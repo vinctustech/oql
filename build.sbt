@@ -1,4 +1,4 @@
-lazy val oql2 = crossProject(JSPlatform, JVMPlatform, NativePlatform).in(file(".")).
+lazy val oql2 = crossProject(JSPlatform, JVMPlatform/*, NativePlatform*/).in(file(".")).
   settings(
     name := "oql2",
     version := "0.1.0-snapshot.1",
@@ -13,16 +13,18 @@ lazy val oql2 = crossProject(JSPlatform, JVMPlatform, NativePlatform).in(file(".
     mainClass := Some("com.vinctus.oql2.Main"),
     libraryDependencies += "org.scalatest" %%% "scalatest" % "3.2.5" % "test",
     libraryDependencies += "xyz.hyperreal" %%% "cross-platform" % "0.1.0-snapshot.3",
+    libraryDependencies += "org.parboiled" %%% "parboiled" % "2.2.1",
     publishMavenStyle := true,
     publishArtifact in Test := false,
     licenses += "ISC" -> url("https://opensource.org/licenses/ISC")
   ).
   jvmSettings(
     libraryDependencies += "org.scala-js" %% "scalajs-stubs" % "1.0.0" % "provided",
+    libraryDependencies += "com.h2database" % "h2" % "1.4.200"
   ).
-  nativeSettings(
-    nativeLinkStubs := true
-  ).
+//  nativeSettings(
+//    nativeLinkStubs := true
+//  ).
   jsSettings(
     jsEnv := new org.scalajs.jsenv.nodejs.NodeJSEnv(),
 //    Test / scalaJSUseMainModuleInitializer := true,
