@@ -1,4 +1,4 @@
-package com.vinctus.cross_platform_template
+package com.vinctus.oql2
 
 import scala.scalajs.js
 import js.Dynamic.{global => g}

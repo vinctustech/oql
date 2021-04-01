@@ -1,6 +1,6 @@
-lazy val cross_platform_template = crossProject(JSPlatform, JVMPlatform, NativePlatform).in(file(".")).
+lazy val oql2 = crossProject(JSPlatform, JVMPlatform, NativePlatform).in(file(".")).
   settings(
-    name := "cross_platform_template",
+    name := "oql2",
     version := "0.1.0-snapshot.1",
     scalaVersion := "2.13.5",
     scalacOptions ++=
@@ -10,7 +10,7 @@ lazy val cross_platform_template = crossProject(JSPlatform, JVMPlatform, NativeP
         "-Xasync"
       ),
     organization := "com.vinctus",
-    mainClass := Some("com.vinctus.cross_platform_template.Main"),
+    mainClass := Some("com.vinctus.oql2.Main"),
     libraryDependencies += "org.scalatest" %%% "scalatest" % "3.2.5" % "test",
     libraryDependencies += "xyz.hyperreal" %%% "cross-platform" % "0.1.0-snapshot.3",
     publishMavenStyle := true,

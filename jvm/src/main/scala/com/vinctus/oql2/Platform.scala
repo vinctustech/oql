@@ -1,4 +1,4 @@
-package com.vinctus.cross_platform_template
+package com.vinctus.oql2
 
 import java.nio.file.{Files, Paths}
 

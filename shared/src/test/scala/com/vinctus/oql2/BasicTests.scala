@@ -1,4 +1,4 @@
-package com.vinctus.cross_platform_template
+package com.vinctus.oql2
 
 import org.scalatest._
 import org.scalatest.freespec.AnyFreeSpec
