@@ -1,6 +1,8 @@
 package com.vinctus.oql2
 
-case class Ident(pos: Int, s: String)
+import org.antlr.v4.runtime.Token
+
+case class Ident(tok: Token, s: String)
 
 trait DMLAST
 case class DMLModel(entities: Seq[DMLEntity]) extends DMLAST

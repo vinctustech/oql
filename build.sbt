@@ -21,7 +21,7 @@ lazy val oql2 = crossProject(/*JSPlatform,*/ JVMPlatform/*, NativePlatform*/).in
     libraryDependencies += "org.scala-js" %% "scalajs-stubs" % "1.0.0" % "provided",
     libraryDependencies += "com.h2database" % "h2" % "1.4.200",
     libraryDependencies ++= Seq(
-      "org.antlr" % "antlr4-runtime" % "4.9.2",
+      "org.antlr" % "antlr4-runtime" % "4.7.2",
       "org.antlr" % "ST4" % "4.3.1"
     )
   )/*.

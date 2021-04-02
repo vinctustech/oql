@@ -13,4 +13,6 @@ object Main extends App {
       |}
       |""".trim.stripMargin
 
+  println(DMLParse(input))
+
 }
