@@ -1,0 +1,2 @@
+cd shared/src/main/antlr
+antlr4 -o ../../../../jvm/src/main/java/com/vinctus/oql2 -visitor -no-listener *.g4

@@ -1,0 +1,42 @@
+package com.vinctus.oql2
+
+//class DMLParser(val input: ParserInput) extends Parser {
+//
+//  implicit def lit(s: String): Rule0 = rule { str(s) ~ ws }
+//
+//  def ws = rule { zeroOrMore(ch(' ') | '\r' | '\n') }
+//
+//  def kw(s: String) = rule { str(s) ~ !identCharRest ~ ws }
+//
+//  def model = rule { ws ~ entities ~ EOI ~> DMLModel }
+//
+//  def entities = rule { oneOrMore(entity) }
+//
+//  def entity = rule { kw("entity") ~ identifier ~ "{" ~ "}" ~> DMLEntity }
+//
+//  def attribute = rule {
+//    optional(capture("*")) ~ identifier ~ optional("(" ~ identifier ~ ")") ~ ":" ~ attributeType ~ optional(
+//      capture("!")) ~> DMLAttribute
+//  }
+//
+//  def attributeType = rule { primitiveType }
+//
+//  def primitiveType = rule {
+//    kw("text") ~ push(DMLText) |
+//      (kw("integer") | kw("int") | kw("int4")) ~ push(DMLInteger) |
+//      (kw("bool") | kw("boolean")) ~ push(DMLBoolean) |
+//      kw("bigint") ~ push(DMLBigint) |
+//      kw("decimal") ~ push(DMLDecimal) |
+//      kw("date") ~ push(DMLDate) |
+//      (kw("float") | kw("float8")) ~ push(DMLFloat) |
+//      kw("uuid") ~ push(DMLUUID) |
+//      kw("timestamp") ~ push(DMLTimestamp)
+//  }
+//
+//  def identCharFirst: CharPredicate = CharPredicate.AlphaNum ++ '_'
+//
+//  def identCharRest: CharPredicate = identCharFirst ++ CharPredicate.Digit
+//
+//  def identifier = rule { push(cursor) ~ capture(identCharFirst ~ zeroOrMore(identCharRest)) ~ ws ~> Ident }
+//
+//}
