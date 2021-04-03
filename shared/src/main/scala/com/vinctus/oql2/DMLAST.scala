@@ -6,7 +6,7 @@ case class Ident(tok: Token, s: String)
 
 trait DMLAST
 case class DMLModel(entities: Seq[DMLEntity]) extends DMLAST
-case class DMLEntity(name: Ident) extends DMLAST
+case class DMLEntity(name: Ident, alias: Option[Ident]) extends DMLAST
 
 trait DMLTypeSpecifier
 trait DMLPrimitiveType extends DMLTypeSpecifier

@@ -6,7 +6,7 @@ grammar DML;
 
 model: entity+;
 
-entity: 'entity' Ident '{' attribute+ '}';
+entity: 'entity' Ident ('(' Ident ')')? '{' attribute+ '}';
 
 attribute: '*'? Ident ('(' Ident ')')?;
 

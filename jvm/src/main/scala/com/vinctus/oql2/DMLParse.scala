@@ -7,7 +7,6 @@ import org.antlr.v4.runtime.{
   CharStreams,
   CommonTokenStream,
   Parser,
-  ParserRuleContext,
   RecognitionException,
   Recognizer
 }
@@ -75,7 +74,13 @@ class DMLASTVisitor extends DMLBaseVisitor[DMLAST] {
   }
 
   override def visitEntity(ctx: DMLParser.EntityContext): DMLEntity = {
-    DMLEntity(Ident(ctx.Ident().getSymbol, ctx.Ident().getText))
+    val alias =
+      ctx.Ident(1) match {
+        case null => None
+        case a    => Some(Ident(a.getSymbol, a.getText))
+      }
+
+    DMLEntity(Ident(ctx.Ident(0).getSymbol, ctx.Ident(0).getText), alias)
   }
 
 }
