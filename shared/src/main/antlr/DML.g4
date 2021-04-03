@@ -8,7 +8,26 @@ model: entity+;
 
 entity: 'entity' Ident ('(' Ident ')')? '{' attribute+ '}';
 
-attribute: '*'? Ident ('(' Ident ')')?;
+attribute: pk? Ident ('(' Ident ')')? ':' type required?;
+
+pk: '*';
+
+required: '!';
+
+type: primitiveType | entityType;
+
+primitiveType:
+  'text' |
+  'integer' | 'int' | 'int4' |
+  'bool' | 'boolean' |
+  'bigint' |
+  'decimal' |
+  'date' |
+  'float' | 'float8' |
+  'uuid' |
+  'timestamp';
+
+entityType: Ident;
 
 Ident: [A-Za-z_] [A-Za-z0-9_]*;
 
