@@ -5,11 +5,11 @@ object Main extends App {
   val input =
     """
       |entity asdf {
-      |
+      | x
       |}
       |
       |entity zxcv {
-      |
+      | y
       |}
       |""".trim.stripMargin
 
