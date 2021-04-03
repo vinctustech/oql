@@ -1,5 +1,6 @@
 package com.vinctus.oql2
 
+import com.vinctus.oql2.DMLParser.AliasContext
 import org.antlr.v4.runtime.atn.ATNConfigSet
 import org.antlr.v4.runtime.dfa.DFA
 import org.antlr.v4.runtime.tree.TerminalNode
@@ -79,17 +80,19 @@ class DMLASTVisitor extends DMLBaseVisitor[DMLAST] {
 
   def opt(node: TerminalNode): Option[TerminalNode] = if (node eq null) None else Some(node)
 
-  def opt(ctx: ParserRuleContext): Option[ParserRuleContext] = if (ctx eq null) None else Some(ctx)
+  def opt(ctx: AliasContext): Option[Ident] = if (ctx eq null) None else Some(ident(ctx.Ident()))
+
+  def opt[C <: ParserRuleContext](ctx: C): Option[C] = if (ctx eq null) None else Some(ctx)
 
   override def visitEntity(ctx: DMLParser.EntityContext): DMLEntity = {
-    DMLEntity(ident(ctx.Ident(0)), opt(ctx.Ident(1)) map ident, ctx.attribute.asScala.toList map visitAttribute)
+    DMLEntity(ident(ctx.entityName.Ident), opt(ctx.alias), ctx.attribute.asScala.toList map visitAttribute)
   }
 
   override def visitAttribute(ctx: DMLParser.AttributeContext): DMLAttribute = {
     DMLAttribute(
-      ident(ctx.Ident(0)),
-      opt(ctx.Ident(1)) map ident,
-      visitType(ctx.`type`()).asInstanceOf[DMLTypeSpecifier],
+      ident(ctx.attributeName.Ident),
+      opt(ctx.alias),
+      visitAttributeType(ctx.attributeType).asInstanceOf[DMLTypeSpecifier],
       opt(ctx.pk).nonEmpty,
       opt(ctx.required).nonEmpty
     )
@@ -99,5 +102,5 @@ class DMLASTVisitor extends DMLBaseVisitor[DMLAST] {
     DMLPrimitiveType(ctx.getText)
   }
 
-  override def visitEntityType(ctx: DMLParser.EntityTypeContext): DMLEntityType = DMLEntityType(ctx.getText)
+  override def visitManyToOneType(ctx: DMLParser.ManyToOneTypeContext): DMLManyToOneType = DMLManyToOneType(ctx.getText)
 }

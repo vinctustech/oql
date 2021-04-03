@@ -4,17 +4,29 @@ grammar DML;
   package com.vinctus.oql2;
 }
 
-model: entity+;
+model
+  : entity+
+  ;
 
-entity: 'entity' Ident ('(' Ident ')')? '{' attribute+ '}';
+entity
+  : 'entity' entityName ('(' alias ')')? '{' attribute+ '}'
+  ;
 
-attribute: pk? Ident ('(' Ident ')')? ':' type required?;
+attribute
+  : pk? attributeName ('(' alias ')')? ':' attributeType required?
+  ;
 
-pk: '*';
+pk
+  : '*'
+  ;
 
-required: '!';
+required
+  : '!'
+  ;
 
-type: primitiveType | entityType;
+attributeType
+  : primitiveType | manyToOneType | oneToManyType
+  ;
 
 primitiveType:
   'text' |
@@ -25,14 +37,41 @@ primitiveType:
   'date' |
   'float' | 'float8' |
   'uuid' |
-  'timestamp';
+  'timestamp'
+  ;
 
-entityType: Ident;
+manyToOneType
+  : entityName
+  ;
 
-Ident: [A-Za-z_] [A-Za-z0-9_]*;
+oneToManyType
+  : '[' entityName ('.' attributeName)? ']'
+  ;
 
-WHITESPACE: [ \t\r\n]+ -> skip;
+alias
+  : Ident
+  ;
 
-COMMENT: '/*' (COMMENT | .)*? '*/' -> skip;
+entityName
+  : Ident
+  ;
 
-LINE_COMMENT: '//' (~[\r\n])* -> skip;
+attributeName
+  : Ident
+  ;
+
+Ident
+  : [A-Za-z_] [A-Za-z0-9_]*
+  ;
+
+WHITESPACE
+  : [ \t\r\n]+ -> skip
+  ;
+
+COMMENT
+  : '/*' (COMMENT | .)*? '*/' -> skip
+  ;
+
+LINE_COMMENT
+  : '//' (~[\r\n])* -> skip
+  ;

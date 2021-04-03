@@ -12,7 +12,7 @@ case class DMLAttribute(name: Ident, alias: Option[Ident], typ: DMLTypeSpecifier
 
 trait DMLTypeSpecifier extends DMLAST
 case class DMLPrimitiveType(name: String) extends DMLTypeSpecifier
-case class DMLEntityType(name: String) extends DMLTypeSpecifier
+case class DMLManyToOneType(name: String) extends DMLTypeSpecifier
 //case object DMLText extends DMLPrimitiveType
 //case object DMLInteger extends DMLPrimitiveType
 //case object DMLBoolean extends DMLPrimitiveType
