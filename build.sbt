@@ -1,7 +1,7 @@
 lazy val oql2 = crossProject(/*JSPlatform,*/ JVMPlatform/*, NativePlatform*/).in(file(".")).
   settings(
     name := "oql2",
-    version := "0.1.0-snapshot.1",
+    version := "2.0.0-snapshot.1",
     scalaVersion := "2.13.5",
     scalacOptions ++=
       Seq(

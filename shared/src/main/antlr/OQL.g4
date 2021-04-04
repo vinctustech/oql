@@ -4,9 +4,10 @@ grammar OQL;
   package com.vinctus.oql2;
 
   import scala.collection.mutable.ListBuffer;
+  import scala.Some;
 }
 
-query
+query returns [OQLQuery q]
   : entityName project select? group? order? restrict?
   ;
 
@@ -14,6 +15,7 @@ project
   : '{' '*' subtracts attributeProjects '}'
   | '{' '*' subtracts '}'
   | '{' attributeProjects '}'
+  | '.' attributeName
   | /* empty (equivalent to '{' '*' '}') */
   ;
 
@@ -27,51 +29,91 @@ attributeProjects
   | attributeProject
   ;
 
-attributeProject
-  : attributeName '('
-  | attributeName
-  | '&' attributeName
+attributeProject returns [OQLProject p]
+  : label? applyExpression
+    { $p = new ExpressionOQLProject(OQLParse.label($label.ctx), $applyExpression.e); }
+  | label? COUNT '(' '*' ')'
+    { $p = new ExpressionOQLProject(OQLParse.label($label.ctx), new ApplyOQLExpression(new Ident($COUNT.text, $COUNT.line, $COUNT.pos), OQLParse.star())); }
+  | label '(' expression ')'
+    { $p = new ExpressionOQLProject(new Some($label.id), $expression.e); }
+  | label? variable
+    { $p = new ExpressionOQLProject(OQLParse.label($label.ctx), $variable.e); }
+  | label? reference
+    { $p = new ExpressionOQLProject(OQLParse.label($label.ctx), $reference.e); }
+  | label? parameter
+    { $p = new ExpressionOQLProject(OQLParse.label($label.ctx), $parameter.e); }
+  | label? query
+    { $p = new QueryOQLProject(OQLParse.label($label.ctx), $query.q); }
   ;
 
-expression returns [Expression e]
+label returns [Ident id]
+  : identifier ':'
+    { $id = $identifier.id; }
+  ;
+
+expression returns [OQLExpression e]
   : additive
     { $e = $additive.e; }
   ;
 
-additive returns [Expression e]
+additive returns [OQLExpression e]
   : l=additive o=('+' | '-') multiplicative
-    { $e = new BinaryExpression($l.e, $o.text, $multiplicative.e); }
+    { $e = new BinaryOQLExpression($l.e, $o.text, $multiplicative.e); }
   | multiplicative
     { $e = $multiplicative.e; }
   ;
 
-multiplicative returns [Expression e]
+multiplicative returns [OQLExpression e]
   : l=multiplicative o=('*' | '/') primary
-    { $e = new BinaryExpression($l.e, $o.text, $primary.e); }
+    { $e = new BinaryOQLExpression($l.e, $o.text, $primary.e); }
   | primary
     { $e = $primary.e; }
   ;
 
-primary returns [Expression e]
+applyExpression returns [OQLExpression e]
+  : identifier '(' expressions ')'
+    { $e = new ApplyOQLExpression($identifier.id, $expressions.es.toList()); }
+  ;
+
+primary returns [OQLExpression e]
   : NUMBER
-    { $e = new NumberExpression(Double.parseDouble($NUMBER.text), $NUMBER.line, $NUMBER.pos); }
-  | identifier '(' expressions ')'
-    { $e = new ApplyExpression($identifier.id, $expressions.es.toList()); }
-  | identifier
-    { $e = new VariableExpression($identifier.id); }
+    { $e = new NumberOQLExpression(Double.parseDouble($NUMBER.text), $NUMBER.line, $NUMBER.pos); }
+  | applyExpression
+    { $e = $applyExpression.e; }
+  | parameter
+    { $e = $parameter.e; }
+  | variable
+    { $e = $variable.e; }
+  | reference
+    { $e = $reference.e; }
   | '-' primary
-    { $e = new UnaryExpression($primary.e, "-"); }
+    { $e = new UnaryOQLExpression($primary.e, "-"); }
   | '(' expression ')'
     { $e = $expression.e; }
   ;
 
-expressions returns [scala.collection.mutable.ListBuffer<Expression> es]
+variable returns [OQLExpression e]
+  : identifier
+    { $e = new VariableOQLExpression($identifier.id); }
+  ;
+
+reference returns [OQLExpression e]
+  : '&' attributeName
+    { $e = new ReferenceOQLExpression($attributeName.id); }
+  ;
+
+parameter returns [OQLExpression e]
+  : ':' identifier
+    { $e = new ParameterOQLExpression($identifier.id); }
+  ;
+
+expressions returns [scala.collection.mutable.ListBuffer<OQLExpression> es]
   : l=expressions ',' expression
     { $es = $l.es.addOne($expression.e); }
   | expression
-    { $es = new scala.collection.mutable.ListBuffer<Expression>().addOne($expression.e); }
+    { $es = new scala.collection.mutable.ListBuffer<OQLExpression>().addOne($expression.e); }
   | // empty
-    { $es = new scala.collection.mutable.ListBuffer<Expression>(); }
+    { $es = new scala.collection.mutable.ListBuffer<OQLExpression>(); }
   ;
 
 select
@@ -103,6 +145,10 @@ attributeName returns [Ident id]
 identifier returns [Ident id]
   : IDENTIFIER
     { $id = new Ident($IDENTIFIER.text, $IDENTIFIER.line, $IDENTIFIER.pos); }
+  ;
+
+COUNT
+  : [Cc] [Oo] [Uu] [Nn] [Tt]
   ;
 
 NUMBER
