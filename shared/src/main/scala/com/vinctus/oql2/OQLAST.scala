@@ -5,7 +5,8 @@ case class OQLQuery()
 trait OQLExpression
 case class BinaryOQLExpression(left: OQLExpression, op: String, right: OQLExpression) extends OQLExpression
 case class UnaryOQLExpression(expr: OQLExpression, op: String) extends OQLExpression
-case class NumberOQLExpression(n: Double, line: Int, col: Int) extends OQLExpression
+case class NumberOQLExpression(n: Double, pos: Position) extends OQLExpression
+case class BooleanOQLExpression(b: String, pos: Position) extends OQLExpression
 case class VariableOQLExpression(v: Ident) extends OQLExpression
 case class ReferenceOQLExpression(v: Ident) extends OQLExpression
 case class ParameterOQLExpression(p: Ident) extends OQLExpression

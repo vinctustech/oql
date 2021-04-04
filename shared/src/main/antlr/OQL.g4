@@ -77,7 +77,9 @@ applyExpression returns [OQLExpression e]
 
 primary returns [OQLExpression e]
   : NUMBER
-    { $e = new NumberOQLExpression(Double.parseDouble($NUMBER.text), $NUMBER.line, $NUMBER.pos); }
+    { $e = new NumberOQLExpression(Double.parseDouble($NUMBER.text), new Position($NUMBER.line, $NUMBER.pos)); }
+  | b=('TRUE' | 'FALSE')
+    { $e = new BooleanOQLExpression($b.text, new Position($b.line, $b.pos)); }
   | applyExpression
     { $e = $applyExpression.e; }
   | parameter
@@ -90,6 +92,17 @@ primary returns [OQLExpression e]
     { $e = new UnaryOQLExpression($primary.e, "-"); }
   | '(' expression ')'
     { $e = $expression.e; }
+  ;
+
+logicalPrimary returns [OQLExpression e]
+  : b=('TRUE' | 'FALSE')
+    { $e = new BooleanOQLExpression($b.text, new Position($b.line, $b.pos)); }
+  | parameter
+    { $e = $parameter.e; }
+  | variable
+    { $e = $variable.e; }
+  | '(' logicalExpression ')'
+    { $e = $logicalExpression.e; }
   ;
 
 variable returns [OQLExpression e]
@@ -117,7 +130,36 @@ expressions returns [scala.collection.mutable.ListBuffer<OQLExpression> es]
   ;
 
 select
-  :
+  : '[' logicalExpression ']'
+  ;
+
+logicalExpression returns [OQLExpression e]
+  : orExpression
+  ;
+
+orExpression
+  : orExpression 'OR' andExpression
+  | andExpression
+  ;
+
+andExpression
+  : andExpression 'AND' notExpression
+  | notExpression
+  ;
+
+notExpression
+  : 'NOT' comparisonExpression
+  | comparisonExpression
+  ;
+
+comparisonExpression
+  : expression ('<=' | '>=' | '<' | '>' | '=' | '!=' | 'NOT'? ('LIKE' | 'ILIKE')) expression
+  | expression 'NOT'? 'BETWEEN' expression 'AND' expression
+  | expression ('IS' 'NULL' | 'IS' 'NOT' 'NULL')
+  | expression 'NOT'? 'IN' expressions
+  | expression 'NOT'? 'IN' '(' query ')'
+  | 'EXISTS' '(' query ')'
+  | logicalPrimary
   ;
 
 group
