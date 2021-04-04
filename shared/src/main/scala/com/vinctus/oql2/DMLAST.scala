@@ -13,14 +13,7 @@ case class DMLAttribute(name: Ident, alias: Option[Ident], typ: DMLTypeSpecifier
     extends DMLAST
 
 trait DMLTypeSpecifier extends DMLAST
-case class DMLPrimitiveType(name: String) extends DMLTypeSpecifier
-case class DMLManyToOneType(name: Ident) extends DMLTypeSpecifier
-//case object DMLText extends DMLPrimitiveType
-//case object DMLInteger extends DMLPrimitiveType
-//case object DMLBoolean extends DMLPrimitiveType
-//case object DMLBigint extends DMLPrimitiveType
-//case object DMLDecimal extends DMLPrimitiveType
-//case object DMLDate extends DMLPrimitiveType
-//case object DMLFloat extends DMLPrimitiveType
-//case object DMLUUID extends DMLPrimitiveType
-//case object DMLTimestamp extends DMLPrimitiveType
+case class DMLPrimitiveType(typ: String) extends DMLTypeSpecifier
+case class DMLManyToOneType(typ: Ident) extends DMLTypeSpecifier
+case class DMLOneToManyType(typ: Ident, attr: Option[Ident]) extends DMLTypeSpecifier
+case class DMLManyToManyType(typ: Ident, attr: Option[Ident], link: Ident) extends DMLTypeSpecifier

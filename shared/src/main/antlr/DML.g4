@@ -49,6 +49,9 @@ attributeType returns [DMLTypeSpecifier t]
   | manyToOneType
     { $t = $manyToOneType.t; }
   | oneToManyType
+    { $t = $oneToManyType.t; }
+  | manyToManyType
+    { $t = $manyToManyType.t; }
   ;
 
 primitiveType returns [DMLPrimitiveType t]
@@ -71,8 +74,14 @@ manyToOneType returns [DMLManyToOneType t]
     { $t = new DMLManyToOneType($entityName.id); }
   ;
 
-oneToManyType
-  : '[' entityName ('.' attributeName)? ']'
+oneToManyType returns [DMLOneToManyType t]
+  : '[' entityName ']' ('.' attributeName)?
+    { $t = new DMLOneToManyType($entityName.id, DMLParse.attributeName($attributeName.ctx)); }
+  ;
+
+manyToManyType returns [DMLManyToManyType t]
+  : '[' a=entityName ']' ('.' attributeName)? '(' l=entityName ')'
+    { $t = new DMLManyToManyType($a.id, DMLParse.attributeName($attributeName.ctx), $l.id); }
   ;
 
 alias returns [Ident id]
