@@ -1,5 +1,7 @@
 package com.vinctus.oql2
 
+import xyz.hyperreal.pretty._
+
 object Main extends App {
 
   val input =
@@ -13,6 +15,6 @@ object Main extends App {
       |}
       |""".trim.stripMargin
 
-  println(DMLParse(input))
+  println(prettyPrint(DMLParse(input)))
 
 }

@@ -4,16 +4,33 @@ grammar DML;
   package com.vinctus.oql2;
 }
 
-model
-  : entity+
+model returns [DMLModel m]
+  : entities
+    { $m = new DMLModel($entities.es.toList()); }
   ;
 
-entity
-  : 'entity' entityName ('(' alias ')')? '{' attribute+ '}'
+entities returns [scala.collection.mutable.ListBuffer<DMLEntity> es]
+  : l=entities entity
+    { $es = $l.es.addOne($entity.e); }
+  | entity
+    { $es = new scala.collection.mutable.ListBuffer<DMLEntity>().addOne($entity.e); }
   ;
 
-attribute
+entity returns [DMLEntity e]
+  : 'entity' entityName ('(' alias ')')? '{' attributes '}'
+    { $e = new DMLEntity($entityName.id, null, $attributes.as.toList()); }
+  ;
+
+attributes returns [scala.collection.mutable.ListBuffer<DMLAttribute> as]
+  : l=attributes attribute
+    { $as = $l.as.addOne($attribute.a); }
+  | attribute
+    { $as = new scala.collection.mutable.ListBuffer<DMLAttribute>().addOne($attribute.a); }
+  ;
+
+attribute returns [DMLAttribute a]
   : pk? attributeName ('(' alias ')')? ':' attributeType required?
+    { $a = new DMLAttribute($attributeName.id, null, null, false, false); }
   ;
 
 pk
@@ -40,27 +57,36 @@ primitiveType:
   'timestamp'
   ;
 
-manyToOneType
+manyToOneType returns [Ident id]
   : entityName
+    { $id = $entityName.id; }
   ;
 
 oneToManyType
   : '[' entityName ('.' attributeName)? ']'
   ;
 
-alias
-  : Ident
+alias returns [Ident id]
+  : identifier
+    { $id = $identifier.id; }
   ;
 
-entityName
-  : Ident
+entityName returns [Ident id]
+  : identifier
+    { $id = $identifier.id; }
   ;
 
-attributeName
-  : Ident
+attributeName returns [Ident id]
+  : identifier
+    { $id = $identifier.id; }
   ;
 
-Ident
+identifier returns [Ident id]
+  : IDENTIFIER
+    { $id = new Ident($IDENTIFIER.text, $IDENTIFIER.line, $IDENTIFIER.pos); }
+  ;
+
+IDENTIFIER
   : [A-Za-z_] [A-Za-z0-9_]*
   ;
 

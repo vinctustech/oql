@@ -1,8 +1,10 @@
 package com.vinctus.oql2
 
-import org.antlr.v4.runtime.Token
+case class Position(line: Int, col: Int)
 
-case class Ident(tok: Token, s: String)
+case class Ident(s: String, pos: Position) {
+  def this(s: String, line: Int, col: Int) = this(s, Position(line, col))
+}
 
 trait DMLAST
 case class DMLModel(entities: Seq[DMLEntity]) extends DMLAST

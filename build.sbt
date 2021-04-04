@@ -23,8 +23,10 @@ lazy val oql2 = crossProject(/*JSPlatform,*/ JVMPlatform/*, NativePlatform*/).in
     libraryDependencies ++= Seq(
       "org.antlr" % "antlr4-runtime" % "4.7.2",
       "org.antlr" % "ST4" % "4.3.1"
-    )
-  )/*.
+    ),
+    libraryDependencies += "xyz.hyperreal" %% "pretty" % "0.2" % "test"
+
+)/*.
 //  nativeSettings(
 //    nativeLinkStubs := true
 //  ).

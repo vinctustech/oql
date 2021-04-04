@@ -14,29 +14,30 @@ import org.antlr.v4.runtime.{
   Recognizer
 }
 
-import java.io.ByteArrayInputStream
 import java.util
 import scala.jdk.CollectionConverters._
 
-object DMLParse extends ANTLRErrorListener {
-
-  var error: Boolean = _
+object DMLParse {
 
   def apply(input: String): Option[DMLAST] = {
-    val charStream = CharStreams.fromStream(new ByteArrayInputStream(input.getBytes))
+    val charStream = CharStreams.fromString(input)
     val lexer = new DMLLexer(charStream)
     val tokens = new CommonTokenStream(lexer)
     val parser = new DMLParser(tokens)
-    val visitor = new DMLASTVisitor
+    val errors = new ErrorListener(input)
 
-    parser.addErrorListener(this)
-    error = false
+    parser.addErrorListener(errors)
 
-    val res = parser.model
+    val res = parser.model.m
 
-    if (error) None
-    else Some(visitor.visit(res))
+    if (errors.error) None
+    else Some(res)
   }
+
+}
+
+class ErrorListener(input: String) extends ANTLRErrorListener {
+  var error: Boolean = false
 
   def syntaxError(recognizer: Recognizer[_, _],
                   offendingSymbol: Any,
@@ -44,6 +45,9 @@ object DMLParse extends ANTLRErrorListener {
                   charPositionInLine: Int,
                   msg: String,
                   e: RecognitionException): Unit = {
+    Console.err.println(s"error on line $line, column ${charPositionInLine + 1}: $msg")
+    Console.err.println("  " ++ io.Source.fromString(input).getLines().drop(line - 1).next())
+    Console.err.println("  " ++ " " * charPositionInLine :+ '^')
     error = true
   }
 
@@ -53,54 +57,25 @@ object DMLParse extends ANTLRErrorListener {
                       stopIndex: Int,
                       exact: Boolean,
                       ambigAlts: util.BitSet,
-                      configs: ATNConfigSet): Unit = {}
+                      configs: ATNConfigSet): Unit = {
+    Console.err.println("reportAmbiguity")
+  }
 
   def reportAttemptingFullContext(recognizer: Parser,
                                   dfa: DFA,
                                   startIndex: Int,
                                   stopIndex: Int,
                                   conflictingAlts: util.BitSet,
-                                  configs: ATNConfigSet): Unit = {}
+                                  configs: ATNConfigSet): Unit = {
+    Console.err.println("reportAttemptingFullContext")
+  }
 
   def reportContextSensitivity(recognizer: Parser,
                                dfa: DFA,
                                startIndex: Int,
                                stopIndex: Int,
                                prediction: Int,
-                               configs: ATNConfigSet): Unit = {}
-}
-
-class DMLASTVisitor extends DMLBaseVisitor[DMLAST] {
-
-  def ident(node: TerminalNode): Ident = Ident(node.getSymbol, node.getText)
-
-  override def visitModel(ctx: DMLParser.ModelContext): DMLModel = {
-    DMLModel(ctx.entity.asScala.toList map visitEntity)
+                               configs: ATNConfigSet): Unit = {
+    Console.err.println("reportContextSensitivity")
   }
-
-  def opt(node: TerminalNode): Option[TerminalNode] = if (node eq null) None else Some(node)
-
-  def opt(ctx: AliasContext): Option[Ident] = if (ctx eq null) None else Some(ident(ctx.Ident()))
-
-  def opt[C <: ParserRuleContext](ctx: C): Option[C] = if (ctx eq null) None else Some(ctx)
-
-  override def visitEntity(ctx: DMLParser.EntityContext): DMLEntity = {
-    DMLEntity(ident(ctx.entityName.Ident), opt(ctx.alias), ctx.attribute.asScala.toList map visitAttribute)
-  }
-
-  override def visitAttribute(ctx: DMLParser.AttributeContext): DMLAttribute = {
-    DMLAttribute(
-      ident(ctx.attributeName.Ident),
-      opt(ctx.alias),
-      visitAttributeType(ctx.attributeType).asInstanceOf[DMLTypeSpecifier],
-      opt(ctx.pk).nonEmpty,
-      opt(ctx.required).nonEmpty
-    )
-  }
-
-  override def visitPrimitiveType(ctx: DMLParser.PrimitiveTypeContext): DMLPrimitiveType = {
-    DMLPrimitiveType(ctx.getText)
-  }
-
-  override def visitManyToOneType(ctx: DMLParser.ManyToOneTypeContext): DMLManyToOneType = DMLManyToOneType(ctx.getText)
 }
