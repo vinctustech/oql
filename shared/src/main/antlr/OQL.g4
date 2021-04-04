@@ -105,7 +105,7 @@ logicalPrimary returns [OQLExpression e]
     { $e = $logicalExpression.e; }
   ;
 
-variable returns [OQLExpression e]
+variable returns [OQLExpression e]//todo: DOT NOTATION!!! (for queries and for conditions)
   : identifier
     { $e = new VariableOQLExpression($identifier.id); }
   ;
