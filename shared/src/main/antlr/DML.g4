@@ -32,7 +32,7 @@ attributes returns [ListBuffer<DMLAttribute> as]
 
 attribute returns [DMLAttribute a]
   : pk? attributeName ('(' alias ')')? ':' attributeType required?
-    { $a = new DMLAttribute($attributeName.id, null, null, false, false); }
+    { $a = new DMLAttribute($attributeName.id, DMLParse.alias($alias.ctx), $attributeType.t, $pk.ctx != null, $required.ctx != null); }
   ;
 
 pk
@@ -43,25 +43,32 @@ required
   : '!'
   ;
 
-attributeType
-  : primitiveType | manyToOneType | oneToManyType
+attributeType returns [DMLTypeSpecifier t]
+  : primitiveType
+    { $t = $primitiveType.t; }
+  | manyToOneType
+    { $t = $manyToOneType.t; }
+  | oneToManyType
   ;
 
-primitiveType:
-  'text' |
-  'integer' | 'int' | 'int4' |
-  'bool' | 'boolean' |
-  'bigint' |
-  'decimal' |
-  'date' |
-  'float' | 'float8' |
-  'uuid' |
-  'timestamp'
+primitiveType returns [DMLPrimitiveType t]
+  : s=(
+    'text' |
+    'integer' | 'int' | 'int4' |
+    'bool' | 'boolean' |
+    'bigint' |
+    'decimal' |
+    'date' |
+    'float' | 'float8' |
+    'uuid' |
+    'timestamp'
+    )
+    { $t = new DMLPrimitiveType($s.text); }
   ;
 
-manyToOneType returns [Ident id]
+manyToOneType returns [DMLManyToOneType t]
   : entityName
-    { $id = $entityName.id; }
+    { $t = new DMLManyToOneType($entityName.id); }
   ;
 
 oneToManyType
