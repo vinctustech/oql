@@ -2,6 +2,8 @@ grammar DML;
 
 @header {
   package com.vinctus.oql2;
+
+  import scala.collection.mutable.ListBuffer;
 }
 
 model returns [DMLModel m]
@@ -9,23 +11,23 @@ model returns [DMLModel m]
     { $m = new DMLModel($entities.es.toList()); }
   ;
 
-entities returns [scala.collection.mutable.ListBuffer<DMLEntity> es]
+entities returns [ListBuffer<DMLEntity> es]
   : l=entities entity
     { $es = $l.es.addOne($entity.e); }
   | entity
-    { $es = new scala.collection.mutable.ListBuffer<DMLEntity>().addOne($entity.e); }
+    { $es = new ListBuffer<DMLEntity>().addOne($entity.e); }
   ;
 
 entity returns [DMLEntity e]
   : 'entity' entityName ('(' alias ')')? '{' attributes '}'
-    { $e = new DMLEntity($entityName.id, null, $attributes.as.toList()); }
+    { $e = new DMLEntity($entityName.id, DMLParse.alias($alias.ctx), $attributes.as.toList()); }
   ;
 
-attributes returns [scala.collection.mutable.ListBuffer<DMLAttribute> as]
+attributes returns [ListBuffer<DMLAttribute> as]
   : l=attributes attribute
     { $as = $l.as.addOne($attribute.a); }
   | attribute
-    { $as = new scala.collection.mutable.ListBuffer<DMLAttribute>().addOne($attribute.a); }
+    { $as = new ListBuffer<DMLAttribute>().addOne($attribute.a); }
   ;
 
 attribute returns [DMLAttribute a]

@@ -3,19 +3,16 @@ package com.vinctus.oql2
 import com.vinctus.oql2.DMLParser.AliasContext
 import org.antlr.v4.runtime.atn.ATNConfigSet
 import org.antlr.v4.runtime.dfa.DFA
-import org.antlr.v4.runtime.tree.TerminalNode
 import org.antlr.v4.runtime.{
   ANTLRErrorListener,
   CharStreams,
   CommonTokenStream,
   Parser,
-  ParserRuleContext,
   RecognitionException,
   Recognizer
 }
 
 import java.util
-import scala.jdk.CollectionConverters._
 
 object DMLParse {
 
@@ -33,6 +30,8 @@ object DMLParse {
     if (errors.error) None
     else Some(res)
   }
+
+  def alias(ctx: AliasContext): Option[Ident] = if (ctx eq null) None else Some(ctx.id)
 
 }
 
