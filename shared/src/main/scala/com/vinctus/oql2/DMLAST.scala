@@ -1,11 +1,5 @@
 package com.vinctus.oql2
 
-case class Position(line: Int, col: Int)
-
-case class Ident(s: String, pos: Position) {
-  def this(s: String, line: Int, col: Int) = this(s, Position(line, col))
-}
-
 trait DMLAST
 case class DMLModel(entities: Seq[DMLEntity]) extends DMLAST
 case class DMLEntity(name: Ident, alias: Option[Ident], attributes: Seq[DMLAttribute]) extends DMLAST
