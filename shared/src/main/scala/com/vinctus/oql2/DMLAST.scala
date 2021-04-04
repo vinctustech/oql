@@ -15,5 +15,6 @@ case class DMLAttribute(name: Ident, alias: Option[Ident], typ: DMLTypeSpecifier
 trait DMLTypeSpecifier extends DMLAST
 case class DMLPrimitiveType(typ: String) extends DMLTypeSpecifier
 case class DMLManyToOneType(typ: Ident) extends DMLTypeSpecifier
+case class DMLOneToOneType(typ: Ident, attr: Option[Ident]) extends DMLTypeSpecifier
 case class DMLOneToManyType(typ: Ident, attr: Option[Ident]) extends DMLTypeSpecifier
 case class DMLManyToManyType(typ: Ident, attr: Option[Ident], link: Ident) extends DMLTypeSpecifier

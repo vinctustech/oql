@@ -50,6 +50,8 @@ attributeType returns [DMLTypeSpecifier t]
     { $t = $manyToOneType.t; }
   | oneToManyType
     { $t = $oneToManyType.t; }
+  | oneToOneType
+    { $t = $oneToOneType.t; }
   | manyToManyType
     { $t = $manyToManyType.t; }
   ;
@@ -77,6 +79,11 @@ manyToOneType returns [DMLManyToOneType t]
 oneToManyType returns [DMLOneToManyType t]
   : '[' entityName ']' ('.' attributeName)?
     { $t = new DMLOneToManyType($entityName.id, DMLParse.attributeName($attributeName.ctx)); }
+  ;
+
+oneToOneType returns [DMLOneToOneType t]
+  : '<' entityName '>' ('.' attributeName)?
+    { $t = new DMLOneToOneType($entityName.id, DMLParse.attributeName($attributeName.ctx)); }
   ;
 
 manyToManyType returns [DMLManyToManyType t]

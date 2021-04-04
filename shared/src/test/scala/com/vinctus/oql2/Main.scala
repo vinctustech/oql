@@ -7,8 +7,8 @@ object Main extends App {
   val input =
     """
       |entity asdf {
-      | x: [poiu] (lkj)
-      | y: [zxcv] . qwer (lkj)
+      | x: <poiu>
+      | y: <zxcv> . qwer
       |}
       |""".trim.stripMargin
 
