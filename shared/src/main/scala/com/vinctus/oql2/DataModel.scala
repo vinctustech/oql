@@ -2,10 +2,29 @@ package com.vinctus.oql2
 
 class DataModel(model: DMLModel, dml: String) {
 
-  require(toSet.size == model.entities.length, "require entity names to be unique")
-
   val entities: Map[String, Entity] = {
-    model.entities.map(_.name).groupBy(identity).toList.map { case (k, v) => (k, v.length) }
+    var error = false
+
+    def duplicates(ids: Seq[Ident], typ: String): Unit =
+      ids.groupBy(_.s).toList filter { case (_, v) => v.length > 1 } flatMap { case (_, s) => s } match {
+        case Nil =>
+        case duplicates =>
+          duplicates foreach { id =>
+            printError(id.pos, s"duplicate $typ: '${id.s}'", dml)
+          }
+
+          error = true
+      }
+
+    duplicates(model.entities.map(_.name), "entity name")
+    duplicates(model.entities.flatMap(_.alias map (List(_)) getOrElse Nil), "entity alias")
+
+    for (DMLEntity(name, alias, attributes) <- model.entities) {
+      duplicates(attributes
+    }
+
+    if (error)
+      sys.error("error creating data model")
   }
 
 }
