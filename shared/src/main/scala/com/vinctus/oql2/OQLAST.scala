@@ -3,13 +3,16 @@ package com.vinctus.oql2
 case class OQLQuery(entity: Ident,
                     project: List[OQLProject],
                     select: Option[OQLExpression],
-                    group: Option[List[AttributeOQLExpression]])
+                    group: Option[List[AttributeOQLExpression]],
+                    order: Option[List[OQLOrdering]])
 
 trait OQLProject { val label: Option[Ident] }
 case object StarOQLProject extends OQLProject { val label: Option[Ident] = None }
 case class SubtractOQLProject(id: Ident) extends OQLProject { val label: Option[Ident] = None }
 case class ExpressionOQLProject(label: Option[Ident], expr: OQLExpression) extends OQLProject
 case class QueryOQLProject(label: Option[Ident], query: OQLQuery) extends OQLProject
+
+case class OQLOrdering(expr: OQLExpression, ordering: String)
 
 trait OQLExpression
 case class InfixOQLExpression(left: OQLExpression, op: String, right: OQLExpression) extends OQLExpression

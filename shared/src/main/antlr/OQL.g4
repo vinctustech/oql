@@ -10,7 +10,7 @@ grammar OQL;
 
 query returns [OQLQuery q]
   : entityName project select? group? order? restrict?
-    { $q = new OQLQuery($entityName.id, OQLParse.project($project.ps), OQLParse.select($select.ctx), OQLParse.group($group.ctx)); }
+    { $q = new OQLQuery($entityName.id, OQLParse.project($project.ps), OQLParse.select($select.ctx), OQLParse.group($group.ctx), OQLParse.order($order.ctx)); }
   ;
 
 project returns [Buffer<OQLProject> ps]
@@ -220,8 +220,29 @@ group returns  [ListBuffer<AttributeOQLExpression> es]
     { $es = $qualifiedAttributeNames.es; }
   ;
 
-order
-  :
+order returns [ListBuffer<OQLOrdering> os]
+  : '<' orderings '>'
+    { $os = $orderings.os; }
+  ;
+
+orderings returns [ListBuffer<OQLOrdering> os]
+  : l=orderings ',' ordering
+    { $os = $l.os.addOne($ordering.o); }
+  | ordering
+    { $os = new ListBuffer<OQLOrdering>().addOne($ordering.o); }
+  ;
+
+ordering returns [OQLOrdering o]
+  : expression dir? nulls?
+    { $o = new OQLOrdering($expression.e, OQLParse.ordering($dir.text, $nulls.text)); }
+  ;
+
+dir
+  : 'ASC' | 'DESC'
+  ;
+
+nulls
+  : 'NULLS' ('FIRST' | 'LAST')
   ;
 
 restrict
