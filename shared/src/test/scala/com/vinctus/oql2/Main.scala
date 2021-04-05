@@ -4,7 +4,7 @@ import xyz.hyperreal.pretty._
 
 object Main extends App {
 
-  val input = "a { * b [x = 5] c }"
+  val input = "a { b } (c, d)"
 
   println(prettyPrint(OQLParse(input)))
 

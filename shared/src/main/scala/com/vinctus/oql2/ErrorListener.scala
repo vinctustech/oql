@@ -28,7 +28,7 @@ class ErrorListener(input: String) extends ANTLRErrorListener {
                       exact: Boolean,
                       ambigAlts: util.BitSet,
                       configs: ATNConfigSet): Unit = {
-    Console.err.println("reportAmbiguity")
+    //Console.err.println("reportAmbiguity")
   }
 
   def reportAttemptingFullContext(recognizer: Parser,
@@ -37,7 +37,7 @@ class ErrorListener(input: String) extends ANTLRErrorListener {
                                   stopIndex: Int,
                                   conflictingAlts: util.BitSet,
                                   configs: ATNConfigSet): Unit = {
-    Console.err.println("reportAttemptingFullContext")
+    //Console.err.println("reportAttemptingFullContext")
   }
 
   def reportContextSensitivity(recognizer: Parser,
@@ -46,6 +46,6 @@ class ErrorListener(input: String) extends ANTLRErrorListener {
                                stopIndex: Int,
                                prediction: Int,
                                configs: ATNConfigSet): Unit = {
-    Console.err.println("reportContextSensitivity")
+    //Console.err.println("reportContextSensitivity")
   }
 }

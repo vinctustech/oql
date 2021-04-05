@@ -10,7 +10,7 @@ grammar OQL;
 
 query returns [OQLQuery q]
   : entityName project select? group? order? restrict?
-    { $q = new OQLQuery($entityName.id, OQLParse.project($project.ps), OQLParse.select($select.ctx)); }
+    { $q = new OQLQuery($entityName.id, OQLParse.project($project.ps), OQLParse.select($select.ctx), OQLParse.group($group.ctx)); }
   ;
 
 project returns [Buffer<OQLProject> ps]
@@ -114,7 +114,7 @@ logicalPrimary returns [OQLExpression e]
     { $e = $logicalExpression.e; }
   ;
 
-qualifiedAttributeName returns [OQLExpression e]
+qualifiedAttributeName returns [AttributeOQLExpression e]
   : identifiers
     { $e = new AttributeOQLExpression($identifiers.ids.toList()); }
   ;
@@ -143,6 +143,15 @@ expressions returns [ListBuffer<OQLExpression> es]
     { $es = new ListBuffer<OQLExpression>().addOne($expression.e); }
   | // empty
     { $es = new ListBuffer<OQLExpression>(); }
+  ;
+
+qualifiedAttributeNames returns [ListBuffer<AttributeOQLExpression> es]
+  : l=qualifiedAttributeNames ',' qualifiedAttributeName
+    { $es = $l.es.addOne($qualifiedAttributeName.e); }
+  | qualifiedAttributeName
+    { $es = new ListBuffer<AttributeOQLExpression>().addOne($qualifiedAttributeName.e); }
+  | // empty
+    { $es = new ListBuffer<AttributeOQLExpression>(); }
   ;
 
 select returns [OQLExpression e]
@@ -206,8 +215,9 @@ isNull
   : 'IS' 'NULL' | 'IS' 'NOT' 'NULL'
   ;
 
-group
-  :
+group returns  [ListBuffer<AttributeOQLExpression> es]
+  : '(' qualifiedAttributeNames ')'
+    { $es = $qualifiedAttributeNames.es; }
   ;
 
 order

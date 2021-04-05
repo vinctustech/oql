@@ -1,6 +1,9 @@
 package com.vinctus.oql2
 
-case class OQLQuery(entity: Ident, project: List[OQLProject], select: Option[OQLExpression])
+case class OQLQuery(entity: Ident,
+                    project: List[OQLProject],
+                    select: Option[OQLExpression],
+                    group: Option[List[AttributeOQLExpression]])
 
 trait OQLProject { val label: Option[Ident] }
 case object StarOQLProject extends OQLProject { val label: Option[Ident] = None }
