@@ -15,9 +15,7 @@ class ErrorListener(input: String) extends ANTLRErrorListener {
                   charPositionInLine: Int,
                   msg: String,
                   e: RecognitionException): Unit = {
-    Console.err.println(s"error on line $line, column ${charPositionInLine + 1}: $msg")
-    Console.err.println("  " ++ io.Source.fromString(input).getLines().drop(line - 1).next())
-    Console.err.println("  " ++ " " * charPositionInLine :+ '^')
+    printError(line, charPositionInLine, msg, input)
     error = true
   }
 
