@@ -4,29 +4,37 @@ grammar OQL;
   package com.vinctus.oql2;
 
   import scala.collection.mutable.ListBuffer;
+  import scala.collection.mutable.Buffer;
   import scala.Some;
 }
 
 query returns [OQLQuery q]
   : entityName project select? group? order? restrict?
+    { $q = new OQLQuery($entityName.id, $project.ps.toList()); }
   ;
 
-project
+project returns [Buffer<OQLProject> ps]
   : '{' '*' subtracts attributeProjects '}'
+    { $ps = $subtracts.ps.prepend(StarOQLProject$.MODULE$).appendAll($attributeProjects.ps); }
   | '{' '*' subtracts '}'
+    { $ps = $subtracts.ps.prepend(StarOQLProject$.MODULE$); }
   | '{' attributeProjects '}'
-  | '.' attributeName
+    { $ps = $attributeProjects.ps; }
   | /* empty (equivalent to '{' '*' '}') */
   ;
 
-subtracts
-  : subtracts '-' attributeName
+subtracts returns [ListBuffer<OQLProject> ps]
+  : l=subtracts '-' attributeName
+    { $ps = $l.ps.addOne(new SubtractOQLProject($attributeName.id)); }
   | /* empty */
+    { $ps = new ListBuffer<OQLProject>(); }
   ;
 
-attributeProjects
-  : attributeProjects attributeProject
+attributeProjects returns [ListBuffer<OQLProject> ps]
+  : l=attributeProjects attributeProject
+    { $ps = $l.ps.addOne($attributeProject.p); }
   | attributeProject
+    { $ps = new ListBuffer<OQLProject>().addOne($attributeProject.p); }
   ;
 
 attributeProject returns [OQLProject p]
@@ -36,8 +44,8 @@ attributeProject returns [OQLProject p]
     { $p = new ExpressionOQLProject(OQLParse.label($label.ctx), new ApplyOQLExpression(new Ident($COUNT.text, $COUNT.line, $COUNT.pos), OQLParse.star())); }
   | label '(' expression ')'
     { $p = new ExpressionOQLProject(new Some($label.id), $expression.e); }
-  | label? variable
-    { $p = new ExpressionOQLProject(OQLParse.label($label.ctx), $variable.e); }
+  | label? qualifiedAttributeName
+    { $p = new ExpressionOQLProject(OQLParse.label($label.ctx), $qualifiedAttributeName.e); }
   | label? reference
     { $p = new ExpressionOQLProject(OQLParse.label($label.ctx), $reference.e); }
   | label? parameter
@@ -84,8 +92,8 @@ primary returns [OQLExpression e]
     { $e = $applyExpression.e; }
   | parameter
     { $e = $parameter.e; }
-  | variable
-    { $e = $variable.e; }
+  | qualifiedAttributeName
+    { $e = $qualifiedAttributeName.e; }
   | reference
     { $e = $reference.e; }
   | '-' primary
@@ -99,20 +107,27 @@ logicalPrimary returns [OQLExpression e]
     { $e = new BooleanOQLExpression($b.text, new Position($b.line, $b.pos)); }
   | parameter
     { $e = $parameter.e; }
-  | variable
-    { $e = $variable.e; }
+  | qualifiedAttributeName
+    { $e = $qualifiedAttributeName.e; }
   | '(' logicalExpression ')'
     { $e = $logicalExpression.e; }
   ;
 
-variable returns [OQLExpression e]//todo: DOT NOTATION!!! (for queries and for conditions)
-  : identifier
-    { $e = new VariableOQLExpression($identifier.id); }
+qualifiedAttributeName returns [OQLExpression e]
+  : identifiers
+    { $e = new AttributeOQLExpression($identifiers.ids.toList()); }
+  ;
+
+identifiers returns [ListBuffer<Ident> ids]
+  : l=identifiers '.' identifier
+    { $ids = $l.ids.addOne($identifier.id); }
+  | identifier
+    { $ids = new ListBuffer<Ident>().addOne($identifier.id); }
   ;
 
 reference returns [OQLExpression e]
-  : '&' attributeName
-    { $e = new ReferenceOQLExpression($attributeName.id); }
+  : '&' identifiers
+    { $e = new ReferenceOQLExpression($identifiers.ids.toList()); }
   ;
 
 parameter returns [OQLExpression e]
@@ -120,13 +135,13 @@ parameter returns [OQLExpression e]
     { $e = new ParameterOQLExpression($identifier.id); }
   ;
 
-expressions returns [scala.collection.mutable.ListBuffer<OQLExpression> es]
+expressions returns [ListBuffer<OQLExpression> es]
   : l=expressions ',' expression
     { $es = $l.es.addOne($expression.e); }
   | expression
-    { $es = new scala.collection.mutable.ListBuffer<OQLExpression>().addOne($expression.e); }
+    { $es = new ListBuffer<OQLExpression>().addOne($expression.e); }
   | // empty
-    { $es = new scala.collection.mutable.ListBuffer<OQLExpression>(); }
+    { $es = new ListBuffer<OQLExpression>(); }
   ;
 
 select
