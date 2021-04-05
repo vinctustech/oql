@@ -176,13 +176,29 @@ notExpression returns [OQLExpression e]
   ;
 
 comparisonExpression returns [OQLExpression e]
-  : expression ('<=' | '>=' | '<' | '>' | '=' | '!=' | 'NOT'? ('LIKE' | 'ILIKE')) expression
-  | expression 'NOT'? 'BETWEEN' expression 'AND' expression
-  | expression ('IS' 'NULL' | 'IS' 'NOT' 'NULL')
+  : l=expression o=comparison r=expression
+    { $e = new InfixOQLExpression($l.e, $o.text, $r.e); }
+  | exp=expression between l=expression 'AND' u=expression
+    { $e = new BetweenOQLExpression($exp.e, $between.text, $l.e, $u.e); }
+  | expression isNull
+    { $e = new PostfixOQLExpression($expression.e, $isNull.text); }
   | expression 'NOT'? 'IN' expressions
   | expression 'NOT'? 'IN' '(' query ')'
   | 'EXISTS' '(' query ')'
-  | logicalPrimary
+  | ex=logicalPrimary
+    { $e = $ex.e; }
+  ;
+
+comparison
+  : '<=' | '>=' | '<' | '>' | '=' | '!=' | 'NOT'? ('LIKE' | 'ILIKE')
+  ;
+
+between
+  : 'NOT'? 'BETWEEN'
+  ;
+
+isNull
+  : 'IS' 'NULL' | 'IS' 'NOT' 'NULL'
   ;
 
 group
