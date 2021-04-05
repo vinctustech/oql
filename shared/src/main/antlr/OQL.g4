@@ -9,8 +9,8 @@ grammar OQL;
 }
 
 query returns [OQLQuery q]
-  : entityName /*project select? group? order? restrict?*/ EOF
-    { $q = new OQLQuery($entityName.id, null); }//$project.ps.toList()
+  : entityName project select? group? order? restrict?
+    { $q = new OQLQuery($entityName.id, $project.ps.toList(), OQLParse.select($select.ctx)); }
   ;
 
 project returns [Buffer<OQLProject> ps]

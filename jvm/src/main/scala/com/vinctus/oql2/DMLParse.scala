@@ -1,19 +1,7 @@
 package com.vinctus.oql2
 
 import com.vinctus.oql2.DMLParser.{AliasContext, AttributeNameContext}
-import org.antlr.v4.runtime.atn.ATNConfigSet
-import org.antlr.v4.runtime.dfa.DFA
-import org.antlr.v4.runtime.{
-  ANTLRErrorListener,
-  CharStreams,
-  CommonTokenStream,
-  ConsoleErrorListener,
-  Parser,
-  RecognitionException,
-  Recognizer
-}
-
-import java.util
+import org.antlr.v4.runtime.{CharStreams, CommonTokenStream, ConsoleErrorListener}
 
 object DMLParse {
 
