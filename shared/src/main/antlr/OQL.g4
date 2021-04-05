@@ -9,8 +9,8 @@ grammar OQL;
 }
 
 query returns [OQLQuery q]
-  : entityName project select? group? order? restrict?
-    { $q = new OQLQuery($entityName.id, OQLParse.project($project.ps), OQLParse.select($select.ctx), OQLParse.group($group.ctx), OQLParse.order($order.ctx)); }
+  : entityName project select? group? order? restrict
+    { $q = new OQLQuery($entityName.id, OQLParse.project($project.ps), OQLParse.select($select.ctx), OQLParse.group($group.ctx), OQLParse.order($order.ctx), $restrict.r); }
   ;
 
 project returns [Buffer<OQLProject> ps]
@@ -41,8 +41,6 @@ attributeProjects returns [ListBuffer<OQLProject> ps]
 attributeProject returns [OQLProject p]
   : label? applyExpression
     { $p = new ExpressionOQLProject(OQLParse.label($label.ctx), $applyExpression.e); }
-  | label? COUNT '(' '*' ')'
-    { $p = new ExpressionOQLProject(OQLParse.label($label.ctx), new ApplyOQLExpression(new Ident($COUNT.text, $COUNT.line, $COUNT.pos), OQLParse.star())); }
   | label '(' expression ')'
     { $p = new ExpressionOQLProject(new Some($label.id), $expression.e); }
   | label? qualifiedAttributeName
@@ -61,7 +59,9 @@ label returns [Ident id]
   ;
 
 expression returns [OQLExpression e]
-  : additive
+  : '*'
+    { $e = StarOQLExpression$.MODULE$; }
+  | additive
     { $e = $additive.e; }
   ;
 
@@ -97,10 +97,22 @@ primary returns [OQLExpression e]
     { $e = $qualifiedAttributeName.e; }
   | reference
     { $e = $reference.e; }
+  | caseExpression
+    { $e = $caseExpression.e; }
   | '-' primary
     { $e = new PrefixOQLExpression("-", $primary.e); }
   | '(' expression ')'
     { $e = $expression.e; }
+  ;
+
+caseExpression returns [OQLExpression e]
+  : 'CASE' when+ ('ELSE' expression)? 'END'
+    { $e = OQLParse.caseExpression($ctx.when(), $expression.ctx); }
+  ;
+
+when returns [OQLWhen w]
+  : 'WHEN' logicalExpression 'THEN' expression
+    { $w = new OQLWhen($logicalExpression.e, $expression.e); }
   ;
 
 logicalPrimary returns [OQLExpression e]
@@ -141,8 +153,6 @@ expressions returns [ListBuffer<OQLExpression> es]
     { $es = $l.es.addOne($expression.e); }
   | expression
     { $es = new ListBuffer<OQLExpression>().addOne($expression.e); }
-  | // empty
-    { $es = new ListBuffer<OQLExpression>(); }
   ;
 
 qualifiedAttributeNames returns [ListBuffer<AttributeOQLExpression> es]
@@ -150,8 +160,6 @@ qualifiedAttributeNames returns [ListBuffer<AttributeOQLExpression> es]
     { $es = $l.es.addOne($qualifiedAttributeName.e); }
   | qualifiedAttributeName
     { $es = new ListBuffer<AttributeOQLExpression>().addOne($qualifiedAttributeName.e); }
-  | // empty
-    { $es = new ListBuffer<AttributeOQLExpression>(); }
   ;
 
 select returns [OQLExpression e]
@@ -245,8 +253,13 @@ nulls
   : 'NULLS' ('FIRST' | 'LAST')
   ;
 
-restrict
-  :
+restrict returns [OQLRestrict r]
+  : '|' l=NUMBER (',' o=NUMBER)? '|'
+    { $r = OQLParse.restrict($l.text, $o.text); }
+  | '|' ',' NUMBER '|'
+    { $r = OQLParse.restrict(null, $NUMBER.text); }
+  | // empty
+    { $r = OQLParse.restrict(null, null); }
   ;
 
 entityName returns [Ident id]
@@ -262,10 +275,6 @@ attributeName returns [Ident id]
 identifier returns [Ident id]
   : IDENTIFIER
     { $id = new Ident($IDENTIFIER.text, $IDENTIFIER.line, $IDENTIFIER.pos); }
-  ;
-
-COUNT
-  : [Cc] [Oo] [Uu] [Nn] [Tt]
   ;
 
 NUMBER

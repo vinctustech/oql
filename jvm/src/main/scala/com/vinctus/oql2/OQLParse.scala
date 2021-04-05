@@ -1,9 +1,18 @@
 package com.vinctus.oql2
 
-import com.vinctus.oql2.OQLParser.{GroupContext, LabelContext, OrderContext, ProjectContext, SelectContext}
+import com.vinctus.oql2.OQLParser.{
+  ExpressionContext,
+  GroupContext,
+  LabelContext,
+  OrderContext,
+  ProjectContext,
+  SelectContext,
+  WhenContext
+}
 import org.antlr.v4.runtime.{CharStreams, CommonTokenStream, ConsoleErrorListener, ParserRuleContext}
 
 import scala.collection.mutable
+import scala.jdk.CollectionConverters._
 
 object OQLParse {
 
@@ -43,9 +52,11 @@ object OQLParse {
       case (dir, nulls)                         => s"${dir.toUpperCase} NULLS ${nulls.toUpperCase}"
     }
 
-//  case ("", "") | ("ASC" | "asc", "") => "ASC NULLS FIRST"
-//  case ("", nulls) if nulls != ""     => s"ASC NULLS ${nulls.toUpperCase}"
-//  case (_, "")                        => "DESC NULLS LAST"
+  def restrict(limit: String, offset: String): OQLRestrict =
+    OQLRestrict(Option(limit) map (_.toInt), Option(offset) map (_.toInt))
+
+  def caseExpression(whens: java.util.List[WhenContext], els: ExpressionContext): OQLExpression =
+    CaseOQLexpression(whens.asScala.toList map (_.w), Option(els) map (_.e))
 
   val star: List[OQLExpression] = List(StarOQLExpression)
 

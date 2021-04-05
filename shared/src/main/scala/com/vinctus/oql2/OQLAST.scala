@@ -4,7 +4,8 @@ case class OQLQuery(entity: Ident,
                     project: List[OQLProject],
                     select: Option[OQLExpression],
                     group: Option[List[AttributeOQLExpression]],
-                    order: Option[List[OQLOrdering]])
+                    order: Option[List[OQLOrdering]],
+                    restrict: OQLRestrict)
 
 trait OQLProject { val label: Option[Ident] }
 case object StarOQLProject extends OQLProject { val label: Option[Ident] = None }
@@ -13,6 +14,7 @@ case class ExpressionOQLProject(label: Option[Ident], expr: OQLExpression) exten
 case class QueryOQLProject(label: Option[Ident], query: OQLQuery) extends OQLProject
 
 case class OQLOrdering(expr: OQLExpression, ordering: String)
+case class OQLRestrict(limit: Option[Int], offset: Option[Int])
 
 trait OQLExpression
 case class InfixOQLExpression(left: OQLExpression, op: String, right: OQLExpression) extends OQLExpression
@@ -27,3 +29,6 @@ case class ReferenceOQLExpression(ids: List[Ident]) extends OQLExpression
 case class ParameterOQLExpression(p: Ident) extends OQLExpression
 case class ApplyOQLExpression(f: Ident, args: List[OQLExpression]) extends OQLExpression
 case object StarOQLExpression extends OQLExpression
+case class CaseOQLexpression(whens: List[OQLWhen], els: Option[OQLExpression]) extends OQLExpression
+
+case class OQLWhen(cond: OQLExpression, expr: OQLExpression)
