@@ -4,14 +4,8 @@ import xyz.hyperreal.pretty._
 
 object Main extends App {
 
-  val input =
-    """
-      |entity asdf {
-      | x: <poiu>
-      | y: <zxcv> . qwer
-      |}
-      |""".trim.stripMargin
+  val input = "asdf"
 
-  println(prettyPrint(DMLParse(input)))
+  println(prettyPrint(OQLParse(input)))
 
 }

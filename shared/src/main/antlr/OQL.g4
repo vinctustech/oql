@@ -9,8 +9,8 @@ grammar OQL;
 }
 
 query returns [OQLQuery q]
-  : entityName project select? group? order? restrict?
-    { $q = new OQLQuery($entityName.id, $project.ps.toList()); }
+  : entityName /*project select? group? order? restrict?*/ EOF
+    { $q = new OQLQuery($entityName.id, null); }//$project.ps.toList()
   ;
 
 project returns [Buffer<OQLProject> ps]
@@ -21,6 +21,7 @@ project returns [Buffer<OQLProject> ps]
   | '{' attributeProjects '}'
     { $ps = $attributeProjects.ps; }
   | /* empty (equivalent to '{' '*' '}') */
+    { $ps = new ListBuffer<OQLProject>().addOne(StarOQLProject$.MODULE$); }
   ;
 
 subtracts returns [ListBuffer<OQLProject> ps]
@@ -182,11 +183,15 @@ comparisonExpression returns [OQLExpression e]
     { $e = new BetweenOQLExpression($exp.e, $between.text, $l.e, $u.e); }
   | expression isNull
     { $e = new PostfixOQLExpression($expression.e, $isNull.text); }
-  | expression 'NOT'? 'IN' expressions
-  | expression 'NOT'? 'IN' '(' query ')'
-  | 'EXISTS' '(' query ')'
+//  | expression in expressions
+//  | expression in '(' query ')'
+//  | 'EXISTS' '(' query ')'
   | ex=logicalPrimary
     { $e = $ex.e; }
+  ;
+
+in
+  : 'NOT'? 'IN'
   ;
 
 comparison

@@ -1,6 +1,5 @@
 package com.vinctus.oql2
 
-import com.vinctus.oql2.DMLParser.{AliasContext, AttributeNameContext}
 import com.vinctus.oql2.OQLParser.LabelContext
 import org.antlr.v4.runtime.{CharStreams, CommonTokenStream, ConsoleErrorListener}
 
@@ -23,10 +22,6 @@ object OQLParse {
     if (errors.error) None
     else Some(res)
   }
-
-  def alias(ctx: AliasContext): Option[Ident] = if (ctx eq null) None else Some(ctx.id)
-
-  def attributeName(ctx: AttributeNameContext): Option[Ident] = if (ctx eq null) None else Some(ctx.id)
 
   def label(ctx: LabelContext): Option[Ident] = if (ctx eq null) None else Some(ctx.id)
 
