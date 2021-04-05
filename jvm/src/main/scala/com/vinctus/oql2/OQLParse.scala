@@ -1,7 +1,9 @@
 package com.vinctus.oql2
 
-import com.vinctus.oql2.OQLParser.{LabelContext, SelectContext}
+import com.vinctus.oql2.OQLParser.{LabelContext, ProjectContext, SelectContext}
 import org.antlr.v4.runtime.{CharStreams, CommonTokenStream, ConsoleErrorListener}
+
+import scala.collection.mutable
 
 object OQLParse {
 
@@ -17,13 +19,15 @@ object OQLParse {
     lexer.addErrorListener(errors)
     parser.addErrorListener(errors)
 
-    val res = parser.query.q
+    val res = parser.query
 
     if (errors.error) None
-    else Some(res)
+    else Some(res.q)
   }
 
   def label(ctx: LabelContext): Option[Ident] = if (ctx eq null) None else Some(ctx.id)
+
+  def project(ps: mutable.Buffer[OQLProject]): List[OQLProject] = if (ps eq null) Nil else ps.toList
 
   def select(ctx: SelectContext): Option[OQLExpression] = if (ctx eq null) None else Some(ctx.e)
 
