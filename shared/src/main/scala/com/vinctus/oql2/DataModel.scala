@@ -19,12 +19,17 @@ class DataModel(model: DMLModel, dml: String) {
     duplicates(model.entities.map(_.name), "entity name")
     duplicates(model.entities.flatMap(_.alias map (List(_)) getOrElse Nil), "entity alias")
 
-    for (DMLEntity(name, alias, attributes) <- model.entities) {
-      duplicates(attributes
+    for (entity <- model.entities) {
+      duplicates(entity.attributes.map(_.name), "attribute name")
+      duplicates(entity.attributes.flatMap(_.alias map (List(_)) getOrElse Nil), "attribute alias")
     }
 
     if (error)
-      sys.error("error creating data model")
+      sys.error("duplicates found while creating data model")
+
+    for (DMLEntity(name, alias, attributes) <- model.entities) {}
+
+    Map()
   }
 
 }
