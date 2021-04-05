@@ -9,8 +9,8 @@ case class ExpressionOQLProject(label: Option[Ident], expr: OQLExpression) exten
 case class QueryOQLProject(label: Option[Ident], query: OQLQuery) extends OQLProject
 
 trait OQLExpression
-case class BinaryOQLExpression(left: OQLExpression, op: String, right: OQLExpression) extends OQLExpression
-case class UnaryOQLExpression(expr: OQLExpression, op: String) extends OQLExpression
+case class InfixOQLExpression(left: OQLExpression, op: String, right: OQLExpression) extends OQLExpression
+case class PrefixOQLExpression(op: String, expr: OQLExpression) extends OQLExpression
 case class NumberOQLExpression(n: Double, pos: Position) extends OQLExpression
 case class BooleanOQLExpression(b: String, pos: Position) extends OQLExpression
 case class AttributeOQLExpression(ids: List[Ident]) extends OQLExpression

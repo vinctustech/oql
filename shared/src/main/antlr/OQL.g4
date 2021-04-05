@@ -66,14 +66,14 @@ expression returns [OQLExpression e]
 
 additive returns [OQLExpression e]
   : l=additive o=('+' | '-') multiplicative
-    { $e = new BinaryOQLExpression($l.e, $o.text, $multiplicative.e); }
+    { $e = new InfixOQLExpression($l.e, $o.text, $multiplicative.e); }
   | multiplicative
     { $e = $multiplicative.e; }
   ;
 
 multiplicative returns [OQLExpression e]
   : l=multiplicative o=('*' | '/') primary
-    { $e = new BinaryOQLExpression($l.e, $o.text, $primary.e); }
+    { $e = new InfixOQLExpression($l.e, $o.text, $primary.e); }
   | primary
     { $e = $primary.e; }
   ;
@@ -97,7 +97,7 @@ primary returns [OQLExpression e]
   | reference
     { $e = $reference.e; }
   | '-' primary
-    { $e = new UnaryOQLExpression($primary.e, "-"); }
+    { $e = new PrefixOQLExpression("-", $primary.e); }
   | '(' expression ')'
     { $e = $expression.e; }
   ;
@@ -144,30 +144,38 @@ expressions returns [ListBuffer<OQLExpression> es]
     { $es = new ListBuffer<OQLExpression>(); }
   ;
 
-select
+select returns [OQLExpression e]
   : '[' logicalExpression ']'
+    { $e = $logicalExpression.e; }
   ;
 
 logicalExpression returns [OQLExpression e]
   : orExpression
+    { $e = $orExpression.e; }
   ;
 
-orExpression
-  : orExpression 'OR' andExpression
-  | andExpression
+orExpression returns [OQLExpression e]
+  : l=orExpression o='OR' r=andExpression
+    { $e = new InfixOQLExpression($l.e, $o.text, $r.e); }
+  | ex=andExpression
+    { $e = $ex.e; }
   ;
 
-andExpression
-  : andExpression 'AND' notExpression
-  | notExpression
+andExpression returns [OQLExpression e]
+  : l=andExpression o='AND' r=notExpression
+    { $e = new InfixOQLExpression($l.e, $o.text, $r.e); }
+  | ex=notExpression
+    { $e = $ex.e; }
   ;
 
-notExpression
-  : 'NOT' comparisonExpression
-  | comparisonExpression
+notExpression returns [OQLExpression e]
+  : o='NOT' r=comparisonExpression
+    { $e = new PrefixOQLExpression($o.text, $r.e); }
+  | ex=comparisonExpression
+    { $e = $ex.e; }
   ;
 
-comparisonExpression
+comparisonExpression returns [OQLExpression e]
   : expression ('<=' | '>=' | '<' | '>' | '=' | '!=' | 'NOT'? ('LIKE' | 'ILIKE')) expression
   | expression 'NOT'? 'BETWEEN' expression 'AND' expression
   | expression ('IS' 'NULL' | 'IS' 'NOT' 'NULL')
