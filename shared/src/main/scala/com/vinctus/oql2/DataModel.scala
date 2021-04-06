@@ -36,7 +36,7 @@ class DataModel(model: DMLModel, dml: String) {
       val attributes =
         for (a <- as)
           yield {
-            val typ = {
+            val typ =
               a.typ match {
                 case DMLPrimitiveType("text")                     => TextType
                 case DMLPrimitiveType("integer" | "int" | "int4") => IntegerType
@@ -54,9 +54,7 @@ class DataModel(model: DMLModel, dml: String) {
                   }
               }
 
-              ((a.alias getOrElse a.name).s,
-               new Attribute((a.alias getOrElse a.name).s, a.name.s, a.pk, a.required, typ))
-            }
+            ((a.alias getOrElse a.name).s, new Attribute((a.alias getOrElse a.name).s, a.name.s, a.pk, a.required, typ))
           }
 
       e._attributes = attributes to VectorMap
