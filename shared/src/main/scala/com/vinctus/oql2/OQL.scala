@@ -8,6 +8,6 @@ class OQL(dm: String, db: DataSource) {
       case Some(m: DMLModel) => new DataModel(m, dm)
     }
 
-  def queryMany(query: String, parameters: Map[String, Any]): collection.Seq[Any] =
+  def queryMany(query: String, parameters: Map[String, Any]): collection.Seq[Any] = Nil
 
 }
