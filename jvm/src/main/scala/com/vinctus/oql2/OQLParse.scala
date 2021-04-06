@@ -27,10 +27,11 @@ object OQLParse {
     parser.removeErrorListener(ConsoleErrorListener.INSTANCE)
     lexer.addErrorListener(errors)
     parser.addErrorListener(errors)
+    error = false
 
     val res = parser.query
 
-    if (errors.error) None
+    if (error) None
     else Some(res.q)
   }
 

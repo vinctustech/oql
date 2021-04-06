@@ -7,8 +7,6 @@ import org.antlr.v4.runtime.{ANTLRErrorListener, Parser, RecognitionException, R
 import java.util
 
 class ErrorListener(input: String) extends ANTLRErrorListener {
-  var error: Boolean = false
-
   def syntaxError(recognizer: Recognizer[_, _],
                   offendingSymbol: Any,
                   line: Int,
