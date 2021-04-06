@@ -1,6 +1,6 @@
 package com.vinctus.oql2
 
-class OQL(dm: String, db: DataSource) {
+class OQL(dm: String, db: OQLDataSource) {
 
   val model: DataModel =
     DMLParse(dm) match {

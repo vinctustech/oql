@@ -44,8 +44,9 @@ required
   ;
 
 attributeType returns [DMLTypeSpecifier t]
-  : primitiveType
-    { $t = $primitiveType.t; }
+  : simplePrimitiveType
+    { $t = $simplePrimitiveType.t; }
+  | parametricPrimitiveType
   | manyToOneType
     { $t = $manyToOneType.t; }
   | oneToManyType
@@ -56,19 +57,23 @@ attributeType returns [DMLTypeSpecifier t]
     { $t = $manyToManyType.t; }
   ;
 
-primitiveType returns [DMLPrimitiveType t]
+simplePrimitiveType returns [DMLPrimitiveType t]
   : s=(
     'text' |
     'integer' | 'int' | 'int4' |
     'bool' | 'boolean' |
     'bigint' |
-    'decimal' |
     'date' |
     'float' | 'float8' |
     'uuid' |
     'timestamp'
     )
-    { $t = new DMLPrimitiveType($s.text); }
+    { $t = new DMLSimplePrimitiveType($s.text); }
+  ;
+
+parametricPrimitiveType returns [DMLPrimitiveType t]
+  : 'decimal' '(' p=INTEGER ',' s=INTEGER ')'
+    { $t = new DMLParametricPrimitiveType("decimal", new ListBuffer<String>().addOne($p.text).addOne($s.text).toList()); }
   ;
 
 manyToOneType returns [DMLManyToOneType t]
@@ -109,6 +114,10 @@ attributeName returns [Ident id]
 identifier returns [Ident id]
   : IDENTIFIER
     { $id = new Ident($IDENTIFIER.text, $IDENTIFIER.line, $IDENTIFIER.pos); }
+  ;
+
+INTEGER
+  : [0-9]+
   ;
 
 IDENTIFIER

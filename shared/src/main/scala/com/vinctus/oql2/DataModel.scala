@@ -29,7 +29,7 @@ class DataModel(model: DMLModel, dml: String) {
       }
 
       entities((entity.alias getOrElse entity.name).s) =
-        (new Entity((entity.alias getOrElse entity.name).s, entity.name.s), entity.attributes)
+        (Entity((entity.alias getOrElse entity.name).s, entity.name.s), entity.attributes)
     }
 
     for ((e, as) <- entities.values) {
@@ -38,15 +38,16 @@ class DataModel(model: DMLModel, dml: String) {
           yield {
             val typ =
               a.typ match {
-                case DMLPrimitiveType("text")                     => TextType
-                case DMLPrimitiveType("integer" | "int" | "int4") => IntegerType
-                case DMLPrimitiveType("bool" | "boolean")         => BooleanType
-                case DMLPrimitiveType("bigint")                   => BigintType
-                case DMLPrimitiveType("decimal")                  => DecimalType
-                case DMLPrimitiveType("date")                     => DateType
-                case DMLPrimitiveType("float" | "float8")         => FloatType
-                case DMLPrimitiveType("uuid")                     => UUIDType
-                case DMLPrimitiveType("timestamp")                => TimestampType
+                case DMLSimplePrimitiveType("text")                     => TextType
+                case DMLSimplePrimitiveType("integer" | "int" | "int4") => IntegerType
+                case DMLSimplePrimitiveType("bool" | "boolean")         => BooleanType
+                case DMLSimplePrimitiveType("bigint")                   => BigintType
+                case DMLParametricPrimitiveType("decimal", parameters) =>
+                  DecimalType(parameters.head.toInt, parameters.tail.head.toInt)
+                case DMLSimplePrimitiveType("date")             => DateType
+                case DMLSimplePrimitiveType("float" | "float8") => FloatType
+                case DMLSimplePrimitiveType("uuid")             => UUIDType
+                case DMLSimplePrimitiveType("timestamp")        => TimestampType
                 case DMLManyToOneType(typ) =>
                   entities get typ.s match {
                     case Some(t) => ManyToOneType(typ.s, t._1)
@@ -58,6 +59,7 @@ class DataModel(model: DMLModel, dml: String) {
           }
 
       e._attributes = attributes to VectorMap
+//      e._pk =
     }
 
     if (error)
@@ -68,12 +70,14 @@ class DataModel(model: DMLModel, dml: String) {
 
 }
 
-class Entity(name: String, table: String) {
-  var _attributes: Map[String, Attribute] = _
+case class Entity(name: String, table: String) {
+  private[oql2] var _attributes: Map[String, Attribute] = _
   lazy val attributes: Map[String, Attribute] = _attributes
+  private[oql2] var _pk: Option[Attribute] = _
+  lazy val pk: Option[Attribute] = _pk
 }
 
-class Attribute(name: String, column: String, pk: Boolean, required: Boolean, typ: TypeSpecifier)
+case class Attribute(name: String, column: String, pk: Boolean, required: Boolean, typ: TypeSpecifier)
 
 trait TypeSpecifier
 trait PrimitiveType extends TypeSpecifier
@@ -82,7 +86,7 @@ case object TextType extends PrimitiveType
 case object IntegerType extends PrimitiveType
 case object BooleanType extends PrimitiveType
 case object BigintType extends PrimitiveType
-case object DecimalType extends PrimitiveType
+case class DecimalType(precision: Int, scale: Int) extends PrimitiveType
 case object DateType extends PrimitiveType
 case object FloatType extends PrimitiveType
 case object UUIDType extends PrimitiveType

@@ -7,7 +7,9 @@ case class DMLAttribute(name: Ident, alias: Option[Ident], typ: DMLTypeSpecifier
     extends DMLAST
 
 trait DMLTypeSpecifier extends DMLAST
-case class DMLPrimitiveType(typ: String) extends DMLTypeSpecifier
+trait DMLPrimitiveType extends DMLTypeSpecifier
+case class DMLSimplePrimitiveType(typ: String) extends DMLPrimitiveType
+case class DMLParametricPrimitiveType(typ: String, parameters: List[String]) extends DMLPrimitiveType
 case class DMLManyToOneType(typ: Ident) extends DMLTypeSpecifier
 case class DMLOneToOneType(typ: Ident, attr: Option[Ident]) extends DMLTypeSpecifier
 case class DMLOneToManyType(typ: Ident, attr: Option[Ident]) extends DMLTypeSpecifier
