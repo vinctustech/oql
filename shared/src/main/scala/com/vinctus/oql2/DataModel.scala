@@ -33,6 +33,7 @@ class DataModel(model: DMLModel, dml: String) {
     }
 
     for ((e, as) <- entities.values) {
+      var pk: Option[Attribute] = None
       val attributes =
         for (a <- as)
           yield {
@@ -55,11 +56,16 @@ class DataModel(model: DMLModel, dml: String) {
                   }
               }
 
-            ((a.alias getOrElse a.name).s, new Attribute((a.alias getOrElse a.name).s, a.name.s, a.pk, a.required, typ))
+            val attr = Attribute((a.alias getOrElse a.name).s, a.name.s, a.pk, a.required, typ)
+
+            if (a.pk)
+              pk = Some(attr)
+
+            ((a.alias getOrElse a.name).s, attr)
           }
 
       e._attributes = attributes to VectorMap
-//      e._pk =
+      e._pk = pk
     }
 
     if (error)
