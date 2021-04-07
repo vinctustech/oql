@@ -34,7 +34,7 @@ abstract class JDBCOQLDataSource(driver: String) extends OQLDataSource {
             (for (attribute <- entity.attributes.values)
               yield
                 s"  ${attribute.column} ${mapType(attribute.typ)}${if (attribute.pk) " PRIMARY KEY"
-                else ""}") mkString ",\n"
+                else ""}${if (attribute.required) " NOT NULL" else ""}") mkString ",\n"
 
           s"""
            |CREATE TABLE ${entity.table} (
@@ -47,7 +47,7 @@ abstract class JDBCOQLDataSource(driver: String) extends OQLDataSource {
         yield {
           for (attribute <- entity.attributes.values if attribute.typ.isInstanceOf[ManyToOneType])
             yield
-              s"ALTER TABLE ${entity.table} ADD FOREIGN KEY (${attribute.column}) REFERENCES ${attribute.typ.asInstanceOf[ManyToOneType].entity.table}"
+              s"ALTER TABLE ${entity.table} ADD FOREIGN KEY (${attribute.column}) REFERENCES ${attribute.typ.asInstanceOf[ManyToOneType].entity.table};"
         }
 
     tables ++ foreignKeys.flatten

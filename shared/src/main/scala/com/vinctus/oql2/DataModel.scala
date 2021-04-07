@@ -62,6 +62,12 @@ class DataModel(model: DMLModel, dml: String) {
               if (!typ.isInstanceOf[PrimitiveType])
                 printError(typ.asInstanceOf[DMLEntityType].entity.pos, "primary key must have primitive type", dml)
 
+              if (a.required)
+                printError(
+                  a.name.pos,
+                  "primary keys are already \"NOT NULL\" (required) by definition and may not be marked as such",
+                  dml)
+
               pk = Some(attr)
             }
 
