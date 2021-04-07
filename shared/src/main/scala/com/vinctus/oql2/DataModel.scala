@@ -29,7 +29,7 @@ class DataModel(model: DMLModel, dml: String) {
       }
 
       entities((entity.alias getOrElse entity.name).s) =
-        (Entity((entity.alias getOrElse entity.name).s, entity.name.s), entity.attributes)
+        (new Entity((entity.alias getOrElse entity.name).s, entity.name.s), entity.attributes)
     }
 
     for ((e, as) <- entities.values) {
@@ -93,13 +93,6 @@ class DataModel(model: DMLModel, dml: String) {
     entities.view.mapValues(_._1).toMap
   }
 
-}
-
-case class Entity(name: String, table: String) {
-  private[oql2] var _attributes: Map[String, Attribute] = _
-  lazy val attributes: Map[String, Attribute] = _attributes
-  private[oql2] var _pk: Option[Attribute] = _
-  lazy val pk: Option[Attribute] = _pk
 }
 
 case class Attribute(name: String, column: String, pk: Boolean, required: Boolean, typ: TypeSpecifier)

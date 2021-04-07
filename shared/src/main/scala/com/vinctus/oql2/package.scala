@@ -14,4 +14,6 @@ package object oql2 {
     null
   }
 
+  type OBJECT = Map[String, Any]
+
 }
