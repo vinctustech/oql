@@ -20,9 +20,9 @@ class OQL(dm: String, db: OQLDataSource) {
       }
 
     def arrayNode(query: OQLQuery, join: Option[Attribute]): ArrayNode = {
-      val (entity, join) =
+      val (entity, attr) =
         join match {
-          case Some(Attribute) => ni
+          case Some(_) => ni
           case None =>
             model.entities get query.entity.s match {
               case Some(e) => (e, None)
@@ -30,19 +30,21 @@ class OQL(dm: String, db: OQLDataSource) {
             }
         }
 
-      val attr = new ArrayBuffer[(String, Node)]
+      val attrs = new ArrayBuffer[(String, Node)]
 
       for (p <- query.project)
         p match {
           case ExpressionOQLProject(label, expr) =>
           case QueryOQLProject(label, query) =>
           case StarOQLProject =>
-            entity.attributes.values.filter(_.typ.isDataType)
+            entity.attributes.values.filter(_.typ.isDataType) foreach {
+              case Attribute(name, column, pk, required, typ) =>
+            }
           case SubtractOQLProject(id) =>
           case _ =>
         }
 
-      ArrayNode(entity, query.select, join)
+      ArrayNode(entity, ObjectNode(attrs.toList), query.select, join)
     }
 
     arrayNode(query, None)
