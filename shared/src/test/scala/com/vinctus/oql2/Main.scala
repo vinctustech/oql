@@ -1,10 +1,11 @@
 package com.vinctus.oql2
 
 import xyz.hyperreal.pretty._
+import xyz.hyperreal.table.TextTable
 
 object Main extends App {
 
-  val input = "entity a { *id: int  x: b!  y: int } entity b { *id: text  z: int }"
+  val input = "entity a { *id: int  x: int }"
   val dml = DMLParse(input)
 
 //  println(prettyPrint(dml))
@@ -13,6 +14,11 @@ object Main extends App {
   val h2 = new InMemoryH2
 
   println(h2.schema(model) mkString "\n\n")
+//  h2.create(model)
+//
+//  val conn = h2.connectJDBC
+//  val stmt = conn.createStatement
+//  val res = stmt.executeQuery()
 
 }
 

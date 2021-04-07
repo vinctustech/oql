@@ -21,6 +21,13 @@ class InMemoryH2 extends JDBCOQLDataSource("org.h2.Driver") {
       case ManyToOneType(_, entity) => mapType(entity.pk.get.typ)
     }
 
+  def mapPKType(typ: PrimitiveType): String =
+    typ match {
+      case IntegerType => "SERIAL"
+      case BigintType  => "BIGSERIAL"
+      case _           => mapType(typ)
+    }
+
   def connect: Connection =
     new Connection {
 
