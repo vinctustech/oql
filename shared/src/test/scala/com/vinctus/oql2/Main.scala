@@ -3,9 +3,11 @@ package com.vinctus.oql2
 import xyz.hyperreal.pretty._
 import xyz.hyperreal.table.TextTable
 
+import java.sql.ResultSet
+
 object Main extends App {
 
-  val input = "entity a { *id: int  x: int }"
+  val input = "entity a { *id: bigint  x: int }"
   val dml = DMLParse(input)
 
 //  println(prettyPrint(dml))
@@ -16,15 +18,13 @@ object Main extends App {
   println(h2.schema(model) mkString "\n\n")
   h2.create(model)
 
-  val conn = h2.connectJDBC
-  val stmt = conn.createStatement
+  val conn = h2.connect
 
-  stmt.executeUpdate("insert into a (x) values (3), (4)")
+  conn.execute("insert into a (x) values (3), (4)")
 
-  val res = stmt.executeQuery("select * from a")
+  val res = conn.query("select * from a")
 
-  println(TextTable(res))
-  stmt.close()
+  println(TextTable(res.peer.asInstanceOf[ResultSet]))
   conn.close()
 
 }

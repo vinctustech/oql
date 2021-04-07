@@ -7,27 +7,22 @@ abstract class JDBCOQLDataSource(driver: String) extends OQLDataSource {
   try Class.forName(driver)
   catch { case e: ClassNotFoundException => sys.error(e.getMessage) }
 
-  def databaseURL: String
+  def url: String
 
-  def databaseUser: String
+  def user: String
 
-  def databasePassword: String
+  def password: String
 
   def mapType(typ: TypeSpecifier): String
 
   def mapPKType(typ: PrimitiveType): String
 
-  def connectJDBC: java.sql.Connection = {
-    try DriverManager.getConnection(databaseURL, databaseUser, databasePassword)
-    catch { case e: SQLException => sys.error(e.getMessage) }
-  }
+  def connect: OQLConnection = new JDBCOQLConnection(this)
 
   def create(model: DataModel): Unit = {
-    val conn = connectJDBC
-    val stmt = conn.createStatement
+    val conn = connect
 
-    schema(model) foreach stmt.execute
-    stmt.close()
+    schema(model) foreach conn.execute
     conn.close()
   }
 
@@ -57,6 +52,24 @@ abstract class JDBCOQLDataSource(driver: String) extends OQLDataSource {
               s"ALTER TABLE ${entity.table} ADD FOREIGN KEY (${attribute.column}) REFERENCES ${attribute.typ.asInstanceOf[ManyToOneType].entity.table};"
 
     tables ++ foreignKeys.flatten
+  }
+
+}
+
+class JDBCOQLConnection(val dataSource: JDBCOQLDataSource) extends OQLConnection {
+
+  private val conn =
+    try DriverManager.getConnection(dataSource.url, dataSource.user, dataSource.password)
+    catch { case e: SQLException => sys.error(e.getMessage) }
+  private val stmt = conn.createStatement
+
+  def query(query: String): OQLResultSet = new JDBCOQLResultSet(stmt.executeQuery(query))
+
+  def execute(command: String): Unit = stmt.executeUpdate(command)
+
+  def close(): Unit = {
+    stmt.close()
+    conn.close()
   }
 
 }

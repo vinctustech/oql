@@ -3,9 +3,9 @@ package com.vinctus.oql2
 class InMemoryH2 extends JDBCOQLDataSource("org.h2.Driver") {
 
   val name = "H2 (in memory)"
-  val databaseURL = "jdbc:h2:mem:test;DB_CLOSE_DELAY=-1"
-  val databaseUser = ""
-  val databasePassword = ""
+  val url = "jdbc:h2:mem:test;DB_CLOSE_DELAY=-1"
+  val user = ""
+  val password = ""
 
   def mapType(typ: TypeSpecifier): String =
     typ match {
@@ -23,16 +23,8 @@ class InMemoryH2 extends JDBCOQLDataSource("org.h2.Driver") {
 
   def mapPKType(typ: PrimitiveType): String =
     typ match {
-      case IntegerType => "SERIAL"
-      case BigintType  => "BIGSERIAL"
-      case _           => mapType(typ)
-    }
-
-  def connect: Connection =
-    new Connection {
-
-      val dataSource: OQLDataSource = InMemoryH2.this
-
+      case BigintType => "IDENTITY"
+      case _          => mapType(typ)
     }
 
 }

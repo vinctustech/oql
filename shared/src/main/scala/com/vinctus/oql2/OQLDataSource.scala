@@ -4,7 +4,7 @@ trait OQLDataSource {
 
   val name: String
 
-  def connect: Connection
+  def connect: OQLConnection
 
   def create(model: DataModel): Unit
 
