@@ -14,11 +14,18 @@ object Main extends App {
   val h2 = new InMemoryH2
 
   println(h2.schema(model) mkString "\n\n")
-//  h2.create(model)
-//
-//  val conn = h2.connectJDBC
-//  val stmt = conn.createStatement
-//  val res = stmt.executeQuery()
+  h2.create(model)
+
+  val conn = h2.connectJDBC
+  val stmt = conn.createStatement
+
+  stmt.executeUpdate("insert into a (x) values (3), (4)")
+
+  val res = stmt.executeQuery("select * from a")
+
+  println(TextTable(res))
+  stmt.close()
+  conn.close()
 
 }
 
