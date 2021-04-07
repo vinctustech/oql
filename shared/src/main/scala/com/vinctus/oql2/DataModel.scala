@@ -59,7 +59,7 @@ class DataModel(model: DMLModel, dml: String) {
             val attr = Attribute((a.alias getOrElse a.name).s, a.name.s, a.pk, a.required, typ)
 
             if (a.pk) {
-              if (!typ.isInstanceOf[PrimitiveType])
+              if (!typ.isDataType)
                 printError(typ.asInstanceOf[DMLEntityType].entity.pos, "primary key must have primitive type", dml)
 
               if (a.required)
@@ -96,18 +96,3 @@ class DataModel(model: DMLModel, dml: String) {
 }
 
 case class Attribute(name: String, column: String, pk: Boolean, required: Boolean, typ: TypeSpecifier)
-
-trait TypeSpecifier
-trait PrimitiveType extends TypeSpecifier
-
-case object TextType extends PrimitiveType
-case object IntegerType extends PrimitiveType
-case object BooleanType extends PrimitiveType
-case object BigintType extends PrimitiveType
-case class DecimalType(precision: Int, scale: Int) extends PrimitiveType
-case object DateType extends PrimitiveType
-case object FloatType extends PrimitiveType
-case object UUIDType extends PrimitiveType
-case object TimestampType extends PrimitiveType
-
-case class ManyToOneType(entityName: String, entity: Entity) extends TypeSpecifier

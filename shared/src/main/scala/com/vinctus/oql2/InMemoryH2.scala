@@ -2,7 +2,7 @@ package com.vinctus.oql2
 
 import java.sql.Statement
 
-class InMemoryH2(db: String) extends JDBCOQLDataSource("org.h2.Driver") {
+class InMemoryH2(db: String) extends JDBCDataSource("org.h2.Driver") {
 
   val name = "H2 (in memory)"
   val url = s"jdbc:h2:mem:$db;DB_CLOSE_DELAY=-1"
@@ -23,17 +23,17 @@ class InMemoryH2(db: String) extends JDBCOQLDataSource("org.h2.Driver") {
       case ManyToOneType(_, entity) => mapType(entity.pk.get.typ)
     }
 
-  def mapPKType(typ: PrimitiveType): String =
+  def mapPKType(typ: TypeSpecifier): String =
     typ match {
       case BigintType => "IDENTITY"
-      case _          => mapType(typ)
+      case _: DataType          => mapType(typ)
     }
 
   def connect: OQLConnection =
-    new JDBCOQLConnection(this) {
-      def insert(command: String): JDBCOQLResultSet = {
+    new JDBCConnection(this) {
+      def insert(command: String): JDBCResultSet = {
         stmt.executeUpdate(command, Statement.RETURN_GENERATED_KEYS)
-        new JDBCOQLResultSet(stmt.getGeneratedKeys)
+        new JDBCResultSet(stmt.getGeneratedKeys)
       }
     }
 

@@ -1,5 +1,7 @@
 package com.vinctus.oql2
 
+import scala.collection.mutable.ArrayBuffer
+
 class OQL(dm: String, db: OQLDataSource) {
 
   val model: DataModel =
@@ -17,7 +19,33 @@ class OQL(dm: String, db: OQLDataSource) {
         case Some(q: OQLQuery) => q
       }
 
+    def arrayNode(query: OQLQuery, join: Option[Attribute]): ArrayNode = {
+      val (entity, join) =
+        join match {
+          case Some(Attribute) => ni
+          case None =>
+            model.entities get query.entity.s match {
+              case Some(e) => (e, None)
+              case None => problem(query.entity.pos, s"unknown entity '${query.entity.s}'", oql)
+            }
+        }
 
+      val attr = new ArrayBuffer[(String, Node)]
+
+      for (p <- query.project)
+        p match {
+          case ExpressionOQLProject(label, expr) =>
+          case QueryOQLProject(label, query) =>
+          case StarOQLProject =>
+            entity.attributes.values.filter(_.typ.isDataType)
+          case SubtractOQLProject(id) =>
+          case _ =>
+        }
+
+      ArrayNode(entity, query.select, join)
+    }
+
+    arrayNode(query, None)
 
     Nil
   }
@@ -33,7 +61,8 @@ trait Node
  * One-to-many result node
  *
  * @param entity source entity from which array elements are drawn
- * @param element array element nodes (usually [[ObjectNode]], in future could also be [[ExpressionNode]] resulting from the "lift" feature [todo])
+ * @param element array element nodes (usually [[ObjectNode]], in future could also be [[ExpressionNode]] resulting
+ *                from the "lift" feature [todo] or [[SequenceNode]] resulting from the "tuple" feature)
  * @param select optional boolean condition for selecting elements
  * @param join optional attribute to join on: the attribute contains the target entity to join with
  */
@@ -45,6 +74,13 @@ case class ArrayNode(entity: Entity, element: Node, select: Option[OQLExpression
  * @param properties object properties: each property has a name and a node
  */
 case class ObjectNode(properties: Seq[(String, Node)]) extends Node
+
+/**
+ * Sequence result node
+ *
+ * @param seq node sequence
+ */
+case class SequenceNode(seq: Seq[Node]) extends Node
 
 /**
  * Result expression

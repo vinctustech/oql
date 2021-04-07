@@ -1,6 +1,6 @@
 package com.vinctus.oql2
 
-abstract class JDBCOQLDataSource(driver: String) extends SQLOQLDataSource {
+abstract class JDBCDataSource(driver: String) extends SQLDataSource {
 
   try Class.forName(driver)
   catch { case e: ClassNotFoundException => sys.error(e.getMessage) }

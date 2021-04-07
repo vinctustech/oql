@@ -1,10 +1,10 @@
 package com.vinctus.oql2
 
-trait SQLOQLDataSource extends OQLDataSource {
+trait SQLDataSource extends OQLDataSource {
 
   def mapType(typ: TypeSpecifier): String
 
-  def mapPKType(typ: PrimitiveType): String
+  def mapPKType(typ: TypeSpecifier): String
 
   def create(model: DataModel): Unit = {
     val conn = connect
@@ -21,7 +21,7 @@ trait SQLOQLDataSource extends OQLDataSource {
             for (attribute <- entity.attributes.values)
               yield
                 if (attribute.pk)
-                  s"  ${attribute.column} ${mapPKType(attribute.typ.asInstanceOf[PrimitiveType])} PRIMARY KEY"
+                  s"  ${attribute.column} ${mapPKType(attribute.typ)} PRIMARY KEY"
                 else
                   s"  ${attribute.column} ${mapType(attribute.typ)}${if (attribute.required) " NOT NULL" else ""}"
 

@@ -4,6 +4,13 @@ package object oql2 {
 
   var error: Boolean = _
 
+  def ni: Nothing = sys.error("ni")
+
+  def problem(pos: Position, msg: String, input: String): Nothing = {
+    printError(pos, msg, input)
+    sys.error("error executing query")
+  }
+
   def printError(pos: Position, msg: String, input: String): Null = printError(pos.line, pos.col, msg, input)
 
   def printError(line: Int, charPositionInLine: Int, msg: String, input: String): Null = {

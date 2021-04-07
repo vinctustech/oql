@@ -2,7 +2,7 @@ package com.vinctus.oql2
 
 import java.sql.ResultSet
 
-class JDBCOQLResultSet(rs: ResultSet) extends OQLResultSet {
+class JDBCResultSet(rs: ResultSet) extends OQLResultSet {
 
   def peer: Any = rs
 
