@@ -58,14 +58,27 @@ class DataModel(model: DMLModel, dml: String) {
 
             val attr = Attribute((a.alias getOrElse a.name).s, a.name.s, a.pk, a.required, typ)
 
-            if (a.pk)
+            if (a.pk) {
+              if (!typ.isInstanceOf[PrimitiveType])
+                printError(typ.asInstanceOf[DMLEntityType].entity.pos, "primary key must have primitive type", dml)
+
               pk = Some(attr)
+            }
 
             ((a.alias getOrElse a.name).s, attr)
           }
 
       e._attributes = attributes to VectorMap
       e._pk = pk
+    }
+
+    for ((_, as) <- entities.values) {
+      as.foreach {
+        case DMLAttribute(_, _, DMLManyToOneType(entity), false, _) =>
+          if (entities(entity.s)._1.pk.isEmpty)
+            printError(entity.pos, s"target entity '${entity.s}' has no declared primary key", dml)
+        case _ =>
+      }
     }
 
     if (error)
@@ -98,4 +111,4 @@ case object FloatType extends PrimitiveType
 case object UUIDType extends PrimitiveType
 case object TimestampType extends PrimitiveType
 
-case class ManyToOneType(typ: String, entity: Entity) extends TypeSpecifier
+case class ManyToOneType(entityName: String, entity: Entity) extends TypeSpecifier

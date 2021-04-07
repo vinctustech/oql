@@ -4,7 +4,7 @@ import xyz.hyperreal.pretty._
 
 object Main extends App {
 
-  val input = "entity a { *id: int x: int } entity b { y: int }"
+  val input = "entity a { *id: int  x: b  y: int } entity b { *id: text  z: int }"
   val dml = DMLParse(input)
 
 //  println(prettyPrint(dml))

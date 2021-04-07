@@ -47,6 +47,7 @@ attributeType returns [DMLTypeSpecifier t]
   : simplePrimitiveType
     { $t = $simplePrimitiveType.t; }
   | parametricPrimitiveType
+    { $t = $parametricPrimitiveType.t; }
   | manyToOneType
     { $t = $manyToOneType.t; }
   | oneToManyType
