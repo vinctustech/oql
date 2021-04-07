@@ -7,24 +7,32 @@ import java.sql.ResultSet
 
 object Main extends App {
 
-  val input = "entity a { *id: bigint  x: int }"
-  val dml = DMLParse(input)
+  val oql = new OQL("entity a { *id: bigint  x: int }", new InMemoryH2("test"))
+
+  val q = oql.queryMany("a {* -id }")
+
+  println(prettyPrint(q))
+
+}
+
+/*
+val input = "entity a { *id: bigint  x: int }"
+val dml = DMLParse(input)
 
 //  println(prettyPrint(dml))
 
-  val model = new DataModel(dml.get, input)
-  val h2 = new InMemoryH2("test")
+val model = new DataModel(dml.get, input)
+val h2 = new InMemoryH2("test")
 
-  println(h2.schema(model) mkString "\n\n")
-  h2.create(model)
+println(h2.schema(model) mkString "\n\n")
+h2.create(model)
 
-  val conn = h2.connect
+val conn = h2.connect
 
-  conn.insert("insert into a (x) values (3), (4)")
+conn.insert("insert into a (x) values (3), (4)")
 
-  val res = conn.query("select * from a")
+val res = conn.query("select * from a")
 
-  println(TextTable(res.peer.asInstanceOf[ResultSet]))
-  conn.close()
-
-}
+println(TextTable(res.peer.asInstanceOf[ResultSet]))
+conn.close()
+*/

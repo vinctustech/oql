@@ -2,6 +2,8 @@ package com.vinctus.oql2
 
 import scala.collection.mutable.ArrayBuffer
 
+import xyz.hyperreal.pretty._
+
 class OQL(dm: String, db: OQLDataSource) {
 
   val model: DataModel =
@@ -12,12 +14,14 @@ class OQL(dm: String, db: OQLDataSource) {
 
   def entity(name: String): Entity = model.entities(name)
 
-  def queryMany(oql: String, parameters: Map[String, Any]): collection.Seq[Any] = {//todo: async
+  def queryMany(oql: String, parameters: Map[String, Any] = Map()) = {//todo: async
     val query =
       OQLParse(oql) match {
         case None => sys.error("error parsing query")
         case Some(q: OQLQuery) => q
       }
+
+    println(prettyPrint(query))
 
     def arrayNode(query: OQLQuery, join: Option[Attribute]): ArrayNode = {
       val (entity, attr) =
@@ -30,7 +34,7 @@ class OQL(dm: String, db: OQLDataSource) {
             }
         }
 
-      val attrs = new ArrayBuffer[(String, Node)]
+      val props = new ArrayBuffer[Property]
 
       for (p <- query.project)
         p match {
@@ -38,18 +42,20 @@ class OQL(dm: String, db: OQLDataSource) {
           case QueryOQLProject(label, query) =>
           case StarOQLProject =>
             entity.attributes.values.filter(_.typ.isDataType) foreach {
-              case Attribute(name, column, pk, required, typ) =>
+              case Attribute(name, column, pk, required, typ) => props += Property(name, ExpressionNode(AttributeOQLExpression(List(Ident(name, null)), column)))
             }
           case SubtractOQLProject(id) =>
+            props find (_.name == id.s) match {
+              case Some(value) => props -= value
+              case None => problem(id.pos, s"attribute '${id.s}' was not added with '*'", oql)
+            }
           case _ =>
         }
 
-      ArrayNode(entity, ObjectNode(attrs.toList), query.select, join)
+      ArrayNode(entity, ObjectNode(props.toList), query.select, join)
     }
 
     arrayNode(query, None)
-
-    Nil
   }
 
 }
@@ -75,8 +81,8 @@ case class ArrayNode(entity: Entity, element: Node, select: Option[OQLExpression
  *
  * @param properties object properties: each property has a name and a node
  */
-case class ObjectNode(properties: Seq[(String, Node)]) extends Node
-
+case class ObjectNode(properties: Seq[Property]) extends Node
+case class Property(name: String, node: Node)
 /**
  * Sequence result node
  *
