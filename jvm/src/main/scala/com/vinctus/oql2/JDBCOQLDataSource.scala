@@ -44,11 +44,10 @@ abstract class JDBCOQLDataSource(driver: String) extends OQLDataSource {
 
     val foreignKeys =
       for (entity <- model.entities.values.toList.sortBy(_.table))
-        yield {
+        yield
           for (attribute <- entity.attributes.values if attribute.typ.isInstanceOf[ManyToOneType])
             yield
               s"ALTER TABLE ${entity.table} ADD FOREIGN KEY (${attribute.column}) REFERENCES ${attribute.typ.asInstanceOf[ManyToOneType].entity.table};"
-        }
 
     tables ++ foreignKeys.flatten
   }
