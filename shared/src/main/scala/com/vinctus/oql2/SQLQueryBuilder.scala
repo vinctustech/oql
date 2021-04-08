@@ -2,6 +2,7 @@ package com.vinctus.oql2
 
 import xyz.hyperreal.pretty._
 
+import scala.+:
 import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
 
@@ -74,12 +75,25 @@ class SQLQueryBuilder(margin: Int = 0) {
     line(s"SELECT ${expression(projects.head)}${if (projects.tail.nonEmpty) "," else ""}")
     indent += 7
 
-    val len = projects.tail.length
+    val plen = projects.tail.length
 
     for ((p, i) <- projects.tail.zipWithIndex)
-      line(s"$p${if (i < len - 1) "," else ""}")
+      line(s"${expression(p)}${if (i < plen - 1) "," else ""}")
 
     indent -= 7
+    in()
+
+    val froms = tables.toList.flatMap { case (t, a) => t +: ((1 to a) map (i => s"$t AS $t$$$i")) }
+
+    line(s"FROM ${froms.head}${if (froms.tail.nonEmpty) "," else ""}")
+    indent += 5
+
+    val flen = froms.tail.length
+
+    for ((f, i) <- froms.tail.zipWithIndex)
+      line(s"$f${if (i < flen - 1) "," else ""}")
+
+    indent -= 5
 
     buf.toString
   }
