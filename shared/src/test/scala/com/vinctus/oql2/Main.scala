@@ -9,7 +9,7 @@ object Main extends App {
 
   val oql = new OQL("entity a { *id: bigint  x: text }", new InMemoryH2("test"))
 
-  val q = oql.queryMany("a [x = 'asdf']")
+  val q = oql.queryMany("a [x = \"as'df\"]")
 
   println(prettyPrint(q))
 

@@ -104,7 +104,7 @@ primary returns [OQLExpression e]
   | '-' primary
     { $e = new PrefixOQLExpression("-", $primary.e); }
   | '(' expression ')'
-    { $e = $expression.e; }
+    { $e = new GroupingOQLExpression($expression.e); }
   ;
 
 caseExpression returns [OQLExpression e]

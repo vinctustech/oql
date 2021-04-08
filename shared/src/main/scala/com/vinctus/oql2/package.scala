@@ -23,4 +23,22 @@ package object oql2 {
 
   type OBJECT = Map[String, Any]
 
+//  private val escapeReplaceMap = Seq(
+//    "\\\\" -> "\\",
+//    "\\n" -> "\n",
+//    "\\r" -> "\r",
+//    "\\t" -> "\t",
+//    "\\\"" -> "\"",
+//    "\\'" -> "'"
+//  )
+//
+//  def escape(s: String): String = escapeReplaceMap.foldLeft(s) { case (acc, (c, r)) => acc.replace(c, r) }
+
+  private val quoteReplaceMap = Seq(
+    "'" -> "\\'",
+    "\\\\'" -> "\\'"
+  )
+
+  def quote(s: String): String = quoteReplaceMap.foldLeft(s) { case (acc, (c, r)) => acc.replace(c, r) }
+
 }

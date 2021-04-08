@@ -28,7 +28,12 @@ class SQLQueryBuilder(margin: Int = 0) {
 
   def expression(expr: OQLExpression): String =
     expr match {
-      case NumberOQLExpression(n, pos) => n.toString
+      case InfixOQLExpression(left, op @ "+" | "-", right) => s"${expression(left)} $op ${expression(right)}"
+      case InfixOQLExpression(left, op, right)             => s"${expression(left)}$op${expression(right)}"
+      case GroupingOQLExpression(expr)                     => s"($expr)"
+      case NumberOQLExpression(n, pos)                     => n.toString
+      case LiteralOQLExpression(s, pos)                    => s"'${quote(s)}'"
+      case AttributeOQLExpression(ids, column)             => column
     }
 
   def outerJoin(t1: String, c1: String, t2: String, c2: String): Unit = outerJoins += Join(t1, c1, t2, c2)
