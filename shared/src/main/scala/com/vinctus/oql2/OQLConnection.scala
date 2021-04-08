@@ -10,6 +10,8 @@ abstract class OQLConnection {
 
   def execute(command: String): Unit //todo: async
 
+  def create(model: DataModel): Unit
+
   def close(): Unit
 
 }

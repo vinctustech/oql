@@ -6,6 +6,4 @@ trait OQLDataSource {
 
   def connect: OQLConnection
 
-  def create(model: DataModel): Unit
-
 }

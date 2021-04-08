@@ -7,9 +7,13 @@ import java.sql.ResultSet
 
 object Main extends App {
 
-  val oql = new OQL("entity a { *id: bigint  x: text }", new InMemoryH2("test"))
+  val oql = new OQL("entity a { *id: bigint  x: text  y: int }", new InMemoryH2("test"))
 
-  val q = oql.queryMany("a [x = \"as'df\"]")
+  oql.create()
+  oql.connect.insert("insert into a (x, y) values ('zxcv', 3), ('asdf', 4)")
+  println(TextTable(oql.connect.query("select * from a").peer.asInstanceOf[ResultSet]))
+
+  val q = oql.queryMany("a") // [x = "as'df"]
 
   println(prettyPrint(q))
 

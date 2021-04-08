@@ -15,6 +15,17 @@ class OQL(dm: String, db: OQLDataSource) {
       case Some(m: DMLModel) => new DataModel(m, dm)
     }
 
+  def connect: OQLConnection = db.connect
+
+  def perform(action: OQLConnection => Unit): Unit = {
+    val conn = connect
+
+    action(conn)
+    conn.close()
+  }
+
+  def create(): Unit = perform(_.create(model))
+
   def entity(name: String): Entity = model.entities(name)
 
   def queryMany(oql: String, parameters: Map[String, Any] = Map()) = { //todo: async
@@ -24,7 +35,7 @@ class OQL(dm: String, db: OQLDataSource) {
         case Some(q: OQLQuery) => q
       }
 
-    println(prettyPrint(query))
+//    println(prettyPrint(query))
 
     def arrayNode(query: OQLQuery, join: Option[Attribute]): ArrayNode = {
       val (entity, attr) =
@@ -44,7 +55,7 @@ class OQL(dm: String, db: OQLDataSource) {
       for (p <- query.project)
         p match {
           // todo: AttributeOQLExpression: qualified attributes
-          case ExpressionOQLProject(label, AttributeOQLExpression(ids, _)) =>
+          case ExpressionOQLProject(label, AttributeOQLExpression(ids, _, _)) =>
             entity.attributes get ids.head.s match {
               case Some(Attribute(name, column, pk, required, typ)) =>
                 val l = label.map(_.s).getOrElse(name)
@@ -52,7 +63,7 @@ class OQL(dm: String, db: OQLDataSource) {
                 if (props contains l)
                   problem(label.getOrElse(ids.head).pos, s"attribute '$l' has already been added", oql)
 
-                props(l) = ExpressionNode(AttributeOQLExpression(List(Ident(name, null)), column))
+                props(l) = ExpressionNode(AttributeOQLExpression(List(Ident(name, null)), entity, column))
               case None => problem(ids.head.pos, s"unknown attribute '${ids.head.s}'", oql)
             }
           case ExpressionOQLProject(label, expr) =>
@@ -64,7 +75,7 @@ class OQL(dm: String, db: OQLDataSource) {
           case StarOQLProject =>
             entity.attributes.values.filter(_.typ.isDataType) foreach {
               case Attribute(name, column, pk, required, typ) =>
-                props(name) = ExpressionNode(AttributeOQLExpression(List(Ident(name, null)), column))
+                props(name) = ExpressionNode(AttributeOQLExpression(List(Ident(name, null)), entity, column))
             }
           case SubtractOQLProject(id) =>
             if (subtracts(id.s))

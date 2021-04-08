@@ -6,13 +6,6 @@ trait SQLDataSource extends OQLDataSource {
 
   def mapPKType(typ: TypeSpecifier): String
 
-  def create(model: DataModel): Unit = {
-    val conn = connect
-
-    schema(model) foreach conn.execute
-    conn.close()
-  }
-
   def schema(model: DataModel): Seq[String] = {
     val tables =
       for (entity <- model.entities.values.toList.sortBy(_.table))

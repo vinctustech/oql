@@ -13,6 +13,8 @@ abstract class JDBCConnection(val dataSource: JDBCDataSource) extends OQLConnect
 
   def execute(command: String): Unit = stmt.executeUpdate(command)
 
+  def create(model: DataModel): Unit = dataSource.schema(model) foreach execute
+
   def close(): Unit = {
     stmt.close()
     conn.close()
