@@ -12,7 +12,7 @@ object Main extends App {
   oql.create()
   oql.connect.insert("insert into a (x, y) values ('zxcv', 3), ('asdf', 4)")
   println(TextTable(oql.connect.query("select * from a").peer.asInstanceOf[ResultSet]))
-
+// a: x <- 'asdf', y <- y + 1 [y > 5]
   val q = oql.queryMany("a") // [x = "as'df"]
 
   println(prettyPrint(q))

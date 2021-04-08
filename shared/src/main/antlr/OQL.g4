@@ -5,6 +5,7 @@ grammar OQL;
 
   import scala.collection.mutable.ListBuffer;
   import scala.collection.mutable.Buffer;
+  import scala.collection.immutable.Seq;
   import scala.Some;
 }
 
@@ -277,6 +278,35 @@ attributeName returns [Ident id]
 identifier returns [Ident id]
   : IDENTIFIER
     { $id = new Ident($IDENTIFIER.text, $IDENTIFIER.line, $IDENTIFIER.pos); }
+  ;
+
+insert returns [OQLInsert i]
+  : entityName '<-' objects
+    { $i = new OQLInsert($entityName.id, $objects.os.toList()); }
+  ;
+
+objects returns [ListBuffer<Seq<OQLKeyValuePair>> os]
+  : l=objects object
+    { $os = $l.os.addOne($object.o); }
+  | object
+    { $os = new ListBuffer<Seq<OQLKeyValuePair>>().addOne($object.o); }
+  ;
+
+object returns [Seq<OQLKeyValuePair> o]
+  : '{' pairs '}'
+    { $o = $pairs.ps.toList(); }
+  ;
+
+pairs returns [ListBuffer<OQLKeyValuePair> ps]
+  : l=pairs ',' pair
+    { $ps = $l.ps.addOne($pair.p); }
+  | pair
+    { $ps = new ListBuffer<OQLKeyValuePair>().addOne($pair.p); }
+  ;
+
+pair returns [OQLKeyValuePair p]
+  : label expression
+    { $p = new OQLKeyValuePair($label.id, $expression.e); }
   ;
 
 NUMBER

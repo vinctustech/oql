@@ -57,7 +57,7 @@ object OQLParse {
     OQLRestrict(Option(limit) map (_.toInt), Option(offset) map (_.toInt))
 
   def caseExpression(whens: java.util.List[WhenContext], els: ExpressionContext): OQLExpression =
-    CaseOQLexpression(whens.asScala.toList map (_.w), Option(els) map (_.e))
+    CaseOQLExpression(whens.asScala.toList map (_.w), Option(els) map (_.e))
 
   val star: List[OQLExpression] = List(StarOQLExpression)
 
