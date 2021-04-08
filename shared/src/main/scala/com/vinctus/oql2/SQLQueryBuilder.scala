@@ -67,7 +67,19 @@ class SQLQueryBuilder(margin: Int = 0) {
       buf += '\n'
     }
 
-    line("SELECT")
+    def in(): Unit = indent += INDENT
+
+    def out(): Unit = indent -= INDENT
+
+    line(s"SELECT ${expression(projects.head)}${if (projects.tail.nonEmpty) "," else ""}")
+    indent += 7
+
+    val len = projects.tail.length
+
+    for ((p, i) <- projects.tail.zipWithIndex)
+      line(s"$p${if (i < len - 1) "," else ""}")
+
+    indent -= 7
 
     buf.toString
   }

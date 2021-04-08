@@ -15,7 +15,7 @@ object Main extends App {
 // a: x <- 'asdf', y <- y + 1 [y > 5]
   val q = oql.queryMany("a") // [x = "as'df"]
 
-  println(prettyPrint(q))
+  println(q)
 
 }
 
