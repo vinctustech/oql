@@ -5,6 +5,7 @@ import scala.collection.mutable.ArrayBuffer
 import xyz.hyperreal.pretty._
 
 import scala.reflect.internal.NoPhase.id
+import scala.sys.props
 
 class OQL(dm: String, db: OQLDataSource) {
 
@@ -36,7 +37,8 @@ class OQL(dm: String, db: OQLDataSource) {
             }
         }
 
-      val props = new ArrayBuffer[Property]
+      val props = new mutable.LinkedHashMap[String, Node]
+      val attrset = new mutable.HashSet[String]
       val subtracts = new mutable.HashSet[String]
 
       for (p <- query.project)
@@ -45,16 +47,19 @@ class OQL(dm: String, db: OQLDataSource) {
           case ExpressionOQLProject(label, AttributeOQLExpression(ids, _)) =>
             entity.attributes get ids.head.s match {
               case Some(Attribute(name, column, pk, required, typ)) =>
-              val l = label.map(_.s).getOrElse(name)
-              // check if it's a duplicate
-                props += Property(l, ExpressionNode(AttributeOQLExpression(List(Ident(name, null)), column)))
+                val l = label.map(_.s).getOrElse(name)
+
+                if (props contains l)
+                  problem(label.getOrElse(ids.head).pos, s"attribute '$l' has already been added", oql)
+
+                props(l) = ExpressionNode(AttributeOQLExpression(List(Ident(name, null)), column))
               case None => problem(ids.head.pos, s"unknown attribute '${ids.head.s}'", oql)
             }
           case ExpressionOQLProject(label, expr) =>
           case QueryOQLProject(label, query) =>
           case StarOQLProject =>
             entity.attributes.values.filter(_.typ.isDataType) foreach {
-              case Attribute(name, column, pk, required, typ) => props += Property(name, ExpressionNode(AttributeOQLExpression(List(Ident(name, null)), column)))
+              case Attribute(name, column, pk, required, typ) => props(name) = ExpressionNode(AttributeOQLExpression(List(Ident(name, null)), column))
             }
           case SubtractOQLProject(id) =>
             if (subtracts(id.s))
@@ -62,8 +67,8 @@ class OQL(dm: String, db: OQLDataSource) {
 
             subtracts += id.s
 
-            props find (_.name == id.s) match {
-              case Some(value) => props -= value
+            props get id.s match {
+              case Some(value) => props -= id.s
               case None => problem(id.pos, s"attribute '${id.s}' was not added with '*'", oql)
             }
         }
@@ -97,8 +102,8 @@ case class ArrayNode(entity: Entity, element: Node, select: Option[OQLExpression
  *
  * @param properties object properties: each property has a name and a node
  */
-case class ObjectNode(properties: Seq[Property]) extends Node
-case class Property(name: String, node: Node)
+case class ObjectNode(properties: Seq[(String, Node)]) extends Node
+
 /**
  * Sequence result node
  *
