@@ -56,7 +56,11 @@ class OQL(dm: String, db: OQLDataSource) {
               case None => problem(ids.head.pos, s"unknown attribute '${ids.head.s}'", oql)
             }
           case ExpressionOQLProject(label, expr) =>
-          case QueryOQLProject(label, query) =>
+            if (props contains label.get.s)
+              problem(label.get.pos, s"attribute '${label.get.s}' has already been added", oql)
+
+            props(label.get.s) = ExpressionNode(expr)
+          case QueryOQLProject(label, query) => ni
           case StarOQLProject =>
             entity.attributes.values.filter(_.typ.isDataType) foreach {
               case Attribute(name, column, pk, required, typ) => props(name) = ExpressionNode(AttributeOQLExpression(List(Ident(name, null)), column))

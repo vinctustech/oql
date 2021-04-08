@@ -4,7 +4,7 @@ package object oql2 {
 
   var error: Boolean = _
 
-  def ni: Nothing = sys.error("ni")
+  def ni: Nothing = sys.error("not implemented (yet)")
 
   def problem(pos: Position, msg: String, input: String): Nothing = {
     printError(pos, msg, input)
