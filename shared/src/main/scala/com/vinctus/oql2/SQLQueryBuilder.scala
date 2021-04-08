@@ -5,37 +5,37 @@ import xyz.hyperreal.pretty._
 import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
 
-class SQLQueryBuilder {
+class SQLQueryBuilder(margin: Int = 0) {
 
   private val tables = new mutable.HashMap[String, Int]
-  private val innerJoins = new ArrayBuffer[InnerJoin]
-  private val outerJoins = new ArrayBuffer[OuterJoin]
+  private val innerJoins = new ArrayBuffer[Join]
+  private val outerJoins = new ArrayBuffer[Join]
 
-  def table(name: String): Table = {
+  def table(name: String): String = {
     tables get name match {
       case Some(a) =>
-        val na = a + 1
+        val alias = a + 1
 
-        tables(name) = na
-        new Table(name, na)
+        tables(name) = alias
+        s"$name$$$alias"
       case None =>
         tables(name) = 0
-        new Table(name, 0)
+        name
+    }
+  }
+
+  def ref(tab: String, col: String): String = s"$tab.$col"
+
+  def expression(expr: OQLExpression): String =
+    expr match {
+      case NumberOQLExpression(n, pos) => n.toString
     }
 
-  }
+  def outerJoin(t1: String, c1: String, t2: String, c2: String): Unit = outerJoins += Join(t1, c1, t2, c2)
 
-  def outerJoin(t1: Table, c1: String, t2: Table, c2: String): Unit = outerJoins += OuterJoin(t1.ref, c1, t2.ref, c2)
+  def innerJoin(t1: String, c1: String, t2: String, c2: String): Unit = innerJoins += Join(t1, c1, t2, c2)
 
-  def innerJoin(t1: Table, c1: String, t2: Table, c2: String): Unit = innerJoins += InnerJoin(t1.ref, c1, t2.ref, c2)
-
-  class Table(name: String, alias: Int) {
-    def ref: String = if (alias > 0) s"$name$$$alias" else name
-  }
-
-  private case class OuterJoin(t1: String, c1: String, t2: String, c2: String)
-
-  private case class InnerJoin(t1: String, c1: String, t2: String, c2: String)
+  private case class Join(t1: String, c1: String, t2: String, c2: String)
 
   override def toString: String = {
     val buf = new StringBuilder

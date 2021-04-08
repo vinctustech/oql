@@ -7,9 +7,9 @@ import java.sql.ResultSet
 
 object Main extends App {
 
-  val oql = new OQL("entity a { *id: bigint  x: int }", new InMemoryH2("test"))
+  val oql = new OQL("entity a { *id: bigint  x: text }", new InMemoryH2("test"))
 
-  val q = oql.queryMany("a {x {*} }")
+  val q = oql.queryMany("a [x = 'asdf']")
 
   println(prettyPrint(q))
 
@@ -35,4 +35,4 @@ val res = conn.query("select * from a")
 
 println(TextTable(res.peer.asInstanceOf[ResultSet]))
 conn.close()
-*/
+ */

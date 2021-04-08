@@ -87,6 +87,8 @@ applyExpression returns [OQLExpression e]
 primary returns [OQLExpression e]
   : NUMBER
     { $e = new NumberOQLExpression(Double.parseDouble($NUMBER.text), new Position($NUMBER.line, $NUMBER.pos)); }
+  | STRING
+    { $e = new LiteralOQLExpression($STRING.text.substring(1, $STRING.text.length() - 1), new Position($STRING.line, $STRING.pos)); }
   | b=('TRUE' | 'FALSE')
     { $e = new BooleanOQLExpression($b.text, new Position($b.line, $b.pos)); }
   | applyExpression
@@ -282,8 +284,21 @@ NUMBER
   | '.' [0-9]+ EXPONENT?
   ;
 
-EXPONENT
+fragment EXPONENT
   : [eE] [+-]? [0-9]+
+  ;
+
+STRING
+  : '"' CONTENT '"'
+  | '\'' CONTENT '\''
+  ;
+
+fragment ESC
+  : '\\' .
+  ;
+
+fragment CONTENT
+  : (ESC|.)*?
   ;
 
 IDENTIFIER
