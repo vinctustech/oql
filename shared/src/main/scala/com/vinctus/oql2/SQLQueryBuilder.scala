@@ -10,6 +10,7 @@ class SQLQueryBuilder(margin: Int = 0) {
   private val tables = new mutable.HashMap[String, Int]
   private val innerJoins = new ArrayBuffer[Join]
   private val outerJoins = new ArrayBuffer[Join]
+  private val projects = new ArrayBuffer[OQLExpression]
 
   def table(name: String): String = {
     tables get name match {
@@ -26,6 +27,11 @@ class SQLQueryBuilder(margin: Int = 0) {
 
   def ref(tab: String, col: String): String = s"$tab.$col"
 
+  def project(expr: OQLExpression): SQLQueryBuilder = {
+    projects += expr
+    this
+  }
+
   def expression(expr: OQLExpression): String =
     expr match {
       case InfixOQLExpression(left, op @ ("+" | "-"), right) => s"${expression(left)} $op ${expression(right)}"
@@ -38,14 +44,30 @@ class SQLQueryBuilder(margin: Int = 0) {
       case AttributeOQLExpression(ids, _, column)            => column
     }
 
-  def outerJoin(t1: String, c1: String, t2: String, c2: String): Unit = outerJoins += Join(t1, c1, t2, c2)
+  def outerJoin(t1: String, c1: String, t2: String, c2: String): SQLQueryBuilder = {
+    outerJoins += Join(t1, c1, t2, c2)
+    this
+  }
 
-  def innerJoin(t1: String, c1: String, t2: String, c2: String): Unit = innerJoins += Join(t1, c1, t2, c2)
+  def innerJoin(t1: String, c1: String, t2: String, c2: String): SQLQueryBuilder = {
+    innerJoins += Join(t1, c1, t2, c2)
+    this
+  }
 
   private case class Join(t1: String, c1: String, t2: String, c2: String)
 
   override def toString: String = {
+    val INDENT = 2
     val buf = new StringBuilder
+    var indent = margin
+
+    def line(s: String): Unit = {
+      buf ++= " " * indent
+      buf ++= s
+      buf += '\n'
+    }
+
+    line("SELECT")
 
     buf.toString
   }

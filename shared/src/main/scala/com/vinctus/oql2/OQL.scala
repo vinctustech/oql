@@ -92,7 +92,28 @@ class OQL(dm: String, db: OQLDataSource) {
       ArrayNode(entity, ObjectNode(props.toList), query.select, join)
     }
 
-    arrayNode(query, None)
+    val node: Node = arrayNode(query, None)
+
+    val sql = new SQLQueryBuilder
+
+    node match {
+      case ArrayNode(entity, element, select, join) =>
+//        val sql = new SQLQueryBuilder
+
+        sql.table(entity.table)
+        element match {
+          case ArrayNode(entity, element, select, join) =>
+          case ExpressionNode(expr)                     =>
+          case ObjectNode(properties) =>
+            properties foreach {
+              case (_, ExpressionNode(expr)) => sql.project(expr)
+            }
+          case SequenceNode(seq) =>
+          case _                 =>
+        }
+    }
+
+    sql.toString
   }
 
 }

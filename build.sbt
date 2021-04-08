@@ -1,12 +1,19 @@
-lazy val oql2 = crossProject(/*JSPlatform,*/ JVMPlatform/*, NativePlatform*/).in(file(".")).
-  settings(
+lazy val oql2 = crossProject( /*JSPlatform,*/ JVMPlatform /*, NativePlatform*/ )
+  .in(file("."))
+  .settings(
     name := "oql2",
     version := "2.0.0-snapshot.1",
     scalaVersion := "2.13.5",
     scalacOptions ++=
       Seq(
-        "-deprecation", "-feature", "-unchecked",
-        "-language:postfixOps", "-language:implicitConversions", "-language:existentials", "-language:dynamics",
+        "-deprecation",
+        "-feature",
+        "-unchecked",
+        "-language:postfixOps",
+        "-language:implicitConversions",
+        "-language:existentials",
+        "-language:dynamics",
+        "-language:reflectiveCalls",
         "-Xasync"
       ),
     organization := "com.vinctus",
@@ -17,8 +24,8 @@ lazy val oql2 = crossProject(/*JSPlatform,*/ JVMPlatform/*, NativePlatform*/).in
     publishMavenStyle := true,
     publishArtifact in Test := false,
     licenses += "ISC" -> url("https://opensource.org/licenses/ISC")
-  ).
-  jvmSettings(
+  )
+  .jvmSettings(
     libraryDependencies += "org.scala-js" %% "scalajs-stubs" % "1.0.0" % "provided",
     libraryDependencies += "com.h2database" % "h2" % "1.4.200",
     libraryDependencies ++= Seq(
@@ -26,8 +33,7 @@ lazy val oql2 = crossProject(/*JSPlatform,*/ JVMPlatform/*, NativePlatform*/).in
       "org.antlr" % "ST4" % "4.3.1"
     ),
     libraryDependencies += "xyz.hyperreal" %% "pretty" % "0.2"
-
-)/*.
+  ) /*.
 //  nativeSettings(
 //    nativeLinkStubs := true
 //  ).

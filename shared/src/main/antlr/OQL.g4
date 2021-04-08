@@ -9,6 +9,13 @@ grammar OQL;
   import scala.Some;
 }
 
+command returns [OQLAST c]
+  : query
+    { $c = $query.q; }
+  | insert
+    { $c = $insert.i; }
+  ;
+
 query returns [OQLQuery q]
   : entityName project select? group? order? restrict
     { $q = new OQLQuery($entityName.id, OQLParse.project($project.ps), OQLParse.select($select.ctx), OQLParse.group($group.ctx), OQLParse.order($order.ctx), $restrict.r); }

@@ -16,7 +16,7 @@ import scala.jdk.CollectionConverters._
 
 object OQLParse {
 
-  def apply(input: String): Option[OQLQuery] = {
+  def apply(input: String): Option[OQLAST] = {
     val charStream = CharStreams.fromString(input)
     val lexer = new OQLLexer(charStream)
     val tokens = new CommonTokenStream(lexer)
@@ -29,10 +29,10 @@ object OQLParse {
     parser.addErrorListener(errors)
     error = false
 
-    val res = parser.query
+    val res = parser.command
 
     if (error) None
-    else Some(res.q)
+    else Some(res.c)
   }
 
   def label(ctx: LabelContext): Option[Ident] = if (ctx eq null) None else Some(ctx.id)
