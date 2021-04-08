@@ -1,8 +1,10 @@
 package com.vinctus.oql2
 
+import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
-
 import xyz.hyperreal.pretty._
+
+import scala.reflect.internal.NoPhase.id
 
 class OQL(dm: String, db: OQLDataSource) {
 
@@ -35,9 +37,19 @@ class OQL(dm: String, db: OQLDataSource) {
         }
 
       val props = new ArrayBuffer[Property]
+      val subtracts = new mutable.HashSet[String]
 
       for (p <- query.project)
         p match {
+            // todo: AttributeOQLExpression: qualified attributes
+          case ExpressionOQLProject(label, AttributeOQLExpression(ids, _)) =>
+            entity.attributes get ids.head.s match {
+              case Some(Attribute(name, column, pk, required, typ)) =>
+              val l = label.map(_.s).getOrElse(name)
+              // check if it's a duplicate
+                props += Property(l, ExpressionNode(AttributeOQLExpression(List(Ident(name, null)), column)))
+              case None => problem(ids.head.pos, s"unknown attribute '${ids.head.s}'", oql)
+            }
           case ExpressionOQLProject(label, expr) =>
           case QueryOQLProject(label, query) =>
           case StarOQLProject =>
@@ -45,11 +57,15 @@ class OQL(dm: String, db: OQLDataSource) {
               case Attribute(name, column, pk, required, typ) => props += Property(name, ExpressionNode(AttributeOQLExpression(List(Ident(name, null)), column)))
             }
           case SubtractOQLProject(id) =>
+            if (subtracts(id.s))
+              problem(id.pos, s"attribute '${id.s}' has already been removed", oql)
+
+            subtracts += id.s
+
             props find (_.name == id.s) match {
               case Some(value) => props -= value
               case None => problem(id.pos, s"attribute '${id.s}' was not added with '*'", oql)
             }
-          case _ =>
         }
 
       ArrayNode(entity, ObjectNode(props.toList), query.select, join)
