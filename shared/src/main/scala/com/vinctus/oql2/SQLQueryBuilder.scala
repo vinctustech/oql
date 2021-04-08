@@ -30,6 +30,8 @@ class SQLQueryBuilder(margin: Int = 0) {
     expr match {
       case InfixOQLExpression(left, op @ ("+" | "-"), right) => s"${expression(left)} $op ${expression(right)}"
       case InfixOQLExpression(left, op, right)               => s"${expression(left)}$op${expression(right)}"
+      case PrefixOQLExpression(op, expr)                     => s"$op${expression(expr)}"
+      case PostfixOQLExpression(expr, op)                    => s"${expression(expr)} $op"
       case GroupingOQLExpression(expr)                       => s"($expr)"
       case NumberOQLExpression(n, pos)                       => n.toString
       case LiteralOQLExpression(s, pos)                      => s"'${quote(s)}'"
