@@ -51,8 +51,8 @@ attributeProject returns [OQLProject p]
     { $p = new ExpressionOQLProject(OQLParse.label($label.ctx), $applyExpression.e); }
   | label '(' expression ')'
     { $p = new ExpressionOQLProject(new Some($label.id), $expression.e); }
-  | label? qualifiedAttributeName
-    { $p = new ExpressionOQLProject(OQLParse.label($label.ctx), $qualifiedAttributeName.e); }
+  | label? attributeName
+    { $p = new AttributeOQLProject(OQLParse.label($label.ctx), $attributeName.id); }
   | label? reference
     { $p = new ExpressionOQLProject(OQLParse.label($label.ctx), $reference.e); }
   | label? parameter

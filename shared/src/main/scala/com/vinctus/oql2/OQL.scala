@@ -45,9 +45,9 @@ class OQL(dm: String, val dataSource: OQLDataSource) {
         join match {
           case Some(_) => ni
           case None =>
-            model.entities get query.entity.s match {
+            model.entities get query.resource.s match {
               case Some(e) => (e, None)
-              case None    => problem(query.entity.pos, s"unknown entity '${query.entity.s}'", oql)
+              case None    => problem(query.resource.pos, s"unknown entity '${query.resource.s}'", oql)
             }
         }
 
@@ -57,17 +57,16 @@ class OQL(dm: String, val dataSource: OQLDataSource) {
 
       for (p <- query.project)
         p match {
-          // todo: AttributeOQLExpression: qualified attributes
-          case ExpressionOQLProject(label, AttributeOQLExpression(ids, _, _)) =>
-            entity.attributes get ids.head.s match {
+          case AttributeOQLProject(label, id) =>
+            entity.attributes get id.s match {
               case Some(Attribute(name, column, pk, required, typ)) =>
                 val l = label.map(_.s).getOrElse(name)
 
                 if (props contains l)
-                  problem(label.getOrElse(ids.head).pos, s"attribute '$l' has already been added", oql)
+                  problem(label.getOrElse(id).pos, s"attribute '$l' has already been added", oql)
 
                 props(l) = ExpressionNode(AttributeOQLExpression(List(Ident(name, null)), entity, column))
-              case None => problem(ids.head.pos, s"unknown attribute '${ids.head.s}'", oql)
+              case None => problem(id.pos, s"unknown attribute '${id.s}'", oql)
             }
           case ExpressionOQLProject(label, expr) =>
             if (props contains label.get.s)

@@ -2,7 +2,7 @@ package com.vinctus.oql2
 
 trait OQLAST
 
-case class OQLQuery(entity: Ident,
+case class OQLQuery(resource: Ident,
                     project: List[OQLProject],
                     select: Option[OQLExpression],
                     group: Option[List[AttributeOQLExpression]],
@@ -14,6 +14,7 @@ trait OQLProject { val label: Option[Ident] }
 case object StarOQLProject extends OQLProject { val label: Option[Ident] = None }
 case class SubtractOQLProject(id: Ident) extends OQLProject { val label: Option[Ident] = None }
 case class ExpressionOQLProject(label: Option[Ident], expr: OQLExpression) extends OQLProject
+case class AttributeOQLProject(label: Option[Ident], attr: Ident) extends OQLProject
 case class QueryOQLProject(label: Option[Ident], query: OQLQuery) extends OQLProject
 
 case class OQLOrdering(expr: OQLExpression, ordering: String)
