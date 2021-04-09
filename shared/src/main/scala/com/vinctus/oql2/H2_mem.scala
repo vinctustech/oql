@@ -2,7 +2,7 @@ package com.vinctus.oql2
 
 import java.sql.Statement
 
-class InMemoryH2(db: String) extends JDBCDataSource("org.h2.Driver") {
+class H2_mem(db: String) extends JDBCDataSource("org.h2.Driver") {
 
   val name = "H2 (in memory)"
   val url = s"jdbc:h2:mem:$db;DB_CLOSE_DELAY=-1"
@@ -25,8 +25,8 @@ class InMemoryH2(db: String) extends JDBCDataSource("org.h2.Driver") {
 
   def mapPKType(typ: TypeSpecifier): String =
     typ match {
-      case BigintType => "IDENTITY"
-      case _: DataType          => mapType(typ)
+      case BigintType  => "IDENTITY"
+      case _: DataType => mapType(typ)
     }
 
   def connect: OQLConnection =

@@ -19,7 +19,7 @@ class OQL(dm: String, val dataSource: OQLDataSource) {
 
   def connect: OQLConnection = dataSource.connect
 
-  def perform[R](action: OQLConnection => R): R = {
+  def execute[R](action: OQLConnection => R): R = {
     val conn = connect
     val res = action(conn)
 
@@ -27,7 +27,7 @@ class OQL(dm: String, val dataSource: OQLDataSource) {
     res
   }
 
-  def create(): Unit = perform(_.create(model))
+  def create(): Unit = execute(_.create(model))
 
   def entity(name: String): Entity = model.entities(name)
 
@@ -99,6 +99,8 @@ class OQL(dm: String, val dataSource: OQLDataSource) {
 
     val sql = new SQLQueryBuilder
 
+    var idx = 1
+
     node match {
       case ArrayNode(entity, element, select, join) =>
 //        val sql = new SQLQueryBuilder
@@ -109,45 +111,36 @@ class OQL(dm: String, val dataSource: OQLDataSource) {
           case ExpressionNode(expr)                     =>
           case ObjectNode(properties) =>
             properties foreach {
-              case (_, ExpressionNode(expr)) => sql.project(expr)
+              case (_, e @ ExpressionNode(expr)) =>
+                sql.project(expr)
+                e.idx = idx
+                idx += 1
             }
           case SequenceNode(seq) =>
           case _                 =>
         }
     }
 
-    perform { c =>
+    execute { c =>
       val rs = c.query(sql.toString)
-      val stack = new mutable.Stack[Node]
 
-      def build(node: Node): Option[Any] =
+      def build(node: Node): Any =
         node match {
           case ArrayNode(entity, element, select, join) =>
-            stack push node
-
             val array = new ArrayBuffer[Any]
 
-            @tailrec
-            def buildArray(): Seq[Any] =
-              build(element) match {
-                case Some(value) =>
-                  array += value
-                  buildArray()
-                case None => array.toList
-              }
+            while (rs.next) array += build(element)
 
-            Some(buildArray())
-          case ExpressionNode(expr) => None
+            array.toList
+          case expr: ExpressionNode => rs get expr.idx
           case ObjectNode(properties) =>
             val map = new mutable.LinkedHashMap[String, Any]
 
-            if (rs.next) {
-              for (((label, _), i) <- properties.zipWithIndex)
-                map(label) = rs.get(i + 1)
+            for (((label, node), i) <- properties.zipWithIndex)
+              map(label) = build(node)
 
-              Some(map to VectorMap)
-            } else None
-          case SequenceNode(seq) => None
+            map to VectorMap
+          case SequenceNode(seq) => ni
         }
 
       build(node)
@@ -191,4 +184,4 @@ case class SequenceNode(seq: Seq[Node]) extends Node
   *
   * @param expr expression (usually [[AttributeOQLExpression]] referring to an entity attribute)
   */
-case class ExpressionNode(expr: OQLExpression) extends Node
+case class ExpressionNode(expr: OQLExpression) extends Node { var idx: Int = _ }

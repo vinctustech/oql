@@ -15,16 +15,16 @@ object Main extends App {
       |  y: int
       |}
       |""".stripMargin
-  val oql = new OQL(dm, new InMemoryH2("test"))
+  val oql = new OQL(dm, new H2_mem("test"))
 
   oql.create()
   println(oql.dataSource.asInstanceOf[SQLDataSource].schema(oql.model))
-  oql.perform(_.insert("insert into a (x, y) values ('zxcv', 3), ('asdf', 4)"))
+  oql.execute(_.insert("insert into a (x, y) values ('zxcv', 3), ('asdf', 4)"))
 
 // a: x <- 'asdf', y <- y + 1 [y > 5]
   val q = oql.queryMany("a {y x}") // [x = "as'df"]
 
-  println(JSON(q.get, format = true))
+  println(JSON(q, format = true))
 
 //  oql.perform(c => println(TextTable(c.query(q).peer.asInstanceOf[ResultSet])))
 
