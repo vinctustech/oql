@@ -35,6 +35,9 @@ object OQLParse {
     else Some(res.c)
   }
 
+  def dotQueryProject(name: Ident, projects: List[OQLProject]): QueryOQLProject =
+    QueryOQLProject(None, OQLQuery(name, projects, None, None, None, OQLRestrict(None, None)))
+
   def label(ctx: LabelContext): Option[Ident] = if (ctx eq null) None else Some(ctx.id)
 
   def project(ps: mutable.Buffer[OQLProject]): List[OQLProject] = if (ps eq null) Nil else ps.toList

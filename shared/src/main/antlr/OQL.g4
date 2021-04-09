@@ -7,6 +7,7 @@ grammar OQL;
   import scala.collection.mutable.Buffer;
   import scala.collection.immutable.Seq;
   import scala.Some;
+  import scala.None$;
 }
 
 command returns [OQLAST c]
@@ -34,7 +35,7 @@ project returns [Buffer<OQLProject> ps]
 
 dotProject returns [Buffer<OQLProject> ps]
   : '.' attributeName d=dotProject
-    { $p = new QueryOQLProject(None, new OQLQuery($attributeName.id, $d.ps, None, None, None, new OQLRestrict(None, None))); }
+    { $ps = new ListBuffer<OQLProject>().addOne(OQLParse.dotQueryProject($attributeName.id, $d.ps.toList())); }
   | /* empty (equivalent to '{' '*' '}') */
     { $ps = new ListBuffer<OQLProject>().addOne(StarOQLProject$.MODULE$); }
   ;

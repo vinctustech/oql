@@ -45,9 +45,9 @@ class OQL(dm: String, val dataSource: OQLDataSource) {
         join match {
           case Some(_) => ni
           case None =>
-            model.entities get query.entity.s match {
+            model.entities get query.resource.s match {
               case Some(e) => (e, None)
-              case None    => problem(query.entity.pos, s"unknown entity '${query.entity.s}'", oql)
+              case None    => problem(query.resource.pos, s"unknown entity '${query.resource.s}'", oql)
             }
         }
 
@@ -58,23 +58,38 @@ class OQL(dm: String, val dataSource: OQLDataSource) {
       for (p <- query.project)
         p match {
           // todo: AttributeOQLExpression: qualified attributes
-          case ExpressionOQLProject(label, AttributeOQLExpression(ids, _, _)) =>
-            entity.attributes get ids.head.s match {
+//          case ExpressionOQLProject(label, AttributeOQLExpression(ids, _, _)) =>
+//            entity.attributes get ids.head.s match {
+//              case Some(Attribute(name, column, pk, required, typ)) =>
+//                val l = label.map(_.s).getOrElse(name)
+//
+//                if (props contains l)
+//                  problem(label.getOrElse(ids.head).pos, s"attribute '$l' has already been added", oql)
+//
+//                props(l) = ExpressionNode(AttributeOQLExpression(List(Ident(name, null)), entity, column))
+//              case None => problem(ids.head.pos, s"unknown attribute '${ids.head.s}'", oql)
+//            }
+          case QueryOQLProject(label, OQLQuery(resource, project, select, group, order, restrict)) =>
+            entity.attributes get resource.s match {
               case Some(Attribute(name, column, pk, required, typ)) =>
                 val l = label.map(_.s).getOrElse(name)
 
                 if (props contains l)
-                  problem(label.getOrElse(ids.head).pos, s"attribute '$l' has already been added", oql)
+                  problem(label.getOrElse(resource).pos, s"attribute '$l' has already been added", oql)
+
+                if (typ.isDataType && (project != List(StarOQLProject) || select.isDefined || group.isDefined || order.isDefined || restrict != OQLRestrict(
+                      None,
+                      None)))
+                  problem(resource.pos, s"attribute '${resource.s}' does not have an array type", oql)
 
                 props(l) = ExpressionNode(AttributeOQLExpression(List(Ident(name, null)), entity, column))
-              case None => problem(ids.head.pos, s"unknown attribute '${ids.head.s}'", oql)
+              case None => problem(resource.pos, s"unknown attribute '${resource.s}'", oql)
             }
           case ExpressionOQLProject(label, expr) =>
             if (props contains label.get.s)
               problem(label.get.pos, s"attribute '${label.get.s}' has already been added", oql)
 
             props(label.get.s) = ExpressionNode(expr)
-          case QueryOQLProject(label, query) => ni
           case StarOQLProject =>
             entity.attributes.values.filter(_.typ.isDataType) foreach {
               case Attribute(name, column, pk, required, typ) =>
