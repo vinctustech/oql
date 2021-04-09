@@ -1,6 +1,7 @@
 package com.vinctus.oql2
 
 import java.time.Instant
+import scala.language.postfixOps
 
 object JSON {
 
@@ -62,7 +63,7 @@ object JSON {
             .replace("\"", "\\\"")
             .replace("\t", "\\t")
             .replace("\n", "\\n")
-            .replace("\r", "")
+            .replace("\r", "\\r")
           buf += '"'
       }
 
