@@ -28,6 +28,13 @@ project returns [Buffer<OQLProject> ps]
     { $ps = $subtracts.ps.prepend(StarOQLProject$.MODULE$); }
   | '{' attributeProjects '}'
     { $ps = $attributeProjects.ps; }
+  | dotProject
+    { $ps = $dotProject.ps; }
+  ;
+
+dotProject returns [Buffer<OQLProject> ps]
+  : '.' attributeName d=dotProject
+    { $p = new QueryOQLProject(None, new OQLQuery($attributeName.id, $d.ps, None, None, None, new OQLRestrict(None, None))); }
   | /* empty (equivalent to '{' '*' '}') */
     { $ps = new ListBuffer<OQLProject>().addOne(StarOQLProject$.MODULE$); }
   ;
@@ -51,14 +58,14 @@ attributeProject returns [OQLProject p]
     { $p = new ExpressionOQLProject(OQLParse.label($label.ctx), $applyExpression.e); }
   | label '(' expression ')'
     { $p = new ExpressionOQLProject(new Some($label.id), $expression.e); }
-  | label? qualifiedAttributeName
-    { $p = new ExpressionOQLProject(OQLParse.label($label.ctx), $qualifiedAttributeName.e); }
+  | label? query
+    { $p = new QueryOQLProject(OQLParse.label($label.ctx), $query.q); }
+//  | label? qualifiedAttributeName
+//    { $p = new ExpressionOQLProject(OQLParse.label($label.ctx), $qualifiedAttributeName.e); }
   | label? reference
     { $p = new ExpressionOQLProject(OQLParse.label($label.ctx), $reference.e); }
   | label? parameter
     { $p = new ExpressionOQLProject(OQLParse.label($label.ctx), $parameter.e); }
-  | label? query
-    { $p = new QueryOQLProject(OQLParse.label($label.ctx), $query.q); }
   ;
 
 label returns [Ident id]

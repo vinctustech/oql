@@ -38,7 +38,7 @@ class OQL(dm: String, val dataSource: OQLDataSource) {
         case Some(q: OQLQuery) => q
       }
 
-//    println(prettyPrint(query))
+    println(prettyPrint(query))
 
     def arrayNode(query: OQLQuery, join: Option[Attribute]): ArrayNode = {
       val (entity, attr) =
