@@ -29,7 +29,10 @@ object JSON {
       if (format)
         buf ++= " " * level
 
-    def aggregate[T](seq: collection.Seq[T])(render: T => Unit): Unit = {
+    def aggregate[T](open: Char, seq: collection.Seq[T], close: Char)(render: T => Unit): Unit = {
+      buf += open
+      indent()
+
       val it = seq.iterator
 
       if (it.nonEmpty)
@@ -41,6 +44,9 @@ object JSON {
         margin()
         render(it.next())
       }
+
+      dedent()
+      buf += close
     }
 
     def jsonValue(value: Any): Unit =
@@ -48,14 +54,9 @@ object JSON {
         case _: Double | _: Int | _: Boolean | null => buf ++= String.valueOf(value)
         case m: collection.Map[_, _]                => jsonObject(m.toSeq.asInstanceOf[Seq[(String, Any)]])
         case s: collection.Seq[_] if s.isEmpty      => buf ++= "[]"
-        case s: collection.Seq[_] =>
-          buf += '['
-          indent()
-          aggregate(s)(jsonValue)
-          dedent()
-          buf += ']'
-        case a: Array[_] => jsonValue(a.toList)
-        case p: Product  => jsonObject(p.productElementNames zip p.productIterator toList)
+        case s: collection.Seq[_]                   => aggregate('[', s, ']')(jsonValue)
+        case a: Array[_]                            => jsonValue(a.toList)
+        case p: Product                             => jsonObject(p.productElementNames zip p.productIterator toList)
         case _: String | _: Instant =>
           buf += '"'
           buf ++= value.toString
@@ -67,22 +68,16 @@ object JSON {
           buf += '"'
       }
 
-    def jsonObject(pairs: Seq[(String, Any)]): Unit = {
+    def jsonObject(pairs: Seq[(String, Any)]): Unit =
       if (pairs.isEmpty)
         buf ++= "{}"
-      else {
-        buf += '{'
-        indent()
-        aggregate(pairs) {
+      else
+        aggregate('{', pairs, '}') {
           case (k, v) =>
             jsonValue(k)
             buf ++= (if (format) ": " else ":")
             jsonValue(v)
         }
-        dedent()
-        buf += '}'
-      }
-    }
 
     jsonValue(value)
     buf.toString
