@@ -136,7 +136,7 @@ class OQL(dm: String, val dataSource: OQLDataSource) {
           case ObjectNode(properties) =>
             val map = new mutable.LinkedHashMap[String, Any]
 
-            for (((label, node), i) <- properties.zipWithIndex)
+            for ((label, node) <- properties)
               map(label) = build(node)
 
             map to VectorMap
