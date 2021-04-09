@@ -59,12 +59,10 @@ object JSON {
         case p: Product                             => jsonObject(p.productElementNames zip p.productIterator toList)
         case _: String | _: Instant =>
           buf += '"'
-          buf ++= value.toString
-            .replace("\\", "\\\\")
-            .replace("\"", "\\\"")
-            .replace("\t", "\\t")
-            .replace("\n", "\\n")
-            .replace("\r", "\\r")
+          buf ++=
+            List("\\" -> "\\\\", "\"" -> "\\\"", "\t" -> "\\t", "\n" -> "\\n", "\r" -> "\\r").foldLeft(value.toString) {
+              case (acc, (c, r)) => acc.replace(c, r)
+            }
           buf += '"'
       }
 
