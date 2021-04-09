@@ -50,7 +50,6 @@ class OQL(dm: String, val dataSource: OQLDataSource) {
               case None    => problem(query.resource.pos, s"unknown entity '${query.resource.s}'", oql)
             }
         }
-
       val props = new mutable.LinkedHashMap[String, Node]
       val attrset = new mutable.HashSet[String]
       val subtracts = new mutable.HashSet[String]
@@ -73,7 +72,22 @@ class OQL(dm: String, val dataSource: OQLDataSource) {
               problem(label.get.pos, s"attribute '${label.get.s}' has already been added", oql)
 
             props(label.get.s) = ExpressionNode(expr)
-          case QueryOQLProject(label, query) => ni
+          case QueryOQLProject(label, query) =>
+            entity.attributes get query.resource.s match {
+              case Some(Attribute(name, column, pk, required, typ))
+                  if !typ.isArrayType &&
+                    (query.select.isDefined || query.group.isDefined || query.order.isDefined || query.restrict != OQLRestrict(None, None)) =>
+                problem(query.resource.pos, s"attribute '${query.resource.s}' is not an array type", oql)
+              case Some(Attribute(name, column, pk, required, ManyToOneType(entityName, entity))) =>
+                val l = label.map(_.s).getOrElse(name)
+
+                if (props contains l)
+                  problem(label.getOrElse(query.resource).pos, s"attribute '$l' has already been added", oql)
+
+                props(l) = ExpressionNode(AttributeOQLExpression(List(Ident(name, null)), entity, column))
+              case Some(Attribute(name, column, pk, required, ManyToOneType(entityName, entity))) =>
+              case None                                                                           => problem(query.resource.pos, s"unknown attribute '${query.resource.s}'", oql)
+            }
           case StarOQLProject =>
             entity.attributes.values.filter(_.typ.isDataType) foreach {
               case Attribute(name, column, pk, required, typ) =>

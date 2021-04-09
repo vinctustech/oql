@@ -1,7 +1,7 @@
 package com.vinctus.oql2
 
-trait TypeSpecifier { val isDataType: Boolean }
-trait DataType extends TypeSpecifier { val isDataType = true }
+trait TypeSpecifier { val isDataType: Boolean; val isArrayType: Boolean }
+trait DataType extends TypeSpecifier { val isDataType = true; val isArrayType = false }
 
 case object TextType extends DataType
 case object IntegerType extends DataType
@@ -13,5 +13,7 @@ case object FloatType extends DataType
 case object UUIDType extends DataType
 case object TimestampType extends DataType
 
-trait RelationalType extends TypeSpecifier { val isDataType = false }
+trait RelationalType extends TypeSpecifier { val isDataType = false; val isArrayType = false }
 case class ManyToOneType(entityName: String, entity: Entity) extends RelationalType
+
+trait ArrayRelationalType extends RelationalType { val isArrayType = true }
