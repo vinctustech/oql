@@ -4,10 +4,12 @@ import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
 import xyz.hyperreal.pretty._
 
+import scala.annotation.tailrec
+import scala.collection.immutable.VectorMap
 import scala.reflect.internal.NoPhase.id
 import scala.sys.props
 
-class OQL(dm: String, db: OQLDataSource) {
+class OQL(dm: String, val dataSource: OQLDataSource) {
 
   val model: DataModel =
     DMLParse(dm) match {
@@ -15,13 +17,14 @@ class OQL(dm: String, db: OQLDataSource) {
       case Some(m: DMLModel) => new DataModel(m, dm)
     }
 
-  def connect: OQLConnection = db.connect
+  def connect: OQLConnection = dataSource.connect
 
-  def perform(action: OQLConnection => Unit): Unit = {
+  def perform[R](action: OQLConnection => R): R = {
     val conn = connect
+    val res = action(conn)
 
-    action(conn)
     conn.close()
+    res
   }
 
   def create(): Unit = perform(_.create(model))
@@ -113,7 +116,42 @@ class OQL(dm: String, db: OQLDataSource) {
         }
     }
 
-    sql.toString
+    perform { c =>
+      val rs = c.query(sql.toString)
+      val stack = new mutable.Stack[Node]
+
+      def build(node: Node): Option[Any] =
+        node match {
+          case ArrayNode(entity, element, select, join) =>
+            stack push node
+
+            val array = new ArrayBuffer[Any]
+
+            @tailrec
+            def buildArray(): Seq[Any] =
+              build(element) match {
+                case Some(value) =>
+                  array += value
+                  buildArray()
+                case None => array.toList
+              }
+
+            Some(buildArray())
+          case ExpressionNode(expr) => None
+          case ObjectNode(properties) =>
+            val map = new mutable.LinkedHashMap[String, Any]
+
+            if (rs.next) {
+              for (((label, _), i) <- properties.zipWithIndex)
+                map(label) = rs.get(i + 1)
+
+              Some(map to VectorMap)
+            } else None
+          case SequenceNode(seq) => None
+        }
+
+      build(node)
+    }
   }
 
 }

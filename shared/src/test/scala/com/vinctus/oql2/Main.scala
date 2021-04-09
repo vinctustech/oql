@@ -7,15 +7,26 @@ import java.sql.ResultSet
 
 object Main extends App {
 
-  val oql = new OQL("entity a { *id: bigint  x: text  y: int }", new InMemoryH2("test"))
+  val dm =
+    """
+      |entity a {
+      | *id: bigint
+      |  x: text
+      |  y: int
+      |}
+      |""".stripMargin
+  val oql = new OQL(dm, new InMemoryH2("test"))
 
   oql.create()
+  println(oql.dataSource.asInstanceOf[SQLDataSource].schema(oql.model))
   oql.perform(_.insert("insert into a (x, y) values ('zxcv', 3), ('asdf', 4)"))
-// a: x <- 'asdf', y <- y + 1 [y > 5]
-  val q = oql.queryMany("a {x y}") // [x = "as'df"]
 
-  println(q)
-  oql.perform(c => println(TextTable(c.query(q).peer.asInstanceOf[ResultSet])))
+// a: x <- 'asdf', y <- y + 1 [y > 5]
+  val q = oql.queryMany("a {y x}") // [x = "as'df"]
+
+  println(JSON(q.get, format = true))
+
+//  oql.perform(c => println(TextTable(c.query(q).peer.asInstanceOf[ResultSet])))
 
 }
 
