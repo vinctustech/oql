@@ -66,18 +66,19 @@ class OQL(dm: String, val dataSource: OQLDataSource) {
 
             props(label.get.s) = ExpressionNode(expr)
           case QueryOQLProject(label, query) =>
+            println(entity)
             entity.attributes get query.resource.s match {
               case Some(Attribute(name, column, pk, required, typ))
                   if !typ.isArrayType &&
                     (query.select.isDefined || query.group.isDefined || query.order.isDefined || query.restrict != OQLRestrict(None, None)) =>
                 problem(query.resource.pos, s"attribute '${query.resource.s}' is not an array type", oql)
-              case Some(attr @ Attribute(name, column, pk, required, ManyToOneType(entityName, entity))) =>
+              case Some(attr @ Attribute(name, column, pk, required, ManyToOneType(entityName, attr_entity))) =>
                 val l = label.map(_.s).getOrElse(name)
 
                 if (props contains l)
                   problem(label.getOrElse(query.resource).pos, s"attribute '$l' has already been added", oql)
 
-                props(l) = objectNode(entity, query.project, Some((ent, attr))) //ExpressionNode(AttributeOQLExpression(List(Ident(name, null)), entity, column))
+                props(l) = objectNode(attr_entity, query.project, Some((attr_entity, attr))) //ExpressionNode(AttributeOQLExpression(List(Ident(name, null)), entity, column))
               // one to many
               // many to many
               case None => problem(query.resource.pos, s"unknown attribute '${query.resource.s}'", oql)
