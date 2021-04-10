@@ -29,9 +29,9 @@ object Main extends App {
 
 // a: x <- 'asdf', y <- y + 1 [y > 5]
 
-  val q = oql.queryMany("book { author { name } }")
+  val q = oql.queryMany("book { title author { name } }")
 
-//  println(JSON(q, format = true))
+  println(JSON(q, format = true))
 
 //  oql.perform(c => println(TextTable(c.query(q).peer.asInstanceOf[ResultSet])))
 

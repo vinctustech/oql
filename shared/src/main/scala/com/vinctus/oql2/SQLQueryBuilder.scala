@@ -10,7 +10,7 @@ class SQLQueryBuilder(margin: Int = 0) {
   private var from: String = null
   private val tables = new mutable.HashMap[String, Int]
   private val innerJoins = new ArrayBuffer[Join]
-  private val outerJoins = new ArrayBuffer[Join]
+  private val leftJoins = new ArrayBuffer[Join]
   private val projects = new ArrayBuffer[OQLExpression]
 
   def table(name: String): String = {
@@ -49,9 +49,9 @@ class SQLQueryBuilder(margin: Int = 0) {
       case AttributeOQLExpression(ids, _, column)            => column
     }
 
-  def outerJoin(t1: String, c1: String, t2: String, c2: String): SQLQueryBuilder = {
+  def leftJoin(t1: String, c1: String, t2: String, c2: String): SQLQueryBuilder = {
     table(t2)
-    outerJoins += Join(t1, c1, t2, c2)
+    leftJoins += Join(t1, c1, t2, c2)
     this
   }
 
@@ -88,17 +88,19 @@ class SQLQueryBuilder(margin: Int = 0) {
     indent -= 7
     in()
 
-    val froms = tables.toList.flatMap { case (t, a) => t +: ((1 to a) map (i => s"$t AS $t$$$i")) }
+//    val froms = tables.toList.flatMap { case (t, a) => t +: ((1 to a) map (i => s"$t AS $t$$$i")) }
 
-    line(s"FROM ${froms.head}${if (froms.tail.nonEmpty) "," else ""}")
-    indent += 5
+    line(s"FROM $from")
+    in()
 
-    val flen = froms.tail.length
+    for (Join(t1, c1, t2, c2) <- innerJoins)
+      line(s"JOIN $t2 ON $t1.$c1 = $t2.$c2")
 
-    for ((f, i) <- froms.tail.zipWithIndex)
-      line(s"$f${if (i < flen - 1) "," else ""}")
+    for (Join(t1, c1, t2, c2) <- leftJoins)
+      line(s"LEFT JOIN $t2 ON $t1.$c1 = $t2.$c2")
 
-    indent -= 5
+    out()
+    out()
 
     buf.toString
   }
