@@ -2,18 +2,21 @@ package com.vinctus.oql2
 
 import xyz.hyperreal.pretty._
 
-import scala.+:
 import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
 
 class SQLQueryBuilder(margin: Int = 0) {
 
+  private var from: String = null
   private val tables = new mutable.HashMap[String, Int]
   private val innerJoins = new ArrayBuffer[Join]
   private val outerJoins = new ArrayBuffer[Join]
   private val projects = new ArrayBuffer[OQLExpression]
 
   def table(name: String): String = {
+    if (from eq null)
+      from = name
+
     tables get name match {
       case Some(a) =>
         val alias = a + 1
@@ -35,9 +38,10 @@ class SQLQueryBuilder(margin: Int = 0) {
 
   def expression(expr: OQLExpression): String =
     expr match {
-      case InfixOQLExpression(left, op @ ("+" | "-"), right) => s"${expression(left)} $op ${expression(right)}"
-      case InfixOQLExpression(left, op, right)               => s"${expression(left)}$op${expression(right)}"
-      case PrefixOQLExpression(op, expr)                     => s"$op${expression(expr)}"
+      case InfixOQLExpression(left, op @ ("*" | "/"), right) => s"${expression(left)}$op${expression(right)}"
+      case InfixOQLExpression(left, op, right)               => s"${expression(left)} $op ${expression(right)}"
+      case PrefixOQLExpression("-", expr)                    => s"-${expression(expr)}"
+      case PrefixOQLExpression(op, expr)                     => s"$op ${expression(expr)}"
       case PostfixOQLExpression(expr, op)                    => s"${expression(expr)} $op"
       case GroupingOQLExpression(expr)                       => s"($expr)"
       case NumberOQLExpression(n, pos)                       => n.toString
@@ -46,6 +50,7 @@ class SQLQueryBuilder(margin: Int = 0) {
     }
 
   def outerJoin(t1: String, c1: String, t2: String, c2: String): SQLQueryBuilder = {
+    table(t2)
     outerJoins += Join(t1, c1, t2, c2)
     this
   }
