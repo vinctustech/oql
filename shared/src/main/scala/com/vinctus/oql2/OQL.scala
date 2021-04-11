@@ -117,11 +117,20 @@ class OQL(dm: String, val dataSource: OQLDataSource) {
 
       def references(expr: OQLExpression): Unit =
         expr match {
+          case InfixOQLExpression(left, _, right) =>
+            references(left)
+            references(right)
           case a @ AttributeOQLExpression(ids, _, _) =>
-            a.entity = entity
-
+            entity.attributes get ids.head.s match {
+              case Some(attr) =>
+                a.entity = entity
+                a.column = attr.column
+              case None => problem(ids.head.pos, s"entity '${entity.name}' does not have attribute '${ids.head.s}'", oql)
+            }
+          case _ =>
         }
 
+      query.select foreach references
       ArrayNode(entity, objectNode(entity, query.project, None), query.select, join)
     }
 

@@ -29,7 +29,7 @@ object Main extends App {
 
 // a: x <- 'asdf', y <- y + 1 [y > 5]
 
-  val q = oql.queryMany("book { title author { name } } [year > 1850]")
+  val q = oql.queryMany("book { title year author { name } } [year > 1880]")
 
   println(JSON(q, format = true))
 
