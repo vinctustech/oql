@@ -13,7 +13,7 @@ class SQLQueryBuilder(margin: Int = 0) {
   private val projects = new ArrayBuffer[OQLExpression]
   private var where: Option[OQLExpression] = None
 
-  def table(name: String): String = {
+  def table(name: String): Unit = {
     if (from eq null)
       from = name
 
@@ -31,8 +31,9 @@ class SQLQueryBuilder(margin: Int = 0) {
 
   def select(cond: OQLExpression): Unit =
     where = where match {
-      case Some(cur) => Some(InfixOQLExpression(GroupingOQLExpression(cur), "AND", GroupingOQLExpression(cond)))//todo: current parent is being ignored
-      case None      => Some(cond)
+      case Some(cur) =>
+        Some(InfixOQLExpression(GroupingOQLExpression(cur), "AND", GroupingOQLExpression(cond))) //todo: current parent is being ignored
+      case None => Some(cond)
     }
 
 //  def ref(tab: String, col: String): String = s"$tab.$col"
@@ -52,22 +53,21 @@ class SQLQueryBuilder(margin: Int = 0) {
       case GroupingOQLExpression(expr)                       => s"($expr)"
       case NumberOQLExpression(n, pos)                       => n.toString
       case LiteralOQLExpression(s, pos)                      => s"'${quote(s)}'"
-      case AttributeOQLExpression(ids, _, table, attr)            => s"$table.${attr.column}"
+      case AttributeOQLExpression(ids, _, table, attr)       => s"$table.${attr.column}"
     }
 
-  def leftJoin(t1: String, c1: String, t2: String, c2: String): String = {
-    val tab = table(t2)
-
-    leftJoins += Join(t1, c1, t2, c2)
-    tab
-  }
-
-  def innerJoin(t1: String, c1: String, t2: String, c2: String): SQLQueryBuilder = {
-    innerJoins += Join(t1, c1, t2, c2)
+  def leftJoin(t1: String, c1: String, t2: String, alias: String, c2: String): SQLQueryBuilder = {
+    table(t2)
+    leftJoins += Join(t1, c1, t2, alias, c2)
     this
   }
 
-  private case class Join(t1: String, c1: String, t2: String, c2: String)
+  def innerJoin(t1: String, c1: String, t2: String, alias: String, c2: String): SQLQueryBuilder = {
+    innerJoins += Join(t1, c1, t2, alias, c2)
+    this
+  }
+
+  private case class Join(t1: String, c1: String, t2: String, alias: String, c2: String)
 
   override def toString: String = {
     val INDENT = 2
@@ -95,16 +95,14 @@ class SQLQueryBuilder(margin: Int = 0) {
     indent -= 7
     in()
 
-//    val froms = tables.toList.flatMap { case (t, a) => t +: ((1 to a) map (i => s"$t AS $t$$$i")) }
-
     line(s"FROM $from")
     in()
 
-    for (Join(t1, c1, t2, c2) <- innerJoins)
-      line(s"JOIN $t2 ON $t1.$c1 = $t2.$c2")
+    for (Join(t1, c1, t2, alias, c2) <- innerJoins)
+      line(s"JOIN $t2 AS $alias ON $t1.$c1 = $alias.$c2")
 
-    for (Join(t1, c1, t2, c2) <- leftJoins)
-      line(s"LEFT JOIN $t2 ON $t1.$c1 = $t2.$c2")
+    for (Join(t1, c1, t2, alias, c2) <- leftJoins)
+      line(s"LEFT JOIN $t2 AS $alias ON $t1.$c1 = $alias.$c2")
 
     out()
 

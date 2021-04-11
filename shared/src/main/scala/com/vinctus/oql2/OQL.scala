@@ -42,7 +42,7 @@ class OQL(dm: String, val dataSource: OQLDataSource) {
 
 //    println(prettyPrint(query))
 
-    def objectNode(entity: Entity, project: List[OQLProject], join: Option[(Entity, Attribute)]): ObjectNode = {
+    def objectNode(entity: Entity, table: String, project: List[OQLProject], join: Option[(Entity, String, Attribute)]): ObjectNode = {
       val props = new mutable.LinkedHashMap[String, Node]
       val attrset = new mutable.HashSet[String]
       val subtracts = new mutable.HashSet[String]
@@ -50,7 +50,6 @@ class OQL(dm: String, val dataSource: OQLDataSource) {
       for (p <- project)
         p match {
           case AttributeOQLProject(label, id) =>
-            println(entity, id)
             entity.attributes get id.s match {
               case Some(attr @ Attribute(name, column, pk, required, typ)) =>
                 val l = label.map(_.s).getOrElse(name)
@@ -59,9 +58,12 @@ class OQL(dm: String, val dataSource: OQLDataSource) {
                   problem(label.getOrElse(id).pos, s"attribute '$l' has already been added", oql)
 
                 props(l) = typ match {
-                  case _: DataType                   => ExpressionNode(AttributeOQLExpression(List(Ident(name, null)), entity, attr))
-                  case ManyToOneType(_, attr_entity) => objectNode(attr_entity, List(StarOQLProject), Some((entity, attr)))
-                  case _                             => ni
+                  case _: DataType => ExpressionNode(AttributeOQLExpression(List(Ident(name, null)), entity, table, attr))
+                  case ManyToOneType(_, attr_entity) =>
+                    val alias = s"$table$$${id.s}"
+
+                    objectNode(attr_entity, alias, List(StarOQLProject), Some((entity, alias, attr)))
+                  case _ => ni
                 }
               case None => problem(id.pos, s"unknown attribute '${id.s}'", oql)
             }
@@ -82,7 +84,9 @@ class OQL(dm: String, val dataSource: OQLDataSource) {
                 if (props contains l)
                   problem(label.getOrElse(query.resource).pos, s"attribute '$l' has already been added", oql)
 
-                props(l) = objectNode(attr_entity, query.project, Some((entity, attr))) //ExpressionNode(AttributeOQLExpression(List(Ident(name, null)), entity, column))
+                val alias = s"$table$$${query.resource.s}"
+
+                props(l) = objectNode(attr_entity, alias, query.project, Some((entity, alias, attr))) //ExpressionNode(AttributeOQLExpression(List(Ident(name, null)), entity, column))
               // case one to many
               // case many to many
               case None => problem(query.resource.pos, s"unknown attribute '${query.resource.s}'", oql)
@@ -90,7 +94,7 @@ class OQL(dm: String, val dataSource: OQLDataSource) {
           case StarOQLProject =>
             entity.attributes.values.filter(_.typ.isDataType) foreach {
               case attr @ Attribute(name, column, pk, required, typ) =>
-                props(name) = ExpressionNode(AttributeOQLExpression(List(Ident(name, null)), entity, attr))
+                props(name) = ExpressionNode(AttributeOQLExpression(List(Ident(name, null)), entity, table, attr))
             }
           case SubtractOQLProject(id) =>
             if (subtracts(id.s))
@@ -136,8 +140,8 @@ class OQL(dm: String, val dataSource: OQLDataSource) {
           case _ =>
         }
 
-      query.select foreach references
-      ArrayNode(entity, objectNode(entity, query.project, None), query.select, join)
+      query.select foreach (references(_, query.resource.s)) // todo: don't know if query.resource.s is right
+      ArrayNode(entity, objectNode(entity, query.resource.s, query.project, None), query.select, join)
     }
 
     val node: Node = arrayNode(query, None)
@@ -163,8 +167,8 @@ class OQL(dm: String, val dataSource: OQLDataSource) {
           val p1 =
             join match {
               case None => null
-              case Some((left, Attribute(_, column, _, _, ManyToOneType(_, right)))) =>
-                sqlBuilder.leftJoin(left.table, column, right.table, right.pk.get.column)
+              case Some((left, alias, Attribute(_, column, _, _, ManyToOneType(_, right)))) =>
+                sqlBuilder.leftJoin(left.table, column, right.table, alias, right.pk.get.column)
             }
 
           properties foreach { case (_, e) => sqlQuery(e) }
@@ -230,7 +234,7 @@ case class ArrayNode(entity: Entity, element: Node, select: Option[OQLExpression
   *
   * @param properties object properties: each property has a name and a node
   */
-case class ObjectNode(properties: Seq[(String, Node)], join: Option[(Entity, Attribute)]) extends Node
+case class ObjectNode(properties: Seq[(String, Node)], join: Option[(Entity, String, Attribute)]) extends Node
 
 /**
   * Sequence result node

@@ -138,7 +138,7 @@ logicalPrimary returns [OQLExpression e]
 
 qualifiedAttributeName returns [AttributeOQLExpression e]
   : identifiers
-    { $e = new AttributeOQLExpression($identifiers.ids.toList(), null, null); }
+    { $e = new AttributeOQLExpression($identifiers.ids.toList(), null, null, null); }
   ;
 
 identifiers returns [ListBuffer<Ident> ids]
