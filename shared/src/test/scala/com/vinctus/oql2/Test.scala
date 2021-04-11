@@ -1,6 +1,6 @@
 package com.vinctus.oql2
 
-trait DBTest {
+trait Test {
 
   val db: OQL
 
