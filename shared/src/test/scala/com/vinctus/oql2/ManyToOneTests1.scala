@@ -6,6 +6,64 @@ import org.scalatest.matchers.should.Matchers
 class ManyToOneTests1 extends AnyFreeSpec with Matchers with BookDB {
 
   "simplest many to one query" in {
-    test("book") shouldBe 123
+    test("book { * author }") shouldBe
+      """
+        |[
+        |  {
+        |    "id": 1,
+        |    "title": "Treasure Island",
+        |    "year": 1883,
+        |    "author": {
+        |      "id": 1,
+        |      "name": "Robert Louis Stevenson"
+        |    }
+        |  },
+        |  {
+        |    "id": 2,
+        |    "title": "Alice’s Adventures in Wonderland",
+        |    "year": 1865,
+        |    "author": {
+        |      "id": 2,
+        |      "name": "Lewis Carroll"
+        |    }
+        |  },
+        |  {
+        |    "id": 3,
+        |    "title": "Oliver Twist",
+        |    "year": 1838,
+        |    "author": {
+        |      "id": 3,
+        |      "name": "Charles Dickens"
+        |    }
+        |  },
+        |  {
+        |    "id": 4,
+        |    "title": "A Tale of Two Cities",
+        |    "year": 1859,
+        |    "author": {
+        |      "id": 3,
+        |      "name": "Charles Dickens"
+        |    }
+        |  },
+        |  {
+        |    "id": 5,
+        |    "title": "The Adventures of Tom Sawyer",
+        |    "year": 1876,
+        |    "author": {
+        |      "id": 4,
+        |      "name": "Mark Twain"
+        |    }
+        |  },
+        |  {
+        |    "id": 6,
+        |    "title": "Adventures of Huckleberry Finn",
+        |    "year": 1884,
+        |    "author": {
+        |      "id": 4,
+        |      "name": "Mark Twain"
+        |    }
+        |  }
+        |]
+        |""".trim.stripMargin
   }
 }

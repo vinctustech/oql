@@ -16,7 +16,7 @@ trait BookDB extends DBTest {
       |  name: text
       |}
       |""".stripMargin
-  val db = new OQL(dm, new H2_mem("BookDB"))
+  val db = new OQL(dm, new H2_mem)
 
   db.create()
   db.execute(_.insert("""insert into author (name) values 

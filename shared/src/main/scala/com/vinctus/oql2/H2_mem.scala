@@ -2,10 +2,10 @@ package com.vinctus.oql2
 
 import java.sql.Statement
 
-class H2_mem(db: String) extends JDBCDataSource("org.h2.Driver") {
+class H2_mem extends JDBCDataSource("org.h2.Driver") {
 
   val name = "H2 (in memory)"
-  val url = s"jdbc:h2:mem:$db;DB_CLOSE_DELAY=-1"
+  val url = s"jdbc:h2:mem:test;DB_CLOSE_DELAY=-1"
   val user = ""
   val password = ""
 
