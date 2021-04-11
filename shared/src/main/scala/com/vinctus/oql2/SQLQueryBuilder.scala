@@ -2,24 +2,20 @@ package com.vinctus.oql2
 
 import xyz.hyperreal.pretty._
 
-import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
 
 class SQLQueryBuilder(margin: Int = 0) {
 
   private var from: String = null
-  private val tables = new mutable.HashMap[String, Int]
+//  private val tables = new mutable.HashMap[String, Int]
   private val innerJoins = new ArrayBuffer[Join]
   private val leftJoins = new ArrayBuffer[Join]
-  private val projects = new ArrayBuffer[(String, OQLExpression)]
+  private val projects = new ArrayBuffer[OQLExpression]
   private var where: Option[OQLExpression] = None
 
-  def table(name: String, parent: String): String = {
+  def table(name: String): String = {
     if (from eq null)
       from = name
-
-    if (parent eq null) name
-    else s"$parent$$$name"
 
 //    tables get name match {
 //      case Some(a) =>
@@ -33,16 +29,16 @@ class SQLQueryBuilder(margin: Int = 0) {
 //    }
   }
 
-  def select(cond: OQLExpression, parent: String): Unit =
+  def select(cond: OQLExpression): Unit =
     where = where match {
-      case Some(cur) => Some(InfixOQLExpression(GroupingOQLExpression(cur), "AND", GroupingOQLExpression(cond)))
+      case Some(cur) => Some(InfixOQLExpression(GroupingOQLExpression(cur), "AND", GroupingOQLExpression(cond)))//todo: current parent is being ignored
       case None      => Some(cond)
     }
 
-  def ref(tab: String, col: String): String = s"$tab.$col"
+//  def ref(tab: String, col: String): String = s"$tab.$col"
 
-  def project(expr: OQLExpression, parent: String): SQLQueryBuilder = {
-    projects += (parent, expr)
+  def project(expr: OQLExpression): SQLQueryBuilder = {
+    projects += expr
     this
   }
 
@@ -56,13 +52,13 @@ class SQLQueryBuilder(margin: Int = 0) {
       case GroupingOQLExpression(expr)                       => s"($expr)"
       case NumberOQLExpression(n, pos)                       => n.toString
       case LiteralOQLExpression(s, pos)                      => s"'${quote(s)}'"
-      case AttributeOQLExpression(ids, tab, attr)            => attr.column
+      case AttributeOQLExpression(ids, _, table, attr)            => s"$table.${attr.column}"
     }
 
-  def leftJoin(t1: String, c1: String, t2: String, c2: String, parent: String): String = {
-    val tab = table(t2, parent)
+  def leftJoin(t1: String, c1: String, t2: String, c2: String): String = {
+    val tab = table(t2)
 
-    leftJoins += Join(t1, c1, tab, c2)
+    leftJoins += Join(t1, c1, t2, c2)
     tab
   }
 
