@@ -31,7 +31,7 @@ object Main extends App with BookDB {
 //
 //  val q = oql.queryMany("book") //"book { title year author { name } } [year > 1880]"
 
-  println(test("book"))
+  println(test("book { * author }"))
 
 //  oql.perform(c => println(TextTable(c.query(q).peer.asInstanceOf[ResultSet])))
 

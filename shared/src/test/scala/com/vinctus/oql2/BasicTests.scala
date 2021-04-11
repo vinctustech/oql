@@ -43,4 +43,22 @@ class BasicTests extends AnyFreeSpec with Matchers with BookDB {
         |""".trim.stripMargin
   }
 
+  "simplest query with select" in {
+    test("book [year > 1880]") shouldBe
+      """
+        |[
+        |  {
+        |    "id": 1,
+        |    "title": "Treasure Island",
+        |    "year": 1883
+        |  },
+        |  {
+        |    "id": 6,
+        |    "title": "Adventures of Huckleberry Finn",
+        |    "year": 1884
+        |  }
+        |]
+        |""".trim.stripMargin
+  }
+
 }

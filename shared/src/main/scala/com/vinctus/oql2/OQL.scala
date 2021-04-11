@@ -50,14 +50,19 @@ class OQL(dm: String, val dataSource: OQLDataSource) {
       for (p <- project)
         p match {
           case AttributeOQLProject(label, id) =>
+            println(entity, id)
             entity.attributes get id.s match {
-              case Some(Attribute(name, column, pk, required, typ)) =>
+              case Some(attr @ Attribute(name, column, pk, required, typ)) =>
                 val l = label.map(_.s).getOrElse(name)
 
                 if (props contains l)
                   problem(label.getOrElse(id).pos, s"attribute '$l' has already been added", oql)
 
-                props(l) = ExpressionNode(AttributeOQLExpression(List(Ident(name, null)), entity, column))
+                props(l) = typ match {
+                  case _: DataType                   => ExpressionNode(AttributeOQLExpression(List(Ident(name, null)), entity, attr))
+                  case ManyToOneType(_, attr_entity) => objectNode(attr_entity, List(StarOQLProject), Some((entity, attr)))
+                  case _                             => ni
+                }
               case None => problem(id.pos, s"unknown attribute '${id.s}'", oql)
             }
           case ExpressionOQLProject(label, expr) =>
@@ -78,14 +83,14 @@ class OQL(dm: String, val dataSource: OQLDataSource) {
                   problem(label.getOrElse(query.resource).pos, s"attribute '$l' has already been added", oql)
 
                 props(l) = objectNode(attr_entity, query.project, Some((entity, attr))) //ExpressionNode(AttributeOQLExpression(List(Ident(name, null)), entity, column))
-              // one to many
-              // many to many
+              // case one to many
+              // case many to many
               case None => problem(query.resource.pos, s"unknown attribute '${query.resource.s}'", oql)
             }
           case StarOQLProject =>
             entity.attributes.values.filter(_.typ.isDataType) foreach {
-              case Attribute(name, column, pk, required, typ) =>
-                props(name) = ExpressionNode(AttributeOQLExpression(List(Ident(name, null)), entity, column))
+              case attr @ Attribute(name, column, pk, required, typ) =>
+                props(name) = ExpressionNode(AttributeOQLExpression(List(Ident(name, null)), entity, attr))
             }
           case SubtractOQLProject(id) =>
             if (subtracts(id.s))
@@ -124,7 +129,7 @@ class OQL(dm: String, val dataSource: OQLDataSource) {
             entity.attributes get ids.head.s match {
               case Some(attr) =>
                 a.entity = entity
-                a.column = attr.column
+                a.attr = attr
               case None => problem(ids.head.pos, s"entity '${entity.name}' does not have attribute '${ids.head.s}'", oql)
             }
           case _ =>
@@ -140,27 +145,28 @@ class OQL(dm: String, val dataSource: OQLDataSource) {
 
     val sqlBuilder = new SQLQueryBuilder
 
-    def sqlQuery(node: Node): Unit = {
+    def sqlQuery(node: Node, parent: String): Unit = {
       node match {
         case ArrayNode(entity, element, select, join) =>
-          sqlBuilder.table(entity.table)
+          val p1 = sqlBuilder.table(entity.table, parent)
 
           if (select.isDefined)
-            sqlBuilder.select(select.get)
+            sqlBuilder.select(select.get, p1)
 
-          sqlQuery(element)
+          sqlQuery(element, p1)
         case e @ ExpressionNode(expr) =>
-          sqlBuilder.project(expr)
+          sqlBuilder.project(expr, parent)
           e.idx = idx
           idx += 1
         case ObjectNode(properties, join) =>
-          join match {
-            case None =>
-            case Some((left, Attribute(_, column, _, _, ManyToOneType(_, right)))) =>
-              sqlBuilder.leftJoin(left.table, column, right.table, right.pk.get.column)
-          }
+          val parent =
+            join match {
+              case None => null
+              case Some((left, Attribute(_, column, _, _, ManyToOneType(_, right)))) =>
+                sqlBuilder.leftJoin(left.table, column, right.table, right.pk.get.column, parent)
+            }
 
-          properties foreach { case (_, e) => sqlQuery(e) }
+          properties foreach { case (_, e) => sqlQuery(e, parent) }
         case SequenceNode(seq) =>
         case _                 =>
       }
@@ -168,7 +174,7 @@ class OQL(dm: String, val dataSource: OQLDataSource) {
 
 //    println(prettyPrint(node))
 
-    sqlQuery(node)
+    sqlQuery(node, null)
 
     val sql = sqlBuilder.toString
 
