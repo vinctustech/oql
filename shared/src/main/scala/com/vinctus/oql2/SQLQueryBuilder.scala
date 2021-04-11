@@ -10,6 +10,7 @@ class SQLQueryBuilder(margin: Int = 0) {
 //  private val tables = new mutable.HashMap[String, Int]
   private val innerJoins = new ArrayBuffer[Join]
   private val leftJoins = new ArrayBuffer[Join]
+  private var idx = 0
   private val projects = new ArrayBuffer[OQLExpression]
   private var where: Option[OQLExpression] = None
 
@@ -38,9 +39,10 @@ class SQLQueryBuilder(margin: Int = 0) {
 
 //  def ref(tab: String, col: String): String = s"$tab.$col"
 
-  def project(expr: OQLExpression): SQLQueryBuilder = {
+  def project(expr: OQLExpression): Int = {
     projects += expr
-    this
+    idx += 1
+    idx
   }
 
   def expression(expr: OQLExpression): String =

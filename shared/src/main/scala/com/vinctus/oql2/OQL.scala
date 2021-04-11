@@ -4,6 +4,8 @@ import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
 import xyz.hyperreal.pretty._
 
+import java.sql.ResultSet
+import xyz.hyperreal.table.TextTable
 import scala.annotation.tailrec
 import scala.collection.immutable.VectorMap
 
@@ -142,8 +144,6 @@ class OQL(dm: String, val dataSource: OQLDataSource) {
 
     val node: Node = arrayNode(query, None)
 
-    var idx = 1
-
     val sqlBuilder = new SQLQueryBuilder
 
     def sqlQuery(node: Node): Unit = {
@@ -155,17 +155,14 @@ class OQL(dm: String, val dataSource: OQLDataSource) {
             sqlBuilder.select(select.get)
 
           sqlQuery(element)
-        case e @ ExpressionNode(expr) =>
-          sqlBuilder.project(expr)
-          e.idx = idx
-          idx += 1
-        case ObjectNode(properties, join) =>
-          val p1 =
-            join match {
-              case None => null
-              case Some((left, alias, Attribute(_, column, _, _, ManyToOneType(_, right)))) =>
-                sqlBuilder.leftJoin(left.table, column, right.table, alias, right.pk.get.column)
-            }
+        case e @ ExpressionNode(expr) => e.idx = sqlBuilder.project(expr)
+        case obj @ ObjectNode(properties, join) =>
+          join match {
+            case None =>
+            case Some((left, alias, attr @ Attribute(name, column, _, _, ManyToOneType(_, right)))) =>
+              obj.idx = sqlBuilder.project(AttributeOQLExpression(List(Ident(name, null)), null, left.table, attr))
+              sqlBuilder.leftJoin(left.table, column, right.table, alias, right.pk.get.column)
+          }
 
           properties foreach { case (_, e) => sqlQuery(e) }
         case SequenceNode(seq) =>
@@ -184,6 +181,8 @@ class OQL(dm: String, val dataSource: OQLDataSource) {
     execute { c =>
       val rs = c.query(sql)
 
+//      println(TextTable(rs.peer.asInstanceOf[ResultSet]))
+
       def build(node: Node): Any =
         node match {
           case ArrayNode(entity, element, select, join) =>
@@ -193,13 +192,16 @@ class OQL(dm: String, val dataSource: OQLDataSource) {
 
             array.toList
           case expr: ExpressionNode => rs get expr.idx
-          case ObjectNode(properties, _) =>
-            val map = new mutable.LinkedHashMap[String, Any]
+          case obj @ ObjectNode(properties, join) =>
+            if (join.isDefined && rs.get(obj.idx) == null) null
+            else {
+              val map = new mutable.LinkedHashMap[String, Any]
 
-            for ((label, node) <- properties)
-              map(label) = build(node)
+              for ((label, node) <- properties)
+                map(label) = build(node)
 
-            map to VectorMap
+              map to VectorMap
+            }
           case SequenceNode(seq) => ni
         }
 
@@ -230,7 +232,7 @@ case class ArrayNode(entity: Entity, element: Node, select: Option[OQLExpression
   *
   * @param properties object properties: each property has a name and a node
   */
-case class ObjectNode(properties: Seq[(String, Node)], join: Option[(Entity, String, Attribute)]) extends Node
+case class ObjectNode(properties: Seq[(String, Node)], join: Option[(Entity, String, Attribute)]) extends Node { var idx: Int = _ }
 
 /**
   * Sequence result node

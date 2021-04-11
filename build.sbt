@@ -1,3 +1,5 @@
+import sbt.Keys.libraryDependencies
+
 lazy val oql2 = crossProject( /*JSPlatform,*/ JVMPlatform /*, NativePlatform*/ )
   .in(file("."))
   .settings(
@@ -19,7 +21,7 @@ lazy val oql2 = crossProject( /*JSPlatform,*/ JVMPlatform /*, NativePlatform*/ )
     organization := "com.vinctus",
     mainClass := Some("com.vinctus.oql2.Main"),
     libraryDependencies += "org.scalatest" %%% "scalatest" % "3.2.5" % "test",
-    libraryDependencies += "xyz.hyperreal" %%% "table" % "1.0.0-snapshot.3" % "test",
+    libraryDependencies += "xyz.hyperreal" %%% "table" % "1.0.0-snapshot.3", // % "test",
     libraryDependencies += "xyz.hyperreal" %%% "cross-platform" % "0.1.0-snapshot.3",
     publishMavenStyle := true,
     publishArtifact in Test := false,
@@ -32,7 +34,7 @@ lazy val oql2 = crossProject( /*JSPlatform,*/ JVMPlatform /*, NativePlatform*/ )
       "org.antlr" % "antlr4-runtime" % "4.7.2",
       "org.antlr" % "ST4" % "4.3.1"
     ),
-    libraryDependencies += "xyz.hyperreal" %% "pretty" % "0.2"
+    libraryDependencies += "xyz.hyperreal" %% "pretty" % "0.2" // % "test",
   ) /*.
 //  nativeSettings(
 //    nativeLinkStubs := true
