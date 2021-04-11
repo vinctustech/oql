@@ -40,7 +40,7 @@ class OQL(dm: String, val dataSource: OQLDataSource) {
         case Some(q: OQLQuery) => q
       }
 
-//    println(prettyPrint(query))
+    println(prettyPrint(query))
 
     def objectNode(entity: Entity, project: List[OQLProject], join: Option[(Entity, Attribute)]): ObjectNode = {
       val props = new mutable.LinkedHashMap[String, Node]
@@ -93,10 +93,10 @@ class OQL(dm: String, val dataSource: OQLDataSource) {
 
             subtracts += id.s
 
-            props get id.s match {
-              case Some(value) => props -= id.s
-              case None        => problem(id.pos, s"attribute '${id.s}' was not added with '*'", oql)
-            }
+            if (props contains id.s)
+              props -= id.s
+            else
+              problem(id.pos, s"attribute '${id.s}' was not added with '*'", oql)
         }
 
       ObjectNode(props.toList, join)
@@ -113,6 +113,15 @@ class OQL(dm: String, val dataSource: OQLDataSource) {
             }
         }
 
+      // lookup columns for attributes
+
+      def references(expr: OQLExpression): Unit =
+        expr match {
+          case a @ AttributeOQLExpression(ids, _, _) =>
+            a.entity = entity
+
+        }
+
       ArrayNode(entity, objectNode(entity, query.project, None), query.select, join)
     }
 
@@ -126,6 +135,10 @@ class OQL(dm: String, val dataSource: OQLDataSource) {
       node match {
         case ArrayNode(entity, element, select, join) =>
           sqlBuilder.table(entity.table)
+
+          if (select.isDefined)
+            sqlBuilder.select(select.get)
+
           sqlQuery(element)
         case e @ ExpressionNode(expr) =>
           sqlBuilder.project(expr)

@@ -12,7 +12,7 @@ class SQLQueryBuilder(margin: Int = 0) {
   private val innerJoins = new ArrayBuffer[Join]
   private val leftJoins = new ArrayBuffer[Join]
   private val projects = new ArrayBuffer[OQLExpression]
-  private var select: Option[OQLExpression] = None
+  private var where: Option[OQLExpression] = None
 
   def table(name: String): String = {
     if (from eq null)
@@ -29,6 +29,12 @@ class SQLQueryBuilder(margin: Int = 0) {
         name
     }
   }
+
+  def select(cond: OQLExpression): Unit =
+    where match {
+      case Some(w) => where = Some(InfixOQLExpression(GroupingOQLExpression(w), "AND", GroupingOQLExpression(w)))
+      case None    => where = Some(cond)
+    }
 
   def ref(tab: String, col: String): String = s"$tab.$col"
 
@@ -102,7 +108,7 @@ class SQLQueryBuilder(margin: Int = 0) {
 
     out()
 
-    select match {
+    where match {
       case Some(expr) =>
         in()
         line(s"WHERE ${expression(expr)}")
