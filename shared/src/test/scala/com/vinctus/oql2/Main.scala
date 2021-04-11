@@ -11,7 +11,7 @@ object Main extends App {
   val oql = new OQL(dm, new H2_mem("test"))
 
   oql.create()
-//  println(oql.dataSource.asInstanceOf[SQLDataSource].schema(oql.model) mkString "\n\n")
+  println(oql.dataSource.asInstanceOf[SQLDataSource].schema(oql.model) mkString "\n\n")
   oql.execute(_.insert("""insert into author (name) values 
       |('Robert Louis Stevenson'),
       |('Lewis Carroll'),
@@ -29,7 +29,7 @@ object Main extends App {
 
 // a: x <- 'asdf', y <- y + 1 [y > 5]
 
-  val q = oql.queryMany("book { title author { name } }")
+  val q = oql.queryMany("book { title author { name } } [year > 1850]")
 
   println(JSON(q, format = true))
 

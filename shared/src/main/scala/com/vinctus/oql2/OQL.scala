@@ -43,7 +43,6 @@ class OQL(dm: String, val dataSource: OQLDataSource) {
 //    println(prettyPrint(query))
 
     def objectNode(entity: Entity, project: List[OQLProject], join: Option[(Entity, Attribute)]): ObjectNode = {
-      println("project", project)
       val props = new mutable.LinkedHashMap[String, Node]
       val attrset = new mutable.HashSet[String]
       val subtracts = new mutable.HashSet[String]
@@ -67,14 +66,12 @@ class OQL(dm: String, val dataSource: OQLDataSource) {
 
             props(label.get.s) = ExpressionNode(expr)
           case QueryOQLProject(label, query) =>
-            println(entity)
             entity.attributes get query.resource.s match {
               case Some(Attribute(name, column, pk, required, typ))
                   if !typ.isArrayType &&
                     (query.select.isDefined || query.group.isDefined || query.order.isDefined || query.restrict != OQLRestrict(None, None)) =>
                 problem(query.resource.pos, s"attribute '${query.resource.s}' is not an array type", oql)
               case Some(attr @ Attribute(name, column, pk, required, ManyToOneType(entityName, attr_entity))) =>
-                println(name, attr_entity)
                 val l = label.map(_.s).getOrElse(name)
 
                 if (props contains l)
@@ -153,7 +150,7 @@ class OQL(dm: String, val dataSource: OQLDataSource) {
 
     val sql = sqlBuilder.toString
 
-//    println(sql)
+    println(sql)
 
     execute { c =>
       val rs = c.query(sql)

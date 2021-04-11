@@ -12,6 +12,7 @@ class SQLQueryBuilder(margin: Int = 0) {
   private val innerJoins = new ArrayBuffer[Join]
   private val leftJoins = new ArrayBuffer[Join]
   private val projects = new ArrayBuffer[OQLExpression]
+  private var select: Option[OQLExpression] = None
 
   def table(name: String): String = {
     if (from eq null)
@@ -100,6 +101,15 @@ class SQLQueryBuilder(margin: Int = 0) {
       line(s"LEFT JOIN $t2 ON $t1.$c1 = $t2.$c2")
 
     out()
+
+    select match {
+      case Some(expr) =>
+        in()
+        line(s"WHERE ${expression(expr)}")
+        out()
+      case None =>
+    }
+
     out()
 
     buf.toString
