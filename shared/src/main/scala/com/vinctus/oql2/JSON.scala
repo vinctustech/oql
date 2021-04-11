@@ -78,6 +78,7 @@ object JSON {
         }
 
     jsonValue(value)
+    ln()
     buf.toString
   }
 

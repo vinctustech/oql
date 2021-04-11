@@ -40,7 +40,7 @@ class OQL(dm: String, val dataSource: OQLDataSource) {
         case Some(q: OQLQuery) => q
       }
 
-    println(prettyPrint(query))
+//    println(prettyPrint(query))
 
     def objectNode(entity: Entity, project: List[OQLProject], join: Option[(Entity, Attribute)]): ObjectNode = {
       val props = new mutable.LinkedHashMap[String, Node]
@@ -172,7 +172,7 @@ class OQL(dm: String, val dataSource: OQLDataSource) {
 
     val sql = sqlBuilder.toString
 
-    println(sql)
+//    println(sql)
 
     execute { c =>
       val rs = c.query(sql)
