@@ -1,15 +1,11 @@
 package com.vinctus.oql2
 
-import sun.jvm.hotspot.HelloWorld.e
-
 import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
 import xyz.hyperreal.pretty._
 
 import scala.annotation.tailrec
 import scala.collection.immutable.VectorMap
-import scala.reflect.internal.NoPhase.id
-import scala.sys.props
 
 class OQL(dm: String, val dataSource: OQLDataSource) {
 
@@ -183,7 +179,7 @@ class OQL(dm: String, val dataSource: OQLDataSource) {
 
     val sql = sqlBuilder.toString
 
-//    println(sql)
+    println(sql)
 
     execute { c =>
       val rs = c.query(sql)
