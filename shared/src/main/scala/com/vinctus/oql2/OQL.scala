@@ -12,6 +12,7 @@ import xyz.hyperreal.table.TextTable
 
 import scala.annotation.tailrec
 import scala.collection.immutable.VectorMap
+import scala.reflect.internal.NoPhase.id
 
 class OQL(dm: String, val dataSource: OQLDataSource) {
 
@@ -82,15 +83,20 @@ class OQL(dm: String, val dataSource: OQLDataSource) {
                   if !typ.isArrayType &&
                     (query.select.isDefined || query.group.isDefined || query.order.isDefined || query.restrict != OQLRestrict(None, None)) =>
                 problem(query.resource.pos, s"attribute '${query.resource.s}' is not an array type", oql)
-              case Some(attr @ Attribute(name, column, pk, required, ManyToOneType(attr_entity))) =>
+              case Some(attr @ Attribute(name, column, pk, required, typ)) =>
                 val l = label.map(_.s).getOrElse(name)
 
                 if (props contains l)
                   problem(label.getOrElse(query.resource).pos, s"attribute '$l' has already been added", oql)
 
-                val alias = s"$table$$${query.resource.s}"
+                props(l) = typ match {
+                  case ManyToOneType(attr_entity) =>
+                    val alias = s"$table$$${query.resource.s}"
 
-                props(l) = objectNode(attr_entity, alias, query.project, Some((entity, alias, attr)))
+                    objectNode(attr_entity, alias, query.project, Some((entity, alias, attr)))
+                  case OneToManyType(attr_entity, attribute) =>
+                    oneToManyNode(query.copy(entity = attr_entity), attribute)
+                }
               // case one to many
               // case many to many
               case None => problem(query.resource.pos, s"unknown attribute '${query.resource.s}'", oql)
@@ -168,7 +174,7 @@ class OQL(dm: String, val dataSource: OQLDataSource) {
         }
 
       query.select foreach (references(_, query.resource.s)) // 'query.resource.s' should really be an alias
-      OneToManyNode(entity, objectNode(entity, query.resource.s, query.project, None), query.select, attr)
+      OneToManyNode(entity, query.resource.s, objectNode(entity, query.resource.s, query.project, None), query.select, attr)
     }
 
     val root: ResultNode = resultNode(query)
@@ -177,8 +183,8 @@ class OQL(dm: String, val dataSource: OQLDataSource) {
 
     def writeSQL(node: Node): Unit = {
       node match {
-        case OneToManyNode(entity, element, select, Attribute(name, column, pk, required, ManyToOneType(mtoEntity))) =>
-          sqlBuilder.innerJoin(mtoEntity.table, mtoEntity.pk.get.column, entity.table, "books", column)
+        case OneToManyNode(entity, resource, element, select, Attribute(name, column, pk, required, ManyToOneType(mtoEntity))) =>
+          sqlBuilder.leftJoin(mtoEntity.table, mtoEntity.pk.get.column, entity.table, resource, column)
 
           if (select.isDefined)
             sqlBuilder.select(select.get)
@@ -219,28 +225,28 @@ class OQL(dm: String, val dataSource: OQLDataSource) {
 
       println(TextTable(rs.peer.asInstanceOf[ResultSet]))
 
-//      def build(node: Node): Any =
-//        node match {
-//          case ResultNode(entity, element, select) =>
-//            val array = new ArrayBuffer[Any]
-//
-//            while (rs.next) array += build(element)
-//
-//            array.toList
-//          case expr: ValueNode => rs get expr.idx
-//          case obj @ ObjectNode(properties, join) =>
-//            if (join.isDefined && rs.get(obj.idx) == null) null
-//            else {
-//              val map = new mutable.LinkedHashMap[String, Any]
-//
-//              for ((label, node) <- properties)
-//                map(label) = build(node)
-//
-//              map to VectorMap
-//            }
-//          case SequenceNode(seq) => ni
-//        }
-//
+      def build(node: Node): Any =
+        node match {
+          case ResultNode(entity, element, select) =>
+            val array = new ArrayBuffer[Any]
+
+            while (rs.next) array += build(element)
+
+            array.toList
+          case expr: ValueNode => rs get expr.idx
+          case obj @ ObjectNode(properties, join) =>
+            if (join.isDefined && rs.get(obj.idx) == null) null
+            else {
+              val map = new mutable.LinkedHashMap[String, Any]
+
+              for ((label, node) <- properties)
+                map(label) = build(node)
+
+              map to VectorMap
+            }
+          case SequenceNode(seq) => ni
+        }
+
 //      build(root)
     }
   }
@@ -263,7 +269,7 @@ trait Node
   */
 case class ResultNode(entity: Entity, element: Node, select: Option[OQLExpression]) extends Node
 
-case class OneToManyNode(entity: Entity, element: Node, select: Option[OQLExpression], join: Attribute) extends Node
+case class OneToManyNode(entity: Entity, resource: String, element: Node, select: Option[OQLExpression], join: Attribute) extends Node
 
 /**
   * Object (many-to-one) result node
