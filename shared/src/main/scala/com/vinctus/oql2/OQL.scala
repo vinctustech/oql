@@ -53,7 +53,7 @@ class OQL(dm: String, val dataSource: OQLDataSource) {
         p match {
           case AttributeOQLProject(label, id) =>
             entity.attributes get id.s match {
-              case someAttr @ Some(attr @ Attribute(name, column, pk, required, typ)) =>
+              case Some(attr @ Attribute(name, column, pk, required, typ)) =>
                 val l = label.map(_.s).getOrElse(name)
 
                 if (props contains l)
@@ -145,12 +145,10 @@ class OQL(dm: String, val dataSource: OQLDataSource) {
     }
 
     def oneToManyNode(query: OQLQuery, attr: Attribute): OneToManyNode = {
-      val entity = attr.typ.asInstanceOf[OneToManyType].entity
-      val attr1 = attr.typ.asInstanceOf[OneToManyType].attribute
+      val entity = query.entity
 
       println(query)
-      println(attr1)
-
+      println(attr)
       // lookup columns for attributes
 
       def references(expr: OQLExpression, table: String): Unit =
@@ -170,7 +168,7 @@ class OQL(dm: String, val dataSource: OQLDataSource) {
         }
 
       query.select foreach (references(_, query.resource.s)) // 'query.resource.s' should really be an alias
-      OneToManyNode(entity, objectNode(entity, query.resource.s, query.project, None), query.select, attr1)
+      OneToManyNode(entity, objectNode(entity, query.resource.s, query.project, None), query.select, attr)
     }
 
     val root: ResultNode = resultNode(query)
@@ -179,8 +177,13 @@ class OQL(dm: String, val dataSource: OQLDataSource) {
 
     def writeSQL(node: Node): Unit = {
       node match {
-//        case OneToManyNode(entity, element, select, join) =>
-//          sqlBuilder.innerJoin(mtoEntity.table, mtoEntity.pk.get.column, entity.table, "books", column)
+        case OneToManyNode(entity, element, select, Attribute(name, column, pk, required, ManyToOneType(mtoEntity))) =>
+          sqlBuilder.innerJoin(mtoEntity.table, mtoEntity.pk.get.column, entity.table, "books", column)
+
+          if (select.isDefined)
+            sqlBuilder.select(select.get)
+
+          writeSQL(element)
         case ResultNode(entity, element, select) =>
           sqlBuilder.table(entity.table)
 
@@ -214,31 +217,31 @@ class OQL(dm: String, val dataSource: OQLDataSource) {
     execute { c =>
       val rs = c.query(sql)
 
-//      println(TextTable(rs.peer.asInstanceOf[ResultSet]))
+      println(TextTable(rs.peer.asInstanceOf[ResultSet]))
 
-      def build(node: Node): Any =
-        node match {
-          case ResultNode(entity, element, select) =>
-            val array = new ArrayBuffer[Any]
-
-            while (rs.next) array += build(element)
-
-            array.toList
-          case expr: ValueNode => rs get expr.idx
-          case obj @ ObjectNode(properties, join) =>
-            if (join.isDefined && rs.get(obj.idx) == null) null
-            else {
-              val map = new mutable.LinkedHashMap[String, Any]
-
-              for ((label, node) <- properties)
-                map(label) = build(node)
-
-              map to VectorMap
-            }
-          case SequenceNode(seq) => ni
-        }
-
-      build(root)
+//      def build(node: Node): Any =
+//        node match {
+//          case ResultNode(entity, element, select) =>
+//            val array = new ArrayBuffer[Any]
+//
+//            while (rs.next) array += build(element)
+//
+//            array.toList
+//          case expr: ValueNode => rs get expr.idx
+//          case obj @ ObjectNode(properties, join) =>
+//            if (join.isDefined && rs.get(obj.idx) == null) null
+//            else {
+//              val map = new mutable.LinkedHashMap[String, Any]
+//
+//              for ((label, node) <- properties)
+//                map(label) = build(node)
+//
+//              map to VectorMap
+//            }
+//          case SequenceNode(seq) => ni
+//        }
+//
+//      build(root)
     }
   }
 
