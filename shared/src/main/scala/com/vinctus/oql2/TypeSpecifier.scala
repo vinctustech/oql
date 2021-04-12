@@ -17,4 +17,4 @@ trait RelationalType extends TypeSpecifier { val isDataType = false; val isArray
 case class ManyToOneType(entityName: String, entity: Entity) extends RelationalType
 
 trait ArrayRelationalType extends RelationalType { override val isArrayType = true }
-case class OneToManyType(entityName: String, entity: Entity, attribute: Option[Attribute]) extends ArrayRelationalType
+case class OneToManyType(entityName: String, entity: Entity, attribute: Attribute) extends ArrayRelationalType

@@ -49,7 +49,7 @@ class OQL(dm: String, val dataSource: OQLDataSource) {
         p match {
           case AttributeOQLProject(label, id) =>
             entity.attributes get id.s match {
-              case Some(attr @ Attribute(name, column, pk, required, typ)) =>
+              case someAttr @ Some(attr @ Attribute(name, column, pk, required, typ)) =>
                 val l = label.map(_.s).getOrElse(name)
 
                 if (props contains l)
@@ -61,8 +61,9 @@ class OQL(dm: String, val dataSource: OQLDataSource) {
                     val alias = s"$table$$${id.s}"
 
                     objectNode(attr_entity, alias, List(StarOQLProject), Some((entity, alias, attr)))
-                  case OneToManyType(_, attr_entity, attribute) => arrayNode()
-                  case _                                        => ni
+                  case OneToManyType(_, attr_entity, attribute) =>
+                    arrayNode(OQLQuery(id, attr_entity, List(StarOQLProject), None, None, None, OQLRestrict(None, None)), someAttr)
+                  case _ => ni
                 }
               case None => problem(id.pos, s"unknown attribute '${id.s}'", oql)
             }
@@ -113,7 +114,8 @@ class OQL(dm: String, val dataSource: OQLDataSource) {
     def arrayNode(query: OQLQuery, join: Option[Attribute]): ArrayNode = {
       val (entity, attr) =
         join match {
-          case Some(_) => ni
+          case Some(Attribute(name, column, pk, required, typ)) =>
+            sys.error(s"$name, $typ")
           case None =>
             model.entities get query.resource.s match {
               case Some(e) => (e, None)

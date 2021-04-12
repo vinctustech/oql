@@ -3,6 +3,7 @@ package com.vinctus.oql2
 trait OQLAST
 
 case class OQLQuery(resource: Ident,
+                    entity: Entity,
                     project: List[OQLProject],
                     select: Option[OQLExpression],
                     group: Option[List[AttributeOQLExpression]],

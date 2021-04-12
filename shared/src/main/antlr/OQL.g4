@@ -18,7 +18,7 @@ command returns [OQLAST c]
 
 query returns [OQLQuery q]
   : entityName project select? group? order? restrict
-    { $q = new OQLQuery($entityName.id, OQLParse.project($project.ps), OQLParse.select($select.ctx), OQLParse.group($group.ctx), OQLParse.order($order.ctx), $restrict.r); }
+    { $q = new OQLQuery($entityName.id, null, OQLParse.project($project.ps), OQLParse.select($select.ctx), OQLParse.group($group.ctx), OQLParse.order($order.ctx), $restrict.r); }
   ;
 
 project returns [Buffer<OQLProject> ps]

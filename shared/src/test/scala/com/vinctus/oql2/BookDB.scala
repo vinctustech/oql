@@ -4,17 +4,17 @@ trait BookDB extends Test {
 
   val dm: String =
     """
-      |entity book {
-      | *id: bigint
-      |  title: text
-      |  year: int
-      |  author: author
-      |}
       |
       |entity author {
       | *id: bigint
       |  name: text
       |  books: [book]
+      |}
+      |entity book {
+      | *id: bigint
+      |  title: text
+      |  year: int
+      |  author: author
       |}
       |""".stripMargin
   val db = new OQL(dm, new H2_mem)

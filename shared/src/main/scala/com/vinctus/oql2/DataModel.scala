@@ -5,10 +5,14 @@ import scala.collection.mutable
 
 class DataModel(model: DMLModel, dml: String) {
 
+  private case class EntityInfo(entity: Entity,
+                                dmlattrs: Seq[DMLAttribute],
+                                attrs: mutable.LinkedHashMap[String, Attribute] = new mutable.LinkedHashMap)
+
   val entities: Map[String, Entity] = {
     error = false
 
-    val entities = new mutable.HashMap[String, (Entity, Seq[DMLAttribute])]
+    val entities = new mutable.LinkedHashMap[String, EntityInfo]
 
     def duplicates(ids: Seq[Ident], typ: String): Unit =
       ids.groupBy(_.s).toList filter { case (_, v) => v.length > 1 } flatMap { case (_, s) => s } match {
@@ -28,77 +32,80 @@ class DataModel(model: DMLModel, dml: String) {
         case _                   =>
       }
 
-      entities((entity.alias getOrElse entity.name).s) = (Entity((entity.alias getOrElse entity.name).s, entity.name.s), entity.attributes)
+      entities((entity.alias getOrElse entity.name).s) = EntityInfo(Entity((entity.alias getOrElse entity.name).s, entity.name.s), entity.attributes)
     }
 
-    for ((e, as) <- entities.values) {
+    for (EntityInfo(e, dmlas, as) <- entities.values) {
       var pk: Option[Attribute] = None
-      val attributes =
-        for (a <- as)
-          yield {
-            val typ =
-              a.typ match {
-                case DMLSimplePrimitiveType("text")                     => TextType
-                case DMLSimplePrimitiveType("integer" | "int" | "int4") => IntegerType
-                case DMLSimplePrimitiveType("bool" | "boolean")         => BooleanType
-                case DMLSimplePrimitiveType("bigint")                   => BigintType
-                case DMLParametricPrimitiveType("decimal", parameters)  => DecimalType(parameters.head.toInt, parameters.tail.head.toInt)
-                case DMLSimplePrimitiveType("date")                     => DateType
-                case DMLSimplePrimitiveType("float" | "float8")         => FloatType
-                case DMLSimplePrimitiveType("uuid")                     => UUIDType
-                case DMLSimplePrimitiveType("timestamp")                => TimestampType
-                case DMLManyToOneType(typ) =>
-                  entities get typ.s match {
-                    case Some((entity, _)) => ManyToOneType(typ.s, entity)
-                    case None              => printError(typ.pos, s"unknown entity: '${typ.s}'", dml)
-                  }
-                case DMLOneToManyType(typ, attr) =>
-                  entities get typ.s match {
-                    case Some((entity, _)) =>
-                      attr match {
-                        case Some(id) =>
-                          entity.attributes get id.s match {
-                            case Some(a) => OneToManyType(typ.s, entity, Some(a))
-                            case None    => problem(id.pos, s"entity '${entity.name}' does have attribute '${id.s}'", dml)
-                          }
-                        case None => OneToManyType(typ.s, entity, None)
-                      }
-                    case None => printError(typ.pos, s"unknown entity: '${typ.s}'", dml)
-                  }
+
+      for (a <- dmlas) {
+        val typ =
+          a.typ match {
+            case DMLSimplePrimitiveType("text")                     => TextType
+            case DMLSimplePrimitiveType("integer" | "int" | "int4") => IntegerType
+            case DMLSimplePrimitiveType("bool" | "boolean")         => BooleanType
+            case DMLSimplePrimitiveType("bigint")                   => BigintType
+            case DMLParametricPrimitiveType("decimal", parameters)  => DecimalType(parameters.head.toInt, parameters.tail.head.toInt)
+            case DMLSimplePrimitiveType("date")                     => DateType
+            case DMLSimplePrimitiveType("float" | "float8")         => FloatType
+            case DMLSimplePrimitiveType("uuid")                     => UUIDType
+            case DMLSimplePrimitiveType("timestamp")                => TimestampType
+            case DMLManyToOneType(typ) =>
+              entities get typ.s match {
+                case Some(EntityInfo(entity, _, _)) => ManyToOneType(typ.s, entity)
+                case None                           => printError(typ.pos, s"unknown entity: '${typ.s}'", dml)
               }
-
-            val attr = Attribute((a.alias getOrElse a.name).s, a.name.s, a.pk, a.required, typ)
-
-            if (a.pk) {
-              if (!typ.isDataType)
-                printError(typ.asInstanceOf[DMLEntityType].entity.pos, "primary key must have primitive type", dml)
-
-              if (a.required)
-                printError(a.name.pos, "primary keys are already \"NOT NULL\" (required) by definition and may not be marked as such", dml)
-
-              pk = Some(attr)
-            }
-
-            ((a.alias getOrElse a.name).s, attr)
+            case DMLOneToManyType(typ, attr) =>
+              entities get typ.s match {
+                case Some(EntityInfo(entity, _, _)) => OneToManyType(typ.s, entity, null)
+                case None                           => printError(typ.pos, s"unknown entity: '${typ.s}'", dml)
+              }
           }
 
-      e._attributes = attributes to VectorMap
+        val attr = Attribute((a.alias getOrElse a.name).s, a.name.s, a.pk, a.required, typ)
+
+        if (a.pk) {
+          if (!typ.isDataType)
+            printError(typ.asInstanceOf[DMLEntityType].entity.pos, "primary key must be a non-relational data type", dml)
+
+          if (a.required)
+            printError(a.name.pos, "primary keys are already \"NOT NULL\" (required) by definition and may not be marked as such", dml)
+
+          pk = Some(attr)
+        }
+
+        as((a.alias getOrElse a.name).s) = attr
+      }
+
       e._pk = pk
     }
 
-    for ((_, as) <- entities.values) {
-      as.foreach {
-        case DMLAttribute(_, _, DMLManyToOneType(entity), false, _) =>
-          if (entities(entity.s)._1.pk.isEmpty)
+//    attr match {
+//      case Some(id) =>
+//        entity.attributes get id.s match {
+//          case Some(a @ Attribute(_, _, _, _, ManyToOneType(_, `e`))) => OneToManyType(typ.s, entity, a)
+//          case Some(_)                                                => problem(id.pos, s"attribute '${id.s}' of entity '${entity.name}' does not have the correct type", dml)
+//          case None                                                   => problem(id.pos, s"entity '${entity.name}' does not have attribute '${id.s}'", dml)
+//        }
+//      case None => ni
+//    }
+
+    for (EntityInfo(e, dmlas, as) <- entities.values) {
+      dmlas.foreach {
+        case DMLAttribute(_, _, DMLManyToOneType(entity), _, _) =>
+          if (entities(entity.s).entity.pk.isEmpty)
             printError(entity.pos, s"target entity '${entity.s}' has no declared primary key", dml)
-        case _ =>
+        case DMLAttribute(_, _, DMLOneToManyType(typ, attr), _, _) =>
+        case DMLAttribute(_, _, _: DMLPrimitiveType, _, _)         =>
       }
+
+      e._attributes = as to VectorMap
     }
 
     if (error)
       sys.error("errors while creating data model")
 
-    entities.view.mapValues(_._1).toMap
+    entities.view.mapValues(_.entity) to VectorMap
   }
 
 }
