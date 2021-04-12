@@ -5,7 +5,7 @@ import xyz.hyperreal.table.TextTable
 
 import java.nio.file.{Files, Path, Paths}
 
-object Main extends App with MinimalEmployeeDB {
+object Main extends App with BookDB {
 
 //  val dm = Files.readString(Paths.get("test/books"))
 ////  val oql = new OQL(dm, new H2_mem("test"))
@@ -31,7 +31,7 @@ object Main extends App with MinimalEmployeeDB {
 //
 //  val q = oql.queryMany("book") //"book { title year author { name } } [year > 1880]"
 
-  println(test("employee { * manager }"))
+  println(test("author { books }"))
 
 //  oql.perform(c => println(TextTable(c.query(q).peer.asInstanceOf[ResultSet])))
 

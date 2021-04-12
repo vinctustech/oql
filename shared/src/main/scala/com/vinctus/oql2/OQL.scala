@@ -61,7 +61,8 @@ class OQL(dm: String, val dataSource: OQLDataSource) {
                     val alias = s"$table$$${id.s}"
 
                     objectNode(attr_entity, alias, List(StarOQLProject), Some((entity, alias, attr)))
-                  case _ => ni
+                  case OneToManyType(_, attr_entity, attribute) => arrayNode()
+                  case _                                        => ni
                 }
               case None => problem(id.pos, s"unknown attribute '${id.s}'", oql)
             }

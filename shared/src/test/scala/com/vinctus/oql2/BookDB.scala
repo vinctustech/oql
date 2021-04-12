@@ -14,6 +14,7 @@ trait BookDB extends Test {
       |entity author {
       | *id: bigint
       |  name: text
+      |  books: [book]
       |}
       |""".stripMargin
   val db = new OQL(dm, new H2_mem)

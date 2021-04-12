@@ -28,8 +28,7 @@ class DataModel(model: DMLModel, dml: String) {
         case _                   =>
       }
 
-      entities((entity.alias getOrElse entity.name).s) =
-        (new Entity((entity.alias getOrElse entity.name).s, entity.name.s), entity.attributes)
+      entities((entity.alias getOrElse entity.name).s) = (Entity((entity.alias getOrElse entity.name).s, entity.name.s), entity.attributes)
     }
 
     for ((e, as) <- entities.values) {
@@ -43,16 +42,28 @@ class DataModel(model: DMLModel, dml: String) {
                 case DMLSimplePrimitiveType("integer" | "int" | "int4") => IntegerType
                 case DMLSimplePrimitiveType("bool" | "boolean")         => BooleanType
                 case DMLSimplePrimitiveType("bigint")                   => BigintType
-                case DMLParametricPrimitiveType("decimal", parameters) =>
-                  DecimalType(parameters.head.toInt, parameters.tail.head.toInt)
-                case DMLSimplePrimitiveType("date")             => DateType
-                case DMLSimplePrimitiveType("float" | "float8") => FloatType
-                case DMLSimplePrimitiveType("uuid")             => UUIDType
-                case DMLSimplePrimitiveType("timestamp")        => TimestampType
+                case DMLParametricPrimitiveType("decimal", parameters)  => DecimalType(parameters.head.toInt, parameters.tail.head.toInt)
+                case DMLSimplePrimitiveType("date")                     => DateType
+                case DMLSimplePrimitiveType("float" | "float8")         => FloatType
+                case DMLSimplePrimitiveType("uuid")                     => UUIDType
+                case DMLSimplePrimitiveType("timestamp")                => TimestampType
                 case DMLManyToOneType(typ) =>
                   entities get typ.s match {
-                    case Some(t) => ManyToOneType(typ.s, t._1)
-                    case None    => printError(typ.pos, s"unknown entity: '${typ.s}'", dml)
+                    case Some((entity, _)) => ManyToOneType(typ.s, entity)
+                    case None              => printError(typ.pos, s"unknown entity: '${typ.s}'", dml)
+                  }
+                case DMLOneToManyType(typ, attr) =>
+                  entities get typ.s match {
+                    case Some((entity, _)) =>
+                      attr match {
+                        case Some(id) =>
+                          entity.attributes get id.s match {
+                            case Some(a) => OneToManyType(typ.s, entity, Some(a))
+                            case None    => problem(id.pos, s"entity '${entity.name}' does have attribute '${id.s}'", dml)
+                          }
+                        case None => OneToManyType(typ.s, entity, None)
+                      }
+                    case None => printError(typ.pos, s"unknown entity: '${typ.s}'", dml)
                   }
               }
 
@@ -63,10 +74,7 @@ class DataModel(model: DMLModel, dml: String) {
                 printError(typ.asInstanceOf[DMLEntityType].entity.pos, "primary key must have primitive type", dml)
 
               if (a.required)
-                printError(
-                  a.name.pos,
-                  "primary keys are already \"NOT NULL\" (required) by definition and may not be marked as such",
-                  dml)
+                printError(a.name.pos, "primary keys are already \"NOT NULL\" (required) by definition and may not be marked as such", dml)
 
               pk = Some(attr)
             }
