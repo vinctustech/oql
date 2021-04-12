@@ -14,7 +14,7 @@ case object UUIDType extends DataType
 case object TimestampType extends DataType
 
 trait RelationalType extends TypeSpecifier { val isDataType = false; val isArrayType = false }
-case class ManyToOneType(entityName: String, entity: Entity) extends RelationalType
+case class ManyToOneType(entity: Entity) extends RelationalType
 
 trait ArrayRelationalType extends RelationalType { override val isArrayType = true }
-case class OneToManyType(entityName: String, entity: Entity, attribute: Attribute) extends ArrayRelationalType
+case class OneToManyType(entity: Entity, attribute: Attribute) extends ArrayRelationalType

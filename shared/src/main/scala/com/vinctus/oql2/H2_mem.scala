@@ -11,16 +11,16 @@ class H2_mem extends JDBCDataSource("org.h2.Driver") {
 
   def mapType(typ: TypeSpecifier): String =
     typ match {
-      case TextType                 => "VARCHAR(255)"
-      case IntegerType              => "INT"
-      case BooleanType              => "BOOLEAN"
-      case BigintType               => "BIGINT"
-      case DecimalType(p, s)        => s"DECIMAL($p, $s)"
-      case DateType                 => "DATE"
-      case FloatType                => "DOUBLE"
-      case UUIDType                 => "UUID"
-      case TimestampType            => "TIMESTAMP"
-      case ManyToOneType(_, entity) => mapType(entity.pk.get.typ)
+      case TextType              => "VARCHAR(255)"
+      case IntegerType           => "INT"
+      case BooleanType           => "BOOLEAN"
+      case BigintType            => "BIGINT"
+      case DecimalType(p, s)     => s"DECIMAL($p, $s)"
+      case DateType              => "DATE"
+      case FloatType             => "DOUBLE"
+      case UUIDType              => "UUID"
+      case TimestampType         => "TIMESTAMP"
+      case ManyToOneType(entity) => mapType(entity.pk.get.typ)
     }
 
   def mapPKType(typ: TypeSpecifier): String =

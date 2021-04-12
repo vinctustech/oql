@@ -52,12 +52,12 @@ class DataModel(model: DMLModel, dml: String) {
             case DMLSimplePrimitiveType("timestamp")                => TimestampType
             case DMLManyToOneType(typ) =>
               entities get typ.s match {
-                case Some(EntityInfo(entity, _, _)) => ManyToOneType(typ.s, entity)
+                case Some(EntityInfo(entity, _, _)) => ManyToOneType(entity)
                 case None                           => printError(typ.pos, s"unknown entity: '${typ.s}'", dml)
               }
             case DMLOneToManyType(typ, attr) =>
               entities get typ.s match {
-                case Some(EntityInfo(entity, _, _)) => OneToManyType(typ.s, entity, null)
+                case Some(EntityInfo(entity, _, _)) => OneToManyType(entity, null)
                 case None                           => printError(typ.pos, s"unknown entity: '${typ.s}'", dml)
               }
           }
@@ -91,15 +91,15 @@ class DataModel(model: DMLModel, dml: String) {
             attr match {
               case Some(id) =>
                 entityinfo.attrs get id.s match {
-                  case Some(a @ Attribute(_, _, _, _, ManyToOneType(_, `e`))) => OneToManyType(typ.s, entityinfo.entity, a)
-                  case Some(_)                                                => printError(id.pos, s"attribute '${id.s}' of entity '${entityinfo.entity.name}' does not have the correct type", dml)
-                  case None                                                   => printError(id.pos, s"entity '${entityinfo.entity.name}' does not have attribute '${id.s}'", dml)
+                  case Some(a @ Attribute(_, _, _, _, ManyToOneType(`e`))) => OneToManyType(entityinfo.entity, a)
+                  case Some(_)                                             => printError(id.pos, s"attribute '${id.s}' of entity '${entityinfo.entity.name}' does not have the correct type", dml)
+                  case None                                                => printError(id.pos, s"entity '${entityinfo.entity.name}' does not have attribute '${id.s}'", dml)
                 }
               case None =>
                 val attrs =
                   entityinfo.attrs.values.filter {
-                    case Attribute(_, _, _, _, ManyToOneType(_, `e`)) => true
-                    case _                                            => false
+                    case Attribute(_, _, _, _, ManyToOneType(`e`)) => true
+                    case _                                         => false
                   }
 
                 if (attrs.size > 1)
@@ -108,7 +108,7 @@ class DataModel(model: DMLModel, dml: String) {
                 if (attrs.size < 1)
                   printError(typ.pos, s"entity '${entityinfo.entity.name}' has no attributes of type '${typ.s}'", dml)
 
-                OneToManyType(typ.s, entityinfo.entity, attrs.head)
+                OneToManyType(entityinfo.entity, attrs.head)
             }
 
           val name = (a.alias getOrElse a.name).s

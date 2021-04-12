@@ -57,11 +57,11 @@ class OQL(dm: String, val dataSource: OQLDataSource) {
 
                 props(l) = typ match {
                   case _: DataType => ExpressionNode(AttributeOQLExpression(List(Ident(name, null)), entity, table, attr))
-                  case ManyToOneType(_, attr_entity) =>
+                  case ManyToOneType(attr_entity) =>
                     val alias = s"$table$$${id.s}"
 
                     objectNode(attr_entity, alias, List(StarOQLProject), Some((entity, alias, attr)))
-                  case OneToManyType(_, attr_entity, attribute) =>
+                  case OneToManyType(attr_entity, attribute) =>
                     arrayNode(OQLQuery(id, attr_entity, List(StarOQLProject), None, None, None, OQLRestrict(None, None)), someAttr)
                   case _ => ni
                 }
@@ -78,7 +78,7 @@ class OQL(dm: String, val dataSource: OQLDataSource) {
                   if !typ.isArrayType &&
                     (query.select.isDefined || query.group.isDefined || query.order.isDefined || query.restrict != OQLRestrict(None, None)) =>
                 problem(query.resource.pos, s"attribute '${query.resource.s}' is not an array type", oql)
-              case Some(attr @ Attribute(name, column, pk, required, ManyToOneType(entityName, attr_entity))) =>
+              case Some(attr @ Attribute(name, column, pk, required, ManyToOneType(attr_entity))) =>
                 val l = label.map(_.s).getOrElse(name)
 
                 if (props contains l)
@@ -86,7 +86,7 @@ class OQL(dm: String, val dataSource: OQLDataSource) {
 
                 val alias = s"$table$$${query.resource.s}"
 
-                props(l) = objectNode(attr_entity, alias, query.project, Some((entity, alias, attr))) //ExpressionNode(AttributeOQLExpression(List(Ident(name, null)), entity, column))
+                props(l) = objectNode(attr_entity, alias, query.project, Some((entity, alias, attr)))
               // case one to many
               // case many to many
               case None => problem(query.resource.pos, s"unknown attribute '${query.resource.s}'", oql)
@@ -114,8 +114,10 @@ class OQL(dm: String, val dataSource: OQLDataSource) {
     def arrayNode(query: OQLQuery, join: Option[Attribute]): ArrayNode = {
       val (entity, attr) =
         join match {
-          case Some(Attribute(name, column, pk, required, typ)) =>
-            sys.error(s"$name, $typ")
+          case Some(a @ Attribute(name, column, pk, required, OneToManyType(entity, attribute))) =>
+            println(query)
+            println(a)
+            (entity, Some(attribute))
           case None =>
             model.entities get query.resource.s match {
               case Some(e) => (e, None)
@@ -141,33 +143,37 @@ class OQL(dm: String, val dataSource: OQLDataSource) {
           case _ =>
         }
 
-      query.select foreach (references(_, query.resource.s)) // todo: don't know if query.resource.s is right
-      ArrayNode(entity, objectNode(entity, query.resource.s, query.project, None), query.select, join)
+      query.select foreach (references(_, query.resource.s)) // 'query.resource.s' should really be an alias
+      ArrayNode(entity, objectNode(entity, query.resource.s, query.project, None), query.select, attr)
     }
 
     val node: Node = arrayNode(query, None)
 
     val sqlBuilder = new SQLQueryBuilder
 
-    def sqlQuery(node: Node): Unit = {
+    def writeSQL(node: Node): Unit = {
       node match {
         case ArrayNode(entity, element, select, join) =>
-          sqlBuilder.table(entity.table)
+          join match {
+            case Some(a @ Attribute(name, column, pk, required, ManyToOneType(mtoEntity))) =>
+              sqlBuilder.innerJoin(mtoEntity.table, mtoEntity.pk.get.column, entity.table, "books", column)
+            case None => sqlBuilder.table(entity.table)
+          }
 
           if (select.isDefined)
             sqlBuilder.select(select.get)
 
-          sqlQuery(element)
+          writeSQL(element)
         case e @ ExpressionNode(expr) => e.idx = sqlBuilder.project(expr)
         case obj @ ObjectNode(properties, join) =>
           join match {
             case None =>
-            case Some((left, alias, attr @ Attribute(name, column, _, _, ManyToOneType(_, right)))) =>
+            case Some((left, alias, attr @ Attribute(name, column, _, _, ManyToOneType(right)))) =>
               obj.idx = sqlBuilder.project(AttributeOQLExpression(List(Ident(name, null)), null, left.table, attr))
               sqlBuilder.leftJoin(left.table, column, right.table, alias, right.pk.get.column)
           }
 
-          properties foreach { case (_, e) => sqlQuery(e) }
+          properties foreach { case (_, e) => writeSQL(e) }
         case SequenceNode(seq) =>
         case _                 =>
       }
@@ -175,7 +181,7 @@ class OQL(dm: String, val dataSource: OQLDataSource) {
 
 //    println(prettyPrint(node))
 
-    sqlQuery(node)
+    writeSQL(node)
 
     val sql = sqlBuilder.toString
 
@@ -184,31 +190,31 @@ class OQL(dm: String, val dataSource: OQLDataSource) {
     execute { c =>
       val rs = c.query(sql)
 
-//      println(TextTable(rs.peer.asInstanceOf[ResultSet]))
+      println(TextTable(rs.peer.asInstanceOf[ResultSet]))
 
-      def build(node: Node): Any =
-        node match {
-          case ArrayNode(entity, element, select, join) =>
-            val array = new ArrayBuffer[Any]
-
-            while (rs.next) array += build(element)
-
-            array.toList
-          case expr: ExpressionNode => rs get expr.idx
-          case obj @ ObjectNode(properties, join) =>
-            if (join.isDefined && rs.get(obj.idx) == null) null
-            else {
-              val map = new mutable.LinkedHashMap[String, Any]
-
-              for ((label, node) <- properties)
-                map(label) = build(node)
-
-              map to VectorMap
-            }
-          case SequenceNode(seq) => ni
-        }
-
-      build(node)
+//      def build(node: Node): Any =
+//        node match {
+//          case ArrayNode(entity, element, select, join) =>
+//            val array = new ArrayBuffer[Any]
+//
+//            while (rs.next) array += build(element)
+//
+//            array.toList
+//          case expr: ExpressionNode => rs get expr.idx
+//          case obj @ ObjectNode(properties, join) =>
+//            if (join.isDefined && rs.get(obj.idx) == null) null
+//            else {
+//              val map = new mutable.LinkedHashMap[String, Any]
+//
+//              for ((label, node) <- properties)
+//                map(label) = build(node)
+//
+//              map to VectorMap
+//            }
+//          case SequenceNode(seq) => ni
+//        }
+//
+//      build(node)
     }
   }
 
