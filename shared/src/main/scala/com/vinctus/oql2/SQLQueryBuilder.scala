@@ -109,11 +109,8 @@ class SQLQueryBuilder(margin: Int = 0) {
     out()
 
     where match {
-      case Some(expr) =>
-        in()
-        line(s"WHERE ${expression(expr)}")
-        out()
-      case None =>
+      case Some(expr) => line(s"WHERE ${expression(expr)}")
+      case None       =>
     }
 
     out()

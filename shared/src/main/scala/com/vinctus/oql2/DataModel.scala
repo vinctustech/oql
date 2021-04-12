@@ -80,23 +80,41 @@ class DataModel(model: DMLModel, dml: String) {
       e._pk = pk
     }
 
-//    attr match {
-//      case Some(id) =>
-//        entity.attributes get id.s match {
-//          case Some(a @ Attribute(_, _, _, _, ManyToOneType(_, `e`))) => OneToManyType(typ.s, entity, a)
-//          case Some(_)                                                => problem(id.pos, s"attribute '${id.s}' of entity '${entity.name}' does not have the correct type", dml)
-//          case None                                                   => problem(id.pos, s"entity '${entity.name}' does not have attribute '${id.s}'", dml)
-//        }
-//      case None => ni
-//    }
-
     for (EntityInfo(e, dmlas, as) <- entities.values) {
       dmlas.foreach {
         case DMLAttribute(_, _, DMLManyToOneType(entity), _, _) =>
           if (entities(entity.s).entity.pk.isEmpty)
             printError(entity.pos, s"target entity '${entity.s}' has no declared primary key", dml)
-        case DMLAttribute(_, _, DMLOneToManyType(typ, attr), _, _) =>
-        case DMLAttribute(_, _, _: DMLPrimitiveType, _, _)         =>
+        case a @ DMLAttribute(_, _, DMLOneToManyType(typ, attr), _, _) =>
+          val entityinfo = entities(typ.s)
+          val newtyp =
+            attr match {
+              case Some(id) =>
+                entityinfo.attrs get id.s match {
+                  case Some(a @ Attribute(_, _, _, _, ManyToOneType(_, `e`))) => OneToManyType(typ.s, entityinfo.entity, a)
+                  case Some(_)                                                => printError(id.pos, s"attribute '${id.s}' of entity '${entityinfo.entity.name}' does not have the correct type", dml)
+                  case None                                                   => printError(id.pos, s"entity '${entityinfo.entity.name}' does not have attribute '${id.s}'", dml)
+                }
+              case None =>
+                val attrs =
+                  entityinfo.attrs.values.filter {
+                    case Attribute(_, _, _, _, ManyToOneType(_, `e`)) => true
+                    case _                                            => false
+                  }
+
+                if (attrs.size > 1)
+                  printError(typ.pos, s"entity '${entityinfo.entity.name}' has more than one attribute of type '${typ.s}'", dml)
+
+                if (attrs.size < 1)
+                  printError(typ.pos, s"entity '${entityinfo.entity.name}' has no attributes of type '${typ.s}'", dml)
+
+                OneToManyType(typ.s, entityinfo.entity, attrs.head)
+            }
+
+          val name = (a.alias getOrElse a.name).s
+
+          as(name) = as(name).copy(typ = newtyp)
+        case DMLAttribute(_, _, _: DMLPrimitiveType, _, _) =>
       }
 
       e._attributes = as to VectorMap
