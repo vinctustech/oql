@@ -223,7 +223,7 @@ class OQL(dm: String, val dataSource: OQLDataSource) {
     execute { c =>
       val rs = c.query(sql)
 
-      println(TextTable(rs.peer.asInstanceOf[ResultSet]))
+//      println(TextTable(rs.peer.asInstanceOf[ResultSet]))
 
       def build(node: Node): Any =
         node match {
@@ -247,7 +247,7 @@ class OQL(dm: String, val dataSource: OQLDataSource) {
           case SequenceNode(seq) => ni
         }
 
-//      build(root)
+      build(root)
     }
   }
 

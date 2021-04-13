@@ -1,5 +1,3 @@
-import sbt.Keys.libraryDependencies
-
 lazy val oql2 = crossProject( /*JSPlatform,*/ JVMPlatform /*, NativePlatform*/ )
   .in(file("."))
   .settings(
@@ -30,6 +28,7 @@ lazy val oql2 = crossProject( /*JSPlatform,*/ JVMPlatform /*, NativePlatform*/ )
   .jvmSettings(
     libraryDependencies += "org.scala-js" %% "scalajs-stubs" % "1.0.0" % "provided",
     libraryDependencies += "com.h2database" % "h2" % "1.4.200",
+    libraryDependencies += "org.postgresql" % "postgresql" % "42.2.19",
     libraryDependencies ++= Seq(
       "org.antlr" % "antlr4-runtime" % "4.7.2",
       "org.antlr" % "ST4" % "4.3.1"
