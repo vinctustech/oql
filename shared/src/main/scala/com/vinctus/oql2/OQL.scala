@@ -35,6 +35,21 @@ class OQL(dm: String, val dataSource: OQLDataSource) {
 
   def entity(name: String): Entity = model.entities(name)
 
+  private def attributes(entity: Entity, expr: OQLExpression): Unit =
+    expr match {
+      case InfixOQLExpression(left, _, right) =>
+        attributes(entity, left)
+        attributes(entity, right)
+      case attrexp @ AttributeOQLExpression(ids, _, _) =>
+        entity.attributes get ids.head.s match {
+          case Some(attr) =>
+            attrexp.entity = entity
+            attrexp.attr = attr
+          case None => problem(ids.head.pos, s"entity '${entity.name}' does not have attribute '${ids.head.s}'", oql)
+        }
+      case _ =>
+    }
+
   def queryMany(oql: String, parameters: Map[String, Any] = Map()) = { //todo: async
     val query =
       OQLParse(oql) match {
@@ -56,7 +71,8 @@ class OQL(dm: String, val dataSource: OQLDataSource) {
       val subtracts = new mutable.HashSet[String]
 
       query.project foreach {
-        case p @ QueryOQLProject(label, _) => map(label) = p
+        case p @ QueryOQLProject(label, _) =>
+          map(label) = p
         case StarOQLProject =>
           entity.attributes.values foreach {
             case attr @ Attribute(name, column, pk, required, typ) if typ.isDataType =>
@@ -73,83 +89,29 @@ class OQL(dm: String, val dataSource: OQLDataSource) {
             map -= id.s
           else
             problem(id.pos, s"attribute '${id.s}' was not added with '*'", oql)
-        case e @ ExpressionOQLProject(label, expr) =>
+        case expProj @ ExpressionOQLProject(label, expr) =>
           if (map contains label.s)
             problem(label.pos, s"attribute '${label.s}' has already been added", oql)
 
-          map(label.s) = {
-            expr match {
-              case a @ AttributeOQLExpression(List(id), _, _) =>
-                entity.attributes get id.s match {
-                  case Some(attr @ Attribute(name, _, _, _, _: DataType)) =>
-                    a.entity = entity
-                    a.attr = attr
-                    e
-                  case Some(attr @ Attribute(name, _, _, _, ManyToOneType(mtoEntity))) =>
-                    QueryOQLProject(label, OQLQuery(id, mtoEntity, attr, List(StarOQLProject), None, None, None, OQLRestrict(None, None)))
-                  // todo: array type cases
-                  case None => problem(id.pos, s"unknown attribute '${id.s}'", oql)
-                }
-              case _ => e
-            }
+          map(label.s) = expr match {
+            case a @ AttributeOQLExpression(List(id), _, _) =>
+              entity.attributes get id.s match {
+                case Some(attr @ Attribute(_, _, _, _, _: DataType)) =>
+                  a.entity = entity
+                  a.attr = attr
+                  expProj
+                case Some(attr @ Attribute(_, _, _, _, ManyToOneType(mtoEntity))) =>
+                  QueryOQLProject(label, OQLQuery(id, mtoEntity, attr, List(StarOQLProject), None, None, None, OQLRestrict(None, None)))
+                // todo: array type cases
+                case None => problem(id.pos, s"unknown attribute '${id.s}'", oql)
+              }
+            case _ =>
+              attributes(entity, expr) // look up all attributes and references
+              expProj
           }
       }
 
       map.values.toList
-    }
-
-    def objectNode(entity: Entity, table: String, project: List[OQLProject], join: Option[(Entity, String, Attribute)]): ObjectNode = {
-      val props = new mutable.LinkedHashMap[String, Node]
-
-      for (p <- project)
-        p match {
-          case AttributeOQLProject(label, id) =>
-            entity.attributes get id.s match {
-              case Some(attr @ Attribute(name, column, pk, required, typ)) =>
-                val l = label.map(_.s).getOrElse(name)
-
-                if (props contains l)
-                  problem(label.getOrElse(id).pos, s"attribute '$l' has already been added", oql)
-
-                props(l) = typ match {
-                  case _: DataType => ValueNode(AttributeOQLExpression(List(Ident(name, null)), entity, table, attr))
-                  case ManyToOneType(attr_entity) =>
-                    val alias = s"$table$$${id.s}"
-
-                    objectNode(attr_entity, alias, List(StarOQLProject), Some((entity, alias, attr)))
-                  case OneToManyType(attr_entity, attribute) =>
-                    oneToManyNode(OQLQuery(id, attr_entity, List(StarOQLProject), None, None, None, OQLRestrict(None, None)), attribute)
-                  case _ => ni
-                }
-              case None => problem(id.pos, s"unknown attribute '${id.s}'", oql)
-            }
-          case QueryOQLProject(label, query) =>
-            entity.attributes get query.resource.s match {
-              case Some(Attribute(name, column, pk, required, typ))
-                  if !typ.isArrayType &&
-                    (query.select.isDefined || query.group.isDefined || query.order.isDefined || query.restrict != OQLRestrict(None, None)) =>
-                problem(query.resource.pos, s"attribute '${query.resource.s}' is not an array type", oql)
-              case Some(attr @ Attribute(name, column, pk, required, typ)) =>
-                val l = label.map(_.s).getOrElse(name)
-
-                if (props contains l)
-                  problem(label.getOrElse(query.resource).pos, s"attribute '$l' has already been added", oql)
-
-                props(l) = typ match {
-                  case ManyToOneType(attr_entity) =>
-                    val alias = s"$table$$${query.resource.s}"
-
-                    objectNode(attr_entity, alias, query.project, Some((entity, alias, attr)))
-                  case OneToManyType(attr_entity, attribute) =>
-                    oneToManyNode(query.copy(entity = attr_entity), attribute)
-                }
-              // case one to many
-              // case many to many
-              case None => problem(query.resource.pos, s"unknown attribute '${query.resource.s}'", oql)
-            }
-        }
-
-      ObjectNode(props.toList, join)
     }
 
     def resultNode(query: OQLQuery): ResultNode = {
@@ -159,53 +121,8 @@ class OQL(dm: String, val dataSource: OQLDataSource) {
           case None    => problem(query.resource.pos, s"unknown entity '${query.resource.s}'", oql)
         }
 
-      // lookup columns for attributes
-
-      def references(expr: OQLExpression, table: String): Unit =
-        expr match {
-          case InfixOQLExpression(left, _, right) =>
-            references(left, table)
-            references(right, table)
-          case a @ AttributeOQLExpression(ids, _, _, _) =>
-            entity.attributes get ids.head.s match {
-              case Some(attr) =>
-                a.entity = entity
-                a.table = table
-                a.attr = attr
-              case None => problem(ids.head.pos, s"entity '${entity.name}' does not have attribute '${ids.head.s}'", oql)
-            }
-          case _ =>
-        }
-
       query.select foreach (references(_, query.resource.s)) // 'query.resource.s' should really be an alias
       ResultNode(entity, objectNode(entity, query.resource.s, query.project, None), query.select)
-    }
-
-    def oneToManyNode(query: OQLQuery, attr: Attribute): OneToManyNode = {
-      val entity = query.entity
-
-      println(query)
-      println(attr)
-      // lookup columns for attributes
-
-      def references(expr: OQLExpression, table: String): Unit =
-        expr match {
-          case InfixOQLExpression(left, _, right) =>
-            references(left, table)
-            references(right, table)
-          case a @ AttributeOQLExpression(ids, _, _, _) =>
-            entity.attributes get ids.head.s match {
-              case Some(attr) =>
-                a.entity = entity
-                a.table = table
-                a.attr = attr
-              case None => problem(ids.head.pos, s"entity '${entity.name}' does not have attribute '${ids.head.s}'", oql)
-            }
-          case _ =>
-        }
-
-      query.select foreach (references(_, query.resource.s)) // 'query.resource.s' should really be an alias
-      OneToManyNode(entity, query.resource.s, objectNode(entity, query.resource.s, query.project, None), query.select, attr)
     }
 
     val root: ResultNode = resultNode(query)
@@ -265,7 +182,7 @@ class OQL(dm: String, val dataSource: OQLDataSource) {
 
             array.toList
           case expr: ValueNode => rs get expr.idx
-          case obj @ ObjectNode(properties, join) =>
+          case obj @ ObjectNode(properties) =>
             if (join.isDefined && rs.get(obj.idx) == null) null
             else {
               val map = new mutable.LinkedHashMap[String, Any]
@@ -275,7 +192,7 @@ class OQL(dm: String, val dataSource: OQLDataSource) {
 
               map to VectorMap
             }
-          case SequenceNode(seq) => ni
+//          case SequenceNode(seq) => ni
         }
 
       build(root)
@@ -288,7 +205,7 @@ trait Node
 
 case class ResultNode(entity: Entity, element: Node, select: Option[OQLExpression]) extends Node
 
-case class ManyToOneNode(table: String, column: String, join: String, pk: String, element: Node) extends Node
+case class ManyToOneNode(entity: Entity, attr: Attribute, element: Node) extends Node
 
 //case class OneToManyNode(entity: Entity, attribute: Attribute, element: Node) extends Node { var idx: Int = _ }
 
