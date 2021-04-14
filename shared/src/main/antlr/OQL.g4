@@ -18,7 +18,7 @@ command returns [OQLAST c]
 
 query returns [OQLQuery q]
   : entityName project select? group? order? restrict
-    { $q = new OQLQuery($entityName.id, null, OQLParse.project($project.ps), OQLParse.select($select.ctx), OQLParse.group($group.ctx), OQLParse.order($order.ctx), $restrict.r); }
+    { $q = new OQLQuery($entityName.id, null, null, OQLParse.project($project.ps), OQLParse.select($select.ctx), OQLParse.group($group.ctx), OQLParse.order($order.ctx), $restrict.r); }
   ;
 
 project returns [Buffer<OQLProject> ps]
@@ -52,9 +52,9 @@ attributeProject returns [OQLProject p]
   | label '(' expression ')'
     { $p = new ExpressionOQLProject($label.id, $expression.e); }
   | label? attributeName
-    { $p = new ExpressionOQLProject(OQLParse.label($label.ctx, $attributeName.id), AttributeOQLExpression(new ListBuffer<Ident>().addOne($attributeName.id).toList(), null, null, null)); }
+    { $p = new ExpressionOQLProject(OQLParse.label($label.ctx, $attributeName.id), new AttributeOQLExpression(new ListBuffer<Ident>().addOne($attributeName.id).toList(), null, null)); }
   | label? '&' attributeName
-    { $p = new ExpressionOQLProject(OQLParse.label($label.ctx, $identifier.id), new ReferenceOQLExpression(new ListBuffer<Ident>().addOne($attributeName.id).toList()); }
+    { $p = new ExpressionOQLProject(OQLParse.label($label.ctx, $attributeName.id), new ReferenceOQLExpression(new ListBuffer<Ident>().addOne($attributeName.id).toList())); }
   | label? parameter
     { $p = new ExpressionOQLProject(OQLParse.label($label.ctx, $parameter.e), $parameter.e); }
   | label? query
@@ -138,7 +138,7 @@ logicalPrimary returns [OQLExpression e]
 
 qualifiedAttributeName returns [AttributeOQLExpression e]
   : identifiers
-    { $e = new AttributeOQLExpression($identifiers.ids.toList(), null, null, null); }
+    { $e = new AttributeOQLExpression($identifiers.ids.toList(), null, null); }
   ;
 
 identifiers returns [ListBuffer<Ident> ids]

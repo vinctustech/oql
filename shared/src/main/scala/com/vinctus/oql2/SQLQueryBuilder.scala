@@ -11,7 +11,7 @@ class SQLQueryBuilder(margin: Int = 0) {
   private val innerJoins = new ArrayBuffer[Join]
   private val leftJoins = new ArrayBuffer[Join]
   private var idx = 0
-  private val projects = new ArrayBuffer[OQLExpression]
+  private val projects = new ArrayBuffer[String]
   private var where: Option[OQLExpression] = None
 
   def table(name: String): Unit = {
@@ -39,23 +39,23 @@ class SQLQueryBuilder(margin: Int = 0) {
 
 //  def ref(tab: String, col: String): String = s"$tab.$col"
 
-  def project(expr: OQLExpression): Int = {
-    projects += expr
+  def project(expr: OQLExpression, table: String): Int = {
+    projects += expression(expr, table)
     idx += 1
     idx
   }
 
-  def expression(expr: OQLExpression): String =
+  def expression(expr: OQLExpression, table: String): String =
     expr match {
-      case InfixOQLExpression(left, op @ ("*" | "/"), right) => s"${expression(left)}$op${expression(right)}"
-      case InfixOQLExpression(left, op, right)               => s"${expression(left)} $op ${expression(right)}"
-      case PrefixOQLExpression("-", expr)                    => s"-${expression(expr)}"
-      case PrefixOQLExpression(op, expr)                     => s"$op ${expression(expr)}"
-      case PostfixOQLExpression(expr, op)                    => s"${expression(expr)} $op"
+      case InfixOQLExpression(left, op @ ("*" | "/"), right) => s"${expression(left, table)}$op${expression(right, table)}"
+      case InfixOQLExpression(left, op, right)               => s"${expression(left, table)} $op ${expression(right, table)}"
+      case PrefixOQLExpression("-", expr)                    => s"-${expression(expr, table)}"
+      case PrefixOQLExpression(op, expr)                     => s"$op ${expression(expr, table)}"
+      case PostfixOQLExpression(expr, op)                    => s"${expression(expr, table)} $op"
       case GroupingOQLExpression(expr)                       => s"($expr)"
       case NumberOQLExpression(n, pos)                       => n.toString
       case LiteralOQLExpression(s, pos)                      => s"'${quote(s)}'"
-      case AttributeOQLExpression(ids, _, table, attr)       => s"$table.${attr.column}"
+      case AttributeOQLExpression(ids, _, attr)              => s"$table.${attr.column}"
     }
 
   def leftJoin(t1: String, c1: String, t2: String, alias: String, c2: String): SQLQueryBuilder = {
@@ -86,13 +86,13 @@ class SQLQueryBuilder(margin: Int = 0) {
 
     def out(): Unit = indent -= INDENT
 
-    line(s"SELECT ${expression(projects.head)}${if (projects.tail.nonEmpty) "," else ""}")
+    line(s"SELECT ${projects.head}${if (projects.tail.nonEmpty) "," else ""}")
     indent += 7
 
     val plen = projects.tail.length
 
     for ((p, i) <- projects.tail.zipWithIndex)
-      line(s"${expression(p)}${if (i < plen - 1) "," else ""}")
+      line(s"$p${if (i < plen - 1) "," else ""}")
 
     indent -= 7
     in()
@@ -109,7 +109,7 @@ class SQLQueryBuilder(margin: Int = 0) {
     out()
 
     where match {
-      case Some(expr) => line(s"WHERE ${expression(expr)}")
+      case Some(expr) => line(s"WHERE $expr")
       case None       =>
     }
 

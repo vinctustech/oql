@@ -1,6 +1,7 @@
 package com.vinctus.oql2
 
 import com.sun.org.apache.xpath.internal.ExpressionNode
+import com.vinctus.oql2.StarOQLProject.label
 import sun.jvm.hotspot.HelloWorld.e
 
 import scala.collection.mutable
@@ -35,11 +36,11 @@ class OQL(dm: String, val dataSource: OQLDataSource) {
 
   def entity(name: String): Entity = model.entities(name)
 
-  private def attributes(entity: Entity, expr: OQLExpression): Unit =
+  private def attributes(entity: Entity, expr: OQLExpression, oql: String): Unit =
     expr match {
       case InfixOQLExpression(left, _, right) =>
-        attributes(entity, left)
-        attributes(entity, right)
+        attributes(entity, left, oql)
+        attributes(entity, right, oql)
       case attrexp @ AttributeOQLExpression(ids, _, _) =>
         entity.attributes get ids.head.s match {
           case Some(attr) =>
@@ -50,6 +51,73 @@ class OQL(dm: String, val dataSource: OQLDataSource) {
       case _ =>
     }
 
+  private def queryProjects(outer: Option[Entity], query: OQLQuery, oql: String): Unit = {
+    val map = new mutable.LinkedHashMap[String, OQLProject]
+    val entity =
+      if (outer.isDefined) outer.get
+      else
+        model.entities get query.resource.s match {
+          case Some(e) =>
+            query.entity = e
+            e
+          case None => problem(query.resource.pos, s"unknown entity '${query.resource.s}'", oql)
+        }
+    val subtracts = new mutable.HashSet[String]
+
+    query.project foreach {
+      case p @ QueryOQLProject(label, query) =>
+        queryProjects(Some(entity), query, oql)
+        query.select foreach (attributes(entity, _, oql))
+        map(label.s) = p
+      case StarOQLProject =>
+        entity.attributes.values foreach {
+          case attr @ Attribute(name, column, pk, required, typ) if typ.isDataType =>
+            map(name) = ExpressionOQLProject(Ident(name), AttributeOQLExpression(List(Ident(name)), entity, attr))
+          case _ => // non-datatype attributes don't get included with '*'
+        }
+      case SubtractOQLProject(id) =>
+        if (subtracts(id.s))
+          problem(id.pos, s"attribute '${id.s}' already removed", oql)
+
+        subtracts += id.s
+
+        if (map contains id.s)
+          map -= id.s
+        else
+          problem(id.pos, s"attribute '${id.s}' not added with '*'", oql)
+      case expProj @ ExpressionOQLProject(label, expr) =>
+        if (map contains label.s)
+          problem(label.pos, s"duplicate attribute label '${label.s}'", oql)
+
+        map(label.s) = expr match {
+          case a @ AttributeOQLExpression(List(id), _, _) =>
+            entity.attributes get id.s match {
+              case Some(attr @ Attribute(_, _, _, _, _: DataType)) =>
+                a.entity = entity
+                a.attr = attr
+                expProj
+              case Some(attr @ Attribute(_, _, _, _, ManyToOneType(mtoEntity))) =>
+                QueryOQLProject(label, OQLQuery(id, mtoEntity, attr, List(StarOQLProject), None, None, None, OQLRestrict(None, None)))
+              // todo: array type cases
+              case None => problem(id.pos, s"unknown attribute '${id.s}'", oql)
+            }
+          case _ =>
+            attributes(entity, expr, oql) // look up all attributes and references
+            expProj
+        }
+    }
+
+    query.project = map.values.toList
+  }
+
+  private def objectNode(projects: List[OQLProject]): ObjectNode = {
+    ObjectNode(projects map (p =>
+      (p.label.s, p match {
+        case ExpressionOQLProject(label, expr) => ValueNode(expr)
+        case QueryOQLProject(label, query)     => null
+      })))
+  }
+
   def queryMany(oql: String, parameters: Map[String, Any] = Map()) = { //todo: async
     val query =
       OQLParse(oql) match {
@@ -59,110 +127,30 @@ class OQL(dm: String, val dataSource: OQLDataSource) {
 
 //    println(prettyPrint(query))
 
-    def queryProjects(query: OQLQuery): List[OQLProject] = {
-      val map = new mutable.LinkedHashMap[String, OQLProject]
-      val entity =
-        if (query.entity eq null) {
-          model.entities get query.resource.s match {
-            case Some(e) => e
-            case None    => problem(query.resource.pos, s"unknown entity '${query.resource.s}'", oql)
-          }
-        } else query.entity
-      val subtracts = new mutable.HashSet[String]
+    queryProjects(None, query, oql)
 
-      query.project foreach {
-        case p @ QueryOQLProject(label, _) =>
-          map(label) = p
-        case StarOQLProject =>
-          entity.attributes.values foreach {
-            case attr @ Attribute(name, column, pk, required, typ) if typ.isDataType =>
-              map(name) = ExpressionOQLProject(Ident(name), AttributeOQLExpression(List(Ident(name)), entity, attr))
-            case _ => // non-datatype attributes don't get included with '*'
-          }
-        case SubtractOQLProject(id) =>
-          if (subtracts(id.s))
-            problem(id.pos, s"attribute '${id.s}' has already been removed", oql)
-
-          subtracts += id.s
-
-          if (map contains id.s)
-            map -= id.s
-          else
-            problem(id.pos, s"attribute '${id.s}' was not added with '*'", oql)
-        case expProj @ ExpressionOQLProject(label, expr) =>
-          if (map contains label.s)
-            problem(label.pos, s"attribute '${label.s}' has already been added", oql)
-
-          map(label.s) = expr match {
-            case a @ AttributeOQLExpression(List(id), _, _) =>
-              entity.attributes get id.s match {
-                case Some(attr @ Attribute(_, _, _, _, _: DataType)) =>
-                  a.entity = entity
-                  a.attr = attr
-                  expProj
-                case Some(attr @ Attribute(_, _, _, _, ManyToOneType(mtoEntity))) =>
-                  QueryOQLProject(label, OQLQuery(id, mtoEntity, attr, List(StarOQLProject), None, None, None, OQLRestrict(None, None)))
-                // todo: array type cases
-                case None => problem(id.pos, s"unknown attribute '${id.s}'", oql)
-              }
-            case _ =>
-              attributes(entity, expr) // look up all attributes and references
-              expProj
-          }
-      }
-
-      map.values.toList
-    }
-
-    def resultNode(query: OQLQuery): ResultNode = {
-      val entity =
-        model.entities get query.resource.s match {
-          case Some(e) => e
-          case None    => problem(query.resource.pos, s"unknown entity '${query.resource.s}'", oql)
-        }
-
-      query.select foreach (references(_, query.resource.s)) // 'query.resource.s' should really be an alias
-      ResultNode(entity, objectNode(entity, query.resource.s, query.project, None), query.select)
-    }
-
-    val root: ResultNode = resultNode(query)
+    val root: ResultNode = ResultNode(query.entity, objectNode(query.project), query.select)
 
     val sqlBuilder = new SQLQueryBuilder
 
-    def writeSQL(node: Node): Unit = {
+    def writeSQL(node: Node, table: String): Unit = {
       node match {
-        case OneToManyNode(entity, resource, element, select, Attribute(name, column, pk, required, ManyToOneType(mtoEntity))) =>
-          sqlBuilder.leftJoin(mtoEntity.table, mtoEntity.pk.get.column, entity.table, resource, column)
-
-          if (select.isDefined)
-            sqlBuilder.select(select.get)
-
-          writeSQL(element)
         case ResultNode(entity, element, select) =>
           sqlBuilder.table(entity.table)
 
           if (select.isDefined)
             sqlBuilder.select(select.get)
 
-          writeSQL(element)
-        case e @ ValueNode(expr) => e.idx = sqlBuilder.project(expr)
-        case obj @ ObjectNode(properties, join) =>
-          join match {
-            case None =>
-            case Some((left, alias, attr @ Attribute(name, column, _, _, ManyToOneType(right)))) =>
-              obj.idx = sqlBuilder.project(AttributeOQLExpression(List(Ident(name, null)), null, left.table, attr))
-              sqlBuilder.leftJoin(left.table, column, right.table, alias, right.pk.get.column)
-          }
-
-          properties foreach { case (_, e) => writeSQL(e) }
-        case SequenceNode(seq) =>
-        case _                 =>
+          writeSQL(element, entity.table)
+        case e @ ValueNode(expr)    => e.idx = sqlBuilder.project(expr, table)
+        case ObjectNode(properties) => properties foreach { case (_, e) => writeSQL(e, table) }
+        case _                      => ni
       }
     }
 
-//    println(prettyPrint(node))
+//    println(prettyPrint(root))
 
-    writeSQL(root)
+    writeSQL(root, null)
 
     val sql = sqlBuilder.toString
 
@@ -182,16 +170,13 @@ class OQL(dm: String, val dataSource: OQLDataSource) {
 
             array.toList
           case expr: ValueNode => rs get expr.idx
-          case obj @ ObjectNode(properties) =>
-            if (join.isDefined && rs.get(obj.idx) == null) null
-            else {
-              val map = new mutable.LinkedHashMap[String, Any]
+          case ObjectNode(properties) =>
+            val map = new mutable.LinkedHashMap[String, Any]
 
-              for ((label, node) <- properties)
-                map(label) = build(node)
+            for ((label, node) <- properties)
+              map(label) = build(node)
 
-              map to VectorMap
-            }
+            map to VectorMap
 //          case SequenceNode(seq) => ni
         }
 

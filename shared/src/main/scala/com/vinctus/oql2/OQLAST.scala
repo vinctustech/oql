@@ -5,7 +5,7 @@ trait OQLAST
 case class OQLQuery(resource: Ident,
                     var entity: Entity,
                     var attr: Attribute,
-                    project: List[OQLProject],
+                    var project: List[OQLProject],
                     select: Option[OQLExpression],
                     group: Option[List[AttributeOQLExpression]],
                     order: Option[List[OQLOrdering]],

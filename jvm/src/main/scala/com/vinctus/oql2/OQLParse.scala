@@ -31,11 +31,11 @@ object OQLParse {
     ctx match {
       case null =>
         proj match {
-          case id: Ident                                 => id
-          case OQLQuery(resource, _, _, _, _, _, _)      => resource
-          case AttributeOQLExpression(List(id), _, _, _) => id
-          case ReferenceOQLExpression(List(id))          => id
-          case ParameterOQLExpression(id)                => id
+          case id: Ident                               => id
+          case OQLQuery(resource, _, _, _, _, _, _, _) => resource
+          case AttributeOQLExpression(List(id), _, _)  => id
+          case ReferenceOQLExpression(List(id))        => id
+          case ParameterOQLExpression(id)              => id
         }
       case _ => ctx.id
     }
