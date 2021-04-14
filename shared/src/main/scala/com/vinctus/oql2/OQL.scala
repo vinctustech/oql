@@ -51,7 +51,7 @@ class OQL(dm: String, val dataSource: OQLDataSource) {
       case _ =>
     }
 
-  private def queryProjects(outer: Option[Entity], query: OQLQuery, oql: String): Unit = {
+  private def queryProjects(outer: Option[Entity], query: OQLQuery, oql: String): OQLQuery = {
     val map = new mutable.LinkedHashMap[String, OQLProject]
     val entity =
       if (outer.isDefined) outer.get
@@ -97,7 +97,9 @@ class OQL(dm: String, val dataSource: OQLDataSource) {
                 a.attr = attr
                 expProj
               case Some(attr @ Attribute(_, _, _, _, ManyToOneType(mtoEntity))) =>
-                QueryOQLProject(label, OQLQuery(id, mtoEntity, attr, List(StarOQLProject), None, None, None, OQLRestrict(None, None)))
+                QueryOQLProject(
+                  label,
+                  queryProjects(Some(entity), OQLQuery(id, mtoEntity, attr, List(StarOQLProject), None, None, None, OQLRestrict(None, None)), oql))
               // todo: array type cases
               case None => problem(id.pos, s"unknown attribute '${id.s}'", oql)
             }
@@ -108,14 +110,19 @@ class OQL(dm: String, val dataSource: OQLDataSource) {
     }
 
     query.project = map.values.toList
+    query
   }
 
   private def objectNode(projects: List[OQLProject]): ObjectNode = {
-    ObjectNode(projects map (p =>
+    ObjectNode(projects map { p =>
       (p.label.s, p match {
         case ExpressionOQLProject(label, expr) => ValueNode(expr)
-        case QueryOQLProject(label, query)     => null
-      })))
+        case QueryOQLProject(label, query) =>
+          query.attr.typ match {
+            case ManyToOneType(mtoEntity) => ManyToOneNode(null, query.attr, objectNode(query.project))
+          }
+      })
+    })
   }
 
   def queryMany(oql: String, parameters: Map[String, Any] = Map()) = { //todo: async
@@ -142,13 +149,13 @@ class OQL(dm: String, val dataSource: OQLDataSource) {
             sqlBuilder.select(select.get)
 
           writeSQL(element, entity.table)
-        case e @ ValueNode(expr)    => e.idx = sqlBuilder.project(expr, table)
-        case ObjectNode(properties) => properties foreach { case (_, e) => writeSQL(e, table) }
-        case _                      => ni
+        case e @ ValueNode(expr)                  => e.idx = sqlBuilder.project(expr, table)
+        case ObjectNode(properties)               => properties foreach { case (_, e) => writeSQL(e, table) }
+        case ManyToOneNode(entity, attr, element) =>
       }
     }
 
-//    println(prettyPrint(root))
+    println(prettyPrint(root))
 
     writeSQL(root, null)
 
@@ -156,32 +163,32 @@ class OQL(dm: String, val dataSource: OQLDataSource) {
 
     println(sql)
 
-    execute { c =>
-      val rs = c.query(sql)
-
-//      println(TextTable(rs.peer.asInstanceOf[ResultSet]))
-
-      def build(node: Node): Any =
-        node match {
-          case ResultNode(entity, element, select) =>
-            val array = new ArrayBuffer[Any]
-
-            while (rs.next) array += build(element)
-
-            array.toList
-          case expr: ValueNode => rs get expr.idx
-          case ObjectNode(properties) =>
-            val map = new mutable.LinkedHashMap[String, Any]
-
-            for ((label, node) <- properties)
-              map(label) = build(node)
-
-            map to VectorMap
-//          case SequenceNode(seq) => ni
-        }
-
-      build(root)
-    }
+//    execute { c =>
+//      val rs = c.query(sql)
+//
+////      println(TextTable(rs.peer.asInstanceOf[ResultSet]))
+//
+//      def build(node: Node): Any =
+//        node match {
+//          case ResultNode(entity, element, select) =>
+//            val array = new ArrayBuffer[Any]
+//
+//            while (rs.next) array += build(element)
+//
+//            array.toList
+//          case v: ValueNode => rs get v.idx
+//          case ObjectNode(properties) =>
+//            val map = new mutable.LinkedHashMap[String, Any]
+//
+//            for ((label, node) <- properties)
+//              map(label) = build(node)
+//
+//            map to VectorMap
+////          case SequenceNode(seq) => ni
+//        }
+//
+//      build(root)
+//    }
   }
 
 }

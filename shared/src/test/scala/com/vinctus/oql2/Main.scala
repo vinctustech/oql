@@ -7,7 +7,7 @@ import java.nio.file.{Files, Path, Paths}
 
 object Main extends App with BookDB {
 
-  println(test("author { name id id }"))
+  println(test("book { title author }"))
 
 }
 
