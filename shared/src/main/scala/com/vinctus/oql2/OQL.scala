@@ -12,7 +12,6 @@ import xyz.hyperreal.table.TextTable
 
 import scala.annotation.tailrec
 import scala.collection.immutable.VectorMap
-import scala.reflect.internal.NoPhase.id
 
 class OQL(dm: String, val dataSource: OQLDataSource) {
 
@@ -54,13 +53,45 @@ class OQL(dm: String, val dataSource: OQLDataSource) {
             case None    => problem(query.resource.pos, s"unknown entity '${query.resource.s}'", oql)
           }
         } else query.entity
+      val subtracts = new mutable.HashSet[String]
 
       query.project foreach {
         case p @ QueryOQLProject(label, _) => map(label) = p
         case StarOQLProject =>
-          entity.attributes.values.filter(_.typ.isDataType) foreach {
-            case attr @ Attribute(name, column, pk, required, typ) =>
+          entity.attributes.values foreach {
+            case attr @ Attribute(name, column, pk, required, typ) if typ.isDataType =>
               map(name) = ExpressionOQLProject(Ident(name), AttributeOQLExpression(List(Ident(name)), entity, attr))
+            case _ => // non-datatype attributes don't get included with '*'
+          }
+        case SubtractOQLProject(id) =>
+          if (subtracts(id.s))
+            problem(id.pos, s"attribute '${id.s}' has already been removed", oql)
+
+          subtracts += id.s
+
+          if (map contains id.s)
+            map -= id.s
+          else
+            problem(id.pos, s"attribute '${id.s}' was not added with '*'", oql)
+        case e @ ExpressionOQLProject(label, expr) =>
+          if (map contains label.s)
+            problem(label.pos, s"attribute '${label.s}' has already been added", oql)
+
+          map(label.s) = {
+            expr match {
+              case a @ AttributeOQLExpression(List(id), _, _) =>
+                entity.attributes get id.s match {
+                  case Some(attr @ Attribute(name, _, _, _, _: DataType)) =>
+                    a.entity = entity
+                    a.attr = attr
+                    e
+                  case Some(attr @ Attribute(name, _, _, _, ManyToOneType(mtoEntity))) =>
+                    QueryOQLProject(label, OQLQuery(id, mtoEntity, attr, List(StarOQLProject), None, None, None, OQLRestrict(None, None)))
+                  // todo: array type cases
+                  case None => problem(id.pos, s"unknown attribute '${id.s}'", oql)
+                }
+              case _ => e
+            }
           }
       }
 
@@ -69,8 +100,6 @@ class OQL(dm: String, val dataSource: OQLDataSource) {
 
     def objectNode(entity: Entity, table: String, project: List[OQLProject], join: Option[(Entity, String, Attribute)]): ObjectNode = {
       val props = new mutable.LinkedHashMap[String, Node]
-      val attrset = new mutable.HashSet[String]
-      val subtracts = new mutable.HashSet[String]
 
       for (p <- project)
         p match {
@@ -94,11 +123,6 @@ class OQL(dm: String, val dataSource: OQLDataSource) {
                 }
               case None => problem(id.pos, s"unknown attribute '${id.s}'", oql)
             }
-          case ExpressionOQLProject(label, expr) =>
-            if (props contains label.get.s)
-              problem(label.get.pos, s"attribute '${label.get.s}' has already been added", oql)
-
-            props(label.get.s) = ValueNode(expr)
           case QueryOQLProject(label, query) =>
             entity.attributes get query.resource.s match {
               case Some(Attribute(name, column, pk, required, typ))
@@ -123,21 +147,6 @@ class OQL(dm: String, val dataSource: OQLDataSource) {
               // case many to many
               case None => problem(query.resource.pos, s"unknown attribute '${query.resource.s}'", oql)
             }
-          case StarOQLProject =>
-            entity.attributes.values.filter(_.typ.isDataType) foreach {
-              case attr @ Attribute(name, column, pk, required, typ) =>
-                props(name) = ValueNode(AttributeOQLExpression(List(Ident(name, null)), entity, table, attr))
-            }
-          case SubtractOQLProject(id) =>
-            if (subtracts(id.s))
-              problem(id.pos, s"attribute '${id.s}' has already been removed", oql)
-
-            subtracts += id.s
-
-            if (props contains id.s)
-              props -= id.s
-            else
-              problem(id.pos, s"attribute '${id.s}' was not added with '*'", oql)
         }
 
       ObjectNode(props.toList, join)

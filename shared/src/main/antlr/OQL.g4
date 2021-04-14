@@ -53,8 +53,8 @@ attributeProject returns [OQLProject p]
     { $p = new ExpressionOQLProject($label.id, $expression.e); }
   | label? attributeName
     { $p = new ExpressionOQLProject(OQLParse.label($label.ctx, $attributeName.id), AttributeOQLExpression(new ListBuffer<Ident>().addOne($attributeName.id).toList(), null, null, null)); }
-  | label? '&' identifier
-    { $p = new ExpressionOQLProject(OQLParse.label($label.ctx, $identifier.id), new ReferenceOQLExpression(new ListBuffer<Ident>().addOne($identifier.id).toList()); }
+  | label? '&' attributeName
+    { $p = new ExpressionOQLProject(OQLParse.label($label.ctx, $identifier.id), new ReferenceOQLExpression(new ListBuffer<Ident>().addOne($attributeName.id).toList()); }
   | label? parameter
     { $p = new ExpressionOQLProject(OQLParse.label($label.ctx, $parameter.e), $parameter.e); }
   | label? query
