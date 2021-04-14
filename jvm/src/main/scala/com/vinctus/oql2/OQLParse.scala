@@ -1,14 +1,6 @@
 package com.vinctus.oql2
 
-import com.vinctus.oql2.OQLParser.{
-  ExpressionContext,
-  GroupContext,
-  LabelContext,
-  OrderContext,
-  ProjectContext,
-  SelectContext,
-  WhenContext
-}
+import com.vinctus.oql2.OQLParser.{ExpressionContext, GroupContext, LabelContext, OrderContext, ProjectContext, SelectContext, WhenContext}
 import org.antlr.v4.runtime.{CharStreams, CommonTokenStream, ConsoleErrorListener, ParserRuleContext}
 
 import scala.collection.mutable
@@ -35,7 +27,18 @@ object OQLParse {
     else Some(res.c)
   }
 
-  def label(ctx: LabelContext): Option[Ident] = if (ctx eq null) None else Some(ctx.id)
+  def label(ctx: LabelContext, proj: Any): Ident =
+    ctx match {
+      case null =>
+        proj match {
+          case id: Ident                                 => id
+          case OQLQuery(resource, _, _, _, _, _, _)      => resource
+          case AttributeOQLExpression(List(id), _, _, _) => id
+          case ReferenceOQLExpression(List(id))          => id
+          case ParameterOQLExpression(id)                => id
+        }
+      case _ => ctx.id
+    }
 
   def project(ps: mutable.Buffer[OQLProject]): List[OQLProject] = if (ps eq null) Nil else ps.toList
 

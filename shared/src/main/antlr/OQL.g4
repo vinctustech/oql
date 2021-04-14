@@ -48,17 +48,17 @@ attributeProjects returns [ListBuffer<OQLProject> ps]
 
 attributeProject returns [OQLProject p]
   : label? applyExpression
-    { $p = new ExpressionOQLProject(OQLParse.label($label.ctx), $applyExpression.e); }
+    { $p = new ExpressionOQLProject(OQLParse.label($label.ctx, $applyExpression.e), $applyExpression.e); }
   | label '(' expression ')'
-    { $p = new ExpressionOQLProject(new Some($label.id), $expression.e); }
+    { $p = new ExpressionOQLProject($label.id, $expression.e); }
   | label? attributeName
-    { $p = new AttributeOQLProject(OQLParse.label($label.ctx), $attributeName.id); }
-  | label? reference
-    { $p = new ExpressionOQLProject(OQLParse.label($label.ctx), $reference.e); }
+    { $p = new ExpressionOQLProject(OQLParse.label($label.ctx, $attributeName.id), AttributeOQLExpression(new ListBuffer<Ident>().addOne($attributeName.id).toList(), null, null, null)); }
+  | label? '&' identifier
+    { $p = new ExpressionOQLProject(OQLParse.label($label.ctx, $identifier.id), new ReferenceOQLExpression(new ListBuffer<Ident>().addOne($identifier.id).toList()); }
   | label? parameter
-    { $p = new ExpressionOQLProject(OQLParse.label($label.ctx), $parameter.e); }
+    { $p = new ExpressionOQLProject(OQLParse.label($label.ctx, $parameter.e), $parameter.e); }
   | label? query
-    { $p = new QueryOQLProject(OQLParse.label($label.ctx), $query.q); }
+    { $p = new QueryOQLProject(OQLParse.label($label.ctx, $query.q), $query.q); }
   ;
 
 label returns [Ident id]

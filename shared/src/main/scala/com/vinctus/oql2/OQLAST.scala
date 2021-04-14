@@ -3,7 +3,8 @@ package com.vinctus.oql2
 trait OQLAST
 
 case class OQLQuery(resource: Ident,
-                    entity: Entity,
+                    var entity: Entity,
+                    var attribute: Attribute,
                     project: List[OQLProject],
                     select: Option[OQLExpression],
                     group: Option[List[AttributeOQLExpression]],
@@ -11,12 +12,11 @@ case class OQLQuery(resource: Ident,
                     restrict: OQLRestrict)
     extends OQLAST
 
-trait OQLProject { val label: Option[Ident] }
-case object StarOQLProject extends OQLProject { val label: Option[Ident] = None }
-case class SubtractOQLProject(id: Ident) extends OQLProject { val label: Option[Ident] = None }
-case class ExpressionOQLProject(label: Option[Ident], expr: OQLExpression) extends OQLProject
-case class AttributeOQLProject(label: Option[Ident], attr: Ident) extends OQLProject
-case class QueryOQLProject(label: Option[Ident], query: OQLQuery) extends OQLProject
+trait OQLProject { val label: Ident }
+case object StarOQLProject extends OQLProject { val label: Ident = null }
+case class SubtractOQLProject(id: Ident) extends OQLProject { val label: Ident = null }
+case class ExpressionOQLProject(label: Ident, expr: OQLExpression) extends OQLProject
+case class QueryOQLProject(label: Ident, query: OQLQuery) extends OQLProject
 
 case class OQLOrdering(expr: OQLExpression, ordering: String)
 case class OQLRestrict(limit: Option[Int], offset: Option[Int])
@@ -29,7 +29,7 @@ case class BetweenOQLExpression(expr: OQLExpression, op: String, lower: OQLExpre
 case class NumberOQLExpression(n: Double, pos: Position) extends OQLExpression
 case class LiteralOQLExpression(s: String, pos: Position) extends OQLExpression
 case class BooleanOQLExpression(b: String, pos: Position) extends OQLExpression
-case class AttributeOQLExpression(ids: List[Ident], var entity: Entity, var table: String, var attr: Attribute) extends OQLExpression
+case class AttributeOQLExpression(ids: List[Ident], var entity: Entity, var attr: Attribute) extends OQLExpression
 case class ReferenceOQLExpression(ids: List[Ident]) extends OQLExpression
 case class ParameterOQLExpression(p: Ident) extends OQLExpression
 case class ApplyOQLExpression(f: Ident, args: List[OQLExpression]) extends OQLExpression

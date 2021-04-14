@@ -11,7 +11,13 @@ package object oql2 {
     sys.error("error executing query")
   }
 
-  def printError(pos: Position, msg: String, input: String): Null = printError(pos.line, pos.col, msg, input)
+  def printError(pos: Position, msg: String, input: String): Null = {
+    if (pos eq null) {
+      Console.err.println(msg)
+      null
+    } else
+      printError(pos.line, pos.col, msg, input)
+  }
 
   def printError(line: Int, charPositionInLine: Int, msg: String, input: String): Null = {
     Console.err.println(s"error on line $line, column ${charPositionInLine + 1}: $msg")

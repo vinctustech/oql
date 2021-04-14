@@ -1,0 +1,29 @@
+CREATE TABLE author (
+  id bigserial PRIMARY KEY,
+  name VARCHAR(255)
+);
+
+CREATE TABLE book (
+  id bigserial PRIMARY KEY,
+  title VARCHAR(255),
+  year INT,
+  author BIGINT
+);
+ALTER TABLE book ADD FOREIGN KEY (author) REFERENCES author;
+
+insert into author (name) values
+('Robert Louis Stevenson'),
+('Lewis Carroll'),
+('Charles Dickens'),
+('Mark Twain');
+
+insert into book (title, year, author) values
+('Treasure Island', 1883, 1),
+('Alice''s Adventures in Wonderland', 1865, 2),
+('Oliver Twist', 1838, 3),
+('A Tale of Two Cities', 1859, 3),
+('The Adventures of Tom Sawyer', 1876, 4),
+('Adventures of Huckleberry Finn', 1884, 4);
+
+SELECT author.name as author_name, ARRAY(select row(book.id, book.title) from book where book.author = author.id)
+  FROM author;

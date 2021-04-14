@@ -45,6 +45,28 @@ class OQL(dm: String, val dataSource: OQLDataSource) {
 
 //    println(prettyPrint(query))
 
+    def queryProjects(query: OQLQuery): List[OQLProject] = {
+      val map = new mutable.LinkedHashMap[String, OQLProject]
+      val entity =
+        if (query.entity eq null) {
+          model.entities get query.resource.s match {
+            case Some(e) => e
+            case None    => problem(query.resource.pos, s"unknown entity '${query.resource.s}'", oql)
+          }
+        } else query.entity
+
+      query.project foreach {
+        case p @ QueryOQLProject(label, _) => map(label) = p
+        case StarOQLProject =>
+          entity.attributes.values.filter(_.typ.isDataType) foreach {
+            case attr @ Attribute(name, column, pk, required, typ) =>
+              map(name) = ExpressionOQLProject(Ident(name), AttributeOQLExpression(List(Ident(name)), entity, attr))
+          }
+      }
+
+      map.values.toList
+    }
+
     def objectNode(entity: Entity, table: String, project: List[OQLProject], join: Option[(Entity, String, Attribute)]): ObjectNode = {
       val props = new mutable.LinkedHashMap[String, Node]
       val attrset = new mutable.HashSet[String]
@@ -253,41 +275,16 @@ class OQL(dm: String, val dataSource: OQLDataSource) {
 
 }
 
-/**
-  * Result node
-  */
 trait Node
 
-/**
-  * One-to-many result node
-  *
-  * @param entity  source entity from which array elements are drawn
-  * @param element array element nodes (usually [[ObjectNode]], in future could also be [[ValueNode]] resulting
-  *                from the "lift" feature [todo] or [[SequenceNode]] resulting from the "tuple" feature)
-  * @param select  optional boolean condition for selecting elements
-  * @param join    optional attribute to join on: the attribute contains the target entity to join with
-  */
 case class ResultNode(entity: Entity, element: Node, select: Option[OQLExpression]) extends Node
 
-case class OneToManyNode(entity: Entity, resource: String, element: Node, select: Option[OQLExpression], join: Attribute) extends Node
+case class ManyToOneNode(table: String, column: String, join: String, pk: String, element: Node) extends Node
 
-/**
-  * Object (many-to-one) result node
-  *
-  * @param properties object properties: each property has a name and a node
-  */
-case class ObjectNode(properties: Seq[(String, Node)], join: Option[(Entity, String, Attribute)]) extends Node { var idx: Int = _ }
+//case class OneToManyNode(entity: Entity, attribute: Attribute, element: Node) extends Node { var idx: Int = _ }
 
-/**
-  * Sequence result node
-  *
-  * @param seq node sequence
-  */
-case class SequenceNode(seq: Seq[Node]) extends Node
+case class ObjectNode(properties: Seq[(String, Node)]) extends Node // todo: objects as a way of grouping expressions
 
-/**
-  * Result value
-  *
-  * @param value expression (usually [[AttributeOQLExpression]] referring to an entity attribute)
-  */
+case class TupleNode(elements: Seq[Node]) extends Node // todo: tuples as a way of grouping expressions
+
 case class ValueNode(value: OQLExpression) extends Node { var idx: Int = _ }
