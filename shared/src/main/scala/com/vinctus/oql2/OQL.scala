@@ -3,9 +3,10 @@ package com.vinctus.oql2
 import com.sun.org.apache.xpath.internal.ExpressionNode
 import com.vinctus.oql2.StarOQLProject.label
 import sun.jvm.hotspot.HelloWorld.e
+import xyz.hyperreal.json.DefaultJSONReader
 
 import scala.collection.mutable
-import scala.collection.mutable.ArrayBuffer
+import scala.collection.mutable.{ArrayBuffer, ListBuffer}
 import xyz.hyperreal.pretty._
 
 import java.sql.ResultSet
@@ -198,34 +199,37 @@ class OQL(dm: String, val dataSource: OQLDataSource) {
 
 //      println(TextTable(rs.peer.asInstanceOf[ResultSet]))
 
-      def buildResult(node: Node): Any =
+      def buildResult(node: Node, resultSet: OQLResultSet): Any =
         node match {
           case ResultNode(entity, element, select) =>
-            val array = new ArrayBuffer[Any]
+            val array = new ListBuffer[Any]
 
-            while (rs.next) array += buildResult(element)
+            while (resultSet.next) array += buildResult(element, resultSet)
 
             array.toList
           case n @ ManyToOneNode(entity, attr, element) =>
-            if (rs.get(n.idx) == null) null
-            else buildResult(element)
+            if (resultSet.get(n.idx) == null) null
+            else buildResult(element, resultSet)
           case n @ OneToManyNode(entity, attribute, element) =>
-            val books = rs.peer.asInstanceOf[ResultSet].getString(n.idx + 1)
+            val listResultSet = new ListResultSet(DefaultJSONReader.fromString(resultSet.getString(n.idx)).asInstanceOf[List[List[Any]]])
 
-            println(books)
-            ni
-          case v: ValueNode => rs get v.idx
+            val array = new ListBuffer[Any]
+
+            while (listResultSet.next) array += buildResult(element, listResultSet)
+
+            array.toList
+          case v: ValueNode => resultSet get v.idx
           case ObjectNode(properties) =>
             val map = new mutable.LinkedHashMap[String, Any]
 
             for ((label, node) <- properties)
-              map(label) = buildResult(node)
+              map(label) = buildResult(node, resultSet)
 
             map to VectorMap
 //          case SequenceNode(seq) => ni
         }
 
-      buildResult(root)
+      buildResult(root, rs)
     }
   }
 

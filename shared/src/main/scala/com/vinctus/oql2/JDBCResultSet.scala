@@ -10,4 +10,6 @@ class JDBCResultSet(rs: ResultSet) extends OQLResultSet {
 
   def get(idx: Int): Any = rs.getObject(idx + 1)
 
+  def getString(idx: Int): String = rs.getString(idx + 1)
+
 }

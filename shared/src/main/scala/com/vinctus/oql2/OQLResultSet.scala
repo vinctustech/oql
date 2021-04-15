@@ -14,4 +14,6 @@ abstract class OQLResultSet {
     */
   def get(idx: Int): Any
 
+  def getString(idx: Int): String
+
 }
