@@ -2,16 +2,29 @@ package com.vinctus.oql2
 
 import xyz.hyperreal.pretty._
 
+import scala.Console.in
 import scala.collection.mutable.ArrayBuffer
 
-class SQLQueryBuilder(margin: Int = 0) {
+object SQLQueryBuilder {
+
+  val INDENT = 2
+
+}
+
+class SQLQueryBuilder(val margin: Int = 0, subquery: Boolean = false) {
+
+  import SQLQueryBuilder._
+
+  private trait Project
+  private case class ValueProject(expr: OQLExpression, table: String) extends Project { override def toString: String = expression(expr, table) }
+  private case class QueryProject(query: SQLQueryBuilder) extends Project { override def toString: String = query.toString }
 
   private var from: String = _
 //  private val tables = new mutable.HashMap[String, Int]
   private val innerJoins = new ArrayBuffer[Join]
   private val leftJoins = new ArrayBuffer[Join]
   private var idx = 0
-  private val projects = new ArrayBuffer[String]
+  private val projects = new ArrayBuffer[Project]
   private var where: Option[(String, OQLExpression)] = None
 
   def table(name: String): Unit = {
@@ -26,8 +39,14 @@ class SQLQueryBuilder(margin: Int = 0) {
       case None => Some((table, cond))
     }
 
-  def project(expr: OQLExpression, table: String): Int = {
-    projects += expression(expr, table)
+  def projectValue(expr: OQLExpression, table: String): Int = {
+    projects += ValueProject(expr, table)
+    idx += 1
+    idx - 1
+  }
+
+  def projectQuery(builder: SQLQueryBuilder): Int = {
+    projects += QueryProject(builder)
     idx += 1
     idx - 1
   }
@@ -59,7 +78,6 @@ class SQLQueryBuilder(margin: Int = 0) {
   private case class Join(t1: String, c1: String, t2: String, alias: String, c2: String)
 
   override def toString: String = {
-    val INDENT = 2
     val buf = new StringBuilder
     var indent = margin
 
@@ -73,12 +91,14 @@ class SQLQueryBuilder(margin: Int = 0) {
 
     def out(): Unit = indent -= INDENT
 
-    line("SELECT")
+    def sq(yes: String, no: String = "") = if (subquery) yes else no
+
+    line(s"${sq("(JSON_ARRAY(")}SELECT ${sq("JSON_ARRAY(")}")
     in()
     in()
 
     for ((p, i) <- projects.zipWithIndex)
-      line(s"$p${if (i < projects.length - 1) "," else ""}")
+      line(s"$p${if (i < projects.length - 1) "," else sq(")")}")
 
     out()
 
@@ -99,6 +119,9 @@ class SQLQueryBuilder(margin: Int = 0) {
     }
 
     out()
+
+    if (subquery)
+      line("))")
 
     buf.toString
   }

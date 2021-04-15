@@ -154,34 +154,34 @@ class OQL(dm: String, val dataSource: OQLDataSource) {
 
     val root: ResultNode = ResultNode(query.entity, objectNode(query.project), query.select)
 
-    val sqlBuilder = new SQLQueryBuilder
-
-    def writeQuery(node: Node, table: String): Unit = {
+    def writeQuery(node: Node, table: String, builder: SQLQueryBuilder): Unit = {
       node match {
         case ResultNode(entity, element, select) =>
-          sqlBuilder.table(entity.table)
+          builder.table(entity.table)
 
           if (select.isDefined)
-            sqlBuilder.select(select.get, entity.table)
+            builder.select(select.get, entity.table)
 
-          writeQuery(element, entity.table)
-        case e @ ValueNode(expr)    => e.idx = sqlBuilder.project(expr, table)
-        case ObjectNode(properties) => properties foreach { case (_, e) => writeQuery(e, table) }
+          writeQuery(element, entity.table, builder)
+        case e @ ValueNode(expr)    => e.idx = builder.projectValue(expr, table)
+        case ObjectNode(properties) => properties foreach { case (_, e) => writeQuery(e, table, builder) }
         case n @ ManyToOneNode(entity, attr @ Attribute(name, column, pk, required, ManyToOneType(mtoEntity)), element) =>
           val alias = s"$table$$$name"
 
-          n.idx = sqlBuilder.project(AttributeOQLExpression(List(Ident(name)), null, attr), table)
-          sqlBuilder.leftJoin(table, column, entity.table, alias, entity.pk.get.column)
-          writeQuery(element, alias)
+          n.idx = builder.projectValue(AttributeOQLExpression(List(Ident(name)), null, attr), table)
+          builder.leftJoin(table, column, entity.table, alias, entity.pk.get.column)
+          writeQuery(element, alias, builder)
         case n @ OneToManyNode(entity, attr @ Attribute(name, column, pk, required, OneToManyType(mtoEntity, otmAttr)), element) =>
           val alias = s"$table$$$name"
-
+          val subquery = new SQLQueryBuilder(builder.margin + SQLQueryBuilder.INDENT)
       }
     }
 
 //    println(prettyPrint(root))
 
-    writeQuery(root, null)
+    val sqlBuilder = new SQLQueryBuilder
+
+    writeQuery(root, null, sqlBuilder)
 
     val sql = sqlBuilder.toString
 
