@@ -178,8 +178,8 @@ class OQL(dm: String, val dataSource: OQLDataSource) {
           n.idx = builder.projectQuery(subquery)
           subquery.table(mtoEntity.table, Some(alias))
           writeQuery(element, alias, subquery)
-          println(entity, otmAttr)
-          subquery.select(RawOQLExpression(s""), null)
+          println(alias, entity, otmAttr)
+          subquery.select(RawOQLExpression(s"$alias.${otmAttr.column} = $table.${entity.pk.get.column}"), null)
       }
     }
 
@@ -193,35 +193,40 @@ class OQL(dm: String, val dataSource: OQLDataSource) {
 
     println(sql)
 
-//    execute { c =>
-//      val rs = c.query(sql)
-//
-////      println(TextTable(rs.peer.asInstanceOf[ResultSet]))
-//
-//      def buildResult(node: Node): Any =
-//        node match {
-//          case ResultNode(entity, element, select) =>
-//            val array = new ArrayBuffer[Any]
-//
-//            while (rs.next) array += buildResult(element)
-//
-//            array.toList
-//          case n @ ManyToOneNode(entity, attr, element) =>
-//            if (rs.get(n.idx) == null) null
-//            else buildResult(element)
-//          case v: ValueNode => rs get v.idx
-//          case ObjectNode(properties) =>
-//            val map = new mutable.LinkedHashMap[String, Any]
-//
-//            for ((label, node) <- properties)
-//              map(label) = buildResult(node)
-//
-//            map to VectorMap
-////          case SequenceNode(seq) => ni
-//        }
-//
-//      buildResult(root)
-//    }
+    execute { c =>
+      val rs = c.query(sql)
+
+//      println(TextTable(rs.peer.asInstanceOf[ResultSet]))
+
+      def buildResult(node: Node): Any =
+        node match {
+          case ResultNode(entity, element, select) =>
+            val array = new ArrayBuffer[Any]
+
+            while (rs.next) array += buildResult(element)
+
+            array.toList
+          case n @ ManyToOneNode(entity, attr, element) =>
+            if (rs.get(n.idx) == null) null
+            else buildResult(element)
+          case n @ OneToManyNode(entity, attribute, element) =>
+            val books = rs.peer.asInstanceOf[ResultSet].getString(n.idx + 1)
+
+            println(books)
+            ni
+          case v: ValueNode => rs get v.idx
+          case ObjectNode(properties) =>
+            val map = new mutable.LinkedHashMap[String, Any]
+
+            for ((label, node) <- properties)
+              map(label) = buildResult(node)
+
+            map to VectorMap
+//          case SequenceNode(seq) => ni
+        }
+
+      buildResult(root)
+    }
   }
 
 }
