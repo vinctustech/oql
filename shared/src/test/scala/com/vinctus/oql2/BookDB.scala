@@ -9,13 +9,6 @@ trait BookDB extends Test {
       |  title: text
       |  year: int
       |  author: author
-      |  tags: [tag]
-      |}
-      |
-      |entity tag {
-      | *id: bigint
-      |  tag: text
-      |  book: book
       |}
       |
       |entity article {
@@ -48,9 +41,6 @@ trait BookDB extends Test {
                         |('A Tale of Two Cities', 1859, 3),
                         |('The Adventures of Tom Sawyer', 1876, 4),
                         |('Adventures of Huckleberry Finn', 1884, 4)
-                        |""".stripMargin))
-  db.execute(_.insert("""insert into tag (tag, book) values 
-                        |('adventure', 1)
                         |""".stripMargin))
   db.execute(_.insert("""insert into article (title, year, author) values 
                         |('art1a', 1883, 1),
