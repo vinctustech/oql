@@ -145,4 +145,62 @@ class BookDBTests extends AnyFreeSpec with Matchers with BookDB {
         |""".trim.stripMargin
   }
 
+  "simplest one to many query" in {
+    test("author { name books }") shouldBe
+      """
+        |[
+        |  {
+        |    "name": "Robert Louis Stevenson",
+        |    "books": [
+        |      {
+        |        "id": 1,
+        |        "title": "Treasure Island",
+        |        "year": 1883
+        |      }
+        |    ]
+        |  },
+        |  {
+        |    "name": "Lewis Carroll",
+        |    "books": [
+        |      {
+        |        "id": 2,
+        |        "title": "Alice’s Adventures in Wonderland",
+        |        "year": 1865
+        |      }
+        |    ]
+        |  },
+        |  {
+        |    "name": "Charles Dickens",
+        |    "books": [
+        |      {
+        |        "id": 3,
+        |        "title": "Oliver Twist",
+        |        "year": 1838
+        |      },
+        |      {
+        |        "id": 4,
+        |        "title": "A Tale of Two Cities",
+        |        "year": 1859
+        |      }
+        |    ]
+        |  },
+        |  {
+        |    "name": "Mark Twain",
+        |    "books": [
+        |      {
+        |        "id": 5,
+        |        "title": "The Adventures of Tom Sawyer",
+        |        "year": 1876
+        |      },
+        |      {
+        |        "id": 6,
+        |        "title": "Adventures of Huckleberry Finn",
+        |        "year": 1884
+        |      }
+        |    ]
+        |  }
+        |]
+        |""".trim.stripMargin
+  }
+
 }

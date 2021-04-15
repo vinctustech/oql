@@ -11,18 +11,10 @@ trait BookDB extends Test {
       |  author: author
       |}
       |
-      |entity article {
-      | *id: bigint
-      |  title: text
-      |  year: int
-      |  author: author
-      |}
-      |
       |entity author {
       | *id: bigint
       |  name: text
       |  books: [book]
-      |  articles: [article]
       |}
       |""".stripMargin
   val db = new OQL(dm, new H2_mem)
@@ -41,14 +33,6 @@ trait BookDB extends Test {
                         |('A Tale of Two Cities', 1859, 3),
                         |('The Adventures of Tom Sawyer', 1876, 4),
                         |('Adventures of Huckleberry Finn', 1884, 4)
-                        |""".stripMargin))
-  db.execute(_.insert("""insert into article (title, year, author) values 
-                        |('art1a', 1883, 1),
-                        |('art1b', 1883, 1),
-                        |('art2', 1865, 2),
-                        |('art3', 1838, 3),
-                        |('art4a', 1876, 4),
-                        |('art4b', 1884, 4)
                         |""".stripMargin))
 
 }

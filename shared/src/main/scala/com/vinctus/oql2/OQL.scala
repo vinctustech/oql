@@ -1,13 +1,10 @@
 package com.vinctus.oql2
 
-import com.sun.org.apache.xpath.internal.ExpressionNode
-import com.vinctus.oql2.StarOQLProject.label
-import sun.jvm.hotspot.HelloWorld.e
 import xyz.hyperreal.json.DefaultJSONReader
 
 import scala.collection.mutable
-import scala.collection.mutable.{ArrayBuffer, ListBuffer}
-import xyz.hyperreal.pretty._
+import scala.collection.mutable.ListBuffer
+import xyz.hyperreal._
 
 import java.sql.ResultSet
 import xyz.hyperreal.table.TextTable
