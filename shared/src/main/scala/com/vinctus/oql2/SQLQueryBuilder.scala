@@ -6,7 +6,7 @@ import scala.collection.mutable.ArrayBuffer
 
 class SQLQueryBuilder(margin: Int = 0) {
 
-  private var from: String = null
+  private var from: String = _
 //  private val tables = new mutable.HashMap[String, Int]
   private val innerJoins = new ArrayBuffer[Join]
   private val leftJoins = new ArrayBuffer[Join]
@@ -17,32 +17,19 @@ class SQLQueryBuilder(margin: Int = 0) {
   def table(name: String): Unit = {
     if (from eq null)
       from = name
-
-//    tables get name match {
-//      case Some(a) =>
-//        val alias = a + 1
-//
-//        tables(name) = alias
-//        s"$name$$$alias"
-//      case None =>
-//        tables(name) = 0
-//        name
-//    }
   }
 
   def select(cond: OQLExpression, table: String): Unit =
     where = where match {
       case Some((_, cur)) =>
-        Some((table, InfixOQLExpression(GroupingOQLExpression(cur), "AND", GroupingOQLExpression(cond)))) //todo: current parent is being ignored
+        Some((table, InfixOQLExpression(GroupingOQLExpression(cur), "AND", GroupingOQLExpression(cond))))
       case None => Some((table, cond))
     }
-
-//  def ref(tab: String, col: String): String = s"$tab.$col"
 
   def project(expr: OQLExpression, table: String): Int = {
     projects += expression(expr, table)
     idx += 1
-    idx
+    idx - 1
   }
 
   def expression(expr: OQLExpression, table: String): String =
@@ -55,7 +42,7 @@ class SQLQueryBuilder(margin: Int = 0) {
       case GroupingOQLExpression(expr)                       => s"($expr)"
       case NumberOQLExpression(n, pos)                       => n.toString
       case LiteralOQLExpression(s, pos)                      => s"'${quote(s)}'"
-      case AttributeOQLExpression(ids, _, attr)              => s"$table.${attr.column}"
+      case AttributeOQLExpression(ids, _, attr)              => s"$table.${attr.column}" //todo ids not being used
     }
 
   def leftJoin(t1: String, c1: String, t2: String, alias: String, c2: String): SQLQueryBuilder = {
@@ -86,16 +73,14 @@ class SQLQueryBuilder(margin: Int = 0) {
 
     def out(): Unit = indent -= INDENT
 
-    line(s"SELECT ${projects.head}${if (projects.tail.nonEmpty) "," else ""}")
-    indent += 7
-
-    val plen = projects.tail.length
-
-    for ((p, i) <- projects.tail.zipWithIndex)
-      line(s"$p${if (i < plen - 1) "," else ""}")
-
-    indent -= 7
+    line("SELECT")
     in()
+    in()
+
+    for ((p, i) <- projects.zipWithIndex)
+      line(s"$p${if (i < projects.length - 1) "," else ""}")
+
+    out()
 
     line(s"FROM $from")
     in()

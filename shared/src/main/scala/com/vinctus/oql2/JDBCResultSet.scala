@@ -8,6 +8,6 @@ class JDBCResultSet(rs: ResultSet) extends OQLResultSet {
 
   def next: Boolean = rs.next
 
-  def get(idx: Int): Any = rs.getObject(idx)
+  def get(idx: Int): Any = rs.getObject(idx + 1)
 
 }
