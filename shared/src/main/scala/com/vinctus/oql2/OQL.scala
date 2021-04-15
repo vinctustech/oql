@@ -54,8 +54,19 @@ class OQL(dm: String, val dataSource: OQLDataSource) {
   private def queryProjects(outer: Option[Entity], query: OQLQuery, oql: String): OQLQuery = {
     val map = new mutable.LinkedHashMap[String, OQLProject]
     val entity =
-      if (outer.isDefined) outer.get
-      else
+      if (outer.isDefined) {
+        if (query.entity ne null) {
+          query.entity
+        } else {
+          outer.get.attributes get query.resource.s match {
+            case Some(attr @ Attribute(name, column, pk, required, ManyToOneType(entity))) =>
+              query.entity = entity
+              query.attr = attr
+              entity
+            case None => problem(query.resource.pos, s"entity '${outer.get} does not have attribute '${query.resource.s}'", oql)
+          }
+        }
+      } else
         model.entities get query.resource.s match {
           case Some(e) =>
             query.entity = e
@@ -67,7 +78,7 @@ class OQL(dm: String, val dataSource: OQLDataSource) {
     query.project foreach {
       case p @ QueryOQLProject(label, query) =>
         queryProjects(Some(entity), query, oql)
-        query.select foreach (attributes(entity, _, oql))
+        query.select foreach (attributes(query.entity, _, oql))
         map(label.s) = p
       case StarOQLProject =>
         entity.attributes.values foreach {
@@ -99,7 +110,7 @@ class OQL(dm: String, val dataSource: OQLDataSource) {
               case Some(attr @ Attribute(_, _, _, _, ManyToOneType(mtoEntity))) =>
                 QueryOQLProject(
                   label,
-                  queryProjects(Some(mtoEntity), OQLQuery(id, mtoEntity, attr, List(StarOQLProject), None, None, None, OQLRestrict(None, None)), oql))
+                  queryProjects(Some(entity), OQLQuery(id, mtoEntity, attr, List(StarOQLProject), None, None, None, OQLRestrict(None, None)), oql))
               // todo: array type cases
               case None => problem(id.pos, s"unknown attribute '${id.s}'", oql)
             }
@@ -118,7 +129,6 @@ class OQL(dm: String, val dataSource: OQLDataSource) {
       (p.label.s, p match {
         case ExpressionOQLProject(label, expr) => ValueNode(expr)
         case QueryOQLProject(label, query) =>
-          println(query)
           query.attr.typ match {
             case ManyToOneType(mtoEntity) => ManyToOneNode(query.entity, query.attr, objectNode(query.project))
           }
