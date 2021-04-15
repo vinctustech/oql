@@ -157,7 +157,7 @@ class OQL(dm: String, val dataSource: OQLDataSource) {
     def writeQuery(node: Node, table: String, builder: SQLQueryBuilder): Unit = {
       node match {
         case ResultNode(entity, element, select) =>
-          builder.table(entity.table)
+          builder.table(entity.table, None)
 
           if (select.isDefined)
             builder.select(select.get, entity.table)
@@ -173,7 +173,13 @@ class OQL(dm: String, val dataSource: OQLDataSource) {
           writeQuery(element, alias, builder)
         case n @ OneToManyNode(entity, attr @ Attribute(name, column, pk, required, OneToManyType(mtoEntity, otmAttr)), element) =>
           val alias = s"$table$$$name"
-          val subquery = new SQLQueryBuilder(builder.margin + SQLQueryBuilder.INDENT)
+          val subquery = new SQLQueryBuilder(builder.margin + SQLQueryBuilder.INDENT, true)
+
+          n.idx = builder.projectQuery(subquery)
+          subquery.table(mtoEntity.table, Some(alias))
+          writeQuery(element, alias, subquery)
+          println(entity, otmAttr)
+          subquery.select(RawOQLExpression(s""), null)
       }
     }
 
@@ -187,35 +193,35 @@ class OQL(dm: String, val dataSource: OQLDataSource) {
 
     println(sql)
 
-    execute { c =>
-      val rs = c.query(sql)
-
-//      println(TextTable(rs.peer.asInstanceOf[ResultSet]))
-
-      def buildResult(node: Node): Any =
-        node match {
-          case ResultNode(entity, element, select) =>
-            val array = new ArrayBuffer[Any]
-
-            while (rs.next) array += buildResult(element)
-
-            array.toList
-          case n @ ManyToOneNode(entity, attr, element) =>
-            if (rs.get(n.idx) == null) null
-            else buildResult(element)
-          case v: ValueNode => rs get v.idx
-          case ObjectNode(properties) =>
-            val map = new mutable.LinkedHashMap[String, Any]
-
-            for ((label, node) <- properties)
-              map(label) = buildResult(node)
-
-            map to VectorMap
-//          case SequenceNode(seq) => ni
-        }
-
-      buildResult(root)
-    }
+//    execute { c =>
+//      val rs = c.query(sql)
+//
+////      println(TextTable(rs.peer.asInstanceOf[ResultSet]))
+//
+//      def buildResult(node: Node): Any =
+//        node match {
+//          case ResultNode(entity, element, select) =>
+//            val array = new ArrayBuffer[Any]
+//
+//            while (rs.next) array += buildResult(element)
+//
+//            array.toList
+//          case n @ ManyToOneNode(entity, attr, element) =>
+//            if (rs.get(n.idx) == null) null
+//            else buildResult(element)
+//          case v: ValueNode => rs get v.idx
+//          case ObjectNode(properties) =>
+//            val map = new mutable.LinkedHashMap[String, Any]
+//
+//            for ((label, node) <- properties)
+//              map(label) = buildResult(node)
+//
+//            map to VectorMap
+////          case SequenceNode(seq) => ni
+//        }
+//
+//      buildResult(root)
+//    }
   }
 
 }

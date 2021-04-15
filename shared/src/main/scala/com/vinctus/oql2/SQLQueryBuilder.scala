@@ -19,7 +19,7 @@ class SQLQueryBuilder(val margin: Int = 0, subquery: Boolean = false) {
   private case class ValueProject(expr: OQLExpression, table: String) extends Project { override def toString: String = expression(expr, table) }
   private case class QueryProject(query: SQLQueryBuilder) extends Project { override def toString: String = query.toString }
 
-  private var from: String = _
+  private var from: (String, Option[String]) = _
 //  private val tables = new mutable.HashMap[String, Int]
   private val innerJoins = new ArrayBuffer[Join]
   private val leftJoins = new ArrayBuffer[Join]
@@ -27,9 +27,9 @@ class SQLQueryBuilder(val margin: Int = 0, subquery: Boolean = false) {
   private val projects = new ArrayBuffer[Project]
   private var where: Option[(String, OQLExpression)] = None
 
-  def table(name: String): Unit = {
+  def table(name: String, alias: Option[String]): Unit = {
     if (from eq null)
-      from = name
+      from = (name, alias)
   }
 
   def select(cond: OQLExpression, table: String): Unit =
@@ -53,6 +53,7 @@ class SQLQueryBuilder(val margin: Int = 0, subquery: Boolean = false) {
 
   def expression(expr: OQLExpression, table: String): String =
     expr match {
+      case RawOQLExpression(s)                               => s
       case InfixOQLExpression(left, op @ ("*" | "/"), right) => s"${expression(left, table)}$op${expression(right, table)}"
       case InfixOQLExpression(left, op, right)               => s"${expression(left, table)} $op ${expression(right, table)}"
       case PrefixOQLExpression("-", expr)                    => s"-${expression(expr, table)}"
@@ -65,7 +66,6 @@ class SQLQueryBuilder(val margin: Int = 0, subquery: Boolean = false) {
     }
 
   def leftJoin(t1: String, c1: String, t2: String, alias: String, c2: String): SQLQueryBuilder = {
-    table(t2)
     leftJoins += Join(t1, c1, t2, alias, c2)
     this
   }
@@ -80,9 +80,14 @@ class SQLQueryBuilder(val margin: Int = 0, subquery: Boolean = false) {
   override def toString: String = {
     val buf = new StringBuilder
     var indent = margin
+    var first = true
 
     def line(s: String): Unit = {
-      buf ++= " " * indent
+      if (first)
+        first = false
+      else
+        buf ++= " " * indent
+
       buf ++= s
       buf += '\n'
     }
@@ -102,7 +107,9 @@ class SQLQueryBuilder(val margin: Int = 0, subquery: Boolean = false) {
 
     out()
 
-    line(s"FROM $from")
+    val (tab, alias) = from
+
+    line(s"FROM $tab${if (alias.isDefined) s" AS ${alias.get}" else ""}")
     in()
 
     for (Join(t1, c1, t2, alias, c2) <- innerJoins)
@@ -118,10 +125,10 @@ class SQLQueryBuilder(val margin: Int = 0, subquery: Boolean = false) {
       case None                =>
     }
 
-    out()
-
     if (subquery)
       line("))")
+
+    out()
 
     buf.toString
   }
