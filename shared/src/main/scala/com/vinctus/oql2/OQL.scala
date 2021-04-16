@@ -109,6 +109,10 @@ class OQL(dm: String, val dataSource: OQLDataSource) {
                 a.entity = entity
                 a.attr = attr
                 expProj
+              case Some(attr @ Attribute(_, _, _, _, ManyToManyType(mtmEntity, link, self, target))) =>
+                QueryOQLProject(
+                  label,
+                  queryProjects(Some(entity), OQLQuery(id, mtmEntity, attr, List(StarOQLProject), None, None, None, OQLRestrict(None, None)), oql))
               case Some(attr @ Attribute(_, _, _, _, ManyToOneType(mtoEntity))) =>
                 QueryOQLProject(
                   label,
@@ -135,8 +139,9 @@ class OQL(dm: String, val dataSource: OQLDataSource) {
         case ExpressionOQLProject(label, expr) => ValueNode(expr)
         case QueryOQLProject(label, query) =>
           query.attr.typ match {
-            case ManyToOneType(mtoEntity)       => ManyToOneNode(query.entity, query.attr, objectNode(query.project))
-            case OneToManyType(otmEntity, attr) => OneToManyNode(query.entity, query.attr, objectNode(query.project))
+            case ManyToOneType(mtoEntity)           => ManyToOneNode(query.entity, query.attr, objectNode(query.project))
+            case OneToManyType(otmEntity, attr)     => OneToManyNode(query.entity, query.attr, objectNode(query.project))
+            case ManyToManyType(mtmEntity, _, _, _) => ManyToManyNode(query.entity, query.attr, objectNode(query.project))
           }
       })
     })
@@ -167,6 +172,19 @@ class OQL(dm: String, val dataSource: OQLDataSource) {
           writeQuery(element, entity.table, builder)
         case e @ ValueNode(expr)    => e.idx = builder.projectValue(expr, table)
         case ObjectNode(properties) => properties foreach { case (_, e) => writeQuery(e, table, builder) }
+        case n @ ManyToManyNode(entity,
+                                attr @ Attribute(name, column, pk, required, ManyToManyType(mtmEntity, linkEntity, selfAttr, targetAttr)),
+                                element) =>
+          val alias = s"$table$$$name"
+          val subquery = new SQLQueryBuilder(builder.margin + SQLQueryBuilder.INDENT, true)
+          val joinAlias = s"$alias$$${targetAttr.name}"
+
+          n.idx = builder.projectQuery(subquery)
+          subquery.table(linkEntity.table, Some(alias))
+          writeQuery(element, joinAlias, subquery)
+          subquery.select(RawOQLExpression(s"$alias.${selfAttr.column} = $table.${entity.pk.get.column}"), null)
+
+          subquery.innerJoin(alias, targetAttr.column, mtmEntity.table, joinAlias, mtmEntity.pk.get.column)
         case n @ ManyToOneNode(entity, attr @ Attribute(name, column, pk, required, ManyToOneType(mtoEntity)), element) =>
           val alias = s"$table$$$name"
 
@@ -218,6 +236,14 @@ class OQL(dm: String, val dataSource: OQLDataSource) {
             while (listResultSet.next) array += buildResult(element, listResultSet)
 
             array.toList
+          case n @ ManyToManyNode(entity, attr, element) =>
+            val listResultSet = new ListResultSet(DefaultJSONReader.fromString(resultSet.getString(n.idx)).asInstanceOf[List[List[Any]]])
+
+            val array = new ListBuffer[Any]
+
+            while (listResultSet.next) array += buildResult(element, listResultSet)
+
+            array.toList
           case v: ValueNode => resultSet get v.idx
           case ObjectNode(properties) =>
             val map = new mutable.LinkedHashMap[String, Any]
@@ -241,10 +267,12 @@ case class ResultNode(entity: Entity, element: Node, select: Option[OQLExpressio
 
 case class ManyToOneNode(entity: Entity, attr: Attribute, element: Node) extends Node { var idx: Int = _ }
 
-case class OneToManyNode(entity: Entity, attribute: Attribute, element: Node) extends Node { var idx: Int = _ }
+case class OneToManyNode(entity: Entity, attr: Attribute, element: Node) extends Node { var idx: Int = _ }
 
-case class ObjectNode(properties: Seq[(String, Node)]) extends Node // todo: objects as a way of grouping expressions
+case class ManyToManyNode(entity: Entity, attr: Attribute, element: Node) extends Node { var idx: Int = _ }
 
-case class TupleNode(elements: Seq[Node]) extends Node // todo: tuples as a way of grouping expressions
+case class ObjectNode(props: Seq[(String, Node)]) extends Node // todo: objects as a way of grouping expressions
+
+case class TupleNode(elems: Seq[Node]) extends Node // todo: tuples as a way of grouping expressions
 
 case class ValueNode(value: OQLExpression) extends Node { var idx: Int = _ }
