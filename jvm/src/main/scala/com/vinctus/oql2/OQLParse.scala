@@ -41,10 +41,14 @@ object OQLParse {
       case _ => ctx.id
     }
 
-  def label(f: Ident, a: Any): Ident =
-    a match {
-      case AttributeOQLExpression(List(id), _, _) => Ident(s"${f.s}_${id.s}", f.pos)
-      case StarOQLExpression                      => f
+  def label(ctx: LabelContext, f: Ident, a: Any): Ident =
+    ctx match {
+      case null =>
+        a match {
+          case AttributeOQLExpression(List(id), _, _) => Ident(s"${f.s}_${id.s}", f.pos)
+          case StarOQLExpression                      => f
+        }
+      case _ => ctx.id
     }
 
   def project(ps: mutable.Buffer[OQLProject]): List[OQLProject] = if (ps eq null) Nil else ps.toList

@@ -148,4 +148,26 @@ class EmployeeDBTests extends AnyFreeSpec with Matchers with EmployeeDB {
         |""".trim.stripMargin
   }
 
+  "count(*)" in {
+    test("employee { count(*) }") shouldBe
+      """
+        |[
+        |  {
+        |    "count": 5
+        |  }
+        |]
+        |""".trim.stripMargin
+  }
+
+  "function with label" in {
+    test("employee { employeeCount: count(*) }") shouldBe
+      """
+        |[
+        |  {
+        |    "employeeCount": 5
+        |  }
+        |]
+        |""".trim.stripMargin
+  }
+
 }
