@@ -97,4 +97,55 @@ class EmployeeDBTests extends AnyFreeSpec with Matchers with EmployeeDB {
         |""".trim.stripMargin
   }
 
+  "one-to-many query with inner many-to-one query" in {
+    test("job { jobTitle employees { firstName manager { firstName } } }") shouldBe
+      """
+        |[
+        |  {
+        |    "jobTitle": "President",
+        |    "employees": [
+        |      {
+        |        "firstName": "Steven",
+        |        "manager": null
+        |      }
+        |    ]
+        |  },
+        |  {
+        |    "jobTitle": "Administration Vice President",
+        |    "employees": [
+        |      {
+        |        "firstName": "Neena",
+        |        "manager": {
+        |          "firstName": "Steven"
+        |        }
+        |      },
+        |      {
+        |        "firstName": "Lex",
+        |        "manager": {
+        |          "firstName": "Steven"
+        |        }
+        |      }
+        |    ]
+        |  },
+        |  {
+        |    "jobTitle": "Programmer",
+        |    "employees": [
+        |      {
+        |        "firstName": "Alexander",
+        |        "manager": {
+        |          "firstName": "Lex"
+        |        }
+        |      },
+        |      {
+        |        "firstName": "Bruce",
+        |        "manager": {
+        |          "firstName": "Alexander"
+        |        }
+        |      }
+        |    ]
+        |  }
+        |]
+        |""".trim.stripMargin
+  }
+
 }
