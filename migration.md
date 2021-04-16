@@ -19,6 +19,7 @@ The breaking changes in the query language are:
 
 - in projections, "subtracts" (`"-" attributeName`) can only be written right after a `*`, which has to be the first element of the projection if it occurs
 - keywords must be written in uppercase
+- the default for `count(*)` is now `count`
 
 API
 ---

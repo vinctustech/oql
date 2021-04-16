@@ -1,5 +1,6 @@
 package com.vinctus.oql2
 
+import org.checkerframework.checker.units.qual.s
 import xyz.hyperreal.pretty._
 
 import scala.Console.in
@@ -53,6 +54,8 @@ class SQLQueryBuilder(val margin: Int = 0, subquery: Boolean = false) {
 
   def expression(expr: OQLExpression, table: String): String =
     expr match {
+      case ApplyOQLExpression(f, args)                       => s"${f.s}(${args map (expression(_, table)) mkString ", "})"
+      case StarOQLExpression                                 => "*"
       case RawOQLExpression(s)                               => s
       case InfixOQLExpression(left, op @ ("*" | "/"), right) => s"${expression(left, table)}$op${expression(right, table)}"
       case InfixOQLExpression(left, op, right)               => s"${expression(left, table)} $op ${expression(right, table)}"

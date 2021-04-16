@@ -47,8 +47,10 @@ attributeProjects returns [ListBuffer<OQLProject> ps]
   ;
 
 attributeProject returns [OQLProject p]
-  : label? applyExpression
-    { $p = new ExpressionOQLProject(OQLParse.label($label.ctx, $applyExpression.e), $applyExpression.e); }
+  : label? identifier '(' argument ')'
+    { $p = new ExpressionOQLProject(OQLParse.label($identifier.id, $argument.e), new ApplyOQLExpression($identifier.id, new ListBuffer<OQLExpression>().addOne($argument.e).toList())); }
+  | label applyExpression
+    { $p = new ExpressionOQLProject($label.id, $applyExpression.e); }
   | label '(' expression ')'
     { $p = new ExpressionOQLProject($label.id, $expression.e); }
   | label? attributeName
@@ -61,15 +63,20 @@ attributeProject returns [OQLProject p]
     { $p = new QueryOQLProject(OQLParse.label($label.ctx, $query.q), $query.q); }
   ;
 
+argument returns [OQLExpression e]
+  : identifier
+    { $e = new AttributeOQLExpression(new ListBuffer<Ident>().addOne($identifier.id).toList(), null, null); }
+  | '*'
+    { $e = StarOQLExpression$.MODULE$; }
+  ;
+
 label returns [Ident id]
   : identifier ':'
     { $id = $identifier.id; }
   ;
 
 expression returns [OQLExpression e]
-  : '*'
-    { $e = StarOQLExpression$.MODULE$; }
-  | additive
+  : additive
     { $e = $additive.e; }
   ;
 
@@ -97,6 +104,8 @@ primary returns [OQLExpression e]
     { $e = new NumberOQLExpression(Double.parseDouble($NUMBER.text), new Position($NUMBER.line, $NUMBER.pos)); }
   | STRING
     { $e = new LiteralOQLExpression($STRING.text.substring(1, $STRING.text.length() - 1), new Position($STRING.line, $STRING.pos)); }
+  | '*'
+    { $e = StarOQLExpression$.MODULE$; }
   | b=('TRUE' | 'FALSE')
     { $e = new BooleanOQLExpression($b.text, new Position($b.line, $b.pos)); }
   | applyExpression

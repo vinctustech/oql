@@ -5,6 +5,7 @@ import org.antlr.v4.runtime.{CharStreams, CommonTokenStream, ConsoleErrorListene
 
 import scala.collection.mutable
 import scala.jdk.CollectionConverters._
+import scala.reflect.internal.NoPhase.id
 
 object OQLParse {
 
@@ -38,6 +39,12 @@ object OQLParse {
           case ParameterOQLExpression(id)              => id
         }
       case _ => ctx.id
+    }
+
+  def label(f: Ident, a: Any): Ident =
+    a match {
+      case AttributeOQLExpression(List(id), _, _) => Ident(s"${f.s}_${id.s}", f.pos)
+      case StarOQLExpression                      => f
     }
 
   def project(ps: mutable.Buffer[OQLProject]): List[OQLProject] = if (ps eq null) Nil else ps.toList
