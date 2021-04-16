@@ -24,7 +24,7 @@ trait EmployeeDB extends Test {
       | *id: bigint
       |  departmentName: text
       |  employees: [employee]
-      |  jpbs: [job] (employee)
+      |  jobs: [job] (employee)
       |}
       |""".stripMargin
   val db = new OQL(dm, new H2_mem)
@@ -33,7 +33,8 @@ trait EmployeeDB extends Test {
   db.execute(_.insert("""insert into job (id, jobTitle) values 
                         |(4,'President'),
                         |(5,'Administration Vice President'),
-                        |(9,'Programmer')
+                        |(9,'Programmer'),
+                        |(20,'IT Manager')
                         |""".stripMargin))
   db.execute(_.insert("""insert into department (id, departmentName) values 
                         |(9,'Executive'),
@@ -43,7 +44,7 @@ trait EmployeeDB extends Test {
                         |(100,'Steven','King',null,4,9),
                         |(101,'Neena','Kochhar',100,5,9),
                         |(102,'Lex','De Haan',100,5,9),
-                        |(103,'Alexander','Hunold',102,9,6),
+                        |(103,'Alexander','Hunold',102,20,6),
                         |(104,'Bruce','Ernst',103,9,6)
                         |""".stripMargin))
 

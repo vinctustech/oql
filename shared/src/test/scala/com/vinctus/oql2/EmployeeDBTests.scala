@@ -86,10 +86,15 @@ class EmployeeDBTests extends AnyFreeSpec with Matchers with EmployeeDB {
         |    "jobTitle": "Programmer",
         |    "employees": [
         |      {
-        |        "firstName": "Alexander"
-        |      },
-        |      {
         |        "firstName": "Bruce"
+        |      }
+        |    ]
+        |  },
+        |  {
+        |    "jobTitle": "IT Manager",
+        |    "employees": [
+        |      {
+        |        "firstName": "Alexander"
         |      }
         |    ]
         |  }
@@ -131,15 +136,20 @@ class EmployeeDBTests extends AnyFreeSpec with Matchers with EmployeeDB {
         |    "jobTitle": "Programmer",
         |    "employees": [
         |      {
-        |        "firstName": "Alexander",
-        |        "manager": {
-        |          "firstName": "Lex"
-        |        }
-        |      },
-        |      {
         |        "firstName": "Bruce",
         |        "manager": {
         |          "firstName": "Alexander"
+        |        }
+        |      }
+        |    ]
+        |  },
+        |  {
+        |    "jobTitle": "IT Manager",
+        |    "employees": [
+        |      {
+        |        "firstName": "Alexander",
+        |        "manager": {
+        |          "firstName": "Lex"
         |        }
         |      }
         |    ]

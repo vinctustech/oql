@@ -16,6 +16,7 @@ command returns [OQLAST c]
     { $c = $insert.i; }
   ;
 
+// todo: use /= to represent 'DISTINCT'
 query returns [OQLQuery q]
   : entityName project select? group? order? restrict
     { $q = new OQLQuery($entityName.id, null, null, OQLParse.project($project.ps), OQLParse.select($select.ctx), OQLParse.group($group.ctx), OQLParse.order($order.ctx), $restrict.r); }
