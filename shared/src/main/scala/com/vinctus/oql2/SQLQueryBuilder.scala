@@ -5,6 +5,7 @@ import xyz.hyperreal.pretty._
 
 import scala.Console.in
 import scala.collection.mutable.ArrayBuffer
+import scala.language.postfixOps
 
 object SQLQueryBuilder {
 
@@ -62,10 +63,18 @@ class SQLQueryBuilder(val margin: Int = 0, subquery: Boolean = false) {
       case PrefixOQLExpression("-", expr)                    => s"-${expression(expr, table)}"
       case PrefixOQLExpression(op, expr)                     => s"$op ${expression(expr, table)}"
       case PostfixOQLExpression(expr, op)                    => s"${expression(expr, table)} $op"
-      case GroupingOQLExpression(expr)                       => s"($expr)"
-      case NumberOQLExpression(n, pos)                       => n.toString
-      case LiteralOQLExpression(s, pos)                      => s"'${quote(s)}'"
-      case AttributeOQLExpression(ids, _, attr)              => s"$table.${attr.column}" //todo ids not being used
+      case BetweenOQLExpression(expr, op, lower, upper) =>
+        s"${expression(expr, table)} $op ${expression(lower, table)} AND ${expression(upper, table)}"
+      case GroupingOQLExpression(expr)          => s"($expr)"
+      case NumberOQLExpression(n, pos)          => n.toString
+      case LiteralOQLExpression(s, pos)         => s"'${quote(s)}'"
+      case AttributeOQLExpression(ids, _, attr) => s"$table.${attr.column}" //todo ids not being used
+      case BooleanOQLExpression(b, pos)         => b
+      case CaseOQLExpression(whens, els) =>
+        s"CASE ${whens map {
+          case OQLWhen(cond, expr) =>
+            s"WHEN ${expression(cond, table)} THEN ${expression(expr, table)}"
+        } mkString}${if (els.isDefined) expression(els.get, table) else ""} END"
     }
 
   def leftJoin(t1: String, c1: String, t2: String, alias: String, c2: String): SQLQueryBuilder = {
