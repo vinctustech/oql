@@ -3,7 +3,7 @@ package com.vinctus.oql2
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.should.Matchers
 
-class MinimalEmployeeDBTests extends AnyFreeSpec with Matchers with MinimalEmployeeDB {
+class EmployeeDBTests extends AnyFreeSpec with Matchers with EmployeeDB {
 
   "simplest self-join query" in {
     test("employee { * manager }") shouldBe
@@ -54,6 +54,44 @@ class MinimalEmployeeDBTests extends AnyFreeSpec with Matchers with MinimalEmplo
         |      "firstName": "Alexander",
         |      "lastName": "Hunold"
         |    }
+        |  }
+        |]
+        |""".trim.stripMargin
+  }
+
+  "one-to-many query with inner query" in {
+    test("job { jobTitle employees { firstName } }") shouldBe
+      """
+        |[
+        |  {
+        |    "jobTitle": "President",
+        |    "employees": [
+        |      {
+        |        "firstName": "Steven"
+        |      }
+        |    ]
+        |  },
+        |  {
+        |    "jobTitle": "Administration Vice President",
+        |    "employees": [
+        |      {
+        |        "firstName": "Neena"
+        |      },
+        |      {
+        |        "firstName": "Lex"
+        |      }
+        |    ]
+        |  },
+        |  {
+        |    "jobTitle": "Programmer",
+        |    "employees": [
+        |      {
+        |        "firstName": "Alexander"
+        |      },
+        |      {
+        |        "firstName": "Bruce"
+        |      }
+        |    ]
         |  }
         |]
         |""".trim.stripMargin

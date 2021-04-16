@@ -61,6 +61,10 @@ class OQL(dm: String, val dataSource: OQLDataSource) {
               query.entity = entity
               query.attr = attr
               entity
+            case Some(attr @ Attribute(name, column, pk, required, OneToManyType(entity, otmAttr))) =>
+              query.entity = entity
+              query.attr = attr
+              entity
             case None => problem(query.resource.pos, s"entity '${outer.get} does not have attribute '${query.resource.s}'", oql)
           }
         }
@@ -113,7 +117,7 @@ class OQL(dm: String, val dataSource: OQLDataSource) {
                 QueryOQLProject(
                   label,
                   queryProjects(Some(entity), OQLQuery(id, otmEntity, attr, List(StarOQLProject), None, None, None, OQLRestrict(None, None)), oql))
-              case None => problem(id.pos, s"unknown attribute '${id.s}'", oql)
+              case None => problem(id.pos, s"entity '${entity.name}' does not have attribute '${id.s}'", oql)
             }
           case _ =>
             attributes(entity, expr, oql)
