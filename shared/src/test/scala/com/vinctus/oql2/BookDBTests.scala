@@ -61,7 +61,7 @@ class BookDBTests extends AnyFreeSpec with Matchers with BookDB {
         |""".trim.stripMargin
   }
 
-  "simplest many to one query" in {
+  "simplest many-to-one query" in {
     test("book { * author }") shouldBe
       """
         |[
@@ -123,7 +123,7 @@ class BookDBTests extends AnyFreeSpec with Matchers with BookDB {
         |""".trim.stripMargin
   }
 
-  "many to one query with select" in {
+  "many-to-one query with select" in {
     test("book { title year author { name } } [year > 1880]") shouldBe
       """
         |[

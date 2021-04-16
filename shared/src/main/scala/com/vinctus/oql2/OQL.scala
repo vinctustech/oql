@@ -65,7 +65,11 @@ class OQL(dm: String, val dataSource: OQLDataSource) {
               query.entity = entity
               query.attr = attr
               entity
-            case None => problem(query.resource.pos, s"entity '${outer.get} does not have attribute '${query.resource.s}'", oql)
+            case Some(attr @ Attribute(name, column, pk, required, ManyToManyType(entity, link, self, target))) =>
+              query.entity = entity
+              query.attr = attr
+              entity
+            case None => problem(query.resource.pos, s"entity '${outer.get}' does not have attribute '${query.resource.s}'", oql)
           }
         }
       } else
