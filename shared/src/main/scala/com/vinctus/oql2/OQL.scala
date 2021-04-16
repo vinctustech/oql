@@ -180,7 +180,6 @@ class OQL(dm: String, val dataSource: OQLDataSource) {
           n.idx = builder.projectQuery(subquery)
           subquery.table(mtoEntity.table, Some(alias))
           writeQuery(element, alias, subquery)
-          println(alias, entity, otmAttr)
           subquery.select(RawOQLExpression(s"$alias.${otmAttr.column} = $table.${entity.pk.get.column}"), null)
       }
     }

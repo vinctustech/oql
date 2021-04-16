@@ -103,7 +103,7 @@ class SQLQueryBuilder(val margin: Int = 0, subquery: Boolean = false) {
     in()
 
     for ((p, i) <- projects.zipWithIndex)
-      line(s"$p${if (i < projects.length - 1) "," else sq(")")}")
+      line(s"$p${if (i < projects.length - 1) "," else sq(" NULL ON NULL)")}")
 
     out()
 
