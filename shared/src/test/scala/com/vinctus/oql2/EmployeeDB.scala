@@ -17,11 +17,14 @@ trait EmployeeDB extends Test {
       | *id: bigint
       |  jobTitle: text
       |  employees: [employee]
+      |  departments: [department] (employee)
       |}
       |
       |entity department {
       | *id: bigint
       |  departmentName: text
+      |  employees: [employee]
+      |  jpbs: [job] (employee)
       |}
       |""".stripMargin
   val db = new OQL(dm, new H2_mem)

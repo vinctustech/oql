@@ -60,6 +60,17 @@ class DataModel(model: DMLModel, dml: String) {
                 case Some(EntityInfo(entity, _, _)) => OneToManyType(entity, null)
                 case None                           => printError(typ.pos, s"unknown entity: '${typ.s}'", dml)
               }
+            case DMLManyToManyType(entity, link) =>
+              (entities get entity.s, entities get link.s) match {
+                case (Some(EntityInfo(entity, _, _)), Some(EntityInfo(link, _, _))) => ManyToManyType(entity, link, null, null)
+                case (e, l) =>
+                  if (e.isEmpty)
+                    printError(entity.pos, s"unknown entity: '${entity.s}'", dml)
+                  if (l.isEmpty)
+                    printError(link.pos, s"unknown entity: '${link.s}'", dml)
+
+                  null
+              }
           }
 
         val attr = Attribute((a.alias getOrElse a.name).s, a.name.s, a.pk, a.required, typ)
@@ -67,7 +78,6 @@ class DataModel(model: DMLModel, dml: String) {
         if (a.pk) {
           if (!typ.isDataType)
             printError(typ.asInstanceOf[DMLEntityType].entity.pos, "primary key must be a non-relational data type", dml)
-
           if (a.required)
             printError(a.name.pos, "primary keys are already \"NOT NULL\" (required) by definition and may not be marked as such", dml)
 
@@ -82,6 +92,36 @@ class DataModel(model: DMLModel, dml: String) {
 
     for (EntityInfo(e, dmlas, as) <- entities.values) {
       dmlas.foreach {
+        case a @ DMLAttribute(_, _, DMLManyToManyType(entity, link), _, _) =>
+          val linkinfo = entities(link.s)
+          val self =
+            linkinfo.attrs.values.filter {
+              case Attribute(_, _, _, _, ManyToOneType(`e`)) => true
+              case _                                         => false
+            }
+
+          if (self.size > 1)
+            printError(link.pos, s"junction entity '${linkinfo.entity.name}' has more than one attribute of type '${link.s}'", dml)
+
+          if (self.size < 1)
+            printError(link.pos, s"junction entity '${linkinfo.entity.name}' has no attributes of type '${link.s}'", dml)
+
+          val targetentity = entities(entity.s).entity
+          val target =
+            linkinfo.attrs.values.filter {
+              case Attribute(_, _, _, _, ManyToOneType(`targetentity`)) => true
+              case _                                                    => false
+            }
+
+          if (target.size > 1)
+            printError(link.pos, s"junction entity '${linkinfo.entity.name}' has more than one attribute of type '${link.s}'", dml)
+
+          if (target.size < 1)
+            printError(link.pos, s"junction entity '${linkinfo.entity.name}' has no attributes of type '${link.s}'", dml)
+
+          val name = (a.alias getOrElse a.name).s
+
+          as(name) = as(name).copy(typ = ManyToManyType(targetentity, linkinfo.entity, self.head, target.head))
         case DMLAttribute(_, _, DMLManyToOneType(entity), _, _) =>
           if (entities(entity.s).entity.pk.isEmpty)
             printError(entity.pos, s"target entity '${entity.s}' has no declared primary key", dml)

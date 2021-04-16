@@ -18,3 +18,4 @@ case class ManyToOneType(entity: Entity) extends RelationalType
 
 trait ArrayRelationalType extends RelationalType { override val isArrayType = true }
 case class OneToManyType(entity: Entity, attribute: Attribute) extends ArrayRelationalType
+case class ManyToManyType(entity: Entity, link: Entity, self: Attribute, target: Attribute) extends ArrayRelationalType

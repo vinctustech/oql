@@ -31,8 +31,8 @@ attributes returns [ListBuffer<DMLAttribute> as]
   ;
 
 attribute returns [DMLAttribute a]
-  : pk? attributeName ('(' alias ')')? ':' attributeType required?
-    { $a = new DMLAttribute($attributeName.id, DMLParse.alias($alias.ctx), $attributeType.t, $pk.ctx != null, $required.ctx != null); }
+  : pk? attributeName ('(' alias ')')? ':' typeSpecifier required?
+    { $a = new DMLAttribute($attributeName.id, DMLParse.alias($alias.ctx), $typeSpecifier.t, $pk.ctx != null, $required.ctx != null); }
   ;
 
 pk
@@ -43,19 +43,19 @@ required
   : '!'
   ;
 
-attributeType returns [DMLTypeSpecifier t]
+typeSpecifier returns [DMLTypeSpecifier t]
   : simplePrimitiveType
     { $t = $simplePrimitiveType.t; }
-  | parametricPrimitiveType
-    { $t = $parametricPrimitiveType.t; }
-  | manyToOneType
-    { $t = $manyToOneType.t; }
-  | oneToManyType
-    { $t = $oneToManyType.t; }
-  | oneToOneType
-    { $t = $oneToOneType.t; }
-  | manyToManyType
-    { $t = $manyToManyType.t; }
+  | 'decimal' '(' p=INTEGER ',' s=INTEGER ')'
+    { $t = new DMLParametricPrimitiveType("decimal", new ListBuffer<String>().addOne($p.text).addOne($s.text).toList()); }
+  | entityName
+    { $t = new DMLManyToOneType($entityName.id); }
+  | '[' entityName ']' ('.' attributeName)?
+    { $t = new DMLOneToManyType($entityName.id, DMLParse.attributeName($attributeName.ctx)); }
+  | '<' entityName '>' ('.' attributeName)?
+    { $t = new DMLOneToOneType($entityName.id, DMLParse.attributeName($attributeName.ctx)); }
+  | '[' a=entityName ']' '(' l=entityName ')'
+    { $t = new DMLManyToManyType($a.id, $l.id); }
   ;
 
 simplePrimitiveType returns [DMLPrimitiveType t]
@@ -70,31 +70,6 @@ simplePrimitiveType returns [DMLPrimitiveType t]
     'timestamp'
     )
     { $t = new DMLSimplePrimitiveType($s.text); }
-  ;
-
-parametricPrimitiveType returns [DMLPrimitiveType t]
-  : 'decimal' '(' p=INTEGER ',' s=INTEGER ')'
-    { $t = new DMLParametricPrimitiveType("decimal", new ListBuffer<String>().addOne($p.text).addOne($s.text).toList()); }
-  ;
-
-manyToOneType returns [DMLManyToOneType t]
-  : entityName
-    { $t = new DMLManyToOneType($entityName.id); }
-  ;
-
-oneToManyType returns [DMLOneToManyType t]
-  : '[' entityName ']' ('.' attributeName)?
-    { $t = new DMLOneToManyType($entityName.id, DMLParse.attributeName($attributeName.ctx)); }
-  ;
-
-oneToOneType returns [DMLOneToOneType t]
-  : '<' entityName '>' ('.' attributeName)?
-    { $t = new DMLOneToOneType($entityName.id, DMLParse.attributeName($attributeName.ctx)); }
-  ;
-
-manyToManyType returns [DMLManyToManyType t]
-  : '[' a=entityName ']' ('.' attributeName)? '(' l=entityName ')'
-    { $t = new DMLManyToManyType($a.id, DMLParse.attributeName($attributeName.ctx), $l.id); }
   ;
 
 alias returns [Ident id]
