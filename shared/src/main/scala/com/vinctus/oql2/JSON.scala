@@ -51,12 +51,12 @@ object JSON {
 
     def jsonValue(value: Any): Unit =
       value match {
-        case _: Double | _: Int | _: Long | _: Boolean | null => buf ++= String.valueOf(value)
-        case m: collection.Map[_, _]                          => jsonObject(m.toSeq.asInstanceOf[Seq[(String, Any)]])
-        case s: collection.Seq[_] if s.isEmpty                => buf ++= "[]"
-        case s: collection.Seq[_]                             => aggregate('[', s, ']')(jsonValue)
-        case a: Array[_]                                      => jsonValue(a.toList)
-        case p: Product                                       => jsonObject(p.productElementNames zip p.productIterator toList)
+        case _: Double | _: Int | _: Long | _: Boolean | _: BigDecimal | _: java.math.BigDecimal | null => buf ++= String.valueOf(value)
+        case m: collection.Map[_, _]                                                                    => jsonObject(m.toSeq.asInstanceOf[Seq[(String, Any)]])
+        case s: collection.Seq[_] if s.isEmpty                                                          => buf ++= "[]"
+        case s: collection.Seq[_]                                                                       => aggregate('[', s, ']')(jsonValue)
+        case a: Array[_]                                                                                => jsonValue(a.toList)
+        case p: Product                                                                                 => jsonObject(p.productElementNames zip p.productIterator toList)
         case _: String | _: Instant =>
           buf += '"'
           buf ++=
