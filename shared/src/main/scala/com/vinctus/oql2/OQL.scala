@@ -180,7 +180,7 @@ class OQL(dm: String, val dataSource: OQLDataSource) {
                                 attr @ Attribute(name, column, pk, required, ManyToManyType(mtmEntity, linkEntity, selfAttr, targetAttr)),
                                 element) =>
           val alias = s"$table$$$name"
-          val subquery = new SQLQueryBuilder(builder.margin + SQLQueryBuilder.INDENT, true)
+          val subquery = new SQLQueryBuilder(builder.margin + 2 * SQLQueryBuilder.INDENT, true)
           val joinAlias = s"$alias$$${targetAttr.name}"
 
           n.idx = builder.projectQuery(subquery)
@@ -197,7 +197,7 @@ class OQL(dm: String, val dataSource: OQLDataSource) {
           writeQuery(element, alias, builder)
         case n @ OneToManyNode(entity, attr @ Attribute(name, column, pk, required, OneToManyType(mtoEntity, otmAttr)), element) =>
           val alias = s"$table$$$name"
-          val subquery = new SQLQueryBuilder(builder.margin + SQLQueryBuilder.INDENT, true)
+          val subquery = new SQLQueryBuilder(builder.margin + 2 * SQLQueryBuilder.INDENT, true)
 
           n.idx = builder.projectQuery(subquery)
           subquery.table(mtoEntity.table, Some(alias))

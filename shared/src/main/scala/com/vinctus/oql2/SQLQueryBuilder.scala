@@ -19,7 +19,7 @@ class SQLQueryBuilder(val margin: Int = 0, subquery: Boolean = false) {
 
   private trait Project
   private case class ValueProject(expr: OQLExpression, table: String) extends Project { override def toString: String = expression(expr, table) }
-  private case class QueryProject(query: SQLQueryBuilder) extends Project { override def toString: String = query.toString }
+  private case class QueryProject(query: SQLQueryBuilder) extends Project { override def toString: String = query.toString.trim }
 
   private var from: (String, Option[String]) = _
 //  private val tables = new mutable.HashMap[String, Int]
