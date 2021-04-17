@@ -58,7 +58,7 @@ attributeProject returns [OQLProject p]
   | label '(' expression ')'
     { $p = new ExpressionOQLProject($label.id, $expression.e); }
   | label? attributeName
-    { $p = new ExpressionOQLProject(OQLParse.label($label.ctx, $attributeName.id), new AttributeOQLExpression(new ListBuffer<Ident>().addOne($attributeName.id).toList(), null, null)); }
+    { $p = new ExpressionOQLProject(OQLParse.label($label.ctx, $attributeName.id), new AttributeOQLExpression(new ListBuffer<Ident>().addOne($attributeName.id).toList(), null)); }
   | label? '&' attributeName
     { $p = new ExpressionOQLProject(OQLParse.label($label.ctx, $attributeName.id), new ReferenceOQLExpression(new ListBuffer<Ident>().addOne($attributeName.id).toList())); }
   | label? parameter
@@ -69,7 +69,7 @@ attributeProject returns [OQLProject p]
 
 argument returns [OQLExpression e]
   : identifier
-    { $e = new AttributeOQLExpression(new ListBuffer<Ident>().addOne($identifier.id).toList(), null, null); }
+    { $e = new AttributeOQLExpression(new ListBuffer<Ident>().addOne($identifier.id).toList(), null); }
   | '*'
     { $e = StarOQLExpression$.MODULE$; }
   ;
@@ -153,7 +153,7 @@ logicalPrimary returns [OQLExpression e]
 
 qualifiedAttributeName returns [AttributeOQLExpression e]
   : identifiers
-    { $e = new AttributeOQLExpression($identifiers.ids.toList(), null, null); }
+    { $e = new AttributeOQLExpression($identifiers.ids.toList(), null); }
   ;
 
 identifiers returns [ListBuffer<Ident> ids]

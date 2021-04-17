@@ -31,7 +31,7 @@ case class FloatOQLExpression(n: Double, pos: Position) extends OQLExpression
 case class IntegerOQLExpression(n: Int, pos: Position) extends OQLExpression
 case class LiteralOQLExpression(s: String, pos: Position) extends OQLExpression
 case class BooleanOQLExpression(b: String, pos: Position) extends OQLExpression
-case class AttributeOQLExpression(ids: List[Ident], var entity: Entity, var attr: Attribute) extends OQLExpression
+case class AttributeOQLExpression(ids: List[Ident], var dmrefs: List[(Entity, Attribute)]) extends OQLExpression
 case class ReferenceOQLExpression(ids: List[Ident]) extends OQLExpression
 case class ParameterOQLExpression(p: Ident) extends OQLExpression
 case class ApplyOQLExpression(f: Ident, args: List[OQLExpression]) extends OQLExpression

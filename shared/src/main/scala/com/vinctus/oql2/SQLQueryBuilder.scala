@@ -77,14 +77,19 @@ class SQLQueryBuilder(val parms: Parameters, oql: String, val margin: Int = 0, s
       case FloatOQLExpression(n, pos)   => n.toString
       case IntegerOQLExpression(n, pos) => n.toString
       case LiteralOQLExpression(s, pos) => s"'${quote(s)}'"
-      case AttributeOQLExpression(ids, _, attr) =>
+      case AttributeOQLExpression(ids, dmrefs) =>
         val alias =
-          ids dropRight 1 match {
-            case Nil  => table
-            case qual => s"$table$$${qual map { case Ident(s, _) => s } mkString "$"}"
+          ids zip dmrefs dropRight 1 match {
+            case Nil => table
+            case qual =>
+              s"$table$$${qual map {
+                case (Ident(s, _), (e: Entity, a: Attribute)) =>
+//                  leftJoin()
+                  s
+              } mkString "$"}"
           }
 
-        s"$alias.${attr.column}"
+        s"$alias.${dmrefs.last._2.column}"
       case BooleanOQLExpression(b, pos) => b
       case CaseOQLExpression(whens, els) =>
         s"CASE ${whens map {

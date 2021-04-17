@@ -41,26 +41,29 @@ class OQL(dm: String, val dataSource: OQLDataSource) {
       case InfixOQLExpression(left, _, right) =>
         attributes(entity, left, oql)
         attributes(entity, right, oql)
-      case attrexp @ AttributeOQLExpression(ids, _, _) =>
+      case attrexp @ AttributeOQLExpression(ids, _) =>
+        val dmrefs = new ListBuffer[(Entity, Attribute)]
+
         @tailrec
         def lookup(ids: List[Ident], entity: Entity): Unit =
           ids match {
             case List(id) =>
               entity.attributes get id.s match {
-                case Some(attr) =>
-                  attrexp.entity = entity
-                  attrexp.attr = attr
-                case None => problem(id.pos, s"entity '${entity.name}' does not have attribute '${id.s}'", oql)
+                case Some(attr) => dmrefs += (entity -> attr)
+                case None       => problem(id.pos, s"entity '${entity.name}' does not have attribute '${id.s}'", oql)
               }
             case head :: tail =>
               entity.attributes get head.s match {
-                case Some(attr @ Attribute(name, column, pk, required, ManyToOneType(mtoEntity))) => lookup(tail, mtoEntity)
-                case Some(_)                                                                      => problem(head.pos, s"attribute '${head.s}' of entity '${entity.name}' does not have an entity type", oql)
-                case None                                                                         => problem(head.pos, s"entity '${entity.name}' does not have attribute '${head.s}'", oql)
+                case Some(attr @ Attribute(name, column, pk, required, ManyToOneType(mtoEntity))) =>
+                  dmrefs += (mtoEntity -> attr)
+                  lookup(tail, mtoEntity)
+                case Some(_) => problem(head.pos, s"attribute '${head.s}' of entity '${entity.name}' does not have an entity type", oql)
+                case None    => problem(head.pos, s"entity '${entity.name}' does not have attribute '${head.s}'", oql)
               }
           }
 
         lookup(ids, entity)
+        attrexp.dmrefs = dmrefs.toList
       case _ =>
     }
 
@@ -104,7 +107,7 @@ class OQL(dm: String, val dataSource: OQLDataSource) {
       case StarOQLProject =>
         entity.attributes.values foreach {
           case attr @ Attribute(name, column, pk, required, typ) if typ.isDataType =>
-            map(name) = ExpressionOQLProject(Ident(name), AttributeOQLExpression(List(Ident(name)), entity, attr))
+            map(name) = ExpressionOQLProject(Ident(name), AttributeOQLExpression(List(Ident(name)), List((entity, attr))))
           case _ => // non-datatype attributes don't get included with '*'
         }
       case SubtractOQLProject(id) =>
@@ -122,11 +125,10 @@ class OQL(dm: String, val dataSource: OQLDataSource) {
           problem(label.pos, s"duplicate attribute label '${label.s}'", oql)
 
         map(label.s) = expr match {
-          case a @ AttributeOQLExpression(List(id), _, _) =>
+          case a @ AttributeOQLExpression(List(id), _) =>
             entity.attributes get id.s match {
               case Some(attr @ Attribute(_, _, _, _, _: DataType)) =>
-                a.entity = entity
-                a.attr = attr
+                a.dmrefs = List((entity, attr))
                 expProj
               case Some(attr @ Attribute(_, _, _, _, ManyToManyType(mtmEntity, link, self, target))) =>
                 QueryOQLProject(
@@ -208,7 +210,7 @@ class OQL(dm: String, val dataSource: OQLDataSource) {
         case n @ ManyToOneNode(entity, attr @ Attribute(name, column, pk, required, ManyToOneType(mtoEntity)), element) =>
           val alias = s"$table$$$name"
 
-          n.idx = builder.projectValue(AttributeOQLExpression(List(Ident(name)), null, attr), table)
+          n.idx = builder.projectValue(AttributeOQLExpression(List(Ident(name)), List((entity, attr))), table)
           builder.leftJoin(table, column, entity.table, alias, entity.pk.get.column)
           writeQuery(element, alias, builder)
         case n @ OneToManyNode(entity, attr @ Attribute(name, column, pk, required, OneToManyType(mtoEntity, otmAttr)), element) =>

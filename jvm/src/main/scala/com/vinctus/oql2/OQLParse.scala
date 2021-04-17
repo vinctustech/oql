@@ -34,7 +34,7 @@ object OQLParse {
         proj match {
           case id: Ident                               => id
           case OQLQuery(resource, _, _, _, _, _, _, _) => resource
-          case AttributeOQLExpression(List(id), _, _)  => id
+          case AttributeOQLExpression(List(id), _)     => id
           case ReferenceOQLExpression(List(id))        => id
           case ParameterOQLExpression(id)              => id
         }
@@ -45,8 +45,8 @@ object OQLParse {
     ctx match {
       case null =>
         a match {
-          case AttributeOQLExpression(List(id), _, _) => Ident(s"${f.s}_${id.s}", f.pos)
-          case StarOQLExpression                      => f
+          case AttributeOQLExpression(List(id), _) => Ident(s"${f.s}_${id.s}", f.pos)
+          case StarOQLExpression                   => f
         }
       case _ => ctx.id
     }
