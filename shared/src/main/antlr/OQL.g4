@@ -120,8 +120,8 @@ primary returns [OQLExpression e]
     { $e = $parameter.e; }
   | qualifiedAttributeName
     { $e = $qualifiedAttributeName.e; }
-  | reference
-    { $e = $reference.e; }
+  | '&' identifiers
+    { $e = new ReferenceOQLExpression($identifiers.ids.toList()); }
   | caseExpression
     { $e = $caseExpression.e; }
   | '-' primary
@@ -161,11 +161,6 @@ identifiers returns [ListBuffer<Ident> ids]
     { $ids = $l.ids.addOne($identifier.id); }
   | identifier
     { $ids = new ListBuffer<Ident>().addOne($identifier.id); }
-  ;
-
-reference returns [OQLExpression e]
-  : '&' identifiers
-    { $e = new ReferenceOQLExpression($identifiers.ids.toList()); }
   ;
 
 parameter returns [OQLExpression e]
