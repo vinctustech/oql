@@ -88,7 +88,14 @@ class OQL(dm: String, val dataSource: OQLDataSource) {
 
         lookup(ids, entity)
         attrexp.dmrefs = dmrefs.toList
-      case _ =>
+      case InQueryOQLExpression(left, op, query) =>
+        recur(left)
+        queryProjects(Some(entity), query, oql)
+
+        if
+        query.select foreach (attributes(query.entity, _, oql))
+      case StarOQLExpression | _: RawOQLExpression | _: LiteralOQLExpression | _: FloatOQLExpression | _: IntegerOQLExpression |
+          _: BooleanOQLExpression | _: ReferenceOQLExpression =>
     }
   }
 

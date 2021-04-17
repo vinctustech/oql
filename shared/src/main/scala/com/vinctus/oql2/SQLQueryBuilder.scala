@@ -58,6 +58,7 @@ class SQLQueryBuilder(val parms: Parameters, oql: String, val margin: Int = 0, s
 
   def expression(expr: OQLExpression, table: String): String =
     expr match {
+      case InQueryOQLExpression(left, op, right) => s"$left $op (\n"
       case InParameterOQLExpression(left, op, right @ ParameterOQLExpression(p)) =>
         parms.get(p.s) match {
           case Some(value) if !value.isInstanceOf[Seq[_]] => problem(p.pos, s"parameter '${p.s}' is not an array", oql)

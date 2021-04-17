@@ -7,7 +7,7 @@ import java.nio.file.{Files, Path, Paths}
 
 object Main extends App with BookDB {
 
-  println(test("book [year IN :years]", Map("years" -> List(1883, 1884))))
+  println(test("author { name } ['Oliver Twist' IN (books { title })]"))
 
 }
 
