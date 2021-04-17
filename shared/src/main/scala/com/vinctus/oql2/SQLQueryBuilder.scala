@@ -72,7 +72,8 @@ class SQLQueryBuilder(val parms: Parameters, oql: String, val margin: Int = 0, s
       case BetweenOQLExpression(expr, op, lower, upper) =>
         s"${expression(expr, table)} $op ${expression(lower, table)} AND ${expression(upper, table)}"
       case GroupingOQLExpression(expr)          => s"($expr)"
-      case NumberOQLExpression(n, pos)          => n.toString
+      case FloatOQLExpression(n, pos)           => n.toString
+      case IntegerOQLExpression(n, pos)         => n.toString
       case LiteralOQLExpression(s, pos)         => s"'${quote(s)}'"
       case AttributeOQLExpression(ids, _, attr) => s"$table.${attr.column}" //todo ids not being used
       case BooleanOQLExpression(b, pos)         => b

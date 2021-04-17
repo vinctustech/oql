@@ -61,6 +61,24 @@ class BookDBTests extends AnyFreeSpec with Matchers with BookDB {
         |""".trim.stripMargin
   }
 
+  "simplest query with select using parameter" in {
+    test("book [year > :year]", Map("year" -> 1880)) shouldBe
+      """
+        |[
+        |  {
+        |    "id": 1,
+        |    "title": "Treasure Island",
+        |    "year": 1883
+        |  },
+        |  {
+        |    "id": 6,
+        |    "title": "Adventures of Huckleberry Finn",
+        |    "year": 1884
+        |  }
+        |]
+        |""".trim.stripMargin
+  }
+
   "simplest many-to-one query" in {
     test("book { * author }") shouldBe
       """

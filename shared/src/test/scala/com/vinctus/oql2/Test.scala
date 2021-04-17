@@ -4,6 +4,6 @@ trait Test {
 
   val db: OQL
 
-  def test(oql: String): String = JSON(db.queryMany(oql), format = true)
+  def test(oql: String, parameters: Map[String, Any] = Map()): String = JSON(db.queryMany(oql, parameters), format = true)
 
 }

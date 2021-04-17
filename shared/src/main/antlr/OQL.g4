@@ -19,7 +19,8 @@ command returns [OQLAST c]
 // todo: use /= to represent 'DISTINCT'
 query returns [OQLQuery q]
   : entityName project select? group? order? restrict
-    { $q = new OQLQuery($entityName.id, null, null, OQLParse.project($project.ps), OQLParse.select($select.ctx), OQLParse.group($group.ctx), OQLParse.order($order.ctx), $restrict.r); }
+    { $q = new OQLQuery($entityName.id, null, null, OQLParse.project($project.ps), OQLParse.select($select.ctx),
+      OQLParse.group($group.ctx), OQLParse.order($order.ctx), $restrict.r); }
   ;
 
 project returns [Buffer<OQLProject> ps]
@@ -103,8 +104,10 @@ applyExpression returns [OQLExpression e]
   ;
 
 primary returns [OQLExpression e]
-  : NUMBER
-    { $e = new NumberOQLExpression(Double.parseDouble($NUMBER.text), new Position($NUMBER.line, $NUMBER.pos)); }
+  : FLOAT
+    { $e = new FloatOQLExpression(Double.parseDouble($FLOAT.text), new Position($FLOAT.line, $FLOAT.pos)); }
+  | INTEGER
+    { $e = new IntegerOQLExpression(Integer.parseInt($INTEGER.text), new Position($INTEGER.line, $INTEGER.pos)); }
   | STRING
     { $e = new LiteralOQLExpression($STRING.text.substring(1, $STRING.text.length() - 1), new Position($STRING.line, $STRING.pos)); }
   | '*'
@@ -276,10 +279,10 @@ nulls
   ;
 
 restrict returns [OQLRestrict r]
-  : '|' l=NUMBER (',' o=NUMBER)? '|'
+  : '|' l=INTEGER (',' o=INTEGER)? '|'
     { $r = OQLParse.restrict($l.text, $o.text); }
-  | '|' ',' NUMBER '|'
-    { $r = OQLParse.restrict(null, $NUMBER.text); }
+  | '|' ',' INTEGER '|'
+    { $r = OQLParse.restrict(null, $INTEGER.text); }
   | // empty
     { $r = OQLParse.restrict(null, null); }
   ;
@@ -328,13 +331,12 @@ pair returns [OQLKeyValuePair p]
     { $p = new OQLKeyValuePair($label.id, $expression.e); }
   ;
 
-NUMBER
-  : [0-9]+ ('.' [0-9]+)? EXPONENT?
-  | '.' [0-9]+ EXPONENT?
+FLOAT
+  : [0-9]* '.' [0-9]+ ([eE] [+-]? [0-9]+)?
   ;
 
-fragment EXPONENT
-  : [eE] [+-]? [0-9]+
+INTEGER
+  : [0-9]+
   ;
 
 STRING
