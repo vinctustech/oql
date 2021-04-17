@@ -7,7 +7,7 @@ import java.nio.file.{Files, Path, Paths}
 
 object Main extends App with EmployeeDB {
 
-  println(test("employee { firstName job: job.jobTitle }"))
+  println(test("employee { firstName manager: manager.firstName }"))
 
 }
 

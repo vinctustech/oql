@@ -251,4 +251,32 @@ class EmployeeDBTests extends AnyFreeSpec with Matchers with EmployeeDB {
         |""".trim.stripMargin
   }
 
+  "dot notation in project" in {
+    test("employee { firstName manager: manager.firstName }") shouldBe
+      """
+        |[
+        |  {
+        |    "firstName": "Steven",
+        |    "manager": null
+        |  },
+        |  {
+        |    "firstName": "Neena",
+        |    "manager": "Steven"
+        |  },
+        |  {
+        |    "firstName": "Lex",
+        |    "manager": "Steven"
+        |  },
+        |  {
+        |    "firstName": "Alexander",
+        |    "manager": "Lex"
+        |  },
+        |  {
+        |    "firstName": "Bruce",
+        |    "manager": "Alexander"
+        |  }
+        |]
+        |""".trim.stripMargin
+  }
+
 }

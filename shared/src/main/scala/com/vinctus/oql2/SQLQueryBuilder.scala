@@ -2,6 +2,7 @@ package com.vinctus.oql2
 
 import org.checkerframework.checker.units.qual.s
 import org.graalvm.compiler.debug.TTY.out
+import sun.jvm.hotspot.HelloWorld.e
 import xyz.hyperreal.pretty._
 
 import scala.Console.in
@@ -78,16 +79,13 @@ class SQLQueryBuilder(val parms: Parameters, oql: String, val margin: Int = 0, s
       case IntegerOQLExpression(n, pos) => n.toString
       case LiteralOQLExpression(s, pos) => s"'${quote(s)}'"
       case AttributeOQLExpression(ids, dmrefs) =>
-        val alias =
-          ids zip dmrefs dropRight 1 match {
-            case Nil => table
-            case qual =>
-              s"$table$$${qual map {
-                case (Ident(s, _), (e: Entity, a: Attribute)) =>
-//                  leftJoin()
-                  s
-              } mkString "$"}"
-          }
+        var alias = table
+
+        dmrefs dropRight 1 foreach {
+          case (e: Entity, Attribute(name, _, _, _, _)) =>
+            alias = s"$alias$$$name"
+            leftJoin(table, name, e.table, alias, e.pk.get.column)
+        }
 
         s"$alias.${dmrefs.last._2.column}"
       case BooleanOQLExpression(b, pos) => b
