@@ -10,7 +10,7 @@ import java.sql.ResultSet
 import xyz.hyperreal.table.TextTable
 
 import scala.annotation.tailrec
-import scala.collection.immutable.VectorMap
+import scala.collection.immutable.{AbstractSet, SortedSet, VectorMap}
 
 class OQL(dm: String, val dataSource: OQLDataSource) {
 
@@ -157,8 +157,9 @@ class OQL(dm: String, val dataSource: OQLDataSource) {
         case None              => sys.error("error parsing query")
         case Some(q: OQLQuery) => q
       }
+    val parms = new Parameters(parameters)
 
-//    println(prettyPrint(query))
+    //    println(prettyPrint(query))
 
     queryProjects(None, query, oql)
     query.select foreach (attributes(query.entity, _, oql))
@@ -180,7 +181,7 @@ class OQL(dm: String, val dataSource: OQLDataSource) {
                                 attr @ Attribute(name, column, pk, required, ManyToManyType(mtmEntity, linkEntity, selfAttr, targetAttr)),
                                 element) =>
           val alias = s"$table$$$name"
-          val subquery = new SQLQueryBuilder(builder.margin + 2 * SQLQueryBuilder.INDENT, true)
+          val subquery = new SQLQueryBuilder(builder.parms, oql, builder.margin + 2 * SQLQueryBuilder.INDENT, true)
           val joinAlias = s"$alias$$${targetAttr.name}"
 
           n.idx = builder.projectQuery(subquery)
@@ -197,7 +198,7 @@ class OQL(dm: String, val dataSource: OQLDataSource) {
           writeQuery(element, alias, builder)
         case n @ OneToManyNode(entity, attr @ Attribute(name, column, pk, required, OneToManyType(mtoEntity, otmAttr)), element) =>
           val alias = s"$table$$$name"
-          val subquery = new SQLQueryBuilder(builder.margin + 2 * SQLQueryBuilder.INDENT, true)
+          val subquery = new SQLQueryBuilder(builder.parms, oql, builder.margin + 2 * SQLQueryBuilder.INDENT, true)
 
           n.idx = builder.projectQuery(subquery)
           subquery.table(mtoEntity.table, Some(alias))
@@ -208,11 +209,16 @@ class OQL(dm: String, val dataSource: OQLDataSource) {
 
 //    println(prettyPrint(root))
 
-    val sqlBuilder = new SQLQueryBuilder
+    val sqlBuilder = new SQLQueryBuilder(parms, oql)
 
     writeQuery(root, null, sqlBuilder)
 
     val sql = sqlBuilder.toString
+
+    parameters.keySet diff parms.keySet match {
+      case set: Set[_] if set.nonEmpty => sys.error(s"superfluous query parameters: ${set mkString ", "}")
+      case _                           =>
+    }
 
     println(sql)
 

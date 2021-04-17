@@ -13,7 +13,7 @@ object SQLQueryBuilder {
 
 }
 
-class SQLQueryBuilder(val margin: Int = 0, subquery: Boolean = false) {
+class SQLQueryBuilder(val parms: Parameters, oql: String, val margin: Int = 0, subquery: Boolean = false) {
 
   import SQLQueryBuilder._
 
@@ -55,6 +55,12 @@ class SQLQueryBuilder(val margin: Int = 0, subquery: Boolean = false) {
 
   def expression(expr: OQLExpression, table: String): String =
     expr match {
+      case ParameterOQLExpression(p) =>
+        parms get p.s match {
+          case Some(parm: Seq[_]) => parm.mkString("(", ", ", ")")
+          case Some(parm)         => parm.toString
+          case None               => problem(p.pos, s"parameter '${p.s}' not found", oql)
+        }
       case ApplyOQLExpression(f, args)                       => s"${f.s}(${args map (expression(_, table)) mkString ", "})"
       case StarOQLExpression                                 => "*"
       case RawOQLExpression(s)                               => s
