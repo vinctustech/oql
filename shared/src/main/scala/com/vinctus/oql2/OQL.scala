@@ -257,7 +257,6 @@ class OQL(dm: String, val dataSource: OQLDataSource) {
             else buildResult(element, resultSet)
           case n @ OneToManyNode(entity, attribute, element) =>
             val listResultSet = new ListResultSet(DefaultJSONReader.fromString(resultSet.getString(n.idx)).asInstanceOf[List[List[Any]]])
-
             val array = new ListBuffer[Any]
 
             while (listResultSet.next) array += buildResult(element, listResultSet)
@@ -265,7 +264,6 @@ class OQL(dm: String, val dataSource: OQLDataSource) {
             array.toList
           case n @ ManyToManyNode(entity, attr, element) =>
             val listResultSet = new ListResultSet(DefaultJSONReader.fromString(resultSet.getString(n.idx)).asInstanceOf[List[List[Any]]])
-
             val array = new ListBuffer[Any]
 
             while (listResultSet.next) array += buildResult(element, listResultSet)
