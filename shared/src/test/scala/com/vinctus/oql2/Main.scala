@@ -5,9 +5,9 @@ import xyz.hyperreal.table.TextTable
 
 import java.nio.file.{Files, Path, Paths}
 
-object Main extends App with EmployeeDB {
+object Main extends App with BookDB {
 
-  println(test("employee { firstName } [manager.firstName = 'Steven']"))
+  println(test("book [year IN :years]", Map("years" -> List(1883, 1884))))
 
 }
 

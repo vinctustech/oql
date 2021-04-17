@@ -23,6 +23,8 @@ case class OQLRestrict(limit: Option[Int], offset: Option[Int])
 
 trait OQLExpression
 case class RawOQLExpression(s: String) extends OQLExpression
+case class InArrayOQLExpression(left: OQLExpression, op: String, right: List[OQLExpression]) extends OQLExpression
+case class InParameterOQLExpression(left: OQLExpression, op: String, right: ParameterOQLExpression) extends OQLExpression
 case class InfixOQLExpression(left: OQLExpression, op: String, right: OQLExpression) extends OQLExpression
 case class PrefixOQLExpression(op: String, expr: OQLExpression) extends OQLExpression
 case class PostfixOQLExpression(expr: OQLExpression, op: String) extends OQLExpression

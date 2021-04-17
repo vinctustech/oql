@@ -221,4 +221,40 @@ class BookDBTests extends AnyFreeSpec with Matchers with BookDB {
         |""".trim.stripMargin
   }
 
+  "query with select using IN" in {
+    test("book [year IN (1883, 1884)]") shouldBe
+      """
+        |[
+        |  {
+        |    "id": 1,
+        |    "title": "Treasure Island",
+        |    "year": 1883
+        |  },
+        |  {
+        |    "id": 6,
+        |    "title": "Adventures of Huckleberry Finn",
+        |    "year": 1884
+        |  }
+        |]
+        |""".trim.stripMargin
+  }
+
+  "query with select using IN with parameter" in {
+    test("book [year IN :years]", Map("years" -> List(1883, 1884))) shouldBe
+      """
+        |[
+        |  {
+        |    "id": 1,
+        |    "title": "Treasure Island",
+        |    "year": 1883
+        |  },
+        |  {
+        |    "id": 6,
+        |    "title": "Adventures of Huckleberry Finn",
+        |    "year": 1884
+        |  }
+        |]
+        |""".trim.stripMargin
+  }
+
 }

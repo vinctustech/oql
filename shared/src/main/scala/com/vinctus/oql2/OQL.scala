@@ -36,11 +36,35 @@ class OQL(dm: String, val dataSource: OQLDataSource) {
 
   def entity(name: String): Entity = model.entities(name)
 
-  private def attributes(entity: Entity, expr: OQLExpression, oql: String): Unit =
+  private def attributes(entity: Entity, expr: OQLExpression, oql: String): Unit = {
+    def recur(expr: OQLExpression): Unit = attributes(entity, expr, oql)
+
     expr match {
+      case ApplyOQLExpression(f, args) => args foreach recur
+      case BetweenOQLExpression(expr, op, lower, upper) =>
+        recur(expr)
+        recur(lower)
+        recur(upper)
+      case GroupingOQLExpression(expr) => recur(expr)
+      case CaseOQLExpression(whens, els) =>
+        whens foreach {
+          case OQLWhen(cond, expr) =>
+            recur(cond)
+            recur(expr)
+        }
+
+        els foreach recur
+      case PrefixOQLExpression(op, expr)  => recur(expr)
+      case PostfixOQLExpression(expr, op) => recur(expr)
+      case InArrayOQLExpression(left, op, right) =>
+        recur(left)
+        right foreach recur
+      case InParameterOQLExpression(left, op, right) =>
+        recur(left)
+        recur(right)
       case InfixOQLExpression(left, _, right) =>
-        attributes(entity, left, oql)
-        attributes(entity, right, oql)
+        recur(left)
+        recur(right)
       case attrexp @ AttributeOQLExpression(ids, _) =>
         val dmrefs = new ListBuffer[(Entity, Attribute)]
 
@@ -66,6 +90,7 @@ class OQL(dm: String, val dataSource: OQLDataSource) {
         attrexp.dmrefs = dmrefs.toList
       case _ =>
     }
+  }
 
   private def queryProjects(outer: Option[Entity], query: OQLQuery, oql: String): OQLQuery = {
     val map = new mutable.LinkedHashMap[String, OQLProject]

@@ -163,7 +163,7 @@ identifiers returns [ListBuffer<Ident> ids]
     { $ids = new ListBuffer<Ident>().addOne($identifier.id); }
   ;
 
-parameter returns [OQLExpression e]
+parameter returns [ParameterOQLExpression e]
   : ':' identifier
     { $e = new ParameterOQLExpression($identifier.id); }
   ;
@@ -220,7 +220,10 @@ comparisonExpression returns [OQLExpression e]
     { $e = new BetweenOQLExpression($exp.e, $between.text, $l.e, $u.e); }
   | expression isNull
     { $e = new PostfixOQLExpression($expression.e, $isNull.text); }
-//  | expression in expressions
+  | expression in '(' expressions ')'
+    { $e = new InArrayOQLExpression($expression.e, $in.text, $expressions.es.toList()); }
+  | expression in parameter
+    { $e = new InParameterOQLExpression($expression.e, $in.text, $parameter.e); }
 //  | expression in '(' query ')'
 //  | 'EXISTS' '(' query ')'
   | ex=logicalPrimary
