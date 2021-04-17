@@ -1,9 +1,11 @@
 package com.vinctus.oql2
 
 import org.checkerframework.checker.units.qual.s
+import org.graalvm.compiler.debug.TTY.out
 import xyz.hyperreal.pretty._
 
 import scala.Console.in
+import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
 import scala.language.postfixOps
 
@@ -24,7 +26,7 @@ class SQLQueryBuilder(val parms: Parameters, oql: String, val margin: Int = 0, s
   private var from: (String, Option[String]) = _
 //  private val tables = new mutable.HashMap[String, Int]
   private val innerJoins = new ArrayBuffer[Join]
-  private val leftJoins = new ArrayBuffer[Join]
+  private val leftJoins = new mutable.HashSet[Join]
   private var idx = 0
   private val projects = new ArrayBuffer[Project]
   private var where: Option[(String, OQLExpression)] = None
@@ -71,12 +73,19 @@ class SQLQueryBuilder(val parms: Parameters, oql: String, val margin: Int = 0, s
       case PostfixOQLExpression(expr, op)                    => s"${expression(expr, table)} $op"
       case BetweenOQLExpression(expr, op, lower, upper) =>
         s"${expression(expr, table)} $op ${expression(lower, table)} AND ${expression(upper, table)}"
-      case GroupingOQLExpression(expr)          => s"($expr)"
-      case FloatOQLExpression(n, pos)           => n.toString
-      case IntegerOQLExpression(n, pos)         => n.toString
-      case LiteralOQLExpression(s, pos)         => s"'${quote(s)}'"
-      case AttributeOQLExpression(ids, _, attr) => s"$table.${attr.column}" //todo ids not being used
-      case BooleanOQLExpression(b, pos)         => b
+      case GroupingOQLExpression(expr)  => s"($expr)"
+      case FloatOQLExpression(n, pos)   => n.toString
+      case IntegerOQLExpression(n, pos) => n.toString
+      case LiteralOQLExpression(s, pos) => s"'${quote(s)}'"
+      case AttributeOQLExpression(ids, _, attr) =>
+        val alias =
+          ids dropRight 1 match {
+            case Nil  => table
+            case qual => s"$table$$${qual map { case Ident(s, _) => s } mkString "$"}"
+          }
+
+        s"$alias.${attr.column}"
+      case BooleanOQLExpression(b, pos) => b
       case CaseOQLExpression(whens, els) =>
         s"CASE ${whens map {
           case OQLWhen(cond, expr) =>
@@ -131,6 +140,12 @@ class SQLQueryBuilder(val parms: Parameters, oql: String, val margin: Int = 0, s
     line(s"FROM $tab${if (alias.isDefined) s" AS ${alias.get}" else ""}")
     in()
 
+    val whereClause =
+      where match {
+        case Some((table, expr)) => s"WHERE ${expression(expr, table)}"
+        case None                => ""
+      }
+
     for (Join(t1, c1, t2, alias, c2) <- innerJoins)
       line(s"JOIN $t2 AS $alias ON $t1.$c1 = $alias.$c2")
 
@@ -138,17 +153,12 @@ class SQLQueryBuilder(val parms: Parameters, oql: String, val margin: Int = 0, s
       line(s"LEFT JOIN $t2 AS $alias ON $t1.$c1 = $alias.$c2")
 
     out()
-
-    where match {
-      case Some((table, expr)) => line(s"WHERE ${expression(expr, table)}")
-      case None                =>
-    }
+    line(whereClause)
 
     if (subquery)
       line("))")
 
     out()
-
     buf.toString
   }
 

@@ -10,7 +10,9 @@ import java.sql.ResultSet
 import xyz.hyperreal.table.TextTable
 
 import scala.annotation.tailrec
+import scala.collection.immutable.Nil.tail
 import scala.collection.immutable.{AbstractSet, SortedSet, VectorMap}
+import scala.reflect.internal.NoPhase.id
 
 class OQL(dm: String, val dataSource: OQLDataSource) {
 
@@ -40,12 +42,25 @@ class OQL(dm: String, val dataSource: OQLDataSource) {
         attributes(entity, left, oql)
         attributes(entity, right, oql)
       case attrexp @ AttributeOQLExpression(ids, _, _) =>
-        entity.attributes get ids.head.s match {
-          case Some(attr) =>
-            attrexp.entity = entity
-            attrexp.attr = attr
-          case None => problem(ids.head.pos, s"entity '${entity.name}' does not have attribute '${ids.head.s}'", oql)
-        }
+        @tailrec
+        def lookup(ids: List[Ident], entity: Entity): Unit =
+          ids match {
+            case List(id) =>
+              entity.attributes get id.s match {
+                case Some(attr) =>
+                  attrexp.entity = entity
+                  attrexp.attr = attr
+                case None => problem(id.pos, s"entity '${entity.name}' does not have attribute '${id.s}'", oql)
+              }
+            case head :: tail =>
+              entity.attributes get head.s match {
+                case Some(attr @ Attribute(name, column, pk, required, ManyToOneType(mtoEntity))) => lookup(tail, mtoEntity)
+                case Some(_)                                                                      => problem(head.pos, s"attribute '${head.s}' of entity '${entity.name}' does not have an entity type", oql)
+                case None                                                                         => problem(head.pos, s"entity '${entity.name}' does not have attribute '${head.s}'", oql)
+              }
+          }
+
+        lookup(ids, entity)
       case _ =>
     }
 
