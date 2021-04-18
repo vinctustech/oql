@@ -59,7 +59,6 @@ class SQLQueryBuilder(val parms: Parameters, oql: String, val margin: Int = 0, s
     expr match {
       case InQueryOQLExpression(left, op, query) =>
         val subquery = new SQLQueryBuilder(parms, oql, margin + 2 * SQLQueryBuilder.INDENT, true)
-//        val root: ResultNode = ResultNode(query.entity, objectNode(query.project), query.select)
         val alias = s"$table$$${query.resource.s}"
 
         subquery.table(query.entity.table, Some(alias))
@@ -68,7 +67,11 @@ class SQLQueryBuilder(val parms: Parameters, oql: String, val margin: Int = 0, s
           subquery.select(query.select.get, query.entity.table)
 
         writeQuery(objectNode(query.project), alias, subquery, oql)
-//        writeQuery(root, table, sqlBuilder, oql)
+        subquery.select(
+          RawOQLExpression(
+            s"$alias.${query.attr.typ.asInstanceOf[OneToManyType].attribute.column} = $table.${query.attr.typ.asInstanceOf[OneToManyType].attribute.typ.asInstanceOf[ManyToOneType].entity.pk.get.column}"),
+          null
+        )
 
         val sql = subquery.toString
 
