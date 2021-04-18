@@ -61,23 +61,20 @@ class SQLQueryBuilder(val parms: Parameters, oql: String, val margin: Int = 0, s
         val subquery = new SQLQueryBuilder(parms, oql, margin + 2 * SQLQueryBuilder.INDENT, true)
         val alias = s"$table$$${query.resource.s}"
 
-        subquery.table(query.entity.table, Some(alias))
+        query.attr.typ match {
+          case OneToManyType(_, attribute) =>
+            subquery.table(query.entity.table, Some(alias))
 
-        if (query.select.isDefined)
-          subquery.select(query.select.get, query.entity.table)
+            if (query.select.isDefined)
+              subquery.select(query.select.get, query.entity.table)
 
-        writeQuery(objectNode(query.project), alias, subquery, oql)
-        subquery.select(
-          RawOQLExpression(
-            query.attr.typ match {
-              case OneToManyType(_, attribute) =>
-                s"$alias.${attribute.column} = $table.${attribute.typ.asInstanceOf[ManyToOneType].entity.pk.get.column}"
-              case ManyToManyType(entity, link, self, target) =>
-                s"$alias.${self.column} = $table.${attribute.typ.asInstanceOf[ManyToOneType].entity.pk.get.column}"
-            }
-          ),
-          null
-        )
+            writeQuery(objectNode(query.project), alias, subquery, oql)
+            subquery.select(
+              RawOQLExpression(s"$alias.${attribute.column} = $table.${attribute.typ.asInstanceOf[ManyToOneType].entity.pk.get.column}"),
+              null
+            )
+          case ManyToManyType(entity, link, self, target) =>
+        }
 
         val sql = subquery.toString
 
