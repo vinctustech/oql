@@ -293,4 +293,18 @@ class EmployeeDBTests extends AnyFreeSpec with Matchers with EmployeeDB {
         |""".trim.stripMargin
   }
 
+  "query with select using IN with a many-to-many sub-query" in {
+    test("job { jobTitle } ['IT' IN (departments { departmentName })]") shouldBe
+      """
+        |[
+        |  {
+        |    "jobTitle": "Programmer"
+        |  },
+        |  {
+        |    "jobTitle": "IT Manager"
+        |  }
+        |]
+        |""".trim.stripMargin
+  }
+
 }
