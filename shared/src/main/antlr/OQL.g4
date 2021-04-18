@@ -226,8 +226,8 @@ comparisonExpression returns [OQLExpression e]
     { $e = new InParameterOQLExpression($expression.e, $in.text, $parameter.e); }
   | expression in '(' query ')'
     { $e = new InQueryOQLExpression($expression.e, $in.text, $query.q); }
-//  | expression in '(' query ')'
-//  | 'EXISTS' '(' query ')'
+  | 'EXISTS' '(' query ')'
+    { $e = new ExistsOQLExpression($query.q); }
   | ex=logicalPrimary
     { $e = $ex.e; }
   ;

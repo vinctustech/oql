@@ -7,7 +7,7 @@ import java.nio.file.{Files, Path, Paths}
 
 object Main extends App with EmployeeDB {
 
-  println(test("job { jobTitle } ['IT' IN (departments { departmentName })]"))
+  println(test("job { jobTitle } [EXISTS (departments [departmentName = 'IT'])]"))
 
 }
 

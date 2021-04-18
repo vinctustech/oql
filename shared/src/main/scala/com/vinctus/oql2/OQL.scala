@@ -10,9 +10,7 @@ import java.sql.ResultSet
 import xyz.hyperreal.table.TextTable
 
 import scala.annotation.tailrec
-import scala.collection.immutable.Nil.tail
-import scala.collection.immutable.{AbstractSet, SortedSet, VectorMap}
-import scala.reflect.internal.NoPhase.id
+import scala.collection.immutable.VectorMap
 
 class OQL(dm: String, val dataSource: OQLDataSource) {
 
@@ -137,6 +135,13 @@ object OQL {
     def recur(expr: OQLExpression): Unit = attributes(entity, expr, model, oql)
 
     expr match {
+      case ExistsOQLExpression(query) =>
+        queryProjects(Some(entity), query, model, oql)
+
+        if (!query.attr.typ.isArrayType)
+          problem(query.resource.pos, s"attribute ${query.resource.s} does not have an array type", oql)
+
+        query.select foreach (attributes(query.entity, _, model, oql))
       case ApplyOQLExpression(f, args) => args foreach recur
       case BetweenOQLExpression(expr, op, lower, upper) =>
         recur(expr)
