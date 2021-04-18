@@ -20,6 +20,8 @@ class DataModel(model: DMLModel, dml: String) {
         case duplicates => duplicates foreach (id => printError(id.pos, s"duplicate $typ name: '${id.s}'", dml))
       }
 
+    def unknownEntity(typ: Ident) = printError(typ.pos, s"unknown entity: '${typ.s}'", dml)
+
     duplicates(model.entities.map(e => e.alias getOrElse e.name), "effective entity")
     duplicates(model.entities.map(_.name), "entity")
 
@@ -53,21 +55,26 @@ class DataModel(model: DMLModel, dml: String) {
             case DMLManyToOneType(typ) =>
               entities get typ.s match {
                 case Some(EntityInfo(entity, _, _)) => ManyToOneType(entity)
-                case None                           => printError(typ.pos, s"unknown entity: '${typ.s}'", dml)
+                case None                           => unknownEntity(typ)
+              }
+            case DMLOneToOneType(typ, attr) =>
+              entities get typ.s match {
+                case Some(EntityInfo(entity, _, _)) => OneToOneType(entity, null)
+                case None                           => unknownEntity(typ)
               }
             case DMLOneToManyType(typ, attr) =>
               entities get typ.s match {
                 case Some(EntityInfo(entity, _, _)) => OneToManyType(entity, null)
-                case None                           => printError(typ.pos, s"unknown entity: '${typ.s}'", dml)
+                case None                           => unknownEntity(typ)
               }
             case DMLManyToManyType(entity, link) =>
               (entities get entity.s, entities get link.s) match {
                 case (Some(EntityInfo(entity, _, _)), Some(EntityInfo(link, _, _))) => ManyToManyType(entity, link, null, null)
                 case (e, l) =>
                   if (e.isEmpty)
-                    printError(entity.pos, s"unknown entity: '${entity.s}'", dml)
+                    unknownEntity(entity)
                   if (l.isEmpty)
-                    printError(link.pos, s"unknown entity: '${link.s}'", dml)
+                    unknownEntity(link)
 
                   null
               }
@@ -79,7 +86,7 @@ class DataModel(model: DMLModel, dml: String) {
           if (!typ.isDataType)
             printError(typ.asInstanceOf[DMLEntityType].entity.pos, "primary key must be a non-relational data type", dml)
           if (a.required)
-            printError(a.name.pos, "primary keys are already \"NOT NULL\" (required) by definition and may not be marked as such", dml)
+            printError(a.name.pos, "primary keys are already \"NOT NULL\" (required)", dml)
 
           pk = Some(attr)
         }
@@ -125,6 +132,35 @@ class DataModel(model: DMLModel, dml: String) {
         case DMLAttribute(_, _, DMLManyToOneType(entity), _, _) =>
           if (entities(entity.s).entity.pk.isEmpty)
             printError(entity.pos, s"target entity '${entity.s}' has no declared primary key", dml)
+        case a @ DMLAttribute(_, _, DMLOneToOneType(typ, attr), _, _) =>
+          val entityinfo = entities(typ.s)
+          val newtyp =
+            attr match {
+              case Some(id) =>
+                entityinfo.attrs get id.s match {
+                  case Some(a @ Attribute(_, _, _, _, ManyToOneType(`e`))) => OneToOneType(entityinfo.entity, a)
+                  case Some(_)                                             => printError(id.pos, s"attribute '${id.s}' of entity '${entityinfo.entity.name}' does not have the correct type", dml)
+                  case None                                                => printError(id.pos, s"entity '${entityinfo.entity.name}' does not have attribute '${id.s}'", dml)
+                }
+              case None =>
+                val attrs =
+                  entityinfo.attrs.values.filter {
+                    case Attribute(_, _, _, _, ManyToOneType(`e`)) => true
+                    case _                                         => false
+                  }
+
+                if (attrs.size > 1)
+                  printError(typ.pos, s"entity '${entityinfo.entity.name}' has more than one attribute of type '${typ.s}'", dml)
+
+                if (attrs.size < 1)
+                  printError(typ.pos, s"entity '${entityinfo.entity.name}' has no attributes of type '${typ.s}'", dml)
+
+                OneToOneType(entityinfo.entity, attrs.head)
+            }
+
+          val name = (a.alias getOrElse a.name).s
+
+          as(name) = as(name).copy(typ = newtyp)
         case a @ DMLAttribute(_, _, DMLOneToManyType(typ, attr), _, _) =>
           val entityinfo = entities(typ.s)
           val newtyp =

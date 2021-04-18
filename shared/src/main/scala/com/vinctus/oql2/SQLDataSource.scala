@@ -11,7 +11,7 @@ trait SQLDataSource extends OQLDataSource {
       for (entity <- model.entities.values.toList.sortBy(_.table))
         yield {
           val columns =
-            for (attribute <- entity.attributes.values if !attribute.typ.isArrayType)
+            for (attribute <- entity.attributes.values if attribute.typ.isColumnType)
               yield
                 if (attribute.pk)
                   s"  ${attribute.column} ${mapPKType(attribute.typ)} PRIMARY KEY"
