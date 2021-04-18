@@ -268,4 +268,15 @@ class BookDBTests extends AnyFreeSpec with Matchers with BookDB {
         |""".trim.stripMargin
   }
 
+  "query with select using EXISTS with a one-to-many sub-query" in {
+    test("author { name } [EXISTS (books [year < 1840])]") shouldBe
+      """
+        |[
+        |  {
+        |    "name": "Charles Dickens"
+        |  }
+        |]
+        |""".trim.stripMargin
+  }
+
 }

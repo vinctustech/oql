@@ -5,9 +5,9 @@ import xyz.hyperreal.table.TextTable
 
 import java.nio.file.{Files, Path, Paths}
 
-object Main extends App with EmployeeDB {
+object Main extends App with BookDB {
 
-  println(test("job { jobTitle } [EXISTS (departments [departmentName = 'IT'])]"))
+  println(test("author { name } [EXISTS (books [year < 1840])]"))
 
 }
 

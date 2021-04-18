@@ -307,4 +307,18 @@ class EmployeeDBTests extends AnyFreeSpec with Matchers with EmployeeDB {
         |""".trim.stripMargin
   }
 
+  "query with select using EXISTS with a many-to-many sub-query" in {
+    test("job { jobTitle } [EXISTS (departments [departmentName = 'IT'])]") shouldBe
+      """
+        |[
+        |  {
+        |    "jobTitle": "Programmer"
+        |  },
+        |  {
+        |    "jobTitle": "IT Manager"
+        |  }
+        |]
+        |""".trim.stripMargin
+  }
+
 }

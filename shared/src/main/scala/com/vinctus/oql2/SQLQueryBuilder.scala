@@ -89,7 +89,7 @@ class SQLQueryBuilder(val parms: Parameters, oql: String, val margin: Int = 0, s
       case PostfixOQLExpression(expr, op)                    => s"${expression(expr, table)} $op"
       case BetweenOQLExpression(expr, op, lower, upper) =>
         s"${expression(expr, table)} $op ${expression(lower, table)} AND ${expression(upper, table)}"
-      case GroupingOQLExpression(expr)  => s"($expr)"
+      case GroupingOQLExpression(expr)  => s"(${expression(expr, table)})"
       case FloatOQLExpression(n, pos)   => n.toString
       case IntegerOQLExpression(n, pos) => n.toString
       case LiteralOQLExpression(s, pos) => s"'${quote(s)}'"
