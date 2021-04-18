@@ -13,7 +13,7 @@ object SQLQueryBuilder {
 
 }
 
-class SQLQueryBuilder(var parms: Parameters, oql: String, var margin: Int = 0, subquery: Boolean = false) {
+class SQLQueryBuilder(val parms: Parameters, oql: String, val margin: Int = 0, subquery: Boolean = false) {
 
   import SQLQueryBuilder._
 
@@ -57,11 +57,7 @@ class SQLQueryBuilder(var parms: Parameters, oql: String, var margin: Int = 0, s
   def expression(expr: OQLExpression, table: String): String =
     expr match {
       case InQueryOQLExpression(left, op, query) =>
-        val subquery = writeQuery(innerQuery(query), table, None, oql)
-
-        subquery.parms = parms
-        subquery.margin = margin + 2 * SQLQueryBuilder.INDENT
-
+        val subquery = writeQuery(innerQuery(query), table, Right((parms, margin + 2 * SQLQueryBuilder.INDENT)), oql)
         val sql = subquery.toString
 
         s"${expression(left, table)} $op (\n$sql${" " * (margin + 2 * SQLQueryBuilder.INDENT)})"
