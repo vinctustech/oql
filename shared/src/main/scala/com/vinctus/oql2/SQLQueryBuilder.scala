@@ -16,7 +16,7 @@ object SQLQueryBuilder {
 
 }
 
-class SQLQueryBuilder(val parms: Parameters, oql: String, val margin: Int = 0, subquery: Boolean = false) {
+class SQLQueryBuilder(val parms: Parameters, oql: String, val margin: Int = 0) {
 
   import SQLQueryBuilder._
 
@@ -24,6 +24,7 @@ class SQLQueryBuilder(val parms: Parameters, oql: String, val margin: Int = 0, s
   private case class ValueProject(expr: OQLExpression, table: String) extends Project { override def toString: String = expression(expr, table) }
   private case class QueryProject(query: SQLQueryBuilder) extends Project { override def toString: String = query.toString.trim }
 
+  private var projectQuery: Boolean = false
   private var from: (String, Option[String]) = _
 //  private val tables = new mutable.HashMap[String, Int]
   private val innerJoins = new ArrayBuffer[Join]
@@ -51,6 +52,7 @@ class SQLQueryBuilder(val parms: Parameters, oql: String, val margin: Int = 0, s
   }
 
   def projectQuery(builder: SQLQueryBuilder): Int = {
+    builder.projectQuery = true
     projects += QueryProject(builder)
     idx += 1
     idx - 1
@@ -58,7 +60,10 @@ class SQLQueryBuilder(val parms: Parameters, oql: String, val margin: Int = 0, s
 
   def expression(expr: OQLExpression, table: String): String =
     expr match {
-      case InQueryOQLExpression(left, op, right) => s"$left $op (\n"
+      case InQueryOQLExpression(left, op, right) =>
+        val subquery = new SQLQueryBuilder(parms, oql, margin + 2 * SQLQueryBuilder.INDENT)
+
+        s"${expression(left, table)} $op (\n"
       case InParameterOQLExpression(left, op, right @ ParameterOQLExpression(p)) =>
         parms.get(p.s) match {
           case Some(value) if !value.isInstanceOf[Seq[_]] => problem(p.pos, s"parameter '${p.s}' is not an array", oql)
@@ -134,7 +139,7 @@ class SQLQueryBuilder(val parms: Parameters, oql: String, val margin: Int = 0, s
 
     def out(): Unit = indent -= INDENT
 
-    def sq(yes: String, no: String = "") = if (subquery) yes else no
+    def sq(yes: String, no: String = "") = if (projectQuery) yes else no
 
     line(s"${sq("(JSON_ARRAY(")}SELECT ${sq("JSON_ARRAY(")}")
     in()
@@ -165,7 +170,7 @@ class SQLQueryBuilder(val parms: Parameters, oql: String, val margin: Int = 0, s
     out()
     line(whereClause)
 
-    if (subquery)
+    if (projectQuery)
       line("))")
 
     out()

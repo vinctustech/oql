@@ -92,10 +92,12 @@ class OQL(dm: String, val dataSource: OQLDataSource) {
         recur(left)
         queryProjects(Some(entity), query, oql)
 
-        if
+        if (!query.attr.typ.isArrayType)
+          problem(query.resource.pos, s"attribute ${query.resource.s} does not have an array type", oql)
+
         query.select foreach (attributes(query.entity, _, oql))
       case StarOQLExpression | _: RawOQLExpression | _: LiteralOQLExpression | _: FloatOQLExpression | _: IntegerOQLExpression |
-          _: BooleanOQLExpression | _: ReferenceOQLExpression =>
+          _: BooleanOQLExpression | _: ReferenceOQLExpression | _: ParameterOQLExpression =>
     }
   }
 
@@ -200,6 +202,47 @@ class OQL(dm: String, val dataSource: OQLDataSource) {
     })
   }
 
+  def writeQuery(node: Node, table: String, builder: SQLQueryBuilder, oql: String): Unit = {
+    node match {
+      case ResultNode(entity, element, select) =>
+        builder.table(entity.table, None)
+
+        if (select.isDefined)
+          builder.select(select.get, entity.table)
+
+        writeQuery(element, entity.table, builder, oql)
+      case e @ ValueNode(expr)    => e.idx = builder.projectValue(expr, table)
+      case ObjectNode(properties) => properties foreach { case (_, e) => writeQuery(e, table, builder, oql) }
+      case n @ ManyToManyNode(entity,
+                              attr @ Attribute(name, column, pk, required, ManyToManyType(mtmEntity, linkEntity, selfAttr, targetAttr)),
+                              element) =>
+        val alias = s"$table$$$name"
+        val subquery = new SQLQueryBuilder(builder.parms, oql, builder.margin + 2 * SQLQueryBuilder.INDENT)
+        val joinAlias = s"$alias$$${targetAttr.name}"
+
+        n.idx = builder.projectQuery(subquery)
+        subquery.table(linkEntity.table, Some(alias))
+        writeQuery(element, joinAlias, subquery, oql)
+        subquery.select(RawOQLExpression(s"$alias.${selfAttr.column} = $table.${entity.pk.get.column}"), null)
+
+        subquery.innerJoin(alias, targetAttr.column, mtmEntity.table, joinAlias, mtmEntity.pk.get.column)
+      case n @ ManyToOneNode(entity, attr @ Attribute(name, column, pk, required, ManyToOneType(mtoEntity)), element) =>
+        val alias = s"$table$$$name"
+
+        n.idx = builder.projectValue(AttributeOQLExpression(List(Ident(name)), List((entity, attr))), table)
+        builder.leftJoin(table, column, entity.table, alias, entity.pk.get.column)
+        writeQuery(element, alias, builder, oql)
+      case n @ OneToManyNode(entity, attr @ Attribute(name, column, pk, required, OneToManyType(mtoEntity, otmAttr)), element) =>
+        val alias = s"$table$$$name"
+        val subquery = new SQLQueryBuilder(builder.parms, oql, builder.margin + 2 * SQLQueryBuilder.INDENT)
+
+        n.idx = builder.projectQuery(subquery)
+        subquery.table(mtoEntity.table, Some(alias))
+        writeQuery(element, alias, subquery, oql)
+        subquery.select(RawOQLExpression(s"$alias.${otmAttr.column} = $table.${entity.pk.get.column}"), null)
+    }
+  }
+
   def queryMany(oql: String, parameters: Map[String, Any] = Map()) = { //todo: async
     val query =
       OQLParse(oql) match {
@@ -215,52 +258,11 @@ class OQL(dm: String, val dataSource: OQLDataSource) {
 
     val root: ResultNode = ResultNode(query.entity, objectNode(query.project), query.select)
 
-    def writeQuery(node: Node, table: String, builder: SQLQueryBuilder): Unit = {
-      node match {
-        case ResultNode(entity, element, select) =>
-          builder.table(entity.table, None)
-
-          if (select.isDefined)
-            builder.select(select.get, entity.table)
-
-          writeQuery(element, entity.table, builder)
-        case e @ ValueNode(expr)    => e.idx = builder.projectValue(expr, table)
-        case ObjectNode(properties) => properties foreach { case (_, e) => writeQuery(e, table, builder) }
-        case n @ ManyToManyNode(entity,
-                                attr @ Attribute(name, column, pk, required, ManyToManyType(mtmEntity, linkEntity, selfAttr, targetAttr)),
-                                element) =>
-          val alias = s"$table$$$name"
-          val subquery = new SQLQueryBuilder(builder.parms, oql, builder.margin + 2 * SQLQueryBuilder.INDENT, true)
-          val joinAlias = s"$alias$$${targetAttr.name}"
-
-          n.idx = builder.projectQuery(subquery)
-          subquery.table(linkEntity.table, Some(alias))
-          writeQuery(element, joinAlias, subquery)
-          subquery.select(RawOQLExpression(s"$alias.${selfAttr.column} = $table.${entity.pk.get.column}"), null)
-
-          subquery.innerJoin(alias, targetAttr.column, mtmEntity.table, joinAlias, mtmEntity.pk.get.column)
-        case n @ ManyToOneNode(entity, attr @ Attribute(name, column, pk, required, ManyToOneType(mtoEntity)), element) =>
-          val alias = s"$table$$$name"
-
-          n.idx = builder.projectValue(AttributeOQLExpression(List(Ident(name)), List((entity, attr))), table)
-          builder.leftJoin(table, column, entity.table, alias, entity.pk.get.column)
-          writeQuery(element, alias, builder)
-        case n @ OneToManyNode(entity, attr @ Attribute(name, column, pk, required, OneToManyType(mtoEntity, otmAttr)), element) =>
-          val alias = s"$table$$$name"
-          val subquery = new SQLQueryBuilder(builder.parms, oql, builder.margin + 2 * SQLQueryBuilder.INDENT, true)
-
-          n.idx = builder.projectQuery(subquery)
-          subquery.table(mtoEntity.table, Some(alias))
-          writeQuery(element, alias, subquery)
-          subquery.select(RawOQLExpression(s"$alias.${otmAttr.column} = $table.${entity.pk.get.column}"), null)
-      }
-    }
-
 //    println(prettyPrint(root))
 
     val sqlBuilder = new SQLQueryBuilder(parms, oql)
 
-    writeQuery(root, null, sqlBuilder)
+    writeQuery(root, null, sqlBuilder, oql)
 
     val sql = sqlBuilder.toString
 
