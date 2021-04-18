@@ -18,8 +18,6 @@ trait UNDB extends Test {
       |""".stripMargin
   val db = new OQL(dm, new H2_mem)
 
-  println(db.dataSource.asInstanceOf[JDBCDataSource].schema(db.model) mkString "\n\n")
-
   db.create()
   db.execute(_.insert("""insert into country (id, name) values 
                         |(1,'Nigeria'),
