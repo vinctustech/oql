@@ -1,11 +1,8 @@
 package com.vinctus.oql2
 
-import org.checkerframework.checker.units.qual.s
-import org.graalvm.compiler.debug.TTY.out
-import sun.jvm.hotspot.HelloWorld.e
+import com.vinctus.oql2.OQL._
 import xyz.hyperreal.pretty._
 
-import scala.Console.in
 import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
 import scala.language.postfixOps
@@ -60,8 +57,18 @@ class SQLQueryBuilder(val parms: Parameters, oql: String, val margin: Int = 0) {
 
   def expression(expr: OQLExpression, table: String): String =
     expr match {
-      case InQueryOQLExpression(left, op, right) =>
+      case InQueryOQLExpression(left, op, query) =>
         val subquery = new SQLQueryBuilder(parms, oql, margin + 2 * SQLQueryBuilder.INDENT)
+
+        val root: ResultNode = ResultNode(query.entity, objectNode(query.project), query.select)
+
+        //    println(prettyPrint(root))
+
+        val sqlBuilder = new SQLQueryBuilder(parms, oql)
+
+        writeQuery(root, null, sqlBuilder, oql)
+
+        val sql = sqlBuilder.toString
 
         s"${expression(left, table)} $op (\n"
       case InParameterOQLExpression(left, op, right @ ParameterOQLExpression(p)) =>
