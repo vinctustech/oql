@@ -6,6 +6,7 @@ import xyz.hyperreal.pretty._
 import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
 import scala.language.postfixOps
+import scala.reflect.internal.util.NoPosition.line
 
 object SQLQueryBuilder {
 
@@ -13,7 +14,7 @@ object SQLQueryBuilder {
 
 }
 
-class SQLQueryBuilder(val parms: Parameters, oql: String, val margin: Int = 0) {
+class SQLQueryBuilder(val parms: Parameters, oql: String, val margin: Int = 0, subquery: Boolean = false) {
 
   import SQLQueryBuilder._
 
@@ -30,10 +31,9 @@ class SQLQueryBuilder(val parms: Parameters, oql: String, val margin: Int = 0) {
   private val projects = new ArrayBuffer[Project]
   private var where: Option[(String, OQLExpression)] = None
 
-  def table(name: String, alias: Option[String]): Unit = {
+  def table(name: String, alias: Option[String]): Unit =
     if (from eq null)
       from = (name, alias)
-  }
 
   def select(cond: OQLExpression, table: String): Unit =
     where = where match {
@@ -58,19 +58,21 @@ class SQLQueryBuilder(val parms: Parameters, oql: String, val margin: Int = 0) {
   def expression(expr: OQLExpression, table: String): String =
     expr match {
       case InQueryOQLExpression(left, op, query) =>
-        val subquery = new SQLQueryBuilder(parms, oql, margin + 2 * SQLQueryBuilder.INDENT)
+        val subquery = new SQLQueryBuilder(parms, oql, margin + 2 * SQLQueryBuilder.INDENT, true)
+//        val root: ResultNode = ResultNode(query.entity, objectNode(query.project), query.select)
+        val alias = s"$table$$${query.resource.s}"
 
-        val root: ResultNode = ResultNode(query.entity, objectNode(query.project), query.select)
+        subquery.table(query.entity.table, Some(alias))
 
-        //    println(prettyPrint(root))
+        if (query.select.isDefined)
+          subquery.select(query.select.get, query.entity.table)
 
-        val sqlBuilder = new SQLQueryBuilder(parms, oql)
+        writeQuery(objectNode(query.project), alias, subquery, oql)
+//        writeQuery(root, table, sqlBuilder, oql)
 
-        writeQuery(root, null, sqlBuilder, oql)
+        val sql = subquery.toString
 
-        val sql = sqlBuilder.toString
-
-        s"${expression(left, table)} $op (\n"
+        s"${expression(left, table)} $op (\n$sql${" " * (margin + 2 * SQLQueryBuilder.INDENT)})"
       case InParameterOQLExpression(left, op, right @ ParameterOQLExpression(p)) =>
         parms.get(p.s) match {
           case Some(value) if !value.isInstanceOf[Seq[_]] => problem(p.pos, s"parameter '${p.s}' is not an array", oql)
@@ -133,7 +135,7 @@ class SQLQueryBuilder(val parms: Parameters, oql: String, val margin: Int = 0) {
     var first = true
 
     def line(s: String): Unit = {
-      if (first)
+      if (first && !subquery)
         first = false
       else
         buf ++= " " * indent
@@ -162,11 +164,7 @@ class SQLQueryBuilder(val parms: Parameters, oql: String, val margin: Int = 0) {
     line(s"FROM $tab${if (alias.isDefined) s" AS ${alias.get}" else ""}")
     in()
 
-    val whereClause =
-      where match {
-        case Some((table, expr)) => s"WHERE ${expression(expr, table)}"
-        case None                => ""
-      }
+    val whereClause = where map { case (table, expr) => s"WHERE ${expression(expr, table)}" }
 
     for (Join(t1, c1, t2, alias, c2) <- innerJoins)
       line(s"JOIN $t2 AS $alias ON $t1.$c1 = $alias.$c2")
@@ -175,7 +173,7 @@ class SQLQueryBuilder(val parms: Parameters, oql: String, val margin: Int = 0) {
       line(s"LEFT JOIN $t2 AS $alias ON $t1.$c1 = $alias.$c2")
 
     out()
-    line(whereClause)
+    whereClause foreach line
 
     if (projectQuery)
       line("))")
