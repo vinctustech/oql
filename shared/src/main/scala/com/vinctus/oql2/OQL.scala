@@ -142,6 +142,13 @@ object OQL {
           problem(query.resource.pos, s"attribute ${query.resource.s} does not have an array type", oql)
 
         query.select foreach (attributes(query.entity, _, model, oql))
+      case SubqueryOQLExpression(query) =>
+        queryProjects(Some(entity), query, model, oql)
+
+        if (!query.attr.typ.isArrayType)
+          problem(query.resource.pos, s"attribute ${query.resource.s} does not have an array type", oql)
+
+        query.select foreach (attributes(query.entity, _, model, oql))
       case ApplyOQLExpression(f, args) => args foreach recur
       case BetweenOQLExpression(expr, op, lower, upper) =>
         recur(expr)

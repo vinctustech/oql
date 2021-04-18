@@ -7,7 +7,7 @@ import java.nio.file.{Files, Path, Paths}
 
 object Main extends App with BookDB {
 
-  println(test("author { name } [EXISTS (books [year < 1840])]"))
+  println(test("author { name } [(books { count(*) }) = 2]"))
 
 }
 

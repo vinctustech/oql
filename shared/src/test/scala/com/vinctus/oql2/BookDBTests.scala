@@ -279,4 +279,18 @@ class BookDBTests extends AnyFreeSpec with Matchers with BookDB {
         |""".trim.stripMargin
   }
 
+  "query with select using value from a one-to-many sub-query in a comparison" in {
+    test("author { name } [(books { count(*) }) = 2]") shouldBe
+      """
+        |[
+        |  {
+        |    "name": "Charles Dickens"
+        |  },
+        |  {
+        |    "name": "Mark Twain"
+        |  }
+        |]
+        |""".trim.stripMargin
+  }
+
 }

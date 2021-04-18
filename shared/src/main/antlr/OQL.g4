@@ -126,6 +126,8 @@ primary returns [OQLExpression e]
     { $e = $caseExpression.e; }
   | '-' primary
     { $e = new PrefixOQLExpression("-", $primary.e); }
+  | '(' query ')'
+    { $e = new SubqueryOQLExpression($query.q); }
   | '(' expression ')'
     { $e = new GroupingOQLExpression($expression.e); }
   ;
