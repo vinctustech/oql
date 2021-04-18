@@ -6,7 +6,6 @@ import xyz.hyperreal.pretty._
 import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
 import scala.language.postfixOps
-import scala.reflect.internal.util.NoPosition.line
 
 object SQLQueryBuilder {
 
@@ -14,7 +13,7 @@ object SQLQueryBuilder {
 
 }
 
-class SQLQueryBuilder(val parms: Parameters, oql: String, val margin: Int = 0, subquery: Boolean = false) {
+class SQLQueryBuilder(var parms: Parameters, oql: String, var margin: Int = 0, subquery: Boolean = false) {
 
   import SQLQueryBuilder._
 
@@ -58,26 +57,33 @@ class SQLQueryBuilder(val parms: Parameters, oql: String, val margin: Int = 0, s
   def expression(expr: OQLExpression, table: String): String =
     expr match {
       case InQueryOQLExpression(left, op, query) =>
-        val subquery = new SQLQueryBuilder(parms, oql, margin + 2 * SQLQueryBuilder.INDENT, true)
-        val alias = s"$table$$${query.resource.s}"
+//        val subquery = new SQLQueryBuilder(parms, oql, margin + 2 * SQLQueryBuilder.INDENT, true)
+//        val alias = s"$table$$${query.resource.s}"
+//
+//        subquery.table(query.entity.table, Some(alias))
+        val subquery = writeQuery(innerQuery(query), table, None, oql)
+//        query.attr.typ match {
+//          case OneToManyType(_, attribute) =>
+//            subquery.table(query.entity.table, Some(alias))
+//
+//            if (query.select.isDefined)
+//              subquery.select(query.select.get, query.entity.table)
+//
+//            writeQuery(objectNode(query.project), alias, subquery, oql)
+//            subquery.select(
+//              RawOQLExpression(s"$alias.${attribute.column} = $table.${attribute.typ.asInstanceOf[ManyToOneType].entity.pk.get.column}"),
+//              null
+//            )
+//          case ManyToManyType(entity, link, self, target) =>
+//        }
 
-        query.attr.typ match {
-          case OneToManyType(_, attribute) =>
-            subquery.table(query.entity.table, Some(alias))
-
-            if (query.select.isDefined)
-              subquery.select(query.select.get, query.entity.table)
-
-            writeQuery(objectNode(query.project), alias, subquery, oql)
-            subquery.select(
-              RawOQLExpression(s"$alias.${attribute.column} = $table.${attribute.typ.asInstanceOf[ManyToOneType].entity.pk.get.column}"),
-              null
-            )
-          case ManyToManyType(entity, link, self, target) =>
-        }
+        subquery.parms = parms
+        subquery.margin = margin + 2 * SQLQueryBuilder.INDENT
 
         val sql = subquery.toString
 
+        println(sql)
+//        ni
         s"${expression(left, table)} $op (\n$sql${" " * (margin + 2 * SQLQueryBuilder.INDENT)})"
       case InParameterOQLExpression(left, op, right @ ParameterOQLExpression(p)) =>
         parms.get(p.s) match {
@@ -88,7 +94,8 @@ class SQLQueryBuilder(val parms: Parameters, oql: String, val margin: Int = 0, s
       case ParameterOQLExpression(p) =>
         parms get p.s match {
           case Some(parm: Seq[_]) => parm.mkString("(", ", ", ")")
-          case Some(parm)         => parm.toString
+          case Some(parm: Number) => parm.toString
+          case Some(parm: String) => s"'${quote(parm)}'"
           case None               => problem(p.pos, s"parameter '${p.s}' not found", oql)
         }
       case ApplyOQLExpression(f, args)                       => s"${f.s}(${args map (expression(_, table)) mkString ", "})"
