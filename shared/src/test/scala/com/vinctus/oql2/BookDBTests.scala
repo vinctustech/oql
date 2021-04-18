@@ -257,4 +257,15 @@ class BookDBTests extends AnyFreeSpec with Matchers with BookDB {
         |""".trim.stripMargin
   }
 
+  "query with select using IN with a sub-query" in {
+    test("author { name } ['Oliver Twist' IN (books { title })]") shouldBe
+      """
+        |[
+        |  {
+        |    "name": "Charles Dickens"
+        |  }
+        |]
+        |""".trim.stripMargin
+  }
+
 }

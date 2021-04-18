@@ -69,7 +69,13 @@ class SQLQueryBuilder(val parms: Parameters, oql: String, val margin: Int = 0, s
         writeQuery(objectNode(query.project), alias, subquery, oql)
         subquery.select(
           RawOQLExpression(
-            s"$alias.${query.attr.typ.asInstanceOf[OneToManyType].attribute.column} = $table.${query.attr.typ.asInstanceOf[OneToManyType].attribute.typ.asInstanceOf[ManyToOneType].entity.pk.get.column}"),
+            query.attr.typ match {
+              case OneToManyType(_, attribute) =>
+                s"$alias.${attribute.column} = $table.${attribute.typ.asInstanceOf[ManyToOneType].entity.pk.get.column}"
+              case ManyToManyType(entity, link, self, target) =>
+                s"$alias.${self.column} = $table.${attribute.typ.asInstanceOf[ManyToOneType].entity.pk.get.column}"
+            }
+          ),
           null
         )
 
