@@ -57,33 +57,13 @@ class SQLQueryBuilder(var parms: Parameters, oql: String, var margin: Int = 0, s
   def expression(expr: OQLExpression, table: String): String =
     expr match {
       case InQueryOQLExpression(left, op, query) =>
-//        val subquery = new SQLQueryBuilder(parms, oql, margin + 2 * SQLQueryBuilder.INDENT, true)
-//        val alias = s"$table$$${query.resource.s}"
-//
-//        subquery.table(query.entity.table, Some(alias))
         val subquery = writeQuery(innerQuery(query), table, None, oql)
-//        query.attr.typ match {
-//          case OneToManyType(_, attribute) =>
-//            subquery.table(query.entity.table, Some(alias))
-//
-//            if (query.select.isDefined)
-//              subquery.select(query.select.get, query.entity.table)
-//
-//            writeQuery(objectNode(query.project), alias, subquery, oql)
-//            subquery.select(
-//              RawOQLExpression(s"$alias.${attribute.column} = $table.${attribute.typ.asInstanceOf[ManyToOneType].entity.pk.get.column}"),
-//              null
-//            )
-//          case ManyToManyType(entity, link, self, target) =>
-//        }
 
         subquery.parms = parms
         subquery.margin = margin + 2 * SQLQueryBuilder.INDENT
 
         val sql = subquery.toString
 
-        println(sql)
-//        ni
         s"${expression(left, table)} $op (\n$sql${" " * (margin + 2 * SQLQueryBuilder.INDENT)})"
       case InParameterOQLExpression(left, op, right @ ParameterOQLExpression(p)) =>
         parms.get(p.s) match {
