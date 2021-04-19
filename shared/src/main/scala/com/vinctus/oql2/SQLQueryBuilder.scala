@@ -29,6 +29,7 @@ class SQLQueryBuilder(val parms: Parameters, oql: String, val margin: Int = 0, s
   private var idx = 0
   private val projects = new ArrayBuffer[Project]
   private var where: Option[(String, OQLExpression)] = None
+  private var order: Option[(String, List[OQLOrdering])] = None
 
   def table(name: String, alias: Option[String]): Unit =
     if (from eq null)
@@ -40,6 +41,8 @@ class SQLQueryBuilder(val parms: Parameters, oql: String, val margin: Int = 0, s
         Some((table, InfixOQLExpression(GroupingOQLExpression(cur), "AND", GroupingOQLExpression(cond))))
       case None => Some((table, cond))
     }
+
+  def ordering(orderings: List[OQLOrdering], table: String): Unit = order = Some((table, orderings))
 
   def projectValue(expr: OQLExpression, table: String): Int = {
     projects += ValueProject(expr, table)
@@ -164,6 +167,10 @@ class SQLQueryBuilder(val parms: Parameters, oql: String, val margin: Int = 0, s
     in()
 
     val whereClause = where map { case (table, expr) => s"WHERE ${expression(expr, table)}" }
+    val orderByClause = order map {
+      case (table, orderings) =>
+        s"ORDER BY ${orderings map { case OQLOrdering(expr, ordering) => s"${expression(expr, table)} $ordering" } mkString ", "}"
+    }
 
     for (Join(t1, c1, t2, alias, c2) <- innerJoins)
       line(s"JOIN $t2 AS $alias ON $t1.$c1 = $alias.$c2")
@@ -173,6 +180,7 @@ class SQLQueryBuilder(val parms: Parameters, oql: String, val margin: Int = 0, s
 
     out()
     whereClause foreach line
+    orderByClause foreach line
 
     if (projectQuery)
       line("))")

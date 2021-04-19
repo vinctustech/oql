@@ -5,6 +5,7 @@ import xyz.hyperreal.json.DefaultJSONReader
 import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
 import xyz.hyperreal._
+import xyz.hyperreal.pretty.prettyPrint
 
 import java.sql.ResultSet
 import xyz.hyperreal.table.TextTable
@@ -44,12 +45,13 @@ class OQL(dm: String, val dataSource: OQLDataSource) {
       }
     val parms = new Parameters(parameters)
 
-    //    println(prettyPrint(query))
-
     queryProjects(None, query, model, oql)
     query.select foreach (attributes(query.entity, _, model, oql))
+    query.order foreach (_ foreach { case OQLOrdering(expr, _) => attributes(query.entity, expr, model, oql) })
 
-    val root: ResultNode = ResultNode(query.entity, objectNode(query.project), query.select)
+//    println(prettyPrint(query))
+
+    val root: ResultNode = ResultNode(query, objectNode(query.project))
 
 //    println(prettyPrint(root))
 
@@ -64,7 +66,7 @@ class OQL(dm: String, val dataSource: OQLDataSource) {
       case _                           =>
     }
 
-    println(sql)
+//    println(sql)
 
     execute { c =>
       val rs = c.query(sql)
@@ -73,7 +75,7 @@ class OQL(dm: String, val dataSource: OQLDataSource) {
 
       def buildResult(node: Node, resultSet: OQLResultSet): Any =
         node match {
-          case ResultNode(entity, element, select) =>
+          case ResultNode(query, element) =>
             val array = new ListBuffer[Any]
 
             while (resultSet.next) array += buildResult(element, resultSet)
@@ -154,6 +156,7 @@ object OQL {
           problem(query.resource.pos, s"attribute ${query.resource.s} does not have an array type", oql)
 
         query.select foreach (attributes(query.entity, _, model, oql))
+        query.order foreach (_ foreach { case OQLOrdering(expr, _) => attributes(query.entity, expr, model, oql) })
       case SubqueryOQLExpression(query) =>
         queryProjects(Some(entity), query, model, oql)
 
@@ -161,6 +164,7 @@ object OQL {
           problem(query.resource.pos, s"attribute ${query.resource.s} does not have an array type", oql)
 
         query.select foreach (attributes(query.entity, _, model, oql))
+        query.order foreach (_ foreach { case OQLOrdering(expr, _) => attributes(query.entity, expr, model, oql) })
       case ApplyOQLExpression(f, args) => args foreach recur
       case BetweenOQLExpression(expr, op, lower, upper) =>
         recur(expr)
@@ -217,6 +221,7 @@ object OQL {
           problem(query.resource.pos, s"attribute ${query.resource.s} does not have an array type", oql)
 
         query.select foreach (attributes(query.entity, _, model, oql))
+        query.order foreach (_ foreach { case OQLOrdering(expr, _) => attributes(query.entity, expr, model, oql) })
       case StarOQLExpression | _: RawOQLExpression | _: LiteralOQLExpression | _: FloatOQLExpression | _: IntegerOQLExpression |
           _: BooleanOQLExpression | _: ReferenceOQLExpression | _: ParameterOQLExpression =>
     }
@@ -262,6 +267,7 @@ object OQL {
       case p @ QueryOQLProject(label, query) =>
         queryProjects(Some(entity), query, model, oql)
         query.select foreach (attributes(query.entity, _, model, oql))
+        query.order foreach (_ foreach { case OQLOrdering(expr, _) => attributes(query.entity, expr, model, oql) })
         map(label.s) = p
       case StarOQLProject =>
         entity.attributes.values foreach {
@@ -321,13 +327,16 @@ object OQL {
 
   private[oql2] def writeQuery(node: Node, table: String, builder: Either[SQLQueryBuilder, (Parameters, Int)], oql: String): SQLQueryBuilder =
     node match {
-      case ResultNode(entity, element, select) =>
-        builder.left.toOption.get.table(entity.table, None)
+      case ResultNode(query, element) =>
+        builder.left.toOption.get.table(query.entity.table, None)
 
-        if (select.isDefined)
-          builder.left.toOption.get.select(select.get, entity.table)
+        if (query.select.isDefined)
+          builder.left.toOption.get.select(query.select.get, query.entity.table)
 
-        writeQuery(element, entity.table, builder, oql)
+        if (query.order.isDefined)
+          builder.left.toOption.get.ordering(query.order.get, query.entity.table)
+
+        writeQuery(element, query.entity.table, builder, oql)
         builder.left.toOption.get
       case e @ ValueNode(expr) =>
         e.idx = builder.left.toOption.get.projectValue(expr, table)
@@ -343,7 +352,7 @@ object OQL {
         writeQuery(element, alias, builder, oql)
         builder.left.toOption.get
       case n @ ManyToManyNode(
-            OQLQuery(_, entity, attr @ Attribute(name, _, _, _, ManyToManyType(mtmEntity, linkEntity, selfAttr, targetAttr)), _, select, _, _, _),
+            OQLQuery(_, entity, attr @ Attribute(name, _, _, _, ManyToManyType(mtmEntity, linkEntity, selfAttr, targetAttr)), _, select, _, order, _),
             element) =>
         val alias = s"$table$$$name"
         val subquery =
@@ -358,10 +367,12 @@ object OQL {
         writeQuery(element, joinAlias, Left(subquery), oql)
         subquery.select(RawOQLExpression(s"$alias.${selfAttr.column} = $table.${entity.pk.get.column}"), null)
         select foreach (subquery.select(_, joinAlias))
+        order foreach (subquery.ordering(_, joinAlias))
         subquery.innerJoin(alias, targetAttr.column, mtmEntity.table, joinAlias, mtmEntity.pk.get.column)
         subquery
-      case n @ OneToOneNode(OQLQuery(_, entity, attr @ Attribute(name, column, pk, required, OneToOneType(mtoEntity, otmAttr)), _, select, _, _, _),
-                            element) =>
+      case n @ OneToOneNode(
+            OQLQuery(_, entity, attr @ Attribute(name, column, pk, required, OneToOneType(mtoEntity, otmAttr)), _, select, _, order, _),
+            element) =>
         val alias = s"$table$$$name"
         val subquery =
           if (builder.isLeft) new SQLQueryBuilder(builder.left.toOption.get.parms, oql, builder.left.toOption.get.margin + 2 * SQLQueryBuilder.INDENT)
@@ -374,9 +385,11 @@ object OQL {
         writeQuery(element, alias, Left(subquery), oql)
         subquery.select(RawOQLExpression(s"$alias.${otmAttr.column} = $table.${entity.pk.get.column}"), null)
         select foreach (subquery.select(_, alias))
+        order foreach (subquery.ordering(_, alias))
         subquery
-      case n @ OneToManyNode(OQLQuery(_, entity, attr @ Attribute(name, column, pk, required, OneToManyType(mtoEntity, otmAttr)), _, select, _, _, _),
-                             element) =>
+      case n @ OneToManyNode(
+            OQLQuery(_, entity, attr @ Attribute(name, column, pk, required, OneToManyType(mtoEntity, otmAttr)), _, select, _, order, _),
+            element) =>
         val alias = s"$table$$$name"
         val subquery =
           if (builder.isLeft) new SQLQueryBuilder(builder.left.toOption.get.parms, oql, builder.left.toOption.get.margin + 2 * SQLQueryBuilder.INDENT)
@@ -389,13 +402,14 @@ object OQL {
         writeQuery(element, alias, Left(subquery), oql)
         subquery.select(RawOQLExpression(s"$alias.${otmAttr.column} = $table.${entity.pk.get.column}"), null)
         select foreach (subquery.select(_, alias))
+        order foreach (subquery.ordering(_, alias))
         subquery
     }
 
 }
 
 trait Node
-case class ResultNode(entity: Entity, element: Node, select: Option[OQLExpression]) extends Node
+case class ResultNode(query: OQLQuery, element: Node) extends Node
 case class ManyToOneNode(query: OQLQuery, element: Node) extends Node { var idx: Int = _ }
 case class OneToOneNode(query: OQLQuery, element: Node) extends Node { var idx: Int = _ }
 case class OneToManyNode(query: OQLQuery, element: Node) extends Node { var idx: Int = _ }

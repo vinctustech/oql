@@ -5,9 +5,9 @@ import xyz.hyperreal.table.TextTable
 
 import java.nio.file.{Files, Path, Paths}
 
-object Main extends App with UNDB {
+object Main extends App with BookDB {
 
-  println(test("country { * rep { name } }"))
+  println(test("author <name>"))
 
 }
 

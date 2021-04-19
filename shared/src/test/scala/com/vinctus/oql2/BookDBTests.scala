@@ -293,4 +293,28 @@ class BookDBTests extends AnyFreeSpec with Matchers with BookDB {
         |""".trim.stripMargin
   }
 
+  "simplest query with ordering" in {
+    test("author <name>") shouldBe
+      """
+        |[
+        |  {
+        |    "id": 3,
+        |    "name": "Charles Dickens"
+        |  },
+        |  {
+        |    "id": 2,
+        |    "name": "Lewis Carroll"
+        |  },
+        |  {
+        |    "id": 4,
+        |    "name": "Mark Twain"
+        |  },
+        |  {
+        |    "id": 1,
+        |    "name": "Robert Louis Stevenson"
+        |  }
+        |]
+        |""".trim.stripMargin
+  }
+
 }
