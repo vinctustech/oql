@@ -18,9 +18,9 @@ command returns [OQLAST c]
 
 // todo: use /= to represent 'DISTINCT'
 query returns [OQLQuery q]
-  : entityName project select? group? order? restrict
-    { $q = new OQLQuery($entityName.id, null, null, OQLParse.project($project.ps), OQLParse.select($select.ctx),
-      OQLParse.group($group.ctx), OQLParse.order($order.ctx), $restrict.r); }
+  : entityName project ('[' logicalExpression ']')? group? order? restrict
+    { $q = new OQLQuery($entityName.id, null, null, OQLParse.project($project.ps), OQLParse.select($logicalExpression.ctx),
+      OQLParse.group($group.ctx), OQLParse.order($order.ctx), $restrict.r.limit(), $restrict.r.offset()); }
   ;
 
 project returns [Buffer<OQLProject> ps]
@@ -127,7 +127,7 @@ primary returns [OQLExpression e]
   | '-' primary
     { $e = new PrefixOQLExpression("-", $primary.e); }
   | '(' query ')'
-    { $e = new SubqueryOQLExpression($query.q); }
+    { $e = new QueryOQLExpression($query.q); }
   | '(' expression ')'
     { $e = new GroupingOQLExpression($expression.e); }
   ;
@@ -182,11 +182,6 @@ qualifiedAttributeNames returns [ListBuffer<AttributeOQLExpression> es]
     { $es = $l.es.addOne($qualifiedAttributeName.e); }
   | qualifiedAttributeName
     { $es = new ListBuffer<AttributeOQLExpression>().addOne($qualifiedAttributeName.e); }
-  ;
-
-select returns [OQLExpression e]
-  : '[' logicalExpression ']'
-    { $e = $logicalExpression.e; }
   ;
 
 logicalExpression returns [OQLExpression e]

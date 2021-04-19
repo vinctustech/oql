@@ -120,7 +120,7 @@ class OQL(dm: String, val dataSource: OQLDataSource) {
 //          case SequenceNode(seq) => ni
         }
 
-      buildResult(root, rs)
+      buildResult(root, rs).asInstanceOf[List[Any]]
     }
   }
 
@@ -157,7 +157,7 @@ object OQL {
 
         query.select foreach (attributes(query.entity, _, model, oql))
         query.order foreach (_ foreach { case OQLOrdering(expr, _) => attributes(query.entity, expr, model, oql) })
-      case SubqueryOQLExpression(query) =>
+      case QueryOQLExpression(query) =>
         queryProjects(Some(entity), query, model, oql)
 
         if (!query.attr.typ.isArrayType)
@@ -296,23 +296,17 @@ object OQL {
                 a.dmrefs = List((entity, attr))
                 expProj
               case Some(attr @ Attribute(_, _, _, _, ManyToManyType(mtmEntity, link, self, target))) =>
-                QueryOQLProject(label,
-                                queryProjects(Some(entity),
-                                              OQLQuery(id, mtmEntity, attr, List(StarOQLProject), None, None, None, OQLRestrict(None, None)),
-                                              model,
-                                              oql))
+                QueryOQLProject(
+                  label,
+                  queryProjects(Some(entity), OQLQuery(id, mtmEntity, attr, List(StarOQLProject), None, None, None, None, None), model, oql))
               case Some(attr @ Attribute(_, _, _, _, ManyToOneType(mtoEntity))) =>
-                QueryOQLProject(label,
-                                queryProjects(Some(entity),
-                                              OQLQuery(id, mtoEntity, attr, List(StarOQLProject), None, None, None, OQLRestrict(None, None)),
-                                              model,
-                                              oql))
+                QueryOQLProject(
+                  label,
+                  queryProjects(Some(entity), OQLQuery(id, mtoEntity, attr, List(StarOQLProject), None, None, None, None, None), model, oql))
               case Some(attr @ Attribute(_, _, _, _, OneToManyType(otmEntity, otmAttr))) =>
-                QueryOQLProject(label,
-                                queryProjects(Some(entity),
-                                              OQLQuery(id, otmEntity, attr, List(StarOQLProject), None, None, None, OQLRestrict(None, None)),
-                                              model,
-                                              oql))
+                QueryOQLProject(
+                  label,
+                  queryProjects(Some(entity), OQLQuery(id, otmEntity, attr, List(StarOQLProject), None, None, None, None, None), model, oql))
               case None => problem(id.pos, s"entity '${entity.name}' does not have attribute '${id.s}'", oql)
             }
           case _ =>
@@ -344,7 +338,8 @@ object OQL {
       case ObjectNode(properties) =>
         properties foreach { case (_, e) => writeQuery(e, table, builder, oql) }
         builder.left.toOption.get
-      case n @ ManyToOneNode(OQLQuery(_, entity, attr @ Attribute(name, column, pk, required, ManyToOneType(mtoEntity)), _, _, _, _, _), element) =>
+      case n @ ManyToOneNode(OQLQuery(_, entity, attr @ Attribute(name, column, pk, required, ManyToOneType(mtoEntity)), _, _, _, _, _, _),
+                             element) =>
         val alias = s"$table$$$name"
 
         n.idx = builder.left.toOption.get.projectValue(AttributeOQLExpression(List(Ident(name)), List((entity, attr))), table)
@@ -352,7 +347,7 @@ object OQL {
         writeQuery(element, alias, builder, oql)
         builder.left.toOption.get
       case n @ ManyToManyNode(
-            OQLQuery(_, entity, attr @ Attribute(name, _, _, _, ManyToManyType(mtmEntity, linkEntity, selfAttr, targetAttr)), _, select, _, order, _),
+            OQLQuery(_, entity, Attribute(name, _, _, _, ManyToManyType(mtmEntity, linkEntity, selfAttr, targetAttr)), _, select, _, order, _, _),
             element) =>
         val alias = s"$table$$$name"
         val subquery =
@@ -371,7 +366,7 @@ object OQL {
         subquery.innerJoin(alias, targetAttr.column, mtmEntity.table, joinAlias, mtmEntity.pk.get.column)
         subquery
       case n @ OneToOneNode(
-            OQLQuery(_, entity, attr @ Attribute(name, column, pk, required, OneToOneType(mtoEntity, otmAttr)), _, select, _, order, _),
+            OQLQuery(_, entity, attr @ Attribute(name, column, pk, required, OneToOneType(mtoEntity, otmAttr)), _, select, _, order, _, _),
             element) =>
         val alias = s"$table$$$name"
         val subquery =
@@ -388,7 +383,7 @@ object OQL {
         order foreach (subquery.ordering(_, alias))
         subquery
       case n @ OneToManyNode(
-            OQLQuery(_, entity, attr @ Attribute(name, column, pk, required, OneToManyType(mtoEntity, otmAttr)), _, select, _, order, _),
+            OQLQuery(_, entity, attr @ Attribute(name, column, pk, required, OneToManyType(mtoEntity, otmAttr)), _, select, _, order, _, _),
             element) =>
         val alias = s"$table$$$name"
         val subquery =

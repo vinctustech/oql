@@ -64,7 +64,7 @@ class SQLQueryBuilder(val parms: Parameters, oql: String, val margin: Int = 0, s
         val sql = subquery.toString
 
         s"EXISTS (\n$sql${" " * (margin + 2 * SQLQueryBuilder.INDENT)})"
-      case SubqueryOQLExpression(query) =>
+      case QueryOQLExpression(query) =>
         val subquery = writeQuery(innerQuery(query), table, Right((parms, margin + 2 * SQLQueryBuilder.INDENT)), oql)
         val sql = subquery.toString
 

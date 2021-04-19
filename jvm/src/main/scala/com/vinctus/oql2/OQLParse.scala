@@ -1,11 +1,10 @@
 package com.vinctus.oql2
 
-import com.vinctus.oql2.OQLParser.{ExpressionContext, GroupContext, LabelContext, OrderContext, ProjectContext, SelectContext, WhenContext}
-import org.antlr.v4.runtime.{CharStreams, CommonTokenStream, ConsoleErrorListener, ParserRuleContext}
+import com.vinctus.oql2.OQLParser.{ExpressionContext, GroupContext, LabelContext, LogicalExpressionContext, OrderContext, WhenContext}
+import org.antlr.v4.runtime.{CharStreams, CommonTokenStream, ConsoleErrorListener}
 
 import scala.collection.mutable
 import scala.jdk.CollectionConverters._
-import scala.reflect.internal.NoPhase.id
 
 object OQLParse {
 
@@ -32,11 +31,11 @@ object OQLParse {
     ctx match {
       case null =>
         proj match {
-          case id: Ident                               => id
-          case OQLQuery(resource, _, _, _, _, _, _, _) => resource
-          case AttributeOQLExpression(List(id), _)     => id
-          case ReferenceOQLExpression(List(id))        => id
-          case ParameterOQLExpression(id)              => id
+          case id: Ident                                  => id
+          case OQLQuery(resource, _, _, _, _, _, _, _, _) => resource
+          case AttributeOQLExpression(List(id), _)        => id
+          case ReferenceOQLExpression(List(id))           => id
+          case ParameterOQLExpression(id)                 => id
         }
       case _ => ctx.id
     }
@@ -53,7 +52,7 @@ object OQLParse {
 
   def project(ps: mutable.Buffer[OQLProject]): List[OQLProject] = if (ps eq null) Nil else ps.toList
 
-  def select(ctx: SelectContext): Option[OQLExpression] = if (ctx eq null) None else Some(ctx.e)
+  def select(ctx: LogicalExpressionContext): Option[OQLExpression] = if (ctx eq null) None else Some(ctx.e)
 
   def group(ctx: GroupContext): Option[List[AttributeOQLExpression]] = if (ctx eq null) None else Some(ctx.es.toList)
 

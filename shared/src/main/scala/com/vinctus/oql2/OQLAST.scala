@@ -9,7 +9,8 @@ case class OQLQuery(source: Ident,
                     select: Option[OQLExpression],
                     group: Option[List[AttributeOQLExpression]],
                     order: Option[List[OQLOrdering]],
-                    restrict: OQLRestrict)
+                    limit: Option[Int],
+                    offset: Option[Int])
     extends OQLAST
 
 trait OQLProject { val label: Ident }
@@ -27,7 +28,7 @@ case class InArrayOQLExpression(left: OQLExpression, op: String, right: List[OQL
 case class InParameterOQLExpression(left: OQLExpression, op: String, right: ParameterOQLExpression) extends OQLExpression
 case class InQueryOQLExpression(left: OQLExpression, op: String, query: OQLQuery) extends OQLExpression
 case class ExistsOQLExpression(query: OQLQuery) extends OQLExpression
-case class SubqueryOQLExpression(query: OQLQuery) extends OQLExpression
+case class QueryOQLExpression(query: OQLQuery) extends OQLExpression
 case class InfixOQLExpression(left: OQLExpression, op: String, right: OQLExpression) extends OQLExpression
 case class PrefixOQLExpression(op: String, expr: OQLExpression) extends OQLExpression
 case class PostfixOQLExpression(expr: OQLExpression, op: String) extends OQLExpression
