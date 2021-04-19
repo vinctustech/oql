@@ -37,7 +37,7 @@ class OQL(dm: String, val dataSource: OQLDataSource) {
 
   def entity(name: String): Entity = model.entities(name)
 
-  def queryMany(oql: String, parameters: Map[String, Any] = Map()) = { //todo: async
+  def queryMany(oql: String, parameters: Map[String, Any] = Map()): List[Any] = { //todo: async
     val query =
       OQLParse(oql) match {
         case None              => sys.error("error parsing query")
@@ -91,7 +91,7 @@ class OQL(dm: String, val dataSource: OQLDataSource) {
             while (listResultSet.next) rows += 1
 
             if (rows > 1)
-              problem(query.resource.pos, s"attribute '${query.resource.s}' had a result set consisting of $rows rows", oql)
+              problem(query.source.pos, s"attribute '${query.source.s}' had a result set consisting of $rows rows", oql)
 
             if (rows == 0) null
             else buildResult(element, listResultSet)
@@ -153,7 +153,7 @@ object OQL {
         queryProjects(Some(entity), query, model, oql)
 
         if (!query.attr.typ.isArrayType)
-          problem(query.resource.pos, s"attribute ${query.resource.s} does not have an array type", oql)
+          problem(query.source.pos, s"attribute ${query.source.s} does not have an array type", oql)
 
         query.select foreach (attributes(query.entity, _, model, oql))
         query.order foreach (_ foreach { case OQLOrdering(expr, _) => attributes(query.entity, expr, model, oql) })
@@ -161,7 +161,7 @@ object OQL {
         queryProjects(Some(entity), query, model, oql)
 
         if (!query.attr.typ.isArrayType)
-          problem(query.resource.pos, s"attribute ${query.resource.s} does not have an array type", oql)
+          problem(query.source.pos, s"attribute ${query.source.s} does not have an array type", oql)
 
         query.select foreach (attributes(query.entity, _, model, oql))
         query.order foreach (_ foreach { case OQLOrdering(expr, _) => attributes(query.entity, expr, model, oql) })
@@ -218,7 +218,7 @@ object OQL {
         queryProjects(Some(entity), query, model, oql)
 
         if (!query.attr.typ.isArrayType)
-          problem(query.resource.pos, s"attribute ${query.resource.s} does not have an array type", oql)
+          problem(query.source.pos, s"attribute ${query.source.s} does not have an array type", oql)
 
         query.select foreach (attributes(query.entity, _, model, oql))
         query.order foreach (_ foreach { case OQLOrdering(expr, _) => attributes(query.entity, expr, model, oql) })
@@ -234,7 +234,7 @@ object OQL {
         if (query.entity ne null) {
           query.entity
         } else {
-          outer.get.attributes get query.resource.s match {
+          outer.get.attributes get query.source.s match {
             case Some(attr @ Attribute(name, column, pk, required, OneToOneType(entity, _))) =>
               query.entity = entity
               query.attr = attr
@@ -251,15 +251,15 @@ object OQL {
               query.entity = entity
               query.attr = attr
               entity
-            case None => problem(query.resource.pos, s"entity '${outer.get}' does not have attribute '${query.resource.s}'", oql)
+            case None => problem(query.source.pos, s"entity '${outer.get}' does not have attribute '${query.source.s}'", oql)
           }
         }
       } else
-        model.entities get query.resource.s match {
+        model.entities get query.source.s match {
           case Some(e) =>
             query.entity = e
             e
-          case None => problem(query.resource.pos, s"unknown entity '${query.resource.s}'", oql)
+          case None => problem(query.source.pos, s"unknown entity '${query.source.s}'", oql)
         }
     val subtracts = new mutable.HashSet[String]
 

@@ -2,7 +2,7 @@ package com.vinctus.oql2
 
 trait OQLAST
 
-case class OQLQuery(resource: Ident,
+case class OQLQuery(source: Ident,
                     var entity: Entity,
                     var attr: Attribute,
                     var project: List[OQLProject],
