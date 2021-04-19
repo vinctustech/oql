@@ -43,7 +43,7 @@ case class ParameterOQLExpression(p: Ident) extends OQLExpression
 case class ApplyOQLExpression(f: Ident, args: List[OQLExpression]) extends OQLExpression
 case object StarOQLExpression extends OQLExpression
 case class CaseOQLExpression(whens: List[OQLWhen], els: Option[OQLExpression]) extends OQLExpression
-case class GroupingOQLExpression(expr: OQLExpression) extends OQLExpression
+case class GroupedOQLExpression(expr: OQLExpression) extends OQLExpression
 
 case class OQLWhen(cond: OQLExpression, expr: OQLExpression)
 

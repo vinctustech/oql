@@ -47,8 +47,18 @@ class OQL(dm: String, val dataSource: OQLDataSource) {
         query
     }
 
-  def queryMany(oql: String, parameters: Map[String, Any] = Map()): List[Any] = {
-    val query = parseQuery(oql)
+  def parseCondition(cond: String, entity: Entity): OQLExpression = {
+    OQLParse.logicalExpression(cond) match {
+      case None => sys.error("error parsing condition")
+      case Some(expr: OQLExpression) =>
+        attributes(entity, expr, model, cond)
+        expr
+    }
+  }
+
+  def queryMany(oql: String, parameters: Map[String, Any] = Map()): List[Any] = queryMany(parseQuery(oql), oql, parameters)
+
+  def queryMany(query: OQLQuery, oql: String, parameters: Map[String, Any]): List[Any] = {
     val parms = new Parameters(parameters)
     val root: ResultNode = ResultNode(query, objectNode(query.project))
     val sqlBuilder = new SQLQueryBuilder(parms, oql)
@@ -71,7 +81,7 @@ class OQL(dm: String, val dataSource: OQLDataSource) {
 
       def buildResult(node: Node, resultSet: OQLResultSet): Any =
         node match {
-          case ResultNode(query, element) =>
+          case ResultNode(_, element) =>
             val array = new ListBuffer[Any]
 
             while (resultSet.next) array += buildResult(element, resultSet)
@@ -91,7 +101,7 @@ class OQL(dm: String, val dataSource: OQLDataSource) {
 
             if (rows == 0) null
             else buildResult(element, listResultSet)
-          case n @ OneToManyNode(_ibute, element) =>
+          case n @ OneToManyNode(_, element) =>
             val listResultSet = new ListResultSet(DefaultJSONReader.fromString(resultSet.getString(n.idx)).asInstanceOf[List[List[Any]]])
             val array = new ListBuffer[Any]
 
@@ -166,7 +176,7 @@ object OQL {
         recur(expr)
         recur(lower)
         recur(upper)
-      case GroupingOQLExpression(expr) => recur(expr)
+      case GroupedOQLExpression(expr) => recur(expr)
       case CaseOQLExpression(whens, els) =>
         whens foreach {
           case OQLWhen(cond, expr) =>
