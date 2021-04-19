@@ -2,8 +2,6 @@ package com.vinctus.oql2
 
 abstract class OQLResultSet {
 
-  def peer: Any
-
   def next: Boolean
 
   /**
@@ -15,5 +13,7 @@ abstract class OQLResultSet {
   def get(idx: Int): Any
 
   def getString(idx: Int): String
+
+  def getResultSet(idx: Int): OQLResultSet
 
 }

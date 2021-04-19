@@ -4,11 +4,6 @@ import xyz.hyperreal.json.DefaultJSONReader
 
 import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
-import xyz.hyperreal._
-import xyz.hyperreal.pretty.prettyPrint
-
-import java.sql.ResultSet
-import xyz.hyperreal.table.TextTable
 
 import scala.annotation.tailrec
 import scala.collection.immutable.VectorMap
@@ -91,7 +86,7 @@ class OQL(dm: String, val dataSource: OQLDataSource) {
             if (resultSet.get(n.idx) == null) null
             else buildResult(element, resultSet)
           case n @ OneToOneNode(query, element) =>
-            val listResultSet = new ListResultSet(DefaultJSONReader.fromString(resultSet.getString(n.idx)).asInstanceOf[List[List[Any]]])
+            val listResultSet = resultSet.getResultSet(n.idx)
             var rows = 0
 
             while (listResultSet.next) rows += 1

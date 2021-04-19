@@ -1,8 +1,6 @@
 package com.vinctus.oql2
 
-import java.sql.Statement
-
-class H2_mem extends JDBCDataSource("org.h2.Driver") {
+class H2mem extends JDBCDataSource("org.h2.Driver") {
 
   val name = "H2 (in memory)"
   val url = s"jdbc:h2:mem:test;DB_CLOSE_DELAY=-1"
@@ -29,12 +27,6 @@ class H2_mem extends JDBCDataSource("org.h2.Driver") {
       case _: DataType => mapType(typ)
     }
 
-  def connect: OQLConnection =
-    new JDBCConnection(this) {
-      def insert(command: String): JDBCResultSet = {
-        stmt.executeUpdate(command, Statement.RETURN_GENERATED_KEYS)
-        new JDBCResultSet(stmt.getGeneratedKeys)
-      }
-    }
+  def connect: OQLConnection = new H2Connection(this)
 
 }
