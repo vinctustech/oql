@@ -2,7 +2,7 @@ package com.vinctus
 
 package object oql2 {
 
-  var error: Boolean = _
+  var parsingError: Boolean = _
 
   def ni: Nothing = sys.error("not implemented (yet)")
 
@@ -23,7 +23,7 @@ package object oql2 {
     Console.err.println(s"error on line $line, column ${charPositionInLine + 1}: $msg")
     Console.err.println("  " ++ io.Source.fromString(input).getLines().drop(line - 1).next())
     Console.err.println("  " ++ " " * charPositionInLine :+ '^')
-    error = true
+    parsingError = true
     null
   }
 

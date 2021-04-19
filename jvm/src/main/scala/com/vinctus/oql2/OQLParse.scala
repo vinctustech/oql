@@ -8,7 +8,7 @@ import scala.jdk.CollectionConverters._
 
 object OQLParse {
 
-  def apply(input: String): Option[OQLAST] = {
+  def instantiate(input: String): OQLParser = {
     val charStream = CharStreams.fromString(input)
     val lexer = new OQLLexer(charStream)
     val tokens = new CommonTokenStream(lexer)
@@ -19,12 +19,22 @@ object OQLParse {
     parser.removeErrorListener(ConsoleErrorListener.INSTANCE)
     lexer.addErrorListener(errors)
     parser.addErrorListener(errors)
-    error = false
+    parsingError = false
+    parser
+  }
 
-    val res = parser.command
+  def apply(input: String): Option[OQLAST] = {
+    val res = instantiate(input).command
 
-    if (error) None
+    if (parsingError) None
     else Some(res.c)
+  }
+
+  def logicalExpression(input: String): Option[OQLExpression] = {
+    val res = instantiate(input).logicalExpression
+
+    if (parsingError) None
+    else Some(res.e)
   }
 
   def label(ctx: LabelContext, proj: Any): Ident =

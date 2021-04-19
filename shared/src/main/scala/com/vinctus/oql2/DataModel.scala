@@ -10,7 +10,7 @@ class DataModel(model: DMLModel, dml: String) {
                                 attrs: mutable.LinkedHashMap[String, Attribute] = new mutable.LinkedHashMap)
 
   val entities: Map[String, Entity] = {
-    error = false
+    parsingError = false
 
     val entities = new mutable.LinkedHashMap[String, EntityInfo]
 
@@ -196,7 +196,7 @@ class DataModel(model: DMLModel, dml: String) {
       e._attributes = as to VectorMap
     }
 
-    if (error)
+    if (parsingError)
       sys.error("errors while creating data model")
 
     entities.view.mapValues(_.entity) to VectorMap

@@ -16,11 +16,11 @@ object DMLParse {
     parser.removeErrorListener(ConsoleErrorListener.INSTANCE)
     lexer.addErrorListener(errors)
     parser.addErrorListener(errors)
-    error = false
+    parsingError = false
 
     val res = parser.model.m
 
-    if (error) None
+    if (parsingError) None
     else Some(res)
   }
 

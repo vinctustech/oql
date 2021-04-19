@@ -37,24 +37,22 @@ class OQL(dm: String, val dataSource: OQLDataSource) {
 
   def entity(name: String): Entity = model.entities(name)
 
-  def queryMany(oql: String, parameters: Map[String, Any] = Map()): List[Any] = { //todo: async
+  def queryMany(oql: String, parameters: Map[String, Any] = Map()): List[Any] = {
     val query =
       OQLParse(oql) match {
         case None              => sys.error("error parsing query")
         case Some(q: OQLQuery) => q
       }
-    val parms = new Parameters(parameters)
 
     queryProjects(None, query, model, oql)
     query.select foreach (attributes(query.entity, _, model, oql))
     query.order foreach (_ foreach { case OQLOrdering(expr, _) => attributes(query.entity, expr, model, oql) })
+    queryMany(query, oql, parameters)
+  }
 
-//    println(prettyPrint(query))
-
+  def queryMany(query: OQLQuery, oql: String, parameters: Map[String, Any] = Map()): List[Any] = {
+    val parms = new Parameters(parameters)
     val root: ResultNode = ResultNode(query, objectNode(query.project))
-
-//    println(prettyPrint(root))
-
     val sqlBuilder = new SQLQueryBuilder(parms, oql)
 
     writeQuery(root, null, Left(sqlBuilder), oql)

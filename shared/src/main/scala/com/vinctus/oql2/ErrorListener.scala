@@ -14,7 +14,7 @@ class ErrorListener(input: String) extends ANTLRErrorListener {
                   msg: String,
                   e: RecognitionException): Unit = {
     printError(line, charPositionInLine, msg, input)
-    error = true
+    parsingError = true
   }
 
   def reportAmbiguity(recognizer: Parser,
@@ -36,12 +36,7 @@ class ErrorListener(input: String) extends ANTLRErrorListener {
     //Console.err.println("reportAttemptingFullContext")
   }
 
-  def reportContextSensitivity(recognizer: Parser,
-                               dfa: DFA,
-                               startIndex: Int,
-                               stopIndex: Int,
-                               prediction: Int,
-                               configs: ATNConfigSet): Unit = {
+  def reportContextSensitivity(recognizer: Parser, dfa: DFA, startIndex: Int, stopIndex: Int, prediction: Int, configs: ATNConfigSet): Unit = {
     //Console.err.println("reportContextSensitivity")
   }
 }
