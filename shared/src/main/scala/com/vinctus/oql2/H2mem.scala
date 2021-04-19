@@ -29,4 +29,8 @@ class H2mem extends JDBCDataSource("org.h2.Driver") {
 
   def connect: OQLConnection = new H2Connection(this)
 
+  val resultArrayFunction: String = "JSON_ARRAY"
+
+  val rowSequenceFunction: String = "JSON_ARRAY"
+
 }

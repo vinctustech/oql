@@ -8,7 +8,7 @@ import scala.collection.mutable.ListBuffer
 import scala.annotation.tailrec
 import scala.collection.immutable.VectorMap
 
-class OQL(dm: String, val dataSource: OQLDataSource) {
+class OQL(dm: String, val ds: SQLDataSource) {
 
   import OQL._
 
@@ -18,7 +18,7 @@ class OQL(dm: String, val dataSource: OQLDataSource) {
       case Some(m: DMLModel) => new DataModel(m, dm)
     }
 
-  def connect: OQLConnection = dataSource.connect
+  def connect: OQLConnection = ds.connect
 
   def execute[R](action: OQLConnection => R): R = {
     val conn = connect
@@ -56,9 +56,9 @@ class OQL(dm: String, val dataSource: OQLDataSource) {
   def queryMany(query: OQLQuery, oql: String, parameters: Map[String, Any]): List[Any] = {
     val parms = new Parameters(parameters)
     val root: ResultNode = ResultNode(query, objectNode(query.project))
-    val sqlBuilder = new SQLQueryBuilder(parms, oql)
+    val sqlBuilder = new SQLQueryBuilder(parms, oql, ds)
 
-    writeQuery(root, null, Left(sqlBuilder), oql)
+    writeQuery(root, null, Left(sqlBuilder), oql, ds)
 
     val sql = sqlBuilder.toString
 
@@ -320,7 +320,11 @@ object OQL {
     query
   }
 
-  private[oql2] def writeQuery(node: Node, table: String, builder: Either[SQLQueryBuilder, (Parameters, Int)], oql: String): SQLQueryBuilder =
+  private[oql2] def writeQuery(node: Node,
+                               table: String,
+                               builder: Either[SQLQueryBuilder, (Parameters, Int)],
+                               oql: String,
+                               ds: SQLDataSource): SQLQueryBuilder =
     node match {
       case ResultNode(query, element) =>
         builder.left.toOption.get.table(query.entity.table, None)
@@ -331,13 +335,13 @@ object OQL {
         if (query.order.isDefined)
           builder.left.toOption.get.ordering(query.order.get, query.entity.table)
 
-        writeQuery(element, query.entity.table, builder, oql)
+        writeQuery(element, query.entity.table, builder, oql, ds)
         builder.left.toOption.get
       case e @ ValueNode(expr) =>
         e.idx = builder.left.toOption.get.projectValue(expr, table)
         builder.left.toOption.get
       case ObjectNode(properties) =>
-        properties foreach { case (_, e) => writeQuery(e, table, builder, oql) }
+        properties foreach { case (_, e) => writeQuery(e, table, builder, oql, ds) }
         builder.left.toOption.get
       case n @ ManyToOneNode(OQLQuery(_, entity, attr @ Attribute(name, column, pk, required, ManyToOneType(mtoEntity)), _, _, _, _, _, _),
                              element) =>
@@ -345,22 +349,23 @@ object OQL {
 
         n.idx = builder.left.toOption.get.projectValue(AttributeOQLExpression(List(Ident(name)), List((entity, attr))), table)
         builder.left.toOption.get.leftJoin(table, column, entity.table, alias, entity.pk.get.column)
-        writeQuery(element, alias, builder, oql)
+        writeQuery(element, alias, builder, oql, ds)
         builder.left.toOption.get
       case n @ ManyToManyNode(
             OQLQuery(_, entity, Attribute(name, _, _, _, ManyToManyType(mtmEntity, linkEntity, selfAttr, targetAttr)), _, select, _, order, _, _),
             element) =>
         val alias = s"$table$$$name"
         val subquery =
-          if (builder.isLeft) new SQLQueryBuilder(builder.left.toOption.get.parms, oql, builder.left.toOption.get.margin + 2 * SQLQueryBuilder.INDENT)
-          else new SQLQueryBuilder(builder.toOption.get._1, oql, builder.toOption.get._2, true)
+          if (builder.isLeft)
+            new SQLQueryBuilder(builder.left.toOption.get.parms, oql, ds, builder.left.toOption.get.margin + 2 * SQLQueryBuilder.INDENT)
+          else new SQLQueryBuilder(builder.toOption.get._1, oql, ds, builder.toOption.get._2, true)
         val joinAlias = s"$alias$$${targetAttr.name}"
 
         if (builder.isLeft)
           n.idx = builder.left.toOption.get.projectQuery(subquery)
 
         subquery.table(linkEntity.table, Some(alias))
-        writeQuery(element, joinAlias, Left(subquery), oql)
+        writeQuery(element, joinAlias, Left(subquery), oql, ds)
         subquery.select(RawOQLExpression(s"$alias.${selfAttr.column} = $table.${entity.pk.get.column}"), null)
         select foreach (subquery.select(_, joinAlias))
         order foreach (subquery.ordering(_, joinAlias))
@@ -371,14 +376,15 @@ object OQL {
             element) =>
         val alias = s"$table$$$name"
         val subquery =
-          if (builder.isLeft) new SQLQueryBuilder(builder.left.toOption.get.parms, oql, builder.left.toOption.get.margin + 2 * SQLQueryBuilder.INDENT)
-          else new SQLQueryBuilder(builder.toOption.get._1, oql, builder.toOption.get._2, true)
+          if (builder.isLeft)
+            new SQLQueryBuilder(builder.left.toOption.get.parms, oql, ds, builder.left.toOption.get.margin + 2 * SQLQueryBuilder.INDENT)
+          else new SQLQueryBuilder(builder.toOption.get._1, oql, ds, builder.toOption.get._2, true)
 
         if (builder.isLeft)
           n.idx = builder.left.toOption.get.projectQuery(subquery)
 
         subquery.table(mtoEntity.table, Some(alias))
-        writeQuery(element, alias, Left(subquery), oql)
+        writeQuery(element, alias, Left(subquery), oql, ds)
         subquery.select(RawOQLExpression(s"$alias.${otmAttr.column} = $table.${entity.pk.get.column}"), null)
         select foreach (subquery.select(_, alias))
         order foreach (subquery.ordering(_, alias))
@@ -388,14 +394,15 @@ object OQL {
             element) =>
         val alias = s"$table$$$name"
         val subquery =
-          if (builder.isLeft) new SQLQueryBuilder(builder.left.toOption.get.parms, oql, builder.left.toOption.get.margin + 2 * SQLQueryBuilder.INDENT)
-          else new SQLQueryBuilder(builder.toOption.get._1, oql, builder.toOption.get._2, true)
+          if (builder.isLeft)
+            new SQLQueryBuilder(builder.left.toOption.get.parms, oql, ds, builder.left.toOption.get.margin + 2 * SQLQueryBuilder.INDENT)
+          else new SQLQueryBuilder(builder.toOption.get._1, oql, ds, builder.toOption.get._2, true)
 
         if (builder.isLeft)
           n.idx = builder.left.toOption.get.projectQuery(subquery)
 
         subquery.table(mtoEntity.table, Some(alias))
-        writeQuery(element, alias, Left(subquery), oql)
+        writeQuery(element, alias, Left(subquery), oql, ds)
         subquery.select(RawOQLExpression(s"$alias.${otmAttr.column} = $table.${entity.pk.get.column}"), null)
         select foreach (subquery.select(_, alias))
         order foreach (subquery.ordering(_, alias))

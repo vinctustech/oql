@@ -13,7 +13,7 @@ object SQLQueryBuilder {
 
 }
 
-class SQLQueryBuilder(val parms: Parameters, oql: String, val margin: Int = 0, subquery: Boolean = false) {
+class SQLQueryBuilder(val parms: Parameters, oql: String, ds: SQLDataSource, val margin: Int = 0, subquery: Boolean = false) {
 
   import SQLQueryBuilder._
 
@@ -23,7 +23,6 @@ class SQLQueryBuilder(val parms: Parameters, oql: String, val margin: Int = 0, s
 
   private var projectQuery: Boolean = false
   private var from: (String, Option[String]) = _
-//  private val tables = new mutable.HashMap[String, Int]
   private val innerJoins = new ArrayBuffer[Join]
   private val leftJoins = new mutable.HashSet[Join]
   private var idx = 0
@@ -60,17 +59,17 @@ class SQLQueryBuilder(val parms: Parameters, oql: String, val margin: Int = 0, s
   def expression(expr: OQLExpression, table: String): String =
     expr match {
       case ExistsOQLExpression(query) =>
-        val subquery = writeQuery(innerQuery(query), table, Right((parms, margin + 2 * SQLQueryBuilder.INDENT)), oql)
+        val subquery = writeQuery(innerQuery(query), table, Right((parms, margin + 2 * SQLQueryBuilder.INDENT)), oql, ds)
         val sql = subquery.toString
 
         s"EXISTS (\n$sql${" " * (margin + 2 * SQLQueryBuilder.INDENT)})"
       case QueryOQLExpression(query) =>
-        val subquery = writeQuery(innerQuery(query), table, Right((parms, margin + 2 * SQLQueryBuilder.INDENT)), oql)
+        val subquery = writeQuery(innerQuery(query), table, Right((parms, margin + 2 * SQLQueryBuilder.INDENT)), oql, ds)
         val sql = subquery.toString
 
         s"(\n$sql${" " * (margin + 2 * SQLQueryBuilder.INDENT)})"
       case InQueryOQLExpression(left, op, query) =>
-        val subquery = writeQuery(innerQuery(query), table, Right((parms, margin + 2 * SQLQueryBuilder.INDENT)), oql)
+        val subquery = writeQuery(innerQuery(query), table, Right((parms, margin + 2 * SQLQueryBuilder.INDENT)), oql, ds)
         val sql = subquery.toString
 
         s"${expression(left, table)} $op (\n$sql${" " * (margin + 2 * SQLQueryBuilder.INDENT)})"
@@ -152,7 +151,7 @@ class SQLQueryBuilder(val parms: Parameters, oql: String, val margin: Int = 0, s
 
     def sq(yes: String, no: String = "") = if (projectQuery) yes else no
 
-    line(s"${sq("(JSON_ARRAY(")}SELECT ${sq("JSON_ARRAY(")}")
+    line(s"${sq(s"(${ds.resultArrayFunction}(")}SELECT ${sq(s"${ds.rowSequenceFunction}(")}")
     in()
     in()
 

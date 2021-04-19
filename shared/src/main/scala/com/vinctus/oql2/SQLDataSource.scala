@@ -34,4 +34,8 @@ trait SQLDataSource extends OQLDataSource {
     tables ++ foreignKeys.flatten
   }
 
+  val resultArrayFunction: String
+
+  val rowSequenceFunction: String
+
 }
