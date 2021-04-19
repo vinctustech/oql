@@ -82,6 +82,17 @@ class OQL(dm: String, val dataSource: OQLDataSource) {
           case n @ ManyToOneNode(_, element) =>
             if (resultSet.get(n.idx) == null) null
             else buildResult(element, resultSet)
+          case n @ OneToOneNode(query, element) =>
+            val listResultSet = new ListResultSet(DefaultJSONReader.fromString(resultSet.getString(n.idx)).asInstanceOf[List[List[Any]]])
+            var rows = 0
+
+            while (listResultSet.next) rows += 1
+
+            if (rows > 1)
+              problem(query.resource.pos, s"attribute '${query.resource.s}' had a result set consisting of $rows rows", oql)
+
+            if (rows == 0) null
+            else buildResult(element, listResultSet)
           case n @ OneToManyNode(_ibute, element) =>
             val listResultSet = new ListResultSet(DefaultJSONReader.fromString(resultSet.getString(n.idx)).asInstanceOf[List[List[Any]]])
             val array = new ListBuffer[Any]
@@ -118,6 +129,7 @@ object OQL {
   private[oql2] def innerQuery(query: OQLQuery): Node =
     query.attr.typ match {
       case ManyToOneType(mtoEntity)           => ManyToOneNode(query, objectNode(query.project))
+      case OneToOneType(_, _)                 => OneToOneNode(query, objectNode(query.project))
       case OneToManyType(otmEntity, attr)     => OneToManyNode(query, objectNode(query.project))
       case ManyToManyType(mtmEntity, _, _, _) => ManyToManyNode(query, objectNode(query.project))
     }
@@ -218,6 +230,10 @@ object OQL {
           query.entity
         } else {
           outer.get.attributes get query.resource.s match {
+            case Some(attr @ Attribute(name, column, pk, required, OneToOneType(entity, _))) =>
+              query.entity = entity
+              query.attr = attr
+              entity
             case Some(attr @ Attribute(name, column, pk, required, ManyToOneType(entity))) =>
               query.entity = entity
               query.attr = attr
@@ -344,6 +360,21 @@ object OQL {
         select foreach (subquery.select(_, joinAlias))
         subquery.innerJoin(alias, targetAttr.column, mtmEntity.table, joinAlias, mtmEntity.pk.get.column)
         subquery
+      case n @ OneToOneNode(OQLQuery(_, entity, attr @ Attribute(name, column, pk, required, OneToOneType(mtoEntity, otmAttr)), _, select, _, _, _),
+                            element) =>
+        val alias = s"$table$$$name"
+        val subquery =
+          if (builder.isLeft) new SQLQueryBuilder(builder.left.toOption.get.parms, oql, builder.left.toOption.get.margin + 2 * SQLQueryBuilder.INDENT)
+          else new SQLQueryBuilder(builder.toOption.get._1, oql, builder.toOption.get._2, true)
+
+        if (builder.isLeft)
+          n.idx = builder.left.toOption.get.projectQuery(subquery)
+
+        subquery.table(mtoEntity.table, Some(alias))
+        writeQuery(element, alias, Left(subquery), oql)
+        subquery.select(RawOQLExpression(s"$alias.${otmAttr.column} = $table.${entity.pk.get.column}"), null)
+        select foreach (subquery.select(_, alias))
+        subquery
       case n @ OneToManyNode(OQLQuery(_, entity, attr @ Attribute(name, column, pk, required, OneToManyType(mtoEntity, otmAttr)), _, select, _, _, _),
                              element) =>
         val alias = s"$table$$$name"
@@ -364,17 +395,11 @@ object OQL {
 }
 
 trait Node
-
 case class ResultNode(entity: Entity, element: Node, select: Option[OQLExpression]) extends Node
-
 case class ManyToOneNode(query: OQLQuery, element: Node) extends Node { var idx: Int = _ }
-
+case class OneToOneNode(query: OQLQuery, element: Node) extends Node { var idx: Int = _ }
 case class OneToManyNode(query: OQLQuery, element: Node) extends Node { var idx: Int = _ }
-
 case class ManyToManyNode(query: OQLQuery, element: Node) extends Node { var idx: Int = _ }
-
 case class ObjectNode(props: Seq[(String, Node)]) extends Node // todo: objects as a way of grouping expressions
-
 case class TupleNode(elems: Seq[Node]) extends Node // todo: tuples as a way of grouping expressions
-
 case class ValueNode(value: OQLExpression) extends Node { var idx: Int = _ }
