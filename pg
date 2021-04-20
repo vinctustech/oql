@@ -27,3 +27,6 @@ insert into book (title, year, author) values
 
 SELECT author.name as author_name, ARRAY(select row(book.id, book.title) from book where book.author = author.id)
   FROM author;
+
+SELECT author.name as author_name, ARRAY(select json_build_array(book.id, book.title) from book where book.author = author.id)
+  FROM author;
