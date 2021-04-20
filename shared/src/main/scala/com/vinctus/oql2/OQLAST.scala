@@ -22,7 +22,7 @@ case class QueryOQLProject(label: Ident, query: OQLQuery) extends OQLProject
 case class OQLOrdering(expr: OQLExpression, ordering: String)
 case class OQLRestrict(limit: Option[Int], offset: Option[Int])
 
-trait OQLExpression
+abstract class OQLExpression { var typ: DataType = _ }
 case class RawOQLExpression(s: String) extends OQLExpression
 case class InArrayOQLExpression(left: OQLExpression, op: String, right: List[OQLExpression]) extends OQLExpression
 case class InParameterOQLExpression(left: OQLExpression, op: String, right: ParameterOQLExpression) extends OQLExpression

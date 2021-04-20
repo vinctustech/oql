@@ -1,7 +1,5 @@
 package com.vinctus.oql2
 
-import xyz.hyperreal.json.DefaultJSONReader
-
 import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
 
@@ -37,8 +35,8 @@ class OQL(dm: String, val ds: SQLDataSource) {
       case None => sys.error("error parsing query")
       case Some(query: OQLQuery) =>
         queryProjects(None, query, model, oql)
-        query.select foreach (attributes(query.entity, _, model, oql))
-        query.order foreach (_ foreach { case OQLOrdering(expr, _) => attributes(query.entity, expr, model, oql) })
+        query.select foreach (decorate(query.entity, _, model, oql))
+        query.order foreach (_ foreach { case OQLOrdering(expr, _) => decorate(query.entity, expr, model, oql) })
         query
     }
 
@@ -46,7 +44,7 @@ class OQL(dm: String, val ds: SQLDataSource) {
     OQLParse.logicalExpression(cond) match {
       case None => sys.error("error parsing condition")
       case Some(expr: OQLExpression) =>
-        attributes(entity, expr, model, cond)
+        decorate(entity, expr, model, cond)
         expr
     }
   }
@@ -146,8 +144,8 @@ object OQL {
     })
   }
 
-  private[oql2] def attributes(entity: Entity, expr: OQLExpression, model: DataModel, oql: String): Unit = {
-    def recur(expr: OQLExpression): Unit = attributes(entity, expr, model, oql)
+  private[oql2] def decorate(entity: Entity, expr: OQLExpression, model: DataModel, oql: String): Unit = {
+    def recur(expr: OQLExpression): Unit = decorate(entity, expr, model, oql)
 
     expr match {
       case ExistsOQLExpression(query) =>
@@ -156,16 +154,16 @@ object OQL {
         if (!query.attr.typ.isArrayType)
           problem(query.source.pos, s"attribute ${query.source.s} does not have an array type", oql)
 
-        query.select foreach (attributes(query.entity, _, model, oql))
-        query.order foreach (_ foreach { case OQLOrdering(expr, _) => attributes(query.entity, expr, model, oql) })
+        query.select foreach (decorate(query.entity, _, model, oql))
+        query.order foreach (_ foreach { case OQLOrdering(expr, _) => decorate(query.entity, expr, model, oql) })
       case QueryOQLExpression(query) =>
         queryProjects(Some(entity), query, model, oql)
 
         if (!query.attr.typ.isArrayType)
           problem(query.source.pos, s"attribute ${query.source.s} does not have an array type", oql)
 
-        query.select foreach (attributes(query.entity, _, model, oql))
-        query.order foreach (_ foreach { case OQLOrdering(expr, _) => attributes(query.entity, expr, model, oql) })
+        query.select foreach (decorate(query.entity, _, model, oql))
+        query.order foreach (_ foreach { case OQLOrdering(expr, _) => decorate(query.entity, expr, model, oql) })
       case ApplyOQLExpression(f, args) => args foreach recur
       case BetweenOQLExpression(expr, op, lower, upper) =>
         recur(expr)
@@ -199,8 +197,14 @@ object OQL {
           ids match {
             case List(id) =>
               entity.attributes get id.s match {
-                case Some(attr) => dmrefs += (entity -> attr)
-                case None       => problem(id.pos, s"entity '${entity.name}' does not have attribute '${id.s}'", oql)
+                case Some(attr) =>
+                  dmrefs += (entity -> attr)
+
+                  if (!attr.typ.isDataType)
+                    problem(id.pos, s"attribute '${id.s}' is not a DBMS data type", oql)
+
+                  attrexp.typ = attr.typ.asInstanceOf[DataType]
+                case None => problem(id.pos, s"entity '${entity.name}' does not have attribute '${id.s}'", oql)
               }
             case head :: tail =>
               entity.attributes get head.s match {
@@ -221,10 +225,12 @@ object OQL {
         if (!query.attr.typ.isArrayType)
           problem(query.source.pos, s"attribute ${query.source.s} does not have an array type", oql)
 
-        query.select foreach (attributes(query.entity, _, model, oql))
-        query.order foreach (_ foreach { case OQLOrdering(expr, _) => attributes(query.entity, expr, model, oql) })
-      case StarOQLExpression | _: RawOQLExpression | _: LiteralOQLExpression | _: FloatOQLExpression | _: IntegerOQLExpression |
-          _: BooleanOQLExpression | _: ReferenceOQLExpression | _: ParameterOQLExpression =>
+        query.select foreach (decorate(query.entity, _, model, oql))
+        query.order foreach (_ foreach { case OQLOrdering(expr, _) => decorate(query.entity, expr, model, oql) })
+      case e: LiteralOQLExpression                                                                                                   => e.typ = TextType
+      case e: FloatOQLExpression                                                                                                     => e.typ = FloatType
+      case e: IntegerOQLExpression                                                                                                   => e.typ = IntegerType
+      case StarOQLExpression | _: RawOQLExpression | _: BooleanOQLExpression | _: ReferenceOQLExpression | _: ParameterOQLExpression =>
     }
   }
 
@@ -267,8 +273,8 @@ object OQL {
     query.project foreach {
       case p @ QueryOQLProject(label, query) =>
         queryProjects(Some(entity), query, model, oql)
-        query.select foreach (attributes(query.entity, _, model, oql))
-        query.order foreach (_ foreach { case OQLOrdering(expr, _) => attributes(query.entity, expr, model, oql) })
+        query.select foreach (decorate(query.entity, _, model, oql))
+        query.order foreach (_ foreach { case OQLOrdering(expr, _) => decorate(query.entity, expr, model, oql) })
         map(label.s) = p
       case StarOQLProject =>
         entity.attributes.values foreach {
@@ -311,7 +317,7 @@ object OQL {
               case None => problem(id.pos, s"entity '${entity.name}' does not have attribute '${id.s}'", oql)
             }
           case _ =>
-            attributes(entity, expr, model, oql)
+            decorate(entity, expr, model, oql)
             expProj
         }
     }

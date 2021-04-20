@@ -32,5 +32,6 @@ class PG(domain: String, port: Int, database: String, val user: String, val pass
   val resultArrayFunctionEnd: String = "))"
   val rowSequenceFunctionStart: String = "json_build_array("
   val rowSequenceFunctionEnd: String = ")"
+  val typeFunction: Option[String] = Some("pg_typeof")
 
 }
