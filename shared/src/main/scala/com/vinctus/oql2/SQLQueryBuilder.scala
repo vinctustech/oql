@@ -1,6 +1,7 @@
 package com.vinctus.oql2
 
 import com.vinctus.oql2.OQL._
+import org.graalvm.compiler.debug.TTY.out
 import xyz.hyperreal.pretty._
 
 import scala.collection.mutable
@@ -151,12 +152,12 @@ class SQLQueryBuilder(val parms: Parameters, oql: String, ds: SQLDataSource, val
 
     def sq(yes: String, no: String = "") = if (projectQuery) yes else no
 
-    line(s"${sq(s"(${ds.resultArrayFunction}(")}SELECT ${sq(s"${ds.rowSequenceFunction}(")}")
+    line(s"${sq(s"(${ds.resultArrayFunctionStart}")}SELECT ${sq(ds.rowSequenceFunctionStart)}")
     in()
     in()
 
     for ((p, i) <- projects.zipWithIndex)
-      line(s"$p${if (i < projects.length - 1) "," else sq(" NULL ON NULL)")}")
+      line(s"$p${if (i < projects.length - 1) "," else sq(ds.rowSequenceFunctionEnd)}") //sq(" NULL ON NULL)")
 
     out()
 
@@ -182,7 +183,7 @@ class SQLQueryBuilder(val parms: Parameters, oql: String, ds: SQLDataSource, val
     orderByClause foreach line
 
     if (projectQuery)
-      line("))")
+      line(s"${ds.resultArrayFunctionEnd})")
 
     out()
     buf.toString

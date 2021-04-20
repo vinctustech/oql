@@ -28,8 +28,9 @@ class PG(domain: String, port: Int, database: String, val user: String, val pass
 
   def connect: OQLConnection = new PGConnection(this)
 
-  val resultArrayFunction: String = "ARRAY"
-
-  val rowSequenceFunction: String = "ROW"
+  val resultArrayFunctionStart: String = "to_json(ARRAY("
+  val resultArrayFunctionEnd: String = "))"
+  val rowSequenceFunctionStart: String = "json_build_array("
+  val rowSequenceFunctionEnd: String = ")"
 
 }
