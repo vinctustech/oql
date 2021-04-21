@@ -53,7 +53,7 @@ class OQL(dm: String, val ds: SQLDataSource) {
 
   def queryMany(query: OQLQuery, oql: String, parameters: Map[String, Any]): List[Any] = {
     val parms = new Parameters(parameters)
-    val root: ResultNode = ResultNode(query, objectNode(query.project))
+    val root: ResultNode = ResultNode(query, objectNode(query.project, typed = false))
     val sqlBuilder = new SQLQueryBuilder(parms, oql, ds)
 
     writeQuery(root, null, Left(sqlBuilder), oql, ds)
@@ -108,7 +108,8 @@ class OQL(dm: String, val ds: SQLDataSource) {
             while (listResultSet.next) array += buildResult(element, listResultSet)
 
             array.toList
-          case v: ValueNode => resultSet get v.idx
+          case v @ ValueNode(_, typed) =>
+            resultSet get v.idx
           case ObjectNode(properties) =>
             val map = new mutable.LinkedHashMap[String, Any]
 
@@ -127,19 +128,19 @@ class OQL(dm: String, val ds: SQLDataSource) {
 
 object OQL {
 
-  private[oql2] def innerQuery(query: OQLQuery): Node =
+  private[oql2] def innerQuery(query: OQLQuery, typed: Boolean): Node =
     query.attr.typ match {
-      case ManyToOneType(mtoEntity)           => ManyToOneNode(query, objectNode(query.project))
-      case OneToOneType(_, _)                 => OneToOneNode(query, objectNode(query.project))
-      case OneToManyType(otmEntity, attr)     => OneToManyNode(query, objectNode(query.project))
-      case ManyToManyType(mtmEntity, _, _, _) => ManyToManyNode(query, objectNode(query.project))
+      case ManyToOneType(mtoEntity)           => ManyToOneNode(query, objectNode(query.project, typed))
+      case OneToOneType(_, _)                 => OneToOneNode(query, objectNode(query.project, typed = true))
+      case OneToManyType(otmEntity, attr)     => OneToManyNode(query, objectNode(query.project, typed = true))
+      case ManyToManyType(mtmEntity, _, _, _) => ManyToManyNode(query, objectNode(query.project, typed = true))
     }
 
-  private[oql2] def objectNode(projects: List[OQLProject]): ObjectNode = {
+  private[oql2] def objectNode(projects: List[OQLProject], typed: Boolean): ObjectNode = {
     ObjectNode(projects map { p =>
       (p.label.s, p match {
-        case ExpressionOQLProject(label, expr) => ValueNode(expr)
-        case QueryOQLProject(label, query)     => innerQuery(query)
+        case ExpressionOQLProject(label, expr) => ValueNode(expr, typed)
+        case QueryOQLProject(label, query)     => innerQuery(query, typed)
       })
     })
   }
@@ -343,8 +344,8 @@ object OQL {
 
         writeQuery(element, query.entity.table, builder, oql, ds)
         builder.left.toOption.get
-      case e @ ValueNode(expr) =>
-        e.idx = builder.left.toOption.get.projectValue(expr, table)
+      case e @ ValueNode(expr, typed) =>
+        e.idx = builder.left.toOption.get.projectValue(expr, table, typed)
         builder.left.toOption.get
       case ObjectNode(properties) =>
         properties foreach { case (_, e) => writeQuery(e, table, builder, oql, ds) }
@@ -353,7 +354,8 @@ object OQL {
                              element) =>
         val alias = s"$table$$$name"
 
-        n.idx = builder.left.toOption.get.projectValue(AttributeOQLExpression(List(Ident(name)), List((entity, attr))), table)
+        // untyped because we only check if it's 'null'
+        n.idx = builder.left.toOption.get.projectValue(AttributeOQLExpression(List(Ident(name)), List((entity, attr))), table, typed = false)
         builder.left.toOption.get.leftJoin(table, column, entity.table, alias, entity.pk.get.column)
         writeQuery(element, alias, builder, oql, ds)
         builder.left.toOption.get
@@ -425,4 +427,4 @@ case class OneToManyNode(query: OQLQuery, element: Node) extends Node { var idx:
 case class ManyToManyNode(query: OQLQuery, element: Node) extends Node { var idx: Int = _ }
 case class ObjectNode(props: Seq[(String, Node)]) extends Node // todo: objects as a way of grouping expressions
 case class TupleNode(elems: Seq[Node]) extends Node // todo: tuples as a way of grouping expressions
-case class ValueNode(value: OQLExpression) extends Node { var idx: Int = _ }
+case class ValueNode(value: OQLExpression, typed: Boolean) extends Node { var idx: Int = _ }

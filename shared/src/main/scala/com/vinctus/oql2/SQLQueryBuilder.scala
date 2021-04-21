@@ -18,8 +18,22 @@ class SQLQueryBuilder(val parms: Parameters, oql: String, ds: SQLDataSource, val
 
   import SQLQueryBuilder._
 
+  private val Q = '"'
+
   private trait Project
-  private case class ValueProject(expr: OQLExpression, table: String) extends Project { override def toString: String = expression(expr, table) }
+  private case class ValueProject(expr: OQLExpression, table: String, typed: Boolean) extends Project {
+    override def toString: String = {
+      val typing =
+        if (typed) {
+          if (ds.typeFunction.isDefined)
+            s", ${ds.typeFunction.get}(${expression(expr, table)})"
+          else
+            s", $Q${ds.mapType(expr.typ)}$Q"
+        } else ""
+
+      s"${expression(expr, table)}$typing"
+    }
+  }
   private case class QueryProject(query: SQLQueryBuilder) extends Project { override def toString: String = query.toString.trim }
 
   private var projectQuery: Boolean = false
@@ -44,10 +58,13 @@ class SQLQueryBuilder(val parms: Parameters, oql: String, ds: SQLDataSource, val
 
   def ordering(orderings: List[OQLOrdering], table: String): Unit = order = Some((table, orderings))
 
-  def projectValue(expr: OQLExpression, table: String): Int = {
-    projects += ValueProject(expr, table)
-    idx += 1
-    idx - 1
+  def projectValue(expr: OQLExpression, table: String, typed: Boolean): Int = {
+    projects += ValueProject(expr, table, typed)
+
+    val cur = idx
+
+    idx += (if (typed) 2 else 1)
+    cur
   }
 
   def projectQuery(builder: SQLQueryBuilder): Int = {
