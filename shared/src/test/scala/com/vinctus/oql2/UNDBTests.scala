@@ -3,7 +3,7 @@ package com.vinctus.oql2
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.should.Matchers
 
-class UNDBTests extends AnyFreeSpec with Matchers with UNDB {
+class UNDBTests extends AnyFreeSpec with Matchers with UNDBPG {
 
   "simple one-to-one query" in {
     test("country { * rep { name } }") shouldBe

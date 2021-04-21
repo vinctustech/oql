@@ -1,8 +1,15 @@
 package com.vinctus.oql2
 
 import scala.language.postfixOps
+import scala.sys.process._
 
-trait UNDB extends Test {
+trait UNDBPG extends Test {
+
+  "docker container stop pg-docker" !
+
+  "docker run --rm --name pg-docker -e POSTGRES_PASSWORD=docker -d -p 5432:5432 postgres" !
+
+  Thread.sleep(1000)
 
   val dm: String =
     """

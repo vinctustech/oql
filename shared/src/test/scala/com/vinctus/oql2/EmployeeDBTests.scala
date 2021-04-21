@@ -3,7 +3,7 @@ package com.vinctus.oql2
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.should.Matchers
 
-class EmployeeDBTests extends AnyFreeSpec with Matchers with EmployeeDB {
+class EmployeeDBTests extends AnyFreeSpec with Matchers with EmployeeDBPG {
 
   "simplest self-join query" in {
     test("employee { * manager }") shouldBe
@@ -103,42 +103,22 @@ class EmployeeDBTests extends AnyFreeSpec with Matchers with EmployeeDB {
   }
 
   "one-to-many query with inner many-to-one query" in {
-    test("job { jobTitle employees { firstName manager { firstName } } }") shouldBe
+    test("job { jobTitle employees { firstName manager { firstName } } <firstName> } <jobTitle>") shouldBe
       """
         |[
         |  {
-        |    "jobTitle": "President",
-        |    "employees": [
-        |      {
-        |        "firstName": "Steven",
-        |        "manager": null
-        |      }
-        |    ]
-        |  },
-        |  {
         |    "jobTitle": "Administration Vice President",
         |    "employees": [
-        |      {
-        |        "firstName": "Neena",
-        |        "manager": {
-        |          "firstName": "Steven"
-        |        }
-        |      },
         |      {
         |        "firstName": "Lex",
         |        "manager": {
         |          "firstName": "Steven"
         |        }
-        |      }
-        |    ]
-        |  },
-        |  {
-        |    "jobTitle": "Programmer",
-        |    "employees": [
+        |      },
         |      {
-        |        "firstName": "Bruce",
+        |        "firstName": "Neena",
         |        "manager": {
-        |          "firstName": "Alexander"
+        |          "firstName": "Steven"
         |        }
         |      }
         |    ]
@@ -150,6 +130,26 @@ class EmployeeDBTests extends AnyFreeSpec with Matchers with EmployeeDB {
         |        "firstName": "Alexander",
         |        "manager": {
         |          "firstName": "Lex"
+        |        }
+        |      }
+        |    ]
+        |  },
+        |  {
+        |    "jobTitle": "President",
+        |    "employees": [
+        |      {
+        |        "firstName": "Steven",
+        |        "manager": null
+        |      }
+        |    ]
+        |  },
+        |  {
+        |    "jobTitle": "Programmer",
+        |    "employees": [
+        |      {
+        |        "firstName": "Bruce",
+        |        "manager": {
+        |          "firstName": "Alexander"
         |        }
         |      }
         |    ]
@@ -181,19 +181,19 @@ class EmployeeDBTests extends AnyFreeSpec with Matchers with EmployeeDB {
   }
 
   "simple many-to-many query" in {
-    test("department { departmentName jobs }") shouldBe
+    test("department { departmentName jobs <id> } <id>") shouldBe
       """
         |[
         |  {
         |    "departmentName": "IT",
         |    "jobs": [
         |      {
-        |        "id": 20,
-        |        "jobTitle": "IT Manager"
-        |      },
-        |      {
         |        "id": 9,
         |        "jobTitle": "Programmer"
+        |      },
+        |      {
+        |        "id": 20,
+        |        "jobTitle": "IT Manager"
         |      }
         |    ]
         |  },
@@ -219,9 +219,23 @@ class EmployeeDBTests extends AnyFreeSpec with Matchers with EmployeeDB {
   }
 
   "simple many-to-many query with inner query" in {
-    test("department { departmentName jobs { jobTitle } }") shouldBe
+    test("department { departmentName jobs { jobTitle } <jobTitle> } <departmentName>") shouldBe
       """
         |[
+        |  {
+        |    "departmentName": "Executive",
+        |    "jobs": [
+        |      {
+        |        "jobTitle": "Administration Vice President"
+        |      },
+        |      {
+        |        "jobTitle": "Administration Vice President"
+        |      },
+        |      {
+        |        "jobTitle": "President"
+        |      }
+        |    ]
+        |  },
         |  {
         |    "departmentName": "IT",
         |    "jobs": [
@@ -230,20 +244,6 @@ class EmployeeDBTests extends AnyFreeSpec with Matchers with EmployeeDB {
         |      },
         |      {
         |        "jobTitle": "Programmer"
-        |      }
-        |    ]
-        |  },
-        |  {
-        |    "departmentName": "Executive",
-        |    "jobs": [
-        |      {
-        |        "jobTitle": "President"
-        |      },
-        |      {
-        |        "jobTitle": "Administration Vice President"
-        |      },
-        |      {
-        |        "jobTitle": "Administration Vice President"
         |      }
         |    ]
         |  }
