@@ -18,13 +18,15 @@ class SQLQueryBuilder(val parms: Parameters, oql: String, ds: SQLDataSource, val
 
   import SQLQueryBuilder._
 
+  private var projectQuery: Boolean = false
+
   private val Q = '"'
 
   private trait Project
-  private case class ValueProject(expr: OQLExpression, table: String, typed: Boolean) extends Project {
+  private case class ValueProject(expr: OQLExpression, table: String) extends Project {
     override def toString: String = {
       val typing =
-        if (typed) {
+        if (projectQuery) {
           if (ds.typeFunction.isDefined)
             s", ${ds.typeFunction.get}(${expression(expr, table)})"
           else {
@@ -40,7 +42,6 @@ class SQLQueryBuilder(val parms: Parameters, oql: String, ds: SQLDataSource, val
   }
   private case class QueryProject(query: SQLQueryBuilder) extends Project { override def toString: String = query.toString.trim }
 
-  private var projectQuery: Boolean = false
   private var from: (String, Option[String]) = _
   private val innerJoins = new ArrayBuffer[Join]
   private val leftJoins = new mutable.HashSet[Join]
@@ -62,12 +63,12 @@ class SQLQueryBuilder(val parms: Parameters, oql: String, ds: SQLDataSource, val
 
   def ordering(orderings: List[OQLOrdering], table: String): Unit = order = Some((table, orderings))
 
-  def projectValue(expr: OQLExpression, table: String, typed: Boolean): Int = {
-    projects += ValueProject(expr, table, typed)
+  def projectValue(expr: OQLExpression, table: String): Int = {
+    projects += ValueProject(expr, table)
 
     val cur = idx
 
-    idx += (if (typed) 2 else 1)
+    idx += (if (projectQuery) 2 else 1)
     cur
   }
 
@@ -81,17 +82,17 @@ class SQLQueryBuilder(val parms: Parameters, oql: String, ds: SQLDataSource, val
   def expression(expr: OQLExpression, table: String): String =
     expr match {
       case ExistsOQLExpression(query) =>
-        val subquery = writeQuery(innerQuery(query, typed = false), table, Right((parms, margin + 2 * SQLQueryBuilder.INDENT)), oql, ds)
+        val subquery = writeQuery(innerQuery(query), table, Right((parms, margin + 2 * SQLQueryBuilder.INDENT)), oql, ds)
         val sql = subquery.toString
 
         s"EXISTS (\n$sql${" " * (margin + 2 * SQLQueryBuilder.INDENT)})"
       case QueryOQLExpression(query) =>
-        val subquery = writeQuery(innerQuery(query, typed = false), table, Right((parms, margin + 2 * SQLQueryBuilder.INDENT)), oql, ds)
+        val subquery = writeQuery(innerQuery(query), table, Right((parms, margin + 2 * SQLQueryBuilder.INDENT)), oql, ds)
         val sql = subquery.toString
 
         s"(\n$sql${" " * (margin + 2 * SQLQueryBuilder.INDENT)})"
       case InQueryOQLExpression(left, op, query) =>
-        val subquery = writeQuery(innerQuery(query, typed = false), table, Right((parms, margin + 2 * SQLQueryBuilder.INDENT)), oql, ds)
+        val subquery = writeQuery(innerQuery(query), table, Right((parms, margin + 2 * SQLQueryBuilder.INDENT)), oql, ds)
         val sql = subquery.toString
 
         s"${expression(left, table)} $op (\n$sql${" " * (margin + 2 * SQLQueryBuilder.INDENT)})"
