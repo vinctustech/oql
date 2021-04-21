@@ -51,6 +51,10 @@ class OQL(dm: String, val ds: SQLDataSource) {
 
   def queryMany(oql: String, parameters: Map[String, Any] = Map()): List[Any] = queryMany(parseQuery(oql), oql, parameters)
 
+  private var _showQuery = false
+
+  def showQuery(): Unit = _showQuery = true
+
   def queryMany(query: OQLQuery, oql: String, parameters: Map[String, Any]): List[Any] = {
     val parms = new Parameters(parameters)
     val root: ResultNode = ResultNode(query, objectNode(query.project))
@@ -65,7 +69,10 @@ class OQL(dm: String, val ds: SQLDataSource) {
       case _                           =>
     }
 
-    println(sql)
+    if (_showQuery) {
+      println(sql)
+      _showQuery = false
+    }
 
     execute { c =>
       val rs = c.query(sql)
@@ -146,7 +153,7 @@ object OQL {
   }
 
   private[oql2] def decorate(entity: Entity, expr: OQLExpression, model: DataModel, oql: String): Unit = {
-    def recur(expr: OQLExpression): Unit = decorate(entity, expr, model, oql)
+    def _decorate(expr: OQLExpression): Unit = decorate(entity, expr, model, oql)
 
     expr match {
       case ExistsOQLExpression(query) =>
@@ -165,31 +172,31 @@ object OQL {
 
         query.select foreach (decorate(query.entity, _, model, oql))
         query.order foreach (_ foreach { case OQLOrdering(expr, _) => decorate(query.entity, expr, model, oql) })
-      case ApplyOQLExpression(f, args) => args foreach recur
+      case ApplyOQLExpression(f, args) => args foreach _decorate
       case BetweenOQLExpression(expr, op, lower, upper) =>
-        recur(expr)
-        recur(lower)
-        recur(upper)
-      case GroupedOQLExpression(expr) => recur(expr)
+        _decorate(expr)
+        _decorate(lower)
+        _decorate(upper)
+      case GroupedOQLExpression(expr) => _decorate(expr)
       case CaseOQLExpression(whens, els) =>
         whens foreach {
           case OQLWhen(cond, expr) =>
-            recur(cond)
-            recur(expr)
+            _decorate(cond)
+            _decorate(expr)
         }
 
-        els foreach recur
-      case PrefixOQLExpression(op, expr)  => recur(expr)
-      case PostfixOQLExpression(expr, op) => recur(expr)
+        els foreach _decorate
+      case PrefixOQLExpression(op, expr)  => _decorate(expr)
+      case PostfixOQLExpression(expr, op) => _decorate(expr)
       case InArrayOQLExpression(left, op, right) =>
-        recur(left)
-        right foreach recur
+        _decorate(left)
+        right foreach _decorate
       case InParameterOQLExpression(left, op, right) =>
-        recur(left)
-        recur(right)
+        _decorate(left)
+        _decorate(right)
       case InfixOQLExpression(left, _, right) =>
-        recur(left)
-        recur(right)
+        _decorate(left)
+        _decorate(right)
       case attrexp @ AttributeOQLExpression(ids, _) =>
         val dmrefs = new ListBuffer[(Entity, Attribute)]
 
@@ -220,7 +227,7 @@ object OQL {
         lookup(ids, entity)
         attrexp.dmrefs = dmrefs.toList
       case InQueryOQLExpression(left, op, query) =>
-        recur(left)
+        _decorate(left)
         queryProjects(Some(entity), query, model, oql)
 
         if (!query.attr.typ.isArrayType)
@@ -280,7 +287,10 @@ object OQL {
       case StarOQLProject =>
         entity.attributes.values foreach {
           case attr @ Attribute(name, column, pk, required, typ) if typ.isDataType =>
-            map(name) = ExpressionOQLProject(Ident(name), AttributeOQLExpression(List(Ident(name)), List((entity, attr))))
+            val expr = AttributeOQLExpression(List(Ident(name)), List((entity, attr)))
+
+            expr.typ = typ.asInstanceOf[DataType]
+            map(name) = ExpressionOQLProject(Ident(name), expr)
           case _ => // non-datatype attributes don't get included with '*'
         }
       case SubtractOQLProject(id) =>
@@ -302,6 +312,7 @@ object OQL {
             entity.attributes get id.s match {
               case Some(attr @ Attribute(_, _, _, _, _: DataType)) =>
                 a.dmrefs = List((entity, attr))
+                decorate(entity, a, model, oql)
                 expProj
               case Some(attr @ Attribute(_, _, _, _, ManyToManyType(mtmEntity, link, self, target))) =>
                 QueryOQLProject(
@@ -345,7 +356,10 @@ object OQL {
         writeQuery(element, query.entity.table, builder, oql, ds)
         builder.left.toOption.get
       case e @ ValueNode(expr) =>
-        e.idx = builder.left.toOption.get.projectValue(expr, table)
+        val (idx, typed) = builder.left.toOption.get.projectValue(expr, table)
+
+        e.idx = idx
+        e.typed = typed
         builder.left.toOption.get
       case ObjectNode(properties) =>
         properties foreach { case (_, e) => writeQuery(e, table, builder, oql, ds) }
@@ -354,8 +368,8 @@ object OQL {
                              element) =>
         val alias = s"$table$$$name"
 
-        // untyped because we only need it to check if the object is 'null'
-        n.idx = builder.left.toOption.get.projectValue(AttributeOQLExpression(List(Ident(name)), List((entity, attr))), table)
+        // ignore type because we only need it to check if the object is 'null'
+        n.idx = builder.left.toOption.get.projectValue(AttributeOQLExpression(List(Ident(name)), List((entity, attr))), table)._1
         builder.left.toOption.get.leftJoin(table, column, entity.table, alias, entity.pk.get.column)
         writeQuery(element, alias, builder, oql, ds)
         builder.left.toOption.get

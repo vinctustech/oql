@@ -20,8 +20,6 @@ class SQLQueryBuilder(val parms: Parameters, oql: String, ds: SQLDataSource, val
 
   private var projectQuery: Boolean = false
 
-  private val Q = '"'
-
   private trait Project
   private case class ValueProject(expr: OQLExpression, table: String) extends Project {
     override def toString: String = {
@@ -32,7 +30,7 @@ class SQLQueryBuilder(val parms: Parameters, oql: String, ds: SQLDataSource, val
           else {
             expr.typ match {
               case null => ", null"
-              case t    => s", $Q${ds.mapType(t)}$Q"
+              case t    => s", '$t'"
             }
           }
         } else ""
@@ -63,13 +61,13 @@ class SQLQueryBuilder(val parms: Parameters, oql: String, ds: SQLDataSource, val
 
   def ordering(orderings: List[OQLOrdering], table: String): Unit = order = Some((table, orderings))
 
-  def projectValue(expr: OQLExpression, table: String): Int = {
+  def projectValue(expr: OQLExpression, table: String): (Int, Boolean) = {
     projects += ValueProject(expr, table)
 
     val cur = idx
 
     idx += (if (projectQuery) 2 else 1)
-    cur
+    (cur, projectQuery)
   }
 
   def projectQuery(builder: SQLQueryBuilder): Int = {
