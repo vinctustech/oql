@@ -3,7 +3,7 @@ package com.vinctus.oql2
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.should.Matchers
 
-class BookDBTests extends AnyFreeSpec with Matchers with BookDBPG {
+class BookDBTests extends AnyFreeSpec with Matchers with BookDB {
 
   "simplest query" in {
     test("book") shouldBe

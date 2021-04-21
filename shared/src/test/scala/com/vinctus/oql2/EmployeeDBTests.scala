@@ -3,7 +3,7 @@ package com.vinctus.oql2
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.should.Matchers
 
-class EmployeeDBTests extends AnyFreeSpec with Matchers with EmployeeDBPG {
+class EmployeeDBTests extends AnyFreeSpec with Matchers with EmployeeDB {
 
   "simplest self-join query" in {
     test("employee { * manager }") shouldBe
