@@ -1,6 +1,6 @@
 package com.vinctus.oql2
 
-trait TimestampDB extends Test {
+trait EventDB extends Test {
 
   val dm: String =
     """
@@ -25,7 +25,7 @@ trait TimestampDB extends Test {
   val db = new OQL(dm, ds)
 
   db.create()
-  db.execute(_.insert("""insert into event (what, when) values 
+  db.execute(_.insert("""insert into event (what, "when") values 
                         |('start testing timestamps', '2021-04-21T17:42:49.943Z'),
                         |('woke up this morning', '2021-04-21T06:30:00.000Z')
                         |""".stripMargin))
@@ -33,7 +33,8 @@ trait TimestampDB extends Test {
                         |('me')
                         |""".stripMargin))
   db.execute(_.insert("""insert into attendance (event, attendee) values
-                        |(1, 1)
+                        |(1, 1),
+                        |(2, 1)
                         |""".stripMargin))
 
 }
