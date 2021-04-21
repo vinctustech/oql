@@ -5,10 +5,10 @@ import xyz.hyperreal.table.TextTable
 
 import java.nio.file.{Files, Path, Paths}
 
-object Main extends App with EmployeeDB {
+object Main extends App with TimestampDB {
 
 //  println(db.ds.schema(db.model) mkString "\n\n")
   db.showQuery()
-  println(test("job { jobTitle employees { firstName manager { firstName } } <firstName> } <jobTitle>"))
+  println(testmap("event { * attendees }"))
 
 }

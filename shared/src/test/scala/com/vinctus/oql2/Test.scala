@@ -1,5 +1,7 @@
 package com.vinctus.oql2
 
+import xyz.hyperreal.pretty.prettyPrint
+
 import scala.language.postfixOps
 import scala.sys.process._
 
@@ -30,5 +32,7 @@ trait Test {
   val db: OQL
 
   def test(oql: String, parameters: Map[String, Any] = Map()): String = JSON(db.queryMany(oql, parameters), format = true)
+
+  def testmap(oql: String, parameters: Map[String, Any] = Map()): String = prettyPrint(db.queryMany(oql, parameters), classes = true)
 
 }

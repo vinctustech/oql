@@ -1,5 +1,6 @@
 package com.vinctus.oql2
 
+import java.sql.Timestamp
 import java.time.Instant
 import scala.language.postfixOps
 
@@ -57,6 +58,7 @@ object JSON {
         case s: collection.Seq[_]                                                                       => aggregate('[', s, ']')(jsonValue)
         case a: Array[_]                                                                                => jsonValue(a.toList)
         case p: Product                                                                                 => jsonObject(p.productElementNames zip p.productIterator toList)
+        case t: Timestamp                                                                               => jsonValue(t.toInstant.toString)
         case _: String | _: Instant =>
           buf += '"'
           buf ++=
