@@ -27,8 +27,12 @@ class SQLQueryBuilder(val parms: Parameters, oql: String, ds: SQLDataSource, val
         if (typed) {
           if (ds.typeFunction.isDefined)
             s", ${ds.typeFunction.get}(${expression(expr, table)})"
-          else
-            s", $Q${ds.mapType(expr.typ)}$Q"
+          else {
+            expr.typ match {
+              case null => ", null"
+              case t    => s", $Q${ds.mapType(t)}$Q"
+            }
+          }
         } else ""
 
       s"${expression(expr, table)}$typing"
@@ -77,17 +81,17 @@ class SQLQueryBuilder(val parms: Parameters, oql: String, ds: SQLDataSource, val
   def expression(expr: OQLExpression, table: String): String =
     expr match {
       case ExistsOQLExpression(query) =>
-        val subquery = writeQuery(innerQuery(query), table, Right((parms, margin + 2 * SQLQueryBuilder.INDENT)), oql, ds)
+        val subquery = writeQuery(innerQuery(query, typed = false), table, Right((parms, margin + 2 * SQLQueryBuilder.INDENT)), oql, ds)
         val sql = subquery.toString
 
         s"EXISTS (\n$sql${" " * (margin + 2 * SQLQueryBuilder.INDENT)})"
       case QueryOQLExpression(query) =>
-        val subquery = writeQuery(innerQuery(query), table, Right((parms, margin + 2 * SQLQueryBuilder.INDENT)), oql, ds)
+        val subquery = writeQuery(innerQuery(query, typed = false), table, Right((parms, margin + 2 * SQLQueryBuilder.INDENT)), oql, ds)
         val sql = subquery.toString
 
         s"(\n$sql${" " * (margin + 2 * SQLQueryBuilder.INDENT)})"
       case InQueryOQLExpression(left, op, query) =>
-        val subquery = writeQuery(innerQuery(query), table, Right((parms, margin + 2 * SQLQueryBuilder.INDENT)), oql, ds)
+        val subquery = writeQuery(innerQuery(query, typed = false), table, Right((parms, margin + 2 * SQLQueryBuilder.INDENT)), oql, ds)
         val sql = subquery.toString
 
         s"${expression(left, table)} $op (\n$sql${" " * (margin + 2 * SQLQueryBuilder.INDENT)})"

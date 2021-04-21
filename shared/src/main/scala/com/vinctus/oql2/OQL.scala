@@ -65,7 +65,7 @@ class OQL(dm: String, val ds: SQLDataSource) {
       case _                           =>
     }
 
-//    println(sql)
+    println(sql)
 
     execute { c =>
       val rs = c.query(sql)
@@ -354,7 +354,7 @@ object OQL {
                              element) =>
         val alias = s"$table$$$name"
 
-        // untyped because we only check if it's 'null'
+        // untyped because we only need it to check if the object is 'null'
         n.idx = builder.left.toOption.get.projectValue(AttributeOQLExpression(List(Ident(name)), List((entity, attr))), table, typed = false)
         builder.left.toOption.get.leftJoin(table, column, entity.table, alias, entity.pk.get.column)
         writeQuery(element, alias, builder, oql, ds)
