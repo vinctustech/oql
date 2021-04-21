@@ -118,11 +118,8 @@ class OQL(dm: String, val ds: SQLDataSource) {
           case v: ValueNode =>
             val x = resultSet get v.idx
 
-            if (v.typed) {
-              println(x, resultSet get (v.idx + 1))
-              ds.convert(x, resultSet getString (v.idx + 1))
-            } else
-              x
+            if (v.typed) ds.convert(x, resultSet getString (v.idx + 1))
+            else x
           case ObjectNode(properties) =>
             val map = new mutable.LinkedHashMap[String, Any]
 
@@ -394,7 +391,7 @@ object OQL {
 
         subquery.table(linkEntity.table, Some(alias))
         writeQuery(element, joinAlias, Left(subquery), oql, ds)
-        subquery.select(RawOQLExpression(s"$alias.${selfAttr.column} = $table.${entity.pk.get.column}"), null)
+        subquery.select(RawOQLExpression(s""""$alias"."${selfAttr.column}" = "$table"."${entity.pk.get.column}""""), null)
         select foreach (subquery.select(_, joinAlias))
         order foreach (subquery.ordering(_, joinAlias))
         subquery.innerJoin(alias, targetAttr.column, mtmEntity.table, joinAlias, mtmEntity.pk.get.column)
@@ -413,7 +410,7 @@ object OQL {
 
         subquery.table(mtoEntity.table, Some(alias))
         writeQuery(element, alias, Left(subquery), oql, ds)
-        subquery.select(RawOQLExpression(s"$alias.${otmAttr.column} = $table.${entity.pk.get.column}"), null)
+        subquery.select(RawOQLExpression(s""""$alias"."${otmAttr.column}" = "$table"."${entity.pk.get.column}""""), null)
         select foreach (subquery.select(_, alias))
         order foreach (subquery.ordering(_, alias))
         subquery
@@ -431,7 +428,7 @@ object OQL {
 
         subquery.table(mtoEntity.table, Some(alias))
         writeQuery(element, alias, Left(subquery), oql, ds)
-        subquery.select(RawOQLExpression(s"$alias.${otmAttr.column} = $table.${entity.pk.get.column}"), null)
+        subquery.select(RawOQLExpression(s""""$alias"."${otmAttr.column}" = "$table"."${entity.pk.get.column}""""), null)
         select foreach (subquery.select(_, alias))
         order foreach (subquery.ordering(_, alias))
         subquery
