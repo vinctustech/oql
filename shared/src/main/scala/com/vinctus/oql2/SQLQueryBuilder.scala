@@ -11,6 +11,7 @@ import scala.language.postfixOps
 object SQLQueryBuilder {
 
   val INDENT = 2
+  val Q = '"'
 
 }
 
@@ -130,7 +131,7 @@ class SQLQueryBuilder(val parms: Parameters, oql: String, ds: SQLDataSource, val
             leftJoin(table, name, e.table, alias, e.pk.get.column)
         }
 
-        s"$alias.${dmrefs.last._2.column}"
+        s"$Q$alias$Q.$Q${dmrefs.last._2.column}$Q"
       case BooleanOQLExpression(b, pos) => b
       case CaseOQLExpression(whens, els) =>
         s"CASE ${whens map {
@@ -181,9 +182,9 @@ class SQLQueryBuilder(val parms: Parameters, oql: String, ds: SQLDataSource, val
 
     out()
 
-    val (tab, alias) = from
+    val (table, alias) = from
 
-    line(s"FROM $tab${if (alias.isDefined) s" AS ${alias.get}" else ""}")
+    line(s"FROM $Q$table$Q${if (alias.isDefined) s" AS $Q${alias.get}$Q" else ""}")
     in()
 
     val whereClause = where map { case (table, expr) => s"WHERE ${expression(expr, table)}" }
@@ -193,10 +194,10 @@ class SQLQueryBuilder(val parms: Parameters, oql: String, ds: SQLDataSource, val
     }
 
     for (Join(t1, c1, t2, alias, c2) <- innerJoins)
-      line(s"JOIN $t2 AS $alias ON $t1.$c1 = $alias.$c2")
+      line(s"JOIN $Q$t2$Q AS $Q$alias$Q ON $Q$t1$Q.$Q$c1$Q = $Q$alias$Q.$Q$c2$Q")
 
     for (Join(t1, c1, t2, alias, c2) <- leftJoins)
-      line(s"LEFT JOIN $t2 AS $alias ON $t1.$c1 = $alias.$c2")
+      line(s"LEFT JOIN $Q$t2$Q AS $Q$alias$Q ON $Q$t1$Q.$Q$c1$Q = $Q$alias$Q.$Q$c2$Q")
 
     out()
     whereClause foreach line
