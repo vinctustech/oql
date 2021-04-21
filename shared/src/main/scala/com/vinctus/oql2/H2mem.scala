@@ -35,4 +35,6 @@ class H2mem extends JDBCDataSource("org.h2.Driver") {
   val rowSequenceFunctionEnd: String = " NULL ON NULL)"
   val typeFunction: Option[String] = None
 
+  def convert(data: Any, typ: String): Any = data
+
 }

@@ -118,12 +118,11 @@ class OQL(dm: String, val ds: SQLDataSource) {
           case v: ValueNode =>
             val x = resultSet get v.idx
 
-//            if (v.typed) {
-//              resultSet getString v.idx match {
-//                case "TextType" =>
-//              }
-//            } else x
-            x
+            if (v.typed) {
+              println(x, resultSet get (v.idx + 1))
+              ds.convert(x, resultSet getString (v.idx + 1))
+            } else
+              x
           case ObjectNode(properties) =>
             val map = new mutable.LinkedHashMap[String, Any]
 

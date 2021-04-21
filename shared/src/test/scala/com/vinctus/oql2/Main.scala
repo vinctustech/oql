@@ -9,6 +9,6 @@ object Main extends App with EventDB {
 
   println(db.ds.schema(db.model) mkString "\n\n")
   db.showQuery()
-  println(testmap("attendee { * events }")) //event { * attendees }
+  println(testmap("attendee { * events }"))
 
 }

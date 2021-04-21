@@ -1,5 +1,8 @@
 package com.vinctus.oql2
 
+import java.time.Instant
+import java.util.UUID
+
 class PG(domain: String, port: Int, database: String, val user: String, val password: String) extends JDBCDataSource("org.postgresql.Driver") {
 
   val name = "PostgreSQL"
@@ -33,5 +36,12 @@ class PG(domain: String, port: Int, database: String, val user: String, val pass
   val rowSequenceFunctionStart: String = "json_build_array("
   val rowSequenceFunctionEnd: String = ")"
   val typeFunction: Option[String] = Some("pg_typeof")
+
+  def convert(data: Any, typ: String): Any =
+    (data, typ) match {
+      case (t: String, "timestamp without time zone") => Instant.parse(if (t endsWith "Z") t else s"${t}Z")
+      case (t: String, "uuid")                        => UUID.fromString(t)
+      case _                                          => data
+    }
 
 }
