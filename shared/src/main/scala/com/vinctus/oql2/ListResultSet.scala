@@ -6,7 +6,7 @@ import scala.collection.immutable.ArraySeq
 
 object ListResultSet {
 
-  def fromJSON(json: String) = new ListResultSet(DefaultJSONReader.fromString(json).asInstanceOf[List[List[Any]]])
+  def fromJSON(json: String) = new ListResultSet(JSON.readArray(json).asInstanceOf[List[List[Any]]])
 
 }
 

@@ -41,6 +41,9 @@ class PG(domain: String, port: Int, database: String, val user: String, val pass
     (data, typ) match {
       case (t: String, "timestamp without time zone") => Instant.parse(if (t endsWith "Z") t else s"${t}Z")
       case (t: String, "uuid")                        => UUID.fromString(t)
+      case (n: String, "integer")                     => n.toInt
+      case (n: String, "bigint")                      => n.toLong
+      case (n: String, "double precision")            => n.toDouble
       case _                                          => data
     }
 
