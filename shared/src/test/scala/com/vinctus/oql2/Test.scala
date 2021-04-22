@@ -14,7 +14,7 @@ trait Test {
     "pg": PostgreSQL in a docker container called "pg-docker" listening on port 5432 (password: "docker")
           terminal command: `psql -h localhost -U postgres -d postgres`
    */
-  val DB = "h2"
+  val DB = "pg"
 
   val ds: SQLDataSource =
     DB match {

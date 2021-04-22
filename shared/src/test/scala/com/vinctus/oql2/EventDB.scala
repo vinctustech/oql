@@ -8,7 +8,7 @@ trait EventDB extends Test {
       | *id: uuid
       |  what: text
       |  when: timestamp
-      |  duration: bigint
+      |  duration: float
       |  attendees: [attendee] (attendance)
       |}
       |

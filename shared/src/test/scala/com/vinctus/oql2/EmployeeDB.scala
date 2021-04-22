@@ -30,17 +30,17 @@ trait EmployeeDB extends Test {
   val db = new OQL(dm, ds)
 
   db.create()
-  db.execute(_.insert("""insert into job (id, "jobTitle") values 
+  db.execute(_.insert("""insert into "job" ("id", "jobTitle") values 
                         |(4,'President'),
                         |(5,'Administration Vice President'),
                         |(9,'Programmer'),
                         |(20,'IT Manager')
                         |""".stripMargin))
-  db.execute(_.insert("""insert into department (id, "departmentName") values 
+  db.execute(_.insert("""insert into "department" ("id", "departmentName") values 
                         |(9,'Executive'),
                         |(6,'IT')
                         |""".stripMargin))
-  db.execute(_.insert("""insert into employee (id, "firstName", "lastName", manager, job, department) values 
+  db.execute(_.insert("""insert into "employee" ("id", "firstName", "lastName", "manager", "job", "department") values 
                         |(100,'Steven','King',null,4,9),
                         |(101,'Neena','Kochhar',100,5,9),
                         |(102,'Lex','De Haan',100,5,9),
