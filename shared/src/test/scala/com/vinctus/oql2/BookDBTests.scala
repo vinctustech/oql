@@ -293,6 +293,10 @@ class BookDBTests extends AnyFreeSpec with Matchers with BookDB {
         |""".trim.stripMargin
   }
 
+  "count query with select using value from a one-to-many sub-query in a comparison" in {
+    db.count("author [(books { count(*) }) > 1]") shouldBe 2
+  }
+
   "simplest query with ordering" in {
     test("author <name>") shouldBe
       """

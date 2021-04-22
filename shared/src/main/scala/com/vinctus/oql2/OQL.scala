@@ -10,6 +10,8 @@ class OQL(dm: String, val ds: SQLDataSource) {
 
   import OQL._
 
+  private var _showQuery = false
+
   val model: DataModel =
     DMLParse(dm) match {
       case None              => sys.error("error building data model")
@@ -49,11 +51,38 @@ class OQL(dm: String, val ds: SQLDataSource) {
     }
   }
 
-  def queryMany(oql: String, parameters: Map[String, Any] = Map()): List[Any] = queryMany(parseQuery(oql), oql, parameters)
+  def count(oql: String): Int = {
+    OQLParse(oql) match {
+      case None => sys.error("error parsing query")
+      case Some(query: OQLQuery) =>
+        query.project = List(ExpressionOQLProject(Ident("count", null), ApplyOQLExpression(Ident("count", null), List(StarOQLExpression))))
+        queryProjects(None, query, model, oql)
+        query.select foreach (decorate(query.entity, _, model, oql))
+        query.copy(order = None)
+        count(query, oql)
+    }
+  }
 
-  private var _showQuery = false
+  def count(query: OQLQuery, oql: String): Int = {
+    queryMany(query, oql, Map()) match {
+      case Nil       => sys.error("count: zero rows were found")
+      case List(row) => row.asInstanceOf[Map[String, Number]]("count").intValue()
+      case _         => sys.error("count: more than one row was found")
+    }
+  }
+
+  def queryOne(oql: String, parameters: Map[String, Any] = Map()): Option[Any] = queryOne(parseQuery(oql), oql, parameters)
+
+  def queryOne(q: OQLQuery, oql: String, parameters: Map[String, Any]): Option[Any] =
+    queryMany(q, oql, parameters) match {
+      case Nil       => None
+      case List(row) => Some(row)
+      case _         => sys.error("queryOne: more than one row was found")
+    }
 
   def showQuery(): Unit = _showQuery = true
+
+  def queryMany(oql: String, parameters: Map[String, Any] = Map()): List[Any] = queryMany(parseQuery(oql), oql, parameters)
 
   def queryMany(query: OQLQuery, oql: String, parameters: Map[String, Any]): List[Any] = {
     val parms = new Parameters(parameters)
