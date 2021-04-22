@@ -21,22 +21,22 @@ class SQLQueryBuilder(val parms: Parameters, oql: String, ds: SQLDataSource, val
 
   private var projectQuery: Boolean = false
 
+  def call(f: String, args: String): String = f.replace("?", args)
+
   private trait Project
   private case class ValueProject(expr: OQLExpression, table: String) extends Project {
     override def toString: String = {
-      val typing =
-        if (projectQuery) {
-          if (ds.typeFunction.isDefined)
-            s", ${ds.typeFunction.get}(${expression(expr, table)})"
-          else {
-            expr.typ match {
-              case null => ", null"
-              case t    => s", '$t'"
-            }
-          }
-        } else ""
+      val exp =
+        if (projectQuery && ds.convertFunction.isDefined && (expr.typ == UUIDType || expr.typ == TimestampType))
+          call(ds.convertFunction.get, expression(expr, table))
+        else
+          expression(expr, table)
 
-      s"${expression(expr, table)}$typing"
+      val typing =
+        if (projectQuery && ds.typeFunction.isDefined) s", ${ds.typeFunction.get}(${expression(expr, table)})"
+        else ""
+
+      s"$exp$typing"
     }
   }
   private case class QueryProject(query: SQLQueryBuilder) extends Project { override def toString: String = query.toString.trim }

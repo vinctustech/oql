@@ -1,8 +1,8 @@
 package com.vinctus.oql2
 
+import java.time.Instant
 import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
-
 import scala.annotation.tailrec
 import scala.collection.immutable.VectorMap
 
@@ -144,11 +144,18 @@ class OQL(dm: String, val ds: SQLDataSource) {
             while (listResultSet.next) array += buildResult(element, listResultSet)
 
             array.toList
-          case v: ValueNode =>
+          case v @ ValueNode(expr) =>
             val x = resultSet get v.idx
 
             if (v.typed) ds.convert(x, resultSet getString (v.idx + 1))
-            else x
+            else
+              (x, expr.typ) match {
+                case (s: String, IntegerType)   => s.toInt
+                case (s: String, FloatType)     => s.toDouble
+                case (s: String, BigintType)    => s.toLong
+                case (s: String, TimestampType) => Instant.parse(s)
+                case _                          => x
+              }
           case ObjectNode(properties) =>
             val map = new mutable.LinkedHashMap[String, Any]
 

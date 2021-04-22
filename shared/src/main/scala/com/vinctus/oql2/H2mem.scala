@@ -34,6 +34,7 @@ class H2mem extends JDBCDataSource("org.h2.Driver") {
   val rowSequenceFunctionStart: String = "JSON_ARRAY("
   val rowSequenceFunctionEnd: String = " NULL ON NULL)"
   val typeFunction: Option[String] = None
+  val convertFunction: Option[String] = Some("CONVERT(?, VARCHAR)")
 
   def convert(data: Any, typ: String): Any = data
 

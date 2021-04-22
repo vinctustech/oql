@@ -20,13 +20,13 @@ trait BookDB extends Test {
   val db = new OQL(dm, ds)
 
   db.create()
-  db.execute(_.insert("""insert into author (name) values 
+  db.execute(_.insert("""insert into "author" ("name") values 
                         |('Robert Louis Stevenson'),
                         |('Lewis Carroll'),
                         |('Charles Dickens'),
                         |('Mark Twain')
                         |""".stripMargin))
-  db.execute(_.insert("""insert into book (title, year, author) values 
+  db.execute(_.insert("""insert into "book" ("title", "year", "author") values 
                         |('Treasure Island', 1883, 1),
                         |('Alice’s Adventures in Wonderland', 1865, 2),
                         |('Oliver Twist', 1838, 3),
