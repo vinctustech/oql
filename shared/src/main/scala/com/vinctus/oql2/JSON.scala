@@ -9,6 +9,7 @@ import scala.language.postfixOps
 
 object JSON {
 
+  private val EOI = '\uE000'
   private val HEX = {
     val a = new Array[Int](128)
 
@@ -41,7 +42,6 @@ object JSON {
   }
 
   def readArray(json: String): List[Any] = {
-    val EOI = '\uE000'
     var idx: Int = 0
 
     def next: Char =
