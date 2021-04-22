@@ -36,6 +36,7 @@ trait SQLDataSource extends OQLDataSource {
   }
 
   val typeFunction: Option[String]
+  val convertFunction: Option[String]
   val resultArrayFunctionStart: String
   val resultArrayFunctionEnd: String
   val rowSequenceFunctionStart: String
