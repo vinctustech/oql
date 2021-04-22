@@ -33,7 +33,7 @@ class SQLQueryBuilder(val parms: Parameters, oql: String, ds: SQLDataSource, val
           expression(expr, table)
 
       val typing =
-        if (projectQuery && ds.typeFunction.isDefined) s", ${ds.typeFunction.get}(${expression(expr, table)})"
+        if (projectQuery && ds.typeFunction.isDefined) s", ${call(ds.typeFunction.get, expression(expr, table))}"
         else ""
 
       s"$exp$typing"
@@ -66,9 +66,10 @@ class SQLQueryBuilder(val parms: Parameters, oql: String, ds: SQLDataSource, val
     projects += ValueProject(expr, table)
 
     val cur = idx
+    val typed = projectQuery && ds.typeFunction.isDefined
 
-    idx += (if (projectQuery) 2 else 1)
-    (cur, projectQuery)
+    idx += (if (typed) 2 else 1)
+    (cur, typed)
   }
 
   def projectQuery(builder: SQLQueryBuilder): Int = {

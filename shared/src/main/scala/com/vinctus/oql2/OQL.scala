@@ -1,6 +1,7 @@
 package com.vinctus.oql2
 
 import java.time.Instant
+import java.util.UUID
 import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
 import scala.annotation.tailrec
@@ -150,11 +151,17 @@ class OQL(dm: String, val ds: SQLDataSource) {
             if (v.typed) ds.convert(x, resultSet getString (v.idx + 1))
             else
               (x, expr.typ) match {
-                case (s: String, IntegerType)   => s.toInt
-                case (s: String, FloatType)     => s.toDouble
-                case (s: String, BigintType)    => s.toLong
-                case (s: String, TimestampType) => Instant.parse(s)
-                case _                          => x
+                case (s: String, IntegerType) => s.toInt
+                case (s: String, FloatType)   => s.toDouble
+                case (s: String, BigintType)  => s.toLong
+                case (s: String, UUIDType)    => UUID.fromString(s)
+                case (t: String, TimestampType) =>
+                  Instant.parse {
+                    val z = if (t endsWith "Z") t else s"${t}Z"
+
+                    if (z.charAt(10) != 'T') s"${z.substring(0, 10)}T${z.substring(11)}" else z
+                  }
+                case _ => x
               }
           case ObjectNode(properties) =>
             val map = new mutable.LinkedHashMap[String, Any]

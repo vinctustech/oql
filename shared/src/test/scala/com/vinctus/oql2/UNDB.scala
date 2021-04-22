@@ -21,13 +21,13 @@ trait UNDB extends Test {
   val db = new OQL(dm, ds)
 
   db.create()
-  db.execute(_.insert("""insert into country (id, name) values 
+  db.execute(_.insert("""insert into "country" ("id", "name") values 
                         |(1,'Nigeria'),
                         |(2,'Ghana'),
                         |(3,'South Africa'),
                         |(4,'Republic of China (Taiwan)')
                         |""".stripMargin))
-  db.execute(_.insert("""insert into rep (id, name, country) values 
+  db.execute(_.insert("""insert into "rep" ("id", "name", "country") values 
                         |(1,'Abubakar Ahmad', 1),
                         |(2,'Joseph Nkrumah', 2),
                         |(3,'Lauren Zuma', 3),
