@@ -80,10 +80,10 @@ class QueryBuilder private[oql2] (private val oql: OQL, private[oql2] val q: OQL
 
   def getMany(parameters: Map[String, Any] = Map()): List[Any] = check.oql.queryMany(q, null, parameters)
 
-//  def getOne: Option[Any] = check.oql.queryOne(q)
-//
-//  def getCount: Int = oql.count(q)
-//
+  def getOne: Option[Any] = check.oql.queryOne(q, "", Map())
+
+  def getCount: Int = oql.count(q, "")
+
 //  def json: String = JSON(getMany)
 
 }
