@@ -157,7 +157,10 @@ class OQL(dm: String, val ds: SQLDataSource) {
                 case (s: String, UUIDType)    => UUID.fromString(s)
                 case (t: String, TimestampType) =>
                   Instant.parse {
-                    val z = if (t endsWith "Z") t else s"${t}Z"
+                    val z =
+                      if (t.endsWith("Z")) t
+                      else if (t.endsWith("+00")) t.replace("+00", "Z")
+                      else s"${t}Z"
 
                     if (z.charAt(10) != 'T') s"${z.substring(0, 10)}T${z.substring(11)}" else z
                   }

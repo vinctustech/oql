@@ -1,8 +1,6 @@
 package com.vinctus.oql2
 
 import com.vinctus.oql2.OQL._
-import org.graalvm.compiler.debug.TTY.out
-import xyz.hyperreal.pretty._
 
 import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
@@ -11,7 +9,8 @@ import scala.language.postfixOps
 object SQLQueryBuilder {
 
   val INDENT = 2
-  val Q = '"'
+
+  private val Q = '"'
 
 }
 
@@ -172,14 +171,14 @@ class SQLQueryBuilder(val parms: Parameters, oql: String, ds: SQLDataSource, val
 
     def out(): Unit = indent -= INDENT
 
-    def sq(yes: String, no: String = "") = if (projectQuery) yes else no
+    def pq(yes: String, no: String = "") = if (projectQuery) yes else no
 
-    line(s"${sq(s"(${ds.resultArrayFunctionStart}")}SELECT ${sq(ds.rowSequenceFunctionStart)}")
+    line(s"${pq(s"(${ds.resultArrayFunctionStart}")}SELECT ${pq(ds.rowSequenceFunctionStart)}")
     in()
     in()
 
     for ((p, i) <- projects.zipWithIndex)
-      line(s"$p${if (i < projects.length - 1) "," else sq(ds.rowSequenceFunctionEnd)}") //sq(" NULL ON NULL)")
+      line(s"$p${if (i < projects.length - 1) "," else pq(ds.rowSequenceFunctionEnd)}")
 
     out()
 

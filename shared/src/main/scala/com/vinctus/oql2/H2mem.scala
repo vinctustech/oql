@@ -17,7 +17,7 @@ class H2mem extends JDBCDataSource("org.h2.Driver") {
       case DateType              => "DATE"
       case FloatType             => "DOUBLE"
       case UUIDType              => "UUID"
-      case TimestampType         => "TIMESTAMP"
+      case TimestampType         => "TIMESTAMP WITH TIME ZONE" // this keeps H2 from converting timestamps to local time
       case ManyToOneType(entity) => mapType(entity.pk.get.typ)
     }
 
