@@ -18,7 +18,7 @@ class PG(domain: String, port: Int, database: String, val user: String, val pass
       case DateType              => "DATE"
       case FloatType             => "FLOAT"
       case UUIDType              => "UUID"
-      case TimestampType         => "TIMESTAMP"
+      case TimestampType         => "TIMESTAMP WITHOUT TIME ZONE"
       case ManyToOneType(entity) => mapType(entity.pk.get.typ)
     }
 
