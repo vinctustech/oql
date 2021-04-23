@@ -205,6 +205,8 @@ class SQLQueryBuilder(val parms: Parameters, oql: String, ds: SQLDataSource, val
     out()
     whereClause foreach line
     orderByClause foreach line
+    _limit foreach (n => line(s"LIMIT $n"))
+    _offset foreach (n => line(s"OFFSET $n"))
 
     if (projectQuery)
       line(s"${ds.resultArrayFunctionEnd})")

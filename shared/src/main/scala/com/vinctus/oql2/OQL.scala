@@ -459,8 +459,8 @@ object OQL {
         subquery.select(RawOQLExpression(s""""$alias"."${selfAttr.column}" = "$table"."${entity.pk.get.column}""""), null)
         select foreach (subquery.select(_, joinAlias))
         order foreach (subquery.order(_, joinAlias))
-        limit foreach builder.left.toOption.get.limit
-        offset foreach builder.left.toOption.get.offset
+        limit foreach subquery.limit
+        offset foreach subquery.offset
         subquery.innerJoin(alias, targetAttr.column, mtmEntity.table, joinAlias, mtmEntity.pk.get.column)
         subquery
       case n @ OneToOneNode(
@@ -498,8 +498,8 @@ object OQL {
         subquery.select(RawOQLExpression(s""""$alias"."${otmAttr.column}" = "$table"."${entity.pk.get.column}""""), null)
         select foreach (subquery.select(_, alias))
         order foreach (subquery.order(_, alias))
-        limit foreach builder.left.toOption.get.limit
-        offset foreach builder.left.toOption.get.offset
+        limit foreach subquery.limit
+        offset foreach subquery.offset
         subquery
     }
 

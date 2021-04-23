@@ -6,15 +6,15 @@ import org.scalatest.matchers.should.Matchers
 class StudentDBTests extends AnyFreeSpec with Matchers with StudentDB {
 
   "many-to-one" in {
-    test("enrollment { student { name } class { name } grade } <grade> |2, 3|") shouldBe
+    test("enrollment { student { name } class { name } grade } <student.name, grade> |4, 2|") shouldBe
       """
         |[
         |  {
         |    "student": {
-        |      "name": "John"
+        |      "name": "Debbie"
         |    },
         |    "class": {
-        |      "name": "Spanish"
+        |      "name": "Physical Education"
         |    },
         |    "grade": "B+"
         |  },
@@ -23,7 +23,25 @@ class StudentDBTests extends AnyFreeSpec with Matchers with StudentDB {
         |      "name": "Debbie"
         |    },
         |    "class": {
-        |      "name": "Physical Education"
+        |      "name": "Biology"
+        |    },
+        |    "grade": "B-"
+        |  },
+        |  {
+        |    "student": {
+        |      "name": "John"
+        |    },
+        |    "class": {
+        |      "name": "Science"
+        |    },
+        |    "grade": "A"
+        |  },
+        |  {
+        |    "student": {
+        |      "name": "John"
+        |    },
+        |    "class": {
+        |      "name": "Spanish"
         |    },
         |    "grade": "B+"
         |  }
