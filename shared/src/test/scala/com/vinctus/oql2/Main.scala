@@ -9,6 +9,6 @@ object Main extends App with StarTrekDB {
 
   println(db.ds.schema(db.model) mkString "\n\n")
   db.showQuery()
-  println(test("character {* home species {* origin}} <name>"))
+  println(test("character {* home species {* origin}} [species.origin.name = 'Vulcan']"))
 
 }

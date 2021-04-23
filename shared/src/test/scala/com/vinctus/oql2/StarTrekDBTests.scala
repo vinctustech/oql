@@ -165,4 +165,31 @@ class StarTrekDBTests extends AnyFreeSpec with Matchers with StarTrekDB {
         |""".trim.stripMargin
   }
 
+  "deep many-to-one selection" in {
+    test("character {* home species {* origin}} [species.origin.name = 'Vulcan']") shouldBe
+      """
+        |[
+        |  {
+        |    "char_id": 2,
+        |    "name": "Spock",
+        |    "home": {
+        |      "plan_id": 1,
+        |      "name": "Earth",
+        |      "climate": "not too bad"
+        |    },
+        |    "species": {
+        |      "spec_id": 2,
+        |      "name": "Vulcan",
+        |      "lifespan": 220,
+        |      "origin": {
+        |        "plan_id": 2,
+        |        "name": "Vulcan",
+        |        "climate": "pretty hot"
+        |      }
+        |    }
+        |  }
+        |]
+        |""".trim.stripMargin
+  }
+
 }

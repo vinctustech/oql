@@ -40,7 +40,7 @@ class SQLQueryBuilder(val parms: Parameters, oql: String, ds: SQLDataSource, val
 
   private var from: (String, Option[String]) = _
   private val innerJoins = new ArrayBuffer[Join]
-  private val leftJoins = new mutable.LinkedHashSet[Join]
+  private val leftJoins = new ArrayBuffer[Join]
   private var idx = 0
   private val projects = new ArrayBuffer[Project]
   private var where: Option[(String, OQLExpression)] = None
@@ -138,7 +138,9 @@ class SQLQueryBuilder(val parms: Parameters, oql: String, ds: SQLDataSource, val
     }
 
   def leftJoin(t1: String, c1: String, t2: String, alias: String, c2: String): SQLQueryBuilder = {
-    leftJoins += Join(t1, c1, t2, alias, c2)
+    if (!leftJoins.exists { case Join(_, _, curt2, curalias, _) => curt2 == t2 && curalias == alias })
+      leftJoins += Join(t1, c1, t2, alias, c2)
+
     this
   }
 
