@@ -44,11 +44,11 @@ class SQLQueryBuilder(val parms: Parameters, oql: String, ds: SQLDataSource, val
   private var idx = 0
   private val projects = new ArrayBuffer[Project]
   private var where: Option[(String, OQLExpression)] = None
-  private var order: Option[(String, List[OQLOrdering])] = None
+  private var _order: Option[(String, List[OQLOrdering])] = None
+  private var _limit: Option[Int] = None
+  private var _offset: Option[Int] = None
 
-  def table(name: String, alias: Option[String]): Unit =
-    if (from eq null)
-      from = (name, alias)
+  def table(name: String, alias: Option[String]): Unit = if (from eq null) from = (name, alias)
 
   def select(cond: OQLExpression, table: String): Unit =
     where = where match {
@@ -57,7 +57,11 @@ class SQLQueryBuilder(val parms: Parameters, oql: String, ds: SQLDataSource, val
       case None => Some((table, cond))
     }
 
-  def ordering(orderings: List[OQLOrdering], table: String): Unit = order = Some((table, orderings))
+  def order(orderings: List[OQLOrdering], table: String): Unit = _order = Some((table, orderings))
+
+  def limit(n: Int): Unit = _limit = Some(n)
+
+  def offset(n: Int): Unit = _offset = Some(n)
 
   def projectValue(expr: OQLExpression, table: String): (Int, Boolean) = {
     val cur = idx
@@ -187,7 +191,7 @@ class SQLQueryBuilder(val parms: Parameters, oql: String, ds: SQLDataSource, val
     in()
 
     val whereClause = where map { case (table, expr) => s"WHERE ${expression(expr, table)}" }
-    val orderByClause = order map {
+    val orderByClause = _order map {
       case (table, orderings) =>
         s"ORDER BY ${orderings map { case OQLOrdering(expr, ordering) => s"${expression(expr, table)} $ordering" } mkString ", "}"
     }

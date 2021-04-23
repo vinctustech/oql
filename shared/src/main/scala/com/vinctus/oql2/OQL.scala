@@ -409,13 +409,10 @@ object OQL {
     node match {
       case ResultNode(query, element) =>
         builder.left.toOption.get.table(query.entity.table, None)
-
-        if (query.select.isDefined)
-          builder.left.toOption.get.select(query.select.get, query.entity.table)
-
-        if (query.order.isDefined)
-          builder.left.toOption.get.ordering(query.order.get, query.entity.table)
-
+        query.select foreach (builder.left.toOption.get.select(_, query.entity.table))
+        query.order foreach (builder.left.toOption.get.order(_, query.entity.table))
+        query.limit foreach builder.left.toOption.get.limit
+        query.offset foreach builder.left.toOption.get.offset
         writeQuery(element, query.entity.table, builder, oql, ds)
         builder.left.toOption.get
       case e @ ValueNode(expr) =>
@@ -435,10 +432,18 @@ object OQL {
         n.idx = builder.left.toOption.get.projectValue(AttributeOQLExpression(List(Ident(name)), List((entity, attr))), table)._1
         builder.left.toOption.get.leftJoin(table, column, entity.table, alias, entity.pk.get.column)
         writeQuery(element, alias, builder, oql, ds)
+        // todo: check query sections (i.e. order) that don't apply to many-to-one
         builder.left.toOption.get
-      case n @ ManyToManyNode(
-            OQLQuery(_, entity, Attribute(name, _, _, _, ManyToManyType(mtmEntity, linkEntity, selfAttr, targetAttr)), _, select, _, order, _, _),
-            element) =>
+      case n @ ManyToManyNode(OQLQuery(_,
+                                       entity,
+                                       Attribute(name, _, _, _, ManyToManyType(mtmEntity, linkEntity, selfAttr, targetAttr)),
+                                       _,
+                                       select,
+                                       _,
+                                       order,
+                                       limit,
+                                       offset),
+                              element) =>
         val alias = s"$table$$$name"
         val subquery =
           if (builder.isLeft)
@@ -453,7 +458,9 @@ object OQL {
         writeQuery(element, joinAlias, Left(subquery), oql, ds)
         subquery.select(RawOQLExpression(s""""$alias"."${selfAttr.column}" = "$table"."${entity.pk.get.column}""""), null)
         select foreach (subquery.select(_, joinAlias))
-        order foreach (subquery.ordering(_, joinAlias))
+        order foreach (subquery.order(_, joinAlias))
+        limit foreach builder.left.toOption.get.limit
+        offset foreach builder.left.toOption.get.offset
         subquery.innerJoin(alias, targetAttr.column, mtmEntity.table, joinAlias, mtmEntity.pk.get.column)
         subquery
       case n @ OneToOneNode(
@@ -471,11 +478,11 @@ object OQL {
         subquery.table(mtoEntity.table, Some(alias))
         writeQuery(element, alias, Left(subquery), oql, ds)
         subquery.select(RawOQLExpression(s""""$alias"."${otmAttr.column}" = "$table"."${entity.pk.get.column}""""), null)
-        select foreach (subquery.select(_, alias))
-        order foreach (subquery.ordering(_, alias))
+//        select foreach (subquery.select(_, alias))  // todo: selection, ordering don't apply to one-to-one: error?
+//        order foreach (subquery.ordering(_, alias))
         subquery
       case n @ OneToManyNode(
-            OQLQuery(_, entity, attr @ Attribute(name, column, pk, required, OneToManyType(mtoEntity, otmAttr)), _, select, _, order, _, _),
+            OQLQuery(_, entity, attr @ Attribute(name, column, pk, required, OneToManyType(mtoEntity, otmAttr)), _, select, _, order, limit, offset),
             element) =>
         val alias = s"$table$$$name"
         val subquery =
@@ -490,7 +497,9 @@ object OQL {
         writeQuery(element, alias, Left(subquery), oql, ds)
         subquery.select(RawOQLExpression(s""""$alias"."${otmAttr.column}" = "$table"."${entity.pk.get.column}""""), null)
         select foreach (subquery.select(_, alias))
-        order foreach (subquery.ordering(_, alias))
+        order foreach (subquery.order(_, alias))
+        limit foreach builder.left.toOption.get.limit
+        offset foreach builder.left.toOption.get.offset
         subquery
     }
 
