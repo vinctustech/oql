@@ -37,7 +37,7 @@ class PG(domain: String, port: Int, database: String, val user: String, val pass
   val rowSequenceFunctionEnd: String = ")"
   val typeFunction: Option[String] = Some("pg_typeof(?)")
   val convertFunction: Option[String] = None
-  val countType: DataType = BigintType
+  val functionReturnType = Map("count" -> BigintType)
 
   def convert(data: Any, typ: String): Any =
     (data, typ) match {

@@ -37,9 +37,9 @@ class OQL(dm: String, val ds: SQLDataSource) {
     OQLParse(oql) match {
       case None => sys.error("error parsing query")
       case Some(query: OQLQuery) =>
-        queryProjects(None, query, model, oql)
-        query.select foreach (decorate(query.entity, _, model, oql))
-        query.order foreach (_ foreach { case OQLOrdering(expr, _) => decorate(query.entity, expr, model, oql) })
+        queryProjects(None, query, model, ds, oql)
+        query.select foreach (decorate(query.entity, _, model, ds, oql))
+        query.order foreach (_ foreach { case OQLOrdering(expr, _) => decorate(query.entity, expr, model, ds, oql) })
         query
     }
 
@@ -47,7 +47,7 @@ class OQL(dm: String, val ds: SQLDataSource) {
     OQLParse.logicalExpression(cond) match {
       case None => sys.error("error parsing condition")
       case Some(expr: OQLExpression) =>
-        decorate(entity, expr, model, cond)
+        decorate(entity, expr, model, ds, cond)
         expr
     }
   }
@@ -57,8 +57,8 @@ class OQL(dm: String, val ds: SQLDataSource) {
       case None => sys.error("error parsing query")
       case Some(query: OQLQuery) =>
         query.project = List(ExpressionOQLProject(Ident("count", null), ApplyOQLExpression(Ident("count", null), List(StarOQLExpression))))
-        queryProjects(None, query, model, oql)
-        query.select foreach (decorate(query.entity, _, model, oql))
+        queryProjects(None, query, model, ds, oql)
+        query.select foreach (decorate(query.entity, _, model, ds, oql))
         query.copy(order = None)
         count(query, oql)
     }
@@ -201,32 +201,33 @@ object OQL {
     })
   }
 
-  private[oql2] def decorate(entity: Entity, expr: OQLExpression, model: DataModel, oql: String): Unit = {
-    def _decorate(expr: OQLExpression): Unit = decorate(entity, expr, model, oql)
+  private[oql2] def decorate(entity: Entity, expr: OQLExpression, model: DataModel, ds: SQLDataSource, oql: String): Unit = {
+    def _decorate(expr: OQLExpression): Unit = decorate(entity, expr, model, ds, oql)
 
     expr match {
       case ExistsOQLExpression(query) =>
-        queryProjects(Some(entity), query, model, oql)
+        queryProjects(Some(entity), query, model, ds, oql)
 
         if (!query.attr.typ.isArrayType)
           problem(query.source.pos, s"attribute ${query.source.s} does not have an array type", oql)
 
-        query.select foreach (decorate(query.entity, _, model, oql))
-        query.order foreach (_ foreach { case OQLOrdering(expr, _) => decorate(query.entity, expr, model, oql) })
+        query.select foreach (decorate(query.entity, _, model, ds, oql))
+        query.order foreach (_ foreach { case OQLOrdering(expr, _) => decorate(query.entity, expr, model, ds, oql) })
       case QueryOQLExpression(query) =>
-        queryProjects(Some(entity), query, model, oql)
+        queryProjects(Some(entity), query, model, ds, oql)
 
         if (!query.attr.typ.isArrayType)
           problem(query.source.pos, s"attribute ${query.source.s} does not have an array type", oql)
 
-        query.select foreach (decorate(query.entity, _, model, oql))
-        query.order foreach (_ foreach { case OQLOrdering(expr, _) => decorate(query.entity, expr, model, oql) })
+        query.select foreach (decorate(query.entity, _, model, ds, oql))
+        query.order foreach (_ foreach { case OQLOrdering(expr, _) => decorate(query.entity, expr, model, ds, oql) })
       case e @ ApplyOQLExpression(f, args) =>
         args foreach _decorate
 
-// requires SQLDataSource
-//        if (f.s.toLowerCase == "count")
-//          e.typ = ds.countType
+        ds.functionReturnType get f.s.toLowerCase match {
+          case None    =>
+          case Some(t) => e.typ = t
+        }
       case BetweenOQLExpression(expr, op, lower, upper) =>
         _decorate(expr)
         _decorate(lower)
@@ -289,13 +290,13 @@ object OQL {
         attrexp.dmrefs = dmrefs.toList
       case InQueryOQLExpression(left, op, query) =>
         _decorate(left)
-        queryProjects(Some(entity), query, model, oql)
+        queryProjects(Some(entity), query, model, ds, oql)
 
         if (!query.attr.typ.isArrayType)
           problem(query.source.pos, s"attribute ${query.source.s} does not have an array type", oql)
 
-        query.select foreach (decorate(query.entity, _, model, oql))
-        query.order foreach (_ foreach { case OQLOrdering(expr, _) => decorate(query.entity, expr, model, oql) })
+        query.select foreach (decorate(query.entity, _, model, ds, oql))
+        query.order foreach (_ foreach { case OQLOrdering(expr, _) => decorate(query.entity, expr, model, ds, oql) })
       case e: LiteralOQLExpression                                                                         => e.typ = TextType
       case e: FloatOQLExpression                                                                           => e.typ = FloatType
       case e: IntegerOQLExpression                                                                         => e.typ = IntegerType
@@ -304,7 +305,7 @@ object OQL {
     }
   }
 
-  private[oql2] def queryProjects(outer: Option[Entity], query: OQLQuery, model: DataModel, oql: String): OQLQuery = {
+  private[oql2] def queryProjects(outer: Option[Entity], query: OQLQuery, model: DataModel, ds: SQLDataSource, oql: String): OQLQuery = {
     val map = new mutable.LinkedHashMap[String, OQLProject]
     val entity =
       if (outer.isDefined) {
@@ -342,9 +343,9 @@ object OQL {
 
     query.project foreach {
       case p @ QueryOQLProject(label, query) =>
-        queryProjects(Some(entity), query, model, oql)
-        query.select foreach (decorate(query.entity, _, model, oql))
-        query.order foreach (_ foreach { case OQLOrdering(expr, _) => decorate(query.entity, expr, model, oql) })
+        queryProjects(Some(entity), query, model, ds, oql)
+        query.select foreach (decorate(query.entity, _, model, ds, oql))
+        query.order foreach (_ foreach { case OQLOrdering(expr, _) => decorate(query.entity, expr, model, ds, oql) })
         map(label.s) = p
       case StarOQLProject =>
         entity.attributes.values foreach {
@@ -374,24 +375,24 @@ object OQL {
             entity.attributes get id.s match {
               case Some(attr @ Attribute(_, _, _, _, _: DataType)) =>
                 a.dmrefs = List((entity, attr))
-                decorate(entity, a, model, oql)
+                decorate(entity, a, model, ds, oql)
                 expProj
               case Some(attr @ Attribute(_, _, _, _, ManyToManyType(mtmEntity, link, self, target))) =>
                 QueryOQLProject(
                   label,
-                  queryProjects(Some(entity), OQLQuery(id, mtmEntity, attr, List(StarOQLProject), None, None, None, None, None), model, oql))
+                  queryProjects(Some(entity), OQLQuery(id, mtmEntity, attr, List(StarOQLProject), None, None, None, None, None), model, ds, oql))
               case Some(attr @ Attribute(_, _, _, _, ManyToOneType(mtoEntity))) =>
                 QueryOQLProject(
                   label,
-                  queryProjects(Some(entity), OQLQuery(id, mtoEntity, attr, List(StarOQLProject), None, None, None, None, None), model, oql))
+                  queryProjects(Some(entity), OQLQuery(id, mtoEntity, attr, List(StarOQLProject), None, None, None, None, None), model, ds, oql))
               case Some(attr @ Attribute(_, _, _, _, OneToManyType(otmEntity, otmAttr))) =>
                 QueryOQLProject(
                   label,
-                  queryProjects(Some(entity), OQLQuery(id, otmEntity, attr, List(StarOQLProject), None, None, None, None, None), model, oql))
+                  queryProjects(Some(entity), OQLQuery(id, otmEntity, attr, List(StarOQLProject), None, None, None, None, None), model, ds, oql))
               case None => problem(id.pos, s"entity '${entity.name}' does not have attribute '${id.s}'", oql)
             }
           case _ =>
-            decorate(entity, expr, model, oql)
+            decorate(entity, expr, model, ds, oql)
             expProj
         }
     }
