@@ -129,7 +129,7 @@ primary returns [OQLExpression e]
   | '(' query ')'
     { $e = new QueryOQLExpression($query.q); }
   | '(' expression ')'
-    { $e = new GroupingOQLExpression($expression.e); }
+    { $e = new GroupedOQLExpression($expression.e); }
   ;
 
 caseExpression returns [OQLExpression e]

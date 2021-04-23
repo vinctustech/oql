@@ -19,8 +19,8 @@ entities returns [ListBuffer<DMLEntity> es]
   ;
 
 entity returns [DMLEntity e]
-  : 'entity' entityName ('(' alias ')')? '{' attributes '}'
-    { $e = new DMLEntity($entityName.id, DMLParse.alias($alias.ctx), $attributes.as.toList()); }
+  : 'entity' entityName ('(' actualName ')')? '{' attributes '}'
+    { $e = new DMLEntity($entityName.id, DMLParse.actualName($actualName.ctx), $attributes.as.toList()); }
   ;
 
 attributes returns [ListBuffer<DMLAttribute> as]
@@ -31,8 +31,8 @@ attributes returns [ListBuffer<DMLAttribute> as]
   ;
 
 attribute returns [DMLAttribute a]
-  : pk? attributeName ('(' alias ')')? ':' typeSpecifier required?
-    { $a = new DMLAttribute($attributeName.id, DMLParse.alias($alias.ctx), $typeSpecifier.t, $pk.ctx != null, $required.ctx != null); }
+  : pk? attributeName ('(' actualName ')')? ':' typeSpecifier required?
+    { $a = new DMLAttribute($attributeName.id, DMLParse.actualName($actualName.ctx), $typeSpecifier.t, $pk.ctx != null, $required.ctx != null); }
   ;
 
 pk
@@ -72,7 +72,7 @@ simplePrimitiveType returns [DMLPrimitiveType t]
     { $t = new DMLSimplePrimitiveType($s.text); }
   ;
 
-alias returns [Ident id]
+actualName returns [Ident id]
   : identifier
     { $id = $identifier.id; }
   ;

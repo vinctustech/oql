@@ -1,5 +1,7 @@
 package com.vinctus.oql2
 
+import org.checkerframework.checker.units.qual.s
+
 import scala.collection.immutable.VectorMap
 import scala.collection.mutable
 
@@ -22,11 +24,11 @@ class DataModel(model: DMLModel, dml: String) {
 
     def unknownEntity(typ: Ident) = printError(typ.pos, s"unknown entity: '${typ.s}'", dml)
 
-    duplicates(model.entities.map(e => e.alias getOrElse e.name), "effective entity")
+    duplicates(model.entities.map(e => e.actualName getOrElse e.name), "actual table")
     duplicates(model.entities.map(_.name), "entity")
 
     for (entity <- model.entities) {
-      duplicates(entity.attributes.map(a => a.alias getOrElse a.name), " effective attribute")
+      duplicates(entity.attributes.map(a => a.actualName getOrElse a.name), " actual column")
       duplicates(model.entities.map(_.name), "attribute")
 
       entity.attributes.filter(_.pk) match {
@@ -34,7 +36,7 @@ class DataModel(model: DMLModel, dml: String) {
         case _                   =>
       }
 
-      entities((entity.alias getOrElse entity.name).s) = EntityInfo(Entity((entity.alias getOrElse entity.name).s, entity.name.s), entity.attributes)
+      entities(entity.name.s) = EntityInfo(Entity(entity.name.s, (entity.actualName getOrElse entity.name).s), entity.attributes)
     }
 
     for (EntityInfo(e, dmlas, as) <- entities.values) {
@@ -80,7 +82,7 @@ class DataModel(model: DMLModel, dml: String) {
               }
           }
 
-        val attr = Attribute((a.alias getOrElse a.name).s, a.name.s, a.pk, a.required, typ)
+        val attr = Attribute(a.name.s, (a.actualName getOrElse a.name).s, a.pk, a.required, typ)
 
         if (a.pk) {
           if (!typ.isDataType)
@@ -91,7 +93,7 @@ class DataModel(model: DMLModel, dml: String) {
           pk = Some(attr)
         }
 
-        as((a.alias getOrElse a.name).s) = attr
+        as(a.name.s) = attr
       }
 
       e._pk = pk
@@ -126,9 +128,7 @@ class DataModel(model: DMLModel, dml: String) {
           if (target.size < 1)
             printError(link.pos, s"junction entity '${linkinfo.entity.name}' has no attributes of type '${link.s}'", dml)
 
-          val name = (a.alias getOrElse a.name).s
-
-          as(name) = as(name).copy(typ = ManyToManyType(targetentity, linkinfo.entity, self.head, target.head))
+          as(a.name.s) = as(a.name.s).copy(typ = ManyToManyType(targetentity, linkinfo.entity, self.head, target.head))
         case DMLAttribute(_, _, DMLManyToOneType(entity), _, _) =>
           if (entities(entity.s).entity.pk.isEmpty)
             printError(entity.pos, s"target entity '${entity.s}' has no declared primary key", dml)
@@ -158,9 +158,7 @@ class DataModel(model: DMLModel, dml: String) {
                 OneToOneType(entityinfo.entity, attrs.head)
             }
 
-          val name = (a.alias getOrElse a.name).s
-
-          as(name) = as(name).copy(typ = newtyp)
+          as(a.name.s) = as(a.name.s).copy(typ = newtyp)
         case a @ DMLAttribute(_, _, DMLOneToManyType(typ, attr), _, _) =>
           val entityinfo = entities(typ.s)
           val newtyp =
@@ -187,9 +185,7 @@ class DataModel(model: DMLModel, dml: String) {
                 OneToManyType(entityinfo.entity, attrs.head)
             }
 
-          val name = (a.alias getOrElse a.name).s
-
-          as(name) = as(name).copy(typ = newtyp)
+          as(a.name.s) = as(a.name.s).copy(typ = newtyp)
         case DMLAttribute(_, _, _: DMLPrimitiveType, _, _) =>
       }
 

@@ -7,13 +7,13 @@ trait StudentDB extends Test {
       |entity class {
       | *id: integer
       |  name: text
-      |  students: [students] (student_class)
+      |  students: [student] (enrollment)
       |}
       |
       |entity student (students) {
       | *id: integer
-      |  name (stu_name): text
-      |  classes: [class] (student_class)
+      |  name (student_name): text
+      |  classes: [class] (enrollment)
       |}
       |
       |entity enrollment (student_class) {
@@ -28,12 +28,12 @@ trait StudentDB extends Test {
   val data: String =
     """
       |students
-      | id: integer, pk  stu_name: text
+      | id: integer, pk  student_name: text
       | 1                John
       | 2                Debbie
       |
       |class
-      | id: integer, pk      name: text
+      | id: integer, pk  name: text
       | 1                English
       | 2                Maths
       | 3                Spanish
@@ -46,13 +46,13 @@ trait StudentDB extends Test {
       |
       |student_class
       | studentid: integer, fk, students, id  classid: integer, fk, class, id  year: integer  semester: text  grade: text
-      | 1                                    3                                2019           fall            B+
-      | 1                                    5                                2018           winter          A
-      | 1                                    9                                2019           summer          F
-      | 2                                    1                                2018           fall            A+
-      | 2                                    4                                2019           winter          B-
-      | 2                                    5                                2018           summer          A-
-      | 2                                    9                                2019           fall            B+
+      | 1                                     3                                2019           fall            B+
+      | 1                                     5                                2018           winter          A
+      | 1                                     9                                2019           summer          F
+      | 2                                     1                                2018           fall            A+
+      | 2                                     4                                2019           winter          B-
+      | 2                                     5                                2018           summer          A-
+      | 2                                     9                                2019           fall            B+
       |""".stripMargin
 
   db.create()

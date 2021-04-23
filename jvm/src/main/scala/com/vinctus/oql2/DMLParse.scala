@@ -1,6 +1,6 @@
 package com.vinctus.oql2
 
-import com.vinctus.oql2.DMLParser.{AliasContext, AttributeNameContext}
+import com.vinctus.oql2.DMLParser.{ActualNameContext, AttributeNameContext}
 import org.antlr.v4.runtime.{CharStreams, CommonTokenStream, ConsoleErrorListener}
 
 object DMLParse {
@@ -24,7 +24,7 @@ object DMLParse {
     else Some(res)
   }
 
-  def alias(ctx: AliasContext): Option[Ident] = if (ctx eq null) None else Some(ctx.id)
+  def actualName(ctx: ActualNameContext): Option[Ident] = if (ctx eq null) None else Some(ctx.id)
 
   def attributeName(ctx: AttributeNameContext): Option[Ident] = if (ctx eq null) None else Some(ctx.id)
 
