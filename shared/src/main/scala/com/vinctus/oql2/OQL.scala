@@ -221,12 +221,19 @@ object OQL {
 
         query.select foreach (decorate(query.entity, _, model, oql))
         query.order foreach (_ foreach { case OQLOrdering(expr, _) => decorate(query.entity, expr, model, oql) })
-      case ApplyOQLExpression(f, args) => args foreach _decorate
+      case e @ ApplyOQLExpression(f, args) =>
+        args foreach _decorate
+
+// requires SQLDataSource
+//        if (f.s.toLowerCase == "count")
+//          e.typ = ds.countType
       case BetweenOQLExpression(expr, op, lower, upper) =>
         _decorate(expr)
         _decorate(lower)
         _decorate(upper)
-      case GroupedOQLExpression(expr) => _decorate(expr)
+      case e @ GroupedOQLExpression(expr) =>
+        _decorate(expr)
+        e.typ = expr.typ
       case CaseOQLExpression(whens, els) =>
         whens foreach {
           case OQLWhen(cond, expr) =>
@@ -235,7 +242,9 @@ object OQL {
         }
 
         els foreach _decorate
-      case PrefixOQLExpression(op, expr)  => _decorate(expr)
+      case e @ PrefixOQLExpression(op, expr) =>
+        _decorate(expr)
+        e.typ = expr.typ
       case PostfixOQLExpression(expr, op) => _decorate(expr)
       case InArrayOQLExpression(left, op, right) =>
         _decorate(left)
@@ -243,9 +252,12 @@ object OQL {
       case InParameterOQLExpression(left, op, right) =>
         _decorate(left)
         _decorate(right)
-      case InfixOQLExpression(left, _, right) =>
+      case e @ InfixOQLExpression(left, _, right) =>
         _decorate(left)
         _decorate(right)
+
+        if (left.typ == right.typ)
+          e.typ = left.typ
       case attrexp @ AttributeOQLExpression(ids, _) =>
         val dmrefs = new ListBuffer[(Entity, Attribute)]
 
@@ -284,10 +296,11 @@ object OQL {
 
         query.select foreach (decorate(query.entity, _, model, oql))
         query.order foreach (_ foreach { case OQLOrdering(expr, _) => decorate(query.entity, expr, model, oql) })
-      case e: LiteralOQLExpression                                                                                                   => e.typ = TextType
-      case e: FloatOQLExpression                                                                                                     => e.typ = FloatType
-      case e: IntegerOQLExpression                                                                                                   => e.typ = IntegerType
-      case StarOQLExpression | _: RawOQLExpression | _: BooleanOQLExpression | _: ReferenceOQLExpression | _: ParameterOQLExpression =>
+      case e: LiteralOQLExpression                                                                         => e.typ = TextType
+      case e: FloatOQLExpression                                                                           => e.typ = FloatType
+      case e: IntegerOQLExpression                                                                         => e.typ = IntegerType
+      case e: BooleanOQLExpression                                                                         => e.typ = BooleanType
+      case StarOQLExpression | _: RawOQLExpression | _: ReferenceOQLExpression | _: ParameterOQLExpression =>
     }
   }
 
