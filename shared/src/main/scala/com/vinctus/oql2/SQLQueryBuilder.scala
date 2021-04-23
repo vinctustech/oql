@@ -138,7 +138,6 @@ class SQLQueryBuilder(val parms: Parameters, oql: String, ds: SQLDataSource, val
     }
 
   def leftJoin(t1: String, c1: String, t2: String, alias: String, c2: String): SQLQueryBuilder = {
-    println(t1, c1, t2, alias, c2)
     leftJoins += Join(t1, c1, t2, alias, c2)
     this
   }
