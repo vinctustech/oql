@@ -41,7 +41,7 @@ trait SQLDataSource extends OQLDataSource {
   val resultArrayFunctionEnd: String
   val rowSequenceFunctionStart: String
   val rowSequenceFunctionEnd: String
-  val countType: DataType
+  val functionReturnType: Map[String, DataType]
 
   def convert(data: Any, typ: String): Any
 
