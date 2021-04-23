@@ -192,4 +192,69 @@ class StarTrekDBTests extends AnyFreeSpec with Matchers with StarTrekDB {
         |""".trim.stripMargin
   }
 
+  "ordered resource selection" in {
+    test("character {* home species {* origin}} [char_id < 4] <name>") shouldBe
+      """
+        |[
+        |  {
+        |    "char_id": 3,
+        |    "name": "Deanna Troi",
+        |    "home": {
+        |      "plan_id": 1,
+        |      "name": "Earth",
+        |      "climate": "not too bad"
+        |    },
+        |    "species": {
+        |      "spec_id": 3,
+        |      "name": "Betazoid",
+        |      "lifespan": 120,
+        |      "origin": {
+        |        "plan_id": 3,
+        |        "name": "Betazed",
+        |        "climate": "awesome weather"
+        |      }
+        |    }
+        |  },
+        |  {
+        |    "char_id": 1,
+        |    "name": "James Tiberius Kirk",
+        |    "home": {
+        |      "plan_id": 1,
+        |      "name": "Earth",
+        |      "climate": "not too bad"
+        |    },
+        |    "species": {
+        |      "spec_id": 1,
+        |      "name": "Human",
+        |      "lifespan": 71,
+        |      "origin": {
+        |        "plan_id": 1,
+        |        "name": "Earth",
+        |        "climate": "not too bad"
+        |      }
+        |    }
+        |  },
+        |  {
+        |    "char_id": 2,
+        |    "name": "Spock",
+        |    "home": {
+        |      "plan_id": 1,
+        |      "name": "Earth",
+        |      "climate": "not too bad"
+        |    },
+        |    "species": {
+        |      "spec_id": 2,
+        |      "name": "Vulcan",
+        |      "lifespan": 220,
+        |      "origin": {
+        |        "plan_id": 2,
+        |        "name": "Vulcan",
+        |        "climate": "pretty hot"
+        |      }
+        |    }
+        |  }
+        |]
+        |""".trim.stripMargin
+  }
+
 }
