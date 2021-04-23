@@ -1,5 +1,6 @@
 package com.vinctus.oql2
 
+import xyz.hyperreal.importer.{Column, Importer, Table}
 import xyz.hyperreal.pretty.prettyPrint
 
 import scala.language.postfixOps
@@ -34,5 +35,21 @@ trait Test {
   def test(oql: String, parameters: Map[String, Any] = Map()): String = JSON(db.queryMany(oql, parameters), format = true)
 
   def testmap(oql: String, parameters: Map[String, Any] = Map()): String = prettyPrint(db.queryMany(oql, parameters), classes = true)
+
+  def insert(data: String): Unit = {
+    val tables: Iterable[Table] = Importer.importFromString(data, doubleSpaces = true)
+    val q = '"'
+
+    for (Table(name, header, data) <- tables) {
+      val row =
+        data map (r =>
+          r map {
+            case s: String => s"'${s.replace("'", "''")}'"
+            case v         => v
+          } mkString ("(", ", ", ")")) mkString ", "
+
+      db.execute(_.insert(s"INSERT INTO $q$name$q (${header map { case Column(name, _, _) => s"$q$name$q" } mkString ", "}) VALUES $row"))
+    }
+  }
 
 }
