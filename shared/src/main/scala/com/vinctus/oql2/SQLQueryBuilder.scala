@@ -23,7 +23,7 @@ class SQLQueryBuilder(val parms: Parameters, oql: String, ds: SQLDataSource, val
   def call(f: String, args: String): String = f.replace("?", args)
 
   private trait Project
-  private case class ValueProject(expr: OQLExpression, table: String) extends Project {
+  private case class ValueProject(expr: OQLExpression, table: String, typed: Boolean) extends Project {
     override def toString: String = {
       val exp =
         if (projectQuery && ds.convertFunction.isDefined && (expr.typ == UUIDType || expr.typ == TimestampType))
@@ -31,9 +31,7 @@ class SQLQueryBuilder(val parms: Parameters, oql: String, ds: SQLDataSource, val
         else
           expression(expr, table)
 
-      val typing =
-        if (projectQuery && ds.typeFunction.isDefined) s", ${call(ds.typeFunction.get, expression(expr, table))}"
-        else ""
+      val typing = if (typed) s", ${call(ds.typeFunction.get, expression(expr, table))}" else ""
 
       s"$exp$typing"
     }
@@ -62,11 +60,10 @@ class SQLQueryBuilder(val parms: Parameters, oql: String, ds: SQLDataSource, val
   def ordering(orderings: List[OQLOrdering], table: String): Unit = order = Some((table, orderings))
 
   def projectValue(expr: OQLExpression, table: String): (Int, Boolean) = {
-    projects += ValueProject(expr, table)
-
     val cur = idx
-    val typed = projectQuery && ds.typeFunction.isDefined
+    val typed = projectQuery && ds.typeFunction.isDefined && expr.typ == null
 
+    projects += ValueProject(expr, table, typed)
     idx += (if (typed) 2 else 1)
     (cur, typed)
   }

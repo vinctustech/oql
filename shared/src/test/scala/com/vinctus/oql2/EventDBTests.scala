@@ -6,7 +6,7 @@ import org.scalatest.matchers.should.Matchers
 class EventDBTests extends AnyFreeSpec with Matchers with EventDB {
 
   "uuid, timestamp test with many-to-many inner query" in {
-    test("attendee { * events <when> }") shouldBe
+    test("attendee { * events <when> } <name>") shouldBe
       """
         |[
         |  {
