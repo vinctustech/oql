@@ -35,6 +35,7 @@ class H2mem extends JDBCDataSource("org.h2.Driver") {
   val rowSequenceFunctionEnd: String = " NULL ON NULL)"
   val typeFunction: Option[String] = None
   val convertFunction: Option[String] = Some("CONVERT(?, VARCHAR)")
+  val countType: DataType = BigintType
 
   def convert(data: Any, typ: String): Any = data
 
