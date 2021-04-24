@@ -166,7 +166,8 @@ class OQL(dm: String, val ds: SQLDataSource) {
 
                     if (z.charAt(10) != 'T') s"${z.substring(0, 10)}T${z.substring(11)}" else z
                   }
-                case _ => x
+                case (d: String, DecimalType(precision, scale)) => BigDecimal(d)
+                case _                                          => x
               }
           case ObjectNode(properties) =>
             val map = new mutable.LinkedHashMap[String, Any]
@@ -227,7 +228,12 @@ object OQL {
         args foreach _decorate
 
         ds.functionReturnType get f.s.toLowerCase match {
-          case None    =>
+          case None =>
+            val n = f.s.toLowerCase
+
+            if ((n == "sum" || n == "avg" || n == "min" || n == "max") && args.length == 1)
+              e.typ = args.head.typ
+
           case Some(t) => e.typ = t
         }
       case BetweenOQLExpression(expr, op, lower, upper) =>
@@ -487,7 +493,7 @@ object OQL {
         subquery
       case n @ OneToManyNode(OQLQuery(_,
                                       entity,
-                                      attr @ Attribute(name, column, pk, required, OneToManyType(mtoEntity, otmAttr)),
+                                      attr @ Attribute(name, column, pk, required, OneToManyType(otmEntity, otmAttr)),
                                       _,
                                       select,
                                       group,
@@ -504,9 +510,12 @@ object OQL {
         if (builder.isLeft)
           n.idx = builder.left.toOption.get.projectQuery(subquery)
 
-        subquery.table(mtoEntity.table, Some(alias))
+        subquery.table(otmEntity.table, Some(alias))
         writeQuery(element, alias, Left(subquery), oql, ds)
-        subquery.select(RawOQLExpression(s""""$alias"."${otmAttr.column}" = "$table"."${entity.pk.get.column}""""), null)
+        println(otmEntity.table, entity.table)
+        subquery.select(
+          RawOQLExpression(s""""$alias"."${otmAttr.column}" = "$table"."${otmAttr.typ.asInstanceOf[ManyToOneType].entity.pk.get.column}""""),
+          null)
         select foreach (subquery.select(_, alias))
         group foreach (subquery.group(_, alias))
         order foreach (subquery.order(_, alias))
