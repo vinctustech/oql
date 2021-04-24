@@ -1,53 +1,58 @@
 package com.vinctus.oql2
 
+import scala.language.postfixOps
 import scala.util.matching.Regex
 import scala.util.parsing.combinator.RegexParsers
-import scala.util.parsing.input.{CharSequenceReader, Positional}
+import scala.util.parsing.input.{CharSequenceReader, Position, Positional}
 
 class DMLParser extends RegexParsers {
 
   override protected val whiteSpace: Regex = """(\s|//.*)+""".r
 
-  def pos: Parser[Position] = positioned(success(new Positional {})) ^^ {
-    _.pos
-  }
+  def pos: Parser[Position] = positioned(success(new Positional {})) ^^ (_.pos)
+
+  def integer: Parser[String] = "[0-9]+".r
 
   def ident: Parser[Ident] =
-    positioned("""[a-zA-Z_$][a-zA-Z0-9_$]*""".r ^^ Ident)
-
-  def variable: Parser[VariableExpressionERD] = ident ^^ VariableExpressionERD
-
-  def definition: Parser[ERDefinitionERD] = rep1(block) ^^ ERDefinitionERD
-
-  def block: Parser[BlockERD] = entityBlock
-
-  def entityBlock: Parser[EntityBlockERD] =
-    "entity" ~ ident ~ opt("(" ~> ident <~ ")") ~ "{" ~ rep1(attribute) ~ "}" ^^ {
-      case _ ~ n ~ a ~ _ ~ fs ~ _ =>
-        EntityBlockERD(n, if (a isDefined) a.get else n, fs)
+    pos ~ """[a-zA-Z_$][a-zA-Z0-9_$]*""".r ^^ {
+      case p ~ s => Ident(s, p)
     }
 
-  def attribute: Parser[EntityAttributeERD] =
-    positioned(
-      opt("*") ~ ident ~ opt("(" ~> ident <~ ")") ~ ":" ~ typeSpec ~ opt("!") ^^ {
-        case pk ~ n ~ a ~ _ ~ t ~ r =>
-          EntityAttributeERD(n, if (a isDefined) a.get else n, t, pk isDefined, r isDefined)
-      } |
-        ident ~ "=" ~ jsonLiteral ^^ {
-          case n ~ _ ~ v => EntityAttributeERD(n, n, LiteralTypeERD(v), pk = false, required = true)
-        })
+  def model: Parser[DMLModel] = rep1(entity) ^^ DMLModel
 
-  def typeSpec: Parser[TypeSpecifierERD] =
-    ident ^^ SimpleTypeERD |
-      ("[" ~> ident ~ opt("." ~> ident) <~ "]") ~ ("(" ~> ident <~ ")") ^^ {
-        case e ~ a ~ j => JunctionArrayTypeERD(e, a, j)
+  def entity: Parser[DMLEntity] =
+    "entity" ~ ident ~ opt("(" ~> ident <~ ")") ~ "{" ~ rep1(attribute) ~ "}" ^^ {
+      case _ ~ n ~ a ~ _ ~ as ~ _ =>
+        DMLEntity(n, a, as)
+    }
+
+  def attribute: Parser[DMLAttribute] =
+    opt("*") ~ ident ~ opt("(" ~> ident <~ ")") ~ ":" ~ typeSpecifier ~ opt("!") ^^ {
+      case pk ~ n ~ a ~ _ ~ t ~ r =>
+        DMLAttribute(n, a, t, pk isDefined, r isDefined)
+    }
+
+  def typeSpecifier: Parser[DMLTypeSpecifier] =
+    ("text" |
+      "integer" | "int" | "int4" |
+      "bool" | "boolean" |
+      "bigint" |
+      "date" |
+      "float" | "float8" |
+      "uuid" |
+      "timestamp") ^^ DMLSimpleDataType |
+      "decimal" ~ "(" ~ integer ~ "," ~ integer ~ ")" ^^ {
+        case _ ~ _ ~ p ~ _ ~ s ~ _ => DMLParametricDataType("decimal", List(p, s))
       } |
-      ("[" ~> ident ~ opt("." ~> ident) <~ "]") ^^ {
-        case e ~ a =>
-          ArrayTypeERD(e, a)
+      ident ^^ DMLManyToOneType |
+      "[" ~ ident ~ "]" ~ opt("." ~> ident) ^^ {
+        case _ ~ n ~ _ ~ t => DMLOneToManyType(n, t)
       } |
-      ("<" ~> ident ~ opt("." ~> ident) <~ ">") ^^ {
-        case e ~ a => OneToOneTypeERD(e, a)
+      "<" ~ ident ~ ">" ~ opt("." ~> ident) ^^ {
+        case _ ~ n ~ _ ~ t => DMLOneToOneType(n, t)
+      } |
+      "[" ~ ident ~ "]" ~ "(" ~ ident ~ ")" ^^ {
+        case _ ~ n ~ _ ~ _ ~ l ~ _ => DMLManyToManyType(n, l)
       }
 
   def parseFromString[T](src: String, grammar: Parser[T]): T =

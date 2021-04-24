@@ -7,9 +7,9 @@ case class DMLAttribute(name: Ident, actualName: Option[Ident], typ: DMLTypeSpec
 
 trait DMLTypeSpecifier extends DMLAST
 trait DMLColumnType extends DMLTypeSpecifier
-trait DMLPrimitiveType extends DMLColumnType
-case class DMLSimplePrimitiveType(typ: String) extends DMLPrimitiveType
-case class DMLParametricPrimitiveType(typ: String, parameters: List[String]) extends DMLPrimitiveType
+trait DMLDataType extends DMLColumnType
+case class DMLSimpleDataType(typ: String) extends DMLDataType
+case class DMLParametricDataType(typ: String, parameters: List[String]) extends DMLDataType
 
 trait DMLEntityType extends DMLTypeSpecifier { val entity: Ident }
 case class DMLManyToOneType(entity: Ident) extends DMLEntityType with DMLColumnType

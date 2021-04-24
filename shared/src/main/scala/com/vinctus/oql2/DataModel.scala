@@ -45,15 +45,15 @@ class DataModel(model: DMLModel, dml: String) {
       for (a <- dmlas) {
         val typ =
           a.typ match {
-            case DMLSimplePrimitiveType("text")                     => TextType
-            case DMLSimplePrimitiveType("integer" | "int" | "int4") => IntegerType
-            case DMLSimplePrimitiveType("bool" | "boolean")         => BooleanType
-            case DMLSimplePrimitiveType("bigint")                   => BigintType
-            case DMLParametricPrimitiveType("decimal", parameters)  => DecimalType(parameters.head.toInt, parameters.tail.head.toInt)
-            case DMLSimplePrimitiveType("date")                     => DateType
-            case DMLSimplePrimitiveType("float" | "float8")         => FloatType
-            case DMLSimplePrimitiveType("uuid")                     => UUIDType
-            case DMLSimplePrimitiveType("timestamp")                => TimestampType
+            case DMLSimpleDataType("text")                     => TextType
+            case DMLSimpleDataType("integer" | "int" | "int4") => IntegerType
+            case DMLSimpleDataType("bool" | "boolean")         => BooleanType
+            case DMLSimpleDataType("bigint")                   => BigintType
+            case DMLParametricDataType("decimal", parameters)  => DecimalType(parameters.head.toInt, parameters.tail.head.toInt)
+            case DMLSimpleDataType("date")                     => DateType
+            case DMLSimpleDataType("float" | "float8")         => FloatType
+            case DMLSimpleDataType("uuid")                     => UUIDType
+            case DMLSimpleDataType("timestamp")                => TimestampType
             case DMLManyToOneType(typ) =>
               entities get typ.s match {
                 case Some(EntityInfo(entity, _, _)) => ManyToOneType(entity)
@@ -186,7 +186,7 @@ class DataModel(model: DMLModel, dml: String) {
             }
 
           as(a.name.s) = as(a.name.s).copy(typ = newtyp)
-        case DMLAttribute(_, _, _: DMLPrimitiveType, _, _) =>
+        case DMLAttribute(_, _, _: DMLDataType, _, _) =>
       }
 
       e._attributes = as to VectorMap
