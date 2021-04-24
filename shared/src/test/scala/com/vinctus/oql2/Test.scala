@@ -15,7 +15,7 @@ trait Test {
     "pg": PostgreSQL in a docker container called "pg-docker" listening on port 5432 (password: "docker")
           terminal command: `psql -h localhost -U postgres -d postgres`
    */
-  val DB = "h2"
+  val DB = "pg"
 
   val ds: SQLDataSource =
     DB match {
@@ -24,7 +24,7 @@ trait Test {
 
         "docker run --rm --name pg-docker -e POSTGRES_PASSWORD=docker -d -p 5432:5432 postgres" !
 
-        Thread.sleep(1000)
+        Thread.sleep(2000)
 
         new PG("localhost", 5432, "postgres", "postgres", "docker")
       case "h2" => new H2mem
