@@ -1,6 +1,5 @@
 package com.vinctus.oql2
 
-import com.vinctus.oql2.Main.db.queryBuilder
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.should.Matchers
 

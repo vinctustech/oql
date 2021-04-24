@@ -2,8 +2,6 @@ package com.vinctus.oql2
 
 import com.vinctus.oql2.OQL._
 
-import scala.collection.immutable.BitSet.empty.ordering
-import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
 import scala.language.postfixOps
 
