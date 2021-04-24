@@ -150,7 +150,7 @@ logicalPrimary returns [OQLExpression e]
   | qualifiedAttributeName
     { $e = $qualifiedAttributeName.e; }
   | '(' logicalExpression ')'
-    { $e = $logicalExpression.e; }
+    { $e = new GroupedOQLExpression($logicalExpression.e); }
   ;
 
 qualifiedAttributeName returns [AttributeOQLExpression e]

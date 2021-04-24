@@ -512,7 +512,6 @@ object OQL {
 
         subquery.table(otmEntity.table, Some(alias))
         writeQuery(element, alias, Left(subquery), oql, ds)
-        println(otmEntity.table, entity.table)
         subquery.select(
           RawOQLExpression(s""""$alias"."${otmAttr.column}" = "$table"."${otmAttr.typ.asInstanceOf[ManyToOneType].entity.pk.get.column}""""),
           null)

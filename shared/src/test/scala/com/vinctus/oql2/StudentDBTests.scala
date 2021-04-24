@@ -148,4 +148,22 @@ class StudentDBTests extends AnyFreeSpec with Matchers with StudentDB {
         |""".trim.stripMargin
   }
 
+  "not/or" in {
+    test("enrollment { class { name } } [NOT (semester = 'fall' OR semester = 'winter')] <class.name>") shouldBe
+      """
+        |[
+        |  {
+        |    "class": {
+        |      "name": "Physical Education"
+        |    }
+        |  },
+        |  {
+        |    "class": {
+        |      "name": "Science"
+        |    }
+        |  }
+        |]
+        |""".trim.stripMargin
+  }
+
 }
