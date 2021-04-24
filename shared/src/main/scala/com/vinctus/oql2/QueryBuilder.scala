@@ -71,8 +71,13 @@ class QueryBuilder private[oql2] (private val oql: OQL, private[oql2] val q: OQL
     )
   }
 
-  def order(attribute: String, sorting: String): QueryBuilder =
-    new QueryBuilder(oql, q.copy(order = Some(List(OQLOrdering(AttributeOQLExpression(List(Ident(attribute)), null), sorting)))))
+  def order(attribute: String, sorting: String): QueryBuilder = {
+    val attr = AttributeOQLExpression(List(Ident(attribute)), null)
+
+    OQL.decorate(q.entity, attr, oql.model, oql.ds, null)
+
+    new QueryBuilder(oql, q.copy(order = Some(List(OQLOrdering(attr, sorting)))))
+  }
 
   def limit(a: Int): QueryBuilder = new QueryBuilder(oql, q.copy(limit = Some(a)))
 
@@ -84,6 +89,6 @@ class QueryBuilder private[oql2] (private val oql: OQL, private[oql2] val q: OQL
 
   def getCount: Int = oql.count(q, "")
 
-//  def json: String = JSON(getMany)
+  def json(parameters: Map[String, Any] = Map(), tab: Int = 2, format: Boolean = true): String = JSON(getMany(parameters), format = true)
 
 }

@@ -8,7 +8,6 @@ import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
 import scala.annotation.tailrec
 import scala.collection.immutable.VectorMap
-import scala.reflect.internal.util.NoPosition.offset
 
 class OQL(dm: String, val ds: SQLDataSource) {
 
@@ -87,6 +86,12 @@ class OQL(dm: String, val ds: SQLDataSource) {
     }
 
   def showQuery(): Unit = _showQuery = true
+
+  def queryBuilder() =
+    new QueryBuilder(this, OQLQuery(null, null, null, List(StarOQLProject), None, None, None, None, None))
+
+  def json(oql: String, parameters: Map[String, Any] = Map(), tab: Int = 2, format: Boolean = true): String =
+    JSON(queryMany(oql, parameters), tab, format)
 
   def queryMany(oql: String, parameters: Map[String, Any] = Map()): List[Any] = queryMany(parseQuery(oql), oql, parameters)
 
