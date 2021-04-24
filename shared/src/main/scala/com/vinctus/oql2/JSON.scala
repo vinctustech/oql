@@ -4,7 +4,7 @@ import java.sql.Timestamp
 import java.time.Instant
 import scala.annotation.tailrec
 import scala.collection.immutable.ArraySeq
-import scala.collection.mutable.ListBuffer
+import scala.collection.mutable.{ArrayBuffer, ListBuffer}
 import scala.language.postfixOps
 
 object JSON {
@@ -41,7 +41,7 @@ object JSON {
     a to ArraySeq
   }
 
-  def readArray(json: String): Seq[Any] = {
+  def readArray(json: String): IndexedSeq[Any] = {
     var idx: Int = 0
 
     def next: Char =
@@ -69,8 +69,8 @@ object JSON {
       space()
     }
 
-    def readArray: List[Any] = {
-      val buf = new ListBuffer[Any]
+    def readArray: IndexedSeq[Any] = {
+      val buf = new ArrayBuffer[Any]
 
       delim('[')
 
@@ -89,7 +89,7 @@ object JSON {
         elem()
 
       delim(']')
-      buf.toList
+      buf to ArraySeq
     }
 
     def error(str: String) = sys.error(str)

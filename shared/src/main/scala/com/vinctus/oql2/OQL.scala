@@ -123,28 +123,28 @@ class OQL(dm: String, val ds: SQLDataSource) {
             if (resultSet.get(n.idx) == null) null
             else buildResult(element, resultSet)
           case n @ OneToOneNode(query, element) =>
-            val listResultSet = resultSet.getResultSet(n.idx)
+            val sequenceResultSet = resultSet.getResultSet(n.idx)
             var rows = 0
 
-            while (listResultSet.next) rows += 1
+            while (sequenceResultSet.next) rows += 1
 
             if (rows > 1)
               problem(query.source.pos, s"attribute '${query.source.s}' had a result set consisting of $rows rows", oql)
 
             if (rows == 0) null
-            else buildResult(element, listResultSet)
+            else buildResult(element, sequenceResultSet)
           case n @ OneToManyNode(_, element) =>
-            val listResultSet = resultSet.getResultSet(n.idx)
+            val sequenceResultSet = resultSet.getResultSet(n.idx)
             val array = new ListBuffer[Any]
 
-            while (listResultSet.next) array += buildResult(element, listResultSet)
+            while (sequenceResultSet.next) array += buildResult(element, sequenceResultSet)
 
             array.toList
           case n @ ManyToManyNode(_, element) =>
-            val listResultSet = resultSet.getResultSet(n.idx)
+            val sequenceResultSet = resultSet.getResultSet(n.idx)
             val array = new ListBuffer[Any]
 
-            while (listResultSet.next) array += buildResult(element, listResultSet)
+            while (sequenceResultSet.next) array += buildResult(element, sequenceResultSet)
 
             array.toList
           case v @ ValueNode(expr) =>
