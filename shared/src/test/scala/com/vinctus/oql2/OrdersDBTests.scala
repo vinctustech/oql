@@ -46,4 +46,40 @@ class OrdersDBTests extends AnyFreeSpec with Matchers with OrdersDB {
         |""".trim.stripMargin
   }
 
+  "between" in {
+    test("order { sum(ord_amount) count(ord_amount) agent { agent_name } } [ord_amount BETWEEN 3000 AND 4000] /agent.agent_name/ <agent.agent_name>") shouldBe
+      """
+        |[
+        |  {
+        |    "sum_ord_amount": 6500.00,
+        |    "count_ord_amount": 2,
+        |    "agent": {
+        |      "agent_name": "Alford"
+        |    }
+        |  },
+        |  {
+        |    "sum_ord_amount": 4000.00,
+        |    "count_ord_amount": 1,
+        |    "agent": {
+        |      "agent_name": "Ivan"
+        |    }
+        |  },
+        |  {
+        |    "sum_ord_amount": 7500.00,
+        |    "count_ord_amount": 2,
+        |    "agent": {
+        |      "agent_name": "Mukesh"
+        |    }
+        |  },
+        |  {
+        |    "sum_ord_amount": 10500.00,
+        |    "count_ord_amount": 3,
+        |    "agent": {
+        |      "agent_name": "Santakumar"
+        |    }
+        |  }
+        |]
+        |""".trim.stripMargin
+  }
+
 }
