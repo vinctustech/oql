@@ -96,4 +96,56 @@ class StudentDBTests extends AnyFreeSpec with Matchers with StudentDB {
         |""".trim.stripMargin
   }
 
+  "recursion" in {
+    test("student { * classes { * students <name> } <name> } [name = 'John']") shouldBe
+      """
+        |[
+        |  {
+        |    "id": 1,
+        |    "name": "John",
+        |    "classes": [
+        |      {
+        |        "id": 9,
+        |        "name": "Physical Education",
+        |        "students": [
+        |          {
+        |            "id": 2,
+        |            "name": "Debbie"
+        |          },
+        |          {
+        |            "id": 1,
+        |            "name": "John"
+        |          }
+        |        ]
+        |      },
+        |      {
+        |        "id": 5,
+        |        "name": "Science",
+        |        "students": [
+        |          {
+        |            "id": 2,
+        |            "name": "Debbie"
+        |          },
+        |          {
+        |            "id": 1,
+        |            "name": "John"
+        |          }
+        |        ]
+        |      },
+        |      {
+        |        "id": 3,
+        |        "name": "Spanish",
+        |        "students": [
+        |          {
+        |            "id": 1,
+        |            "name": "John"
+        |          }
+        |        ]
+        |      }
+        |    ]
+        |  }
+        |]
+        |""".trim.stripMargin
+  }
+
 }

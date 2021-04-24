@@ -41,7 +41,7 @@ object JSON {
     a to ArraySeq
   }
 
-  def readArray(json: String): List[Any] = {
+  def readArray(json: String): Seq[Any] = {
     var idx: Int = 0
 
     def next: Char =
@@ -58,9 +58,11 @@ object JSON {
 
     def advance(): Unit = idx += 1
 
+    def prev: Char = json.charAt(idx - 1)
+
     def space(): Unit = while (next.isWhitespace) advance()
 
-    def chmatch(c: Char): Unit = if (ch != c) error(if (c == EOI) "expected end of input" else s"expected a '$c'")
+    def chmatch(c: Char): Unit = if (ch != c) error(if (c == EOI) "expected end of input" else s"expected '$c', but found '$prev'")
 
     def delim(c: Char): Unit = {
       chmatch(c)

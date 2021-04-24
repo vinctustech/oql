@@ -6,13 +6,13 @@ import scala.collection.immutable.ArraySeq
 
 object ListResultSet {
 
-  def fromJSON(json: String) = new ListResultSet(JSON.readArray(json).asInstanceOf[List[List[Any]]])
+  def fromJSON(json: String) = new ListResultSet(JSON.readArray(json).asInstanceOf[Seq[Seq[Any]]])
 
 }
 
-class ListResultSet(list: List[Seq[Any]]) extends OQLResultSet {
+class ListResultSet(list: Seq[Seq[Any]]) extends OQLResultSet {
 
-  var rest: List[Seq[Any]] = _
+  var rest: Seq[Seq[Any]] = _
   var first = true
   var row: ArraySeq[Any] = _
 
@@ -35,6 +35,6 @@ class ListResultSet(list: List[Seq[Any]]) extends OQLResultSet {
 
   def getString(idx: Int): String = row(idx).toString
 
-  def getResultSet(idx: Int): OQLResultSet = ListResultSet.fromJSON(getString(idx))
+  def getResultSet(idx: Int): OQLResultSet = new ListResultSet(row(idx).asInstanceOf[Seq[Seq[Any]]])
 
 }
