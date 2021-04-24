@@ -7,7 +7,7 @@ case class OQLQuery(source: Ident,
                     var attr: Attribute,
                     var project: List[OQLProject],
                     select: Option[OQLExpression],
-                    group: Option[List[AttributeOQLExpression]],
+                    group: Option[List[OQLExpression]],
                     order: Option[List[OQLOrdering]],
                     limit: Option[Int],
                     offset: Option[Int])

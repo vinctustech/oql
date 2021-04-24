@@ -49,4 +49,51 @@ class StudentDBTests extends AnyFreeSpec with Matchers with StudentDB {
         |""".trim.stripMargin
   }
 
+  "many-to-many" in {
+    test("class { name students { name } <name> } [name LIKE 'S%'] <name>") shouldBe
+      """
+        |[
+        |  {
+        |    "name": "Science",
+        |    "students": [
+        |      {
+        |        "name": "Debbie"
+        |      },
+        |      {
+        |        "name": "John"
+        |      }
+        |    ]
+        |  },
+        |  {
+        |    "name": "Spanish",
+        |    "students": [
+        |      {
+        |        "name": "John"
+        |      }
+        |    ]
+        |  }
+        |]
+        |""".trim.stripMargin
+  }
+
+  "grouped" in {
+    test("enrollment { student { name count(*) } } /student.name/ <student.name>") shouldBe
+      """
+        |[
+        |  {
+        |    "student": {
+        |      "name": "Debbie",
+        |      "count": 4
+        |    }
+        |  },
+        |  {
+        |    "student": {
+        |      "name": "John",
+        |      "count": 3
+        |    }
+        |  }
+        |]
+        |""".trim.stripMargin
+  }
+
 }

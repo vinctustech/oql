@@ -39,6 +39,7 @@ class OQL(dm: String, val ds: SQLDataSource) {
       case Some(query: OQLQuery) =>
         queryProjects(None, query, model, ds, oql)
         query.select foreach (decorate(query.entity, _, model, ds, oql))
+        query.group foreach (_ foreach (decorate(query.entity, _, model, ds, oql)))
         query.order foreach (_ foreach { case OQLOrdering(expr, _) => decorate(query.entity, expr, model, ds, oql) })
         query
     }
@@ -59,6 +60,7 @@ class OQL(dm: String, val ds: SQLDataSource) {
         query.project = List(ExpressionOQLProject(Ident("count", null), ApplyOQLExpression(Ident("count", null), List(StarOQLExpression))))
         queryProjects(None, query, model, ds, oql)
         query.select foreach (decorate(query.entity, _, model, ds, oql))
+        query.group foreach (_ foreach (decorate(query.entity, _, model, ds, oql)))
         query.copy(order = None)
         count(query, oql)
     }
@@ -410,6 +412,7 @@ object OQL {
       case ResultNode(query, element) =>
         builder.left.toOption.get.table(query.entity.table, None)
         query.select foreach (builder.left.toOption.get.select(_, query.entity.table))
+        query.group foreach (builder.left.toOption.get.group(_, query.entity.table))
         query.order foreach (builder.left.toOption.get.order(_, query.entity.table))
         query.limit foreach builder.left.toOption.get.limit
         query.offset foreach builder.left.toOption.get.offset
@@ -439,7 +442,7 @@ object OQL {
                                        Attribute(name, _, _, _, ManyToManyType(mtmEntity, linkEntity, selfAttr, targetAttr)),
                                        _,
                                        select,
-                                       _,
+                                       group,
                                        order,
                                        limit,
                                        offset),
@@ -458,6 +461,7 @@ object OQL {
         writeQuery(element, joinAlias, Left(subquery), oql, ds)
         subquery.select(RawOQLExpression(s""""$alias"."${selfAttr.column}" = "$table"."${entity.pk.get.column}""""), null)
         select foreach (subquery.select(_, joinAlias))
+        group foreach (subquery.group(_, joinAlias))
         order foreach (subquery.order(_, joinAlias))
         limit foreach subquery.limit
         offset foreach subquery.offset
@@ -481,9 +485,16 @@ object OQL {
 //        select foreach (subquery.select(_, alias))  // todo: selection, ordering don't apply to one-to-one: error?
 //        order foreach (subquery.ordering(_, alias))
         subquery
-      case n @ OneToManyNode(
-            OQLQuery(_, entity, attr @ Attribute(name, column, pk, required, OneToManyType(mtoEntity, otmAttr)), _, select, _, order, limit, offset),
-            element) =>
+      case n @ OneToManyNode(OQLQuery(_,
+                                      entity,
+                                      attr @ Attribute(name, column, pk, required, OneToManyType(mtoEntity, otmAttr)),
+                                      _,
+                                      select,
+                                      group,
+                                      order,
+                                      limit,
+                                      offset),
+                             element) =>
         val alias = s"$table$$$name"
         val subquery =
           if (builder.isLeft)
@@ -497,6 +508,7 @@ object OQL {
         writeQuery(element, alias, Left(subquery), oql, ds)
         subquery.select(RawOQLExpression(s""""$alias"."${otmAttr.column}" = "$table"."${entity.pk.get.column}""""), null)
         select foreach (subquery.select(_, alias))
+        group foreach (subquery.group(_, alias))
         order foreach (subquery.order(_, alias))
         limit foreach subquery.limit
         offset foreach subquery.offset

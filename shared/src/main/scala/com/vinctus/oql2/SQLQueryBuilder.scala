@@ -2,6 +2,7 @@ package com.vinctus.oql2
 
 import com.vinctus.oql2.OQL._
 
+import scala.collection.immutable.BitSet.empty.ordering
 import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
 import scala.language.postfixOps
@@ -10,7 +11,7 @@ object SQLQueryBuilder {
 
   val INDENT = 2
 
-  private val Q = '"'
+  private val q = '"'
 
 }
 
@@ -44,6 +45,7 @@ class SQLQueryBuilder(val parms: Parameters, oql: String, ds: SQLDataSource, val
   private var idx = 0
   private val projects = new ArrayBuffer[Project]
   private var where: Option[(String, OQLExpression)] = None
+  private var _group: Option[(String, List[OQLExpression])] = None
   private var _order: Option[(String, List[OQLOrdering])] = None
   private var _limit: Option[Int] = None
   private var _offset: Option[Int] = None
@@ -56,6 +58,8 @@ class SQLQueryBuilder(val parms: Parameters, oql: String, ds: SQLDataSource, val
         Some((table, InfixOQLExpression(GroupedOQLExpression(cur), "AND", GroupedOQLExpression(cond))))
       case None => Some((table, cond))
     }
+
+  def group(groupings: List[OQLExpression], table: String): Unit = _group = Some((table, groupings))
 
   def order(orderings: List[OQLOrdering], table: String): Unit = _order = Some((table, orderings))
 
@@ -132,7 +136,7 @@ class SQLQueryBuilder(val parms: Parameters, oql: String, ds: SQLDataSource, val
             leftJoin(table, name, e.table, alias, e.pk.get.column)
         }
 
-        s"$Q$alias$Q.$Q${dmrefs.last._2.column}$Q"
+        s"$q$alias$q.$q${dmrefs.last._2.column}$q"
       case BooleanOQLExpression(b, pos) => b
       case CaseOQLExpression(whens, els) =>
         s"CASE ${whens map {
@@ -187,23 +191,28 @@ class SQLQueryBuilder(val parms: Parameters, oql: String, ds: SQLDataSource, val
 
     val (table, alias) = from
 
-    line(s"FROM $Q$table$Q${if (alias.isDefined) s" AS $Q${alias.get}$Q" else ""}")
+    line(s"FROM $q$table$q${if (alias.isDefined) s" AS $q${alias.get}$q" else ""}")
     in()
 
     val whereClause = where map { case (table, expr) => s"WHERE ${expression(expr, table)}" }
+    val groupByClause = _group map {
+      case (table, groupings) =>
+        s"GROUP BY ${groupings map (expr => s"${expression(expr, table)}") mkString ", "}"
+    }
     val orderByClause = _order map {
       case (table, orderings) =>
         s"ORDER BY ${orderings map { case OQLOrdering(expr, ordering) => s"${expression(expr, table)} $ordering" } mkString ", "}"
     }
 
     for (Join(t1, c1, t2, alias, c2) <- innerJoins)
-      line(s"JOIN $Q$t2$Q AS $Q$alias$Q ON $Q$t1$Q.$Q$c1$Q = $Q$alias$Q.$Q$c2$Q")
+      line(s"JOIN $q$t2$q AS $q$alias$q ON $q$t1$q.$q$c1$q = $q$alias$q.$q$c2$q")
 
     for (Join(t1, c1, t2, alias, c2) <- leftJoins)
-      line(s"LEFT JOIN $Q$t2$Q AS $Q$alias$Q ON $Q$t1$Q.$Q$c1$Q = $Q$alias$Q.$Q$c2$Q")
+      line(s"LEFT JOIN $q$t2$q AS $q$alias$q ON $q$t1$q.$q$c1$q = $q$alias$q.$q$c2$q")
 
     out()
     whereClause foreach line
+    groupByClause foreach line
     orderByClause foreach line
     _limit foreach (n => line(s"LIMIT $n"))
     _offset foreach (n => line(s"OFFSET $n"))

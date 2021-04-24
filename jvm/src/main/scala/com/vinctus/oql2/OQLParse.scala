@@ -64,7 +64,7 @@ object OQLParse {
 
   def select(ctx: LogicalExpressionContext): Option[OQLExpression] = if (ctx eq null) None else Some(ctx.e)
 
-  def group(ctx: GroupContext): Option[List[AttributeOQLExpression]] = if (ctx eq null) None else Some(ctx.es.toList)
+  def group(ctx: GroupContext): Option[List[OQLExpression]] = if (ctx eq null) None else Some(ctx.es.toList)
 
   def order(ctx: OrderContext): Option[List[OQLOrdering]] = if (ctx eq null) None else Some(ctx.os.toList)
 

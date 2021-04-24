@@ -10,9 +10,9 @@ grammar OQL;
 }
 
 command returns [OQLAST c]
-  : query
+  : query EOF
     { $c = $query.q; }
-  | insert
+  | insert EOF
     { $c = $insert.i; }
   ;
 
@@ -245,9 +245,9 @@ isNull
   : 'IS' 'NULL' | 'IS' 'NOT' 'NULL'
   ;
 
-group returns  [ListBuffer<AttributeOQLExpression> es]
-  : '(' qualifiedAttributeNames ')'
-    { $es = $qualifiedAttributeNames.es; }
+group returns  [ListBuffer<OQLExpression> es]
+  : '/' expressions '/'
+    { $es = $expressions.es; }
   ;
 
 order returns [ListBuffer<OQLOrdering> os]
