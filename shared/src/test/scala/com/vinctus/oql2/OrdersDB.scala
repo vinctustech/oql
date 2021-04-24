@@ -19,7 +19,7 @@ trait OrdersDB extends Test {
       |  advance_amount: decimal(6, 2)
       |  ord_date: text
       |  customer (cust_code): customer
-      |  agent (agent_code): agent
+      |  agent (agent_code): agent!
       |}
       |
       |entity customer {

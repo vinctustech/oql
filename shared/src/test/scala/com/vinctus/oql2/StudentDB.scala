@@ -17,8 +17,8 @@ trait StudentDB extends Test {
       |}
       |
       |entity enrollment (student_class) {
-      |  student (studentid): student
-      |  class (classid): class
+      |  student (studentid): student!
+      |  class (classid): class!
       |  year: integer
       |  semester: text
       |  grade: text

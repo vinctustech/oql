@@ -1,11 +1,14 @@
 package com.vinctus.oql2
 
+import xyz.hyperreal.pretty.prettyPrint
+
 import java.time.Instant
 import java.util.UUID
 import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
 import scala.annotation.tailrec
 import scala.collection.immutable.VectorMap
+import scala.reflect.internal.util.NoPosition.offset
 
 class OQL(dm: String, val ds: SQLDataSource) {
 
@@ -92,6 +95,7 @@ class OQL(dm: String, val ds: SQLDataSource) {
     val root: ResultNode = ResultNode(query, objectNode(query.project))
     val sqlBuilder = new SQLQueryBuilder(parms, oql, ds)
 
+//    println(prettyPrint(root))
     writeQuery(root, null, Left(sqlBuilder), oql, ds)
 
     val sql = sqlBuilder.toString
@@ -120,7 +124,7 @@ class OQL(dm: String, val ds: SQLDataSource) {
 
             array.toList
           case n @ ManyToOneNode(_, element) =>
-            if (resultSet.get(n.idx) == null) null
+            if (n.idx.isDefined && resultSet.get(n.idx.get) == null) null
             else buildResult(element, resultSet)
           case n @ OneToOneNode(query, element) =>
             val sequenceResultSet = resultSet.getResultSet(n.idx)
@@ -437,8 +441,13 @@ object OQL {
                              element) =>
         val alias = s"$table$$$name"
 
-        // ignore type because we only need it to check if the object is 'null'
-        n.idx = builder.left.toOption.get.projectValue(AttributeOQLExpression(List(Ident(name)), List((entity, attr))), table)._1
+        if (attr.required)
+          n.idx = None
+        else {
+          // ignore type because we only need it to check if the object is 'null'
+          n.idx = Some(builder.left.toOption.get.projectValue(AttributeOQLExpression(List(Ident(name)), List((entity, attr))), table)._1) // todo: can cause 'GROUP BY' to fail in Postgres: solution is to only add this project if the attribute is not marked "non null"
+        }
+
         builder.left.toOption.get.leftJoin(table, column, entity.table, alias, entity.pk.get.column)
         writeQuery(element, alias, builder, oql, ds)
         // todo: check query sections (i.e. order) that don't apply to many-to-one
@@ -527,7 +536,7 @@ object OQL {
 
 trait Node
 case class ResultNode(query: OQLQuery, element: Node) extends Node
-case class ManyToOneNode(query: OQLQuery, element: Node) extends Node { var idx: Int = _ }
+case class ManyToOneNode(query: OQLQuery, element: Node) extends Node { var idx: Option[Int] = _ }
 case class OneToOneNode(query: OQLQuery, element: Node) extends Node { var idx: Int = _ }
 case class OneToManyNode(query: OQLQuery, element: Node) extends Node { var idx: Int = _ }
 case class ManyToManyNode(query: OQLQuery, element: Node) extends Node { var idx: Int = _ }
