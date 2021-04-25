@@ -58,7 +58,7 @@ class DMLParser extends RegexParsers {
   def parseFromString[T](src: String, grammar: Parser[T]): T =
     parseAll(grammar, new CharSequenceReader(src)) match {
       case Success(tree, _)       => tree
-      case NoSuccess(error, rest) => problem(rest.pos, error)
+      case NoSuccess(error, rest) => problem(rest.pos, error, null)
     }
 
 }

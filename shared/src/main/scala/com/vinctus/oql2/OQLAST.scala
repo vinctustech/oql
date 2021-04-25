@@ -1,5 +1,7 @@
 package com.vinctus.oql2
 
+import scala.util.parsing.input.Position
+
 trait OQLAST
 
 case class OQLQuery(source: Ident,

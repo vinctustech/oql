@@ -1,6 +1,6 @@
-package com.vinctus.oql2
-
-//import com.vinctus.oql2.OQLParser.{ExpressionContext, GroupContext, LabelContext, LogicalExpressionContext, OrderContext, WhenContext}
+//package com.vinctus.oql2
+//
+//import com.vinctus.oql2.OQLParser.{GroupContext, LabelContext, LogicalExpressionContext, OrderContext, WhenContext}
 //import org.antlr.v4.runtime.{CharStreams, CommonTokenStream, ConsoleErrorListener}
 //
 //import scala.collection.mutable

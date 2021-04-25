@@ -1,5 +1,7 @@
 package com.vinctus
 
+import scala.util.parsing.input.Position
+
 package object oql2 {
 
   var parsingError: Boolean = _
@@ -12,20 +14,24 @@ package object oql2 {
   }
 
   def printError(pos: Position, msg: String, input: String): Null = {
-    if (pos eq null) {
+    if (pos eq null)
       Console.err.println(msg)
-      null
-    } else
-      printError(pos.line, pos.col, msg, input)
-  }
+    else if (pos.line == 1)
+      Console.err.println(s"$msg\n${pos.longString}")
+    else
+      Console.err.println(s"${pos.line}: $msg\n${pos.longString}")
+//      printError(pos.line, pos.col, msg, input)
 
-  def printError(line: Int, charPositionInLine: Int, msg: String, input: String): Null = {
-    Console.err.println(s"error on line $line, column ${charPositionInLine + 1}: $msg")
-    Console.err.println("  " ++ io.Source.fromString(input).getLines().drop(line - 1).next())
-    Console.err.println("  " ++ " " * charPositionInLine :+ '^')
-    parsingError = true
     null
   }
+
+//  def printError(line: Int, charPositionInLine: Int, msg: String, input: String): Null = {
+//    Console.err.println(s"error on line $line, column ${charPositionInLine + 1}: $msg")
+//    Console.err.println("  " ++ io.Source.fromString(input).getLines().drop(line - 1).next())
+//    Console.err.println("  " ++ " " * charPositionInLine :+ '^')
+//    parsingError = true
+//    null
+//  }
 
   type OBJECT = Map[String, Any]
 

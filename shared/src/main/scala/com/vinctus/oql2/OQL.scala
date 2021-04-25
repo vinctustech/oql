@@ -1,5 +1,6 @@
 package com.vinctus.oql2
 
+import org.checkerframework.checker.units.qual.m
 import xyz.hyperreal.pretty.prettyPrint
 
 import java.time.Instant
@@ -15,11 +16,15 @@ class OQL(dm: String, val ds: SQLDataSource) {
 
   private var _showQuery = false
 
-  val model: DataModel =
-    DMLParse(dm) match {
-      case None              => sys.error("error building data model")
-      case Some(m: DMLModel) => new DataModel(m, dm)
-    }
+  val model: DataModel = {
+    val p = new DMLParser()
+
+    new DataModel(p.parseFromString(dm, p.model), dm)
+  }
+//    DMLParse(dm) match {
+//      case None              => sys.error("error building data model")
+//      case Some(m: DMLModel) => new DataModel(m, dm)
+//    }
 
   def connect: OQLConnection = ds.connect
 

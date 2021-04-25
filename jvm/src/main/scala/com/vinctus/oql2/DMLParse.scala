@@ -1,5 +1,5 @@
-package com.vinctus.oql2
-
+//package com.vinctus.oql2
+//
 //import com.vinctus.oql2.DMLParser.{ActualNameContext, AttributeNameContext}
 //import org.antlr.v4.runtime.{CharStreams, CommonTokenStream, ConsoleErrorListener}
 //
