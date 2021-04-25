@@ -1,5 +1,7 @@
 package com.vinctus.oql2
 
+import com.vinctus.oql2.StarOQLProject.label
+
 import scala.util.matching.Regex
 import scala.util.parsing.combinator.{PackratParsers, RegexParsers}
 import scala.util.parsing.input.{CharSequenceReader, Position, Positional}
@@ -30,7 +32,7 @@ object OQLParser extends RegexParsers with PackratParsers {
     opt(label) ~ ident ~ "(" ~ argument ~ ")" ^^ {
       case None ~ f ~ _ ~ StarOQLExpression ~ _ => ExpressionOQLProject(f, ApplyOQLExpression(f, List(StarOQLExpression)))
       case None ~ f ~ _ ~ (a @ AttributeOQLExpression(ids, _)) ~ _ =>
-        ExpressionOQLProject(Ident(f.s ++ ids.head.s, f.pos), ApplyOQLExpression(f, List(a)))
+        ExpressionOQLProject(Ident(s"${f.s}_${ids.head.s}", f.pos), ApplyOQLExpression(f, List(a)))
       case Some(l) ~ f ~ _ ~ StarOQLExpression ~ _                    => ExpressionOQLProject(l, ApplyOQLExpression(f, List(StarOQLExpression)))
       case Some(l) ~ f ~ _ ~ (a @ AttributeOQLExpression(ids, _)) ~ _ => ExpressionOQLProject(l, ApplyOQLExpression(f, List(a)))
     } |
