@@ -1,9 +1,10 @@
 package com.vinctus.oql2
 
 import com.vinctus.oql2.StarOQLProject.label
-import org.checkerframework.checker.units.qual.s
+import org.checkerframework.checker.units.qual.{g, s}
 import sun.jvm.hotspot.HelloWorld.e
 
+import scala.Seq
 import scala.util.matching.Regex
 import scala.util.parsing.combinator.{PackratParsers, RegexParsers}
 import scala.util.parsing.input.{CharSequenceReader, Position, Positional}
@@ -18,7 +19,7 @@ object OQLParser extends RegexParsers with PackratParsers {
 
   lazy val query: PackratParser[OQLQuery] =
     entityName ~ project ~ opt("[" ~> logicalExpression <~ "]") ~ opt(group) ~ opt(order) ~ restrict ^^ {
-      case e ~ p ~ s ~ g ~ o ~ r => OQLQuery(e, null, null, p, s, g, o, r.limit, r.offset)
+      case e ~ p ~ s ~ g ~ o ~ Seq(lim, off) => OQLQuery(e, null, null, p, s, g, o, lim, off)
     }
 
   lazy val project: PackratParser[List[OQLProject]] =
@@ -30,7 +31,7 @@ object OQLParser extends RegexParsers with PackratParsers {
 
   lazy val attributeProject: PackratParser[OQLProject] =
     opt(label) ~ ident ~ "(" ~ argument ~ ")" ^^ {
-      case None ~ f ~ _ ~ StarOQLExpression ~ _                       => ExpressionOQLProject(f, StarOQLExpression)
+      case None ~ f ~ _ ~ StarOQLExpression ~ _                       => ExpressionOQLProject(f, ApplyOQLExpression(f, List(StarOQLExpression)))
       case None ~ f ~ _ ~ (a @ AttributeOQLExpression(ids, _)) ~ _    => ExpressionOQLProject(Ident(ids.head.s, ids.head.pos), a)
       case Some(l) ~ f ~ _ ~ StarOQLExpression ~ _                    => ExpressionOQLProject(l, StarOQLExpression)
       case Some(l) ~ f ~ _ ~ (a @ AttributeOQLExpression(ids, _)) ~ _ => ExpressionOQLProject(l, a)
@@ -65,6 +66,11 @@ object OQLParser extends RegexParsers with PackratParsers {
           }
         )
     }
+
+  lazy val restrict: PackratParser[Seq[Option[Int]]] =
+    "|" ~> integer ~ opt("," ~> integer) <~ "|" ^^ { case l ~ o => Seq(Some(l), o) } |
+      "|" ~> "," ~> integer <~ "|" ^^ (o => Seq(None, Some(o))) |
+      success(Seq(None, None))
 
   lazy val expressions: PackratParser[List[OQLExpression]] = rep1sep(expression, ",")
 
