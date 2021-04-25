@@ -35,10 +35,10 @@ case class InfixOQLExpression(left: OQLExpression, op: String, right: OQLExpress
 case class PrefixOQLExpression(op: String, expr: OQLExpression) extends OQLExpression
 case class PostfixOQLExpression(expr: OQLExpression, op: String) extends OQLExpression
 case class BetweenOQLExpression(expr: OQLExpression, op: String, lower: OQLExpression, upper: OQLExpression) extends OQLExpression
-case class FloatOQLExpression(n: Double, pos: Position) extends OQLExpression
-case class IntegerOQLExpression(n: Int, pos: Position) extends OQLExpression
-case class LiteralOQLExpression(s: String, pos: Position) extends OQLExpression
-case class BooleanOQLExpression(b: String, pos: Position) extends OQLExpression
+case class FloatOQLExpression(n: Double) extends OQLExpression
+case class IntegerOQLExpression(n: Int) extends OQLExpression
+case class LiteralOQLExpression(s: String) extends OQLExpression
+case class BooleanOQLExpression(b: String) extends OQLExpression
 case class AttributeOQLExpression(ids: List[Ident], var dmrefs: List[(Entity, Attribute)] = null) extends OQLExpression
 case class ReferenceOQLExpression(ids: List[Ident]) extends OQLExpression
 case class ParameterOQLExpression(p: Ident) extends OQLExpression

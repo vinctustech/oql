@@ -1,5 +1,6 @@
 package com.vinctus.oql2
 
+import com.vinctus.oql2.OQLParser.logicalExpression
 import com.vinctus.oql2.StarOQLProject.label
 import org.checkerframework.checker.units.qual.{g, s}
 import sun.jvm.hotspot.HelloWorld.e
@@ -43,7 +44,21 @@ object OQLParser extends RegexParsers with PackratParsers {
       opt(label) ~ attributeExpression ^^ {
         case None ~ a    => ExpressionOQLProject(a.ids.head, a)
         case Some(l) ~ a => ExpressionOQLProject(l, a)
+      } |
+      opt(label) ~ ("&" ~> attributeName) ^^ {
+        case None ~ a    => ExpressionOQLProject(a, ReferenceOQLExpression(List(a)))
+        case Some(l) ~ a => ExpressionOQLProject(l, ReferenceOQLExpression(List(a)))
+      } |
+      opt(label) ~ parameterExpression ^^ {
+        case None ~ e    => ExpressionOQLProject(e.p, e)
+        case Some(l) ~ e => ExpressionOQLProject(l, e)
+      } |
+      opt(label) ~ query ^^ {
+        case None ~ q    => QueryOQLProject(q.source, q)
+        case Some(l) ~ q => QueryOQLProject(l, q)
       }
+
+  lazy val parameterExpression: OQLParser.Parser[ParameterOQLExpression] = ":" ~> ident ^^ ParameterOQLExpression
 
   lazy val label: OQLParser.Parser[Ident] = ident <~ ":"
 
@@ -59,7 +74,9 @@ object OQLParser extends RegexParsers with PackratParsers {
   lazy val attributeExpression: PackratParser[AttributeOQLExpression] = ident ^^ (id => AttributeOQLExpression(List(id)))
 
   lazy val qualifiedAttributeExpression: PackratParser[OQLExpression] =
-    rep1sep(attributeName, ".") ^^ (ids => AttributeOQLExpression(ids))
+    idents ^^ (ids => AttributeOQLExpression(ids))
+
+  lazy val idents: OQLParser.Parser[List[Ident]] = rep1sep(attributeName, ".")
 
   lazy val starExpression: PackratParser[OQLExpression] = "*" ^^^ StarOQLExpression
 
@@ -105,8 +122,22 @@ object OQLParser extends RegexParsers with PackratParsers {
       primary
 
   lazy val primary: PackratParser[OQLExpression] =
-    pos ~ integer ^^ { case p ~ n => IntegerOQLExpression(n, p) } |
-      pos ~ float ^^ { case p ~ n => FloatOQLExpression(n, p) }
+    integer ^^ IntegerOQLExpression |
+      float ^^ FloatOQLExpression |
+      string ^^ LiteralOQLExpression |
+      starExpression |
+      ("TRUE" | "FALSE") ^^ BooleanOQLExpression |
+      applyExpression |
+      parameterExpression |
+      qualifiedAttributeExpression |
+      "&" ~> idents ^^ ReferenceOQLExpression |
+      caseExpression
+
+  lazy val caseExpression: OQLParser.Parser[CaseOQLExpression] =
+    "CASE" ~> rep1(when) ~ opt("ELSE" ~> expression) <~ "END" ^^ { case ws ~ e => CaseOQLExpression(ws, e) }
+
+  lazy val when: OQLParser.Parser[OQLWhen] =
+    kw("WHEN") ~ logicalExpression ~ kw("THEN") ~ expression ^^ { case _ ~ l ~ _ ~ e => OQLWhen(l, e) }
 
   lazy val float: PackratParser[Double] = """[0-9]*\.[0-9]+([eE][+-]?[0-9]+)?""".r ^^ (_.toDouble)
 
@@ -116,6 +147,14 @@ object OQLParser extends RegexParsers with PackratParsers {
     pos ~ """[a-zA-Z_$][a-zA-Z0-9_$]*""".r ^^ {
       case p ~ s => Ident(s, p)
     }
+
+  lazy val singleQuoteString: PackratParser[String] =
+    """'(?:''|[^'\x00-\x1F\x7F\\]|\\[\\'"bfnrt]|\\u[a-fA-F0-9]{4})*'""".r ^^ (s => s.substring(1, s.length - 1))
+
+  lazy val doubleQuoteString: PackratParser[String] =
+    """"(?:""|[^"\x00-\x1F\x7F\\]|\\[\\'"bfnrt]|\\u[a-fA-F0-9]{4})*"""".r ^^ (s => s.substring(1, s.length - 1))
+
+  lazy val string: PackratParser[String] = singleQuoteString | doubleQuoteString
 
   def parseQuery(input: String): OQLQuery =
     parseAll(phrase(query), new PackratReader(new CharSequenceReader(input))) match {
