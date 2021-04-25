@@ -45,20 +45,20 @@ class DMLParser extends RegexParsers {
         case _ ~ _ ~ p ~ _ ~ s ~ _ => DMLParametricDataType("decimal", List(p, s))
       } |
       ident ^^ DMLManyToOneType |
+      "[" ~ ident ~ "]" ~ "(" ~ ident ~ ")" ^^ {
+        case _ ~ n ~ _ ~ _ ~ l ~ _ => DMLManyToManyType(n, l)
+      } |
       "[" ~ ident ~ "]" ~ opt("." ~> ident) ^^ {
         case _ ~ n ~ _ ~ t => DMLOneToManyType(n, t)
       } |
       "<" ~ ident ~ ">" ~ opt("." ~> ident) ^^ {
         case _ ~ n ~ _ ~ t => DMLOneToOneType(n, t)
-      } |
-      "[" ~ ident ~ "]" ~ "(" ~ ident ~ ")" ^^ {
-        case _ ~ n ~ _ ~ _ ~ l ~ _ => DMLManyToManyType(n, l)
       }
 
-  def parseFromString[T](src: String, grammar: Parser[T]): T =
-    parseAll(grammar, new CharSequenceReader(src)) match {
+  def parseModel(src: String): DMLModel =
+    parseAll(model, new CharSequenceReader(src)) match {
       case Success(tree, _)       => tree
-      case NoSuccess(error, rest) => problem(rest.pos, error, null)
+      case NoSuccess(error, rest) => problem(rest.pos, error, src)
     }
 
 }

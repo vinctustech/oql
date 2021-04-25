@@ -19,7 +19,7 @@ class OQL(dm: String, val ds: SQLDataSource) {
   val model: DataModel = {
     val p = new DMLParser()
 
-    new DataModel(p.parseFromString(dm, p.model), dm)
+    new DataModel(p.parseModel(dm), dm)
   }
 //    DMLParse(dm) match {
 //      case None              => sys.error("error building data model")
@@ -41,6 +41,7 @@ class OQL(dm: String, val ds: SQLDataSource) {
   def entity(name: String): Entity = model.entities(name)
 
   def parseQuery(oql: String): OQLQuery = {
+    println(oql)
     val query = OQLParser.parseQuery(oql)
 
     queryProjects(None, query, model, ds, oql)
