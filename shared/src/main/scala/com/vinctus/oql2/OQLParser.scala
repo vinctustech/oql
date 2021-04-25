@@ -199,13 +199,13 @@ object OQLParser extends RegexParsers with PackratParsers {
   def parseQuery(input: String): OQLQuery =
     parseAll(phrase(query), new PackratReader(new CharSequenceReader(input))) match {
       case Success(result, _)     => result
-      case NoSuccess(error, rest) => sys.error(s"$error: ${rest.pos}")
+      case NoSuccess(error, rest) => problem(rest.pos, error, input)
     }
 
   def parseBooleanExpression(input: String): OQLExpression =
     parseAll(phrase(booleanExpression), new PackratReader(new CharSequenceReader(input))) match {
       case Success(result, _)     => result
-      case NoSuccess(error, rest) => sys.error(s"$error: ${rest.pos}")
+      case NoSuccess(error, rest) => problem(rest.pos, error, input)
     }
 
 }

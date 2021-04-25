@@ -41,7 +41,6 @@ class OQL(dm: String, val ds: SQLDataSource) {
   def entity(name: String): Entity = model.entities(name)
 
   def parseQuery(oql: String): OQLQuery = {
-    println(oql)
     val query = OQLParser.parseQuery(oql)
 
     queryProjects(None, query, model, ds, oql)
