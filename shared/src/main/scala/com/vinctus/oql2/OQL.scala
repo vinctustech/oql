@@ -1,6 +1,5 @@
 package com.vinctus.oql2
 
-import com.vinctus.oql2.OQLParser.{order, query}
 import xyz.hyperreal.pretty.prettyPrint
 
 import java.time.Instant
@@ -360,10 +359,19 @@ object OQL {
 
     query.project foreach {
       case p @ QueryOQLProject(label, query) =>
-        queryProjects(Some(entity), query, model, ds, oql)
-        query.select foreach (decorate(query.entity, _, model, ds, oql))
-        query.order foreach (_ foreach { case OQLOrdering(expr, _) => decorate(query.entity, expr, model, ds, oql) })
-        map(label.s) = p
+        map(label.s) = entity.attributes get query.source.s match {
+          case Some(Attribute(name, column, pk, required, typ: DataType)) =>
+            val attr = AttributeOQLExpression(List(query.source), null)
+
+            decorate(entity, attr, model, ds, oql)
+            ExpressionOQLProject(label, attr)
+          case Some(_) =>
+            queryProjects(Some(entity), query, model, ds, oql)
+            query.select foreach (decorate(query.entity, _, model, ds, oql))
+            query.order foreach (_ foreach { case OQLOrdering(expr, _) => decorate(query.entity, expr, model, ds, oql) })
+            p
+          case None => problem(query.source.pos, s"entity '${entity.name}' does not have attribute '${query.source.s}'", oql)
+        }
       case StarOQLProject =>
         entity.attributes.values foreach {
           case attr @ Attribute(name, column, pk, required, typ) if typ.isDataType =>

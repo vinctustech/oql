@@ -1,11 +1,5 @@
 package com.vinctus.oql2
 
-import com.vinctus.oql2.OQLParser.{booleanExpression, expressions, query}
-import com.vinctus.oql2.StarOQLProject.label
-import org.checkerframework.checker.units.qual.{g, s}
-import sun.jvm.hotspot.HelloWorld.e
-
-import scala.Seq
 import scala.util.matching.Regex
 import scala.util.parsing.combinator.{PackratParsers, RegexParsers}
 import scala.util.parsing.input.{CharSequenceReader, Position, Positional}
@@ -43,6 +37,10 @@ object OQLParser extends RegexParsers with PackratParsers {
       label ~ applyExpression ^^ { case l ~ e              => ExpressionOQLProject(l, e) } |
       label ~ qualifiedAttributeExpression ^^ { case l ~ e => ExpressionOQLProject(l, e) } |
       label ~ ("(" ~> expression <~ ")") ^^ { case l ~ e   => ExpressionOQLProject(l, e) } |
+      opt(label) ~ query ^^ {
+        case None ~ q    => QueryOQLProject(q.source, q)
+        case Some(l) ~ q => QueryOQLProject(l, q)
+      } |
       opt(label) ~ attributeExpression ^^ {
         case None ~ a    => ExpressionOQLProject(a.ids.head, a)
         case Some(l) ~ a => ExpressionOQLProject(l, a)
@@ -54,12 +52,7 @@ object OQLParser extends RegexParsers with PackratParsers {
       opt(label) ~ parameterExpression ^^ {
         case None ~ e    => ExpressionOQLProject(e.p, e)
         case Some(l) ~ e => ExpressionOQLProject(l, e)
-      } |
-      opt(label) ~ query ^^ {
-        case None ~ q    => QueryOQLProject(q.source, q)
-        case Some(l) ~ q => QueryOQLProject(l, q)
       }
-
   lazy val parameterExpression: OQLParser.Parser[ParameterOQLExpression] = ":" ~> ident ^^ ParameterOQLExpression
 
   lazy val label: OQLParser.Parser[Ident] = ident <~ ":"
@@ -110,7 +103,7 @@ object OQLParser extends RegexParsers with PackratParsers {
   lazy val booleanExpression: PackratParser[OQLExpression] = orExpression
 
   lazy val orExpression: PackratParser[OQLExpression] =
-    orExpression ~ kw("AND") ~ andExpression ^^ { case l ~ _ ~ r => InfixOQLExpression(l, "AND", r) } |
+    orExpression ~ kw("OR") ~ andExpression ^^ { case l ~ _ ~ r => InfixOQLExpression(l, "OR", r) } |
       andExpression
 
   lazy val andExpression: PackratParser[OQLExpression] =
