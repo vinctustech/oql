@@ -2,6 +2,7 @@ package com.vinctus.oql2
 
 import com.vinctus.oql2.StarOQLProject.label
 import org.checkerframework.checker.units.qual.s
+import sun.jvm.hotspot.HelloWorld.e
 
 import scala.util.matching.Regex
 import scala.util.parsing.combinator.{PackratParsers, RegexParsers}
@@ -20,38 +21,56 @@ object OQLParser extends RegexParsers with PackratParsers {
       case e ~ p ~ s ~ g ~ o ~ r => OQLQuery(e, null, null, p, s, g, o, r.limit, r.offset)
     }
 
-  lazy val project: PackratParser[List[OQLProject]] = {
-  "{" ~ "*" ~ subtracts ~ rep1(attributeProject) ~ "}" ^^ {
-    case _ ~ _ ~ s ~ ps ~ _ => s.prepended(StarOQLProject).appendedAll(ps)
-  }
+  lazy val project: PackratParser[List[OQLProject]] =
+    "{" ~ "*" ~ subtracts ~ rep1(attributeProject) ~ "}" ^^ {
+      case _ ~ _ ~ s ~ ps ~ _ => s.prepended(StarOQLProject).appendedAll(ps)
+    }
 
   lazy val subtracts: PackratParser[List[OQLProject]] = rep("-" ~> attributeName ^^ SubtractOQLProject)
 
-    lazy val attributeProject: PackratParser[OQLProject] =
-      opt(label) ~ ident ~ "(" ~ argument ~ ")" ^^ {
-        case None ~ f ~ _ ~ StarOQLExpression ~ _ =>          ExpressionOQLProject(f,StarOQLExpression )
-        case None ~ f ~ _ ~ (a@AttributeOQLExpression(ids, _)) ~ _ =>          ExpressionOQLProject(Ident(ids.head.s, ids.head.pos),a )
-        case Some(l) ~ f ~ _ ~ StarOQLExpression ~ _ =>          ExpressionOQLProject(l,StarOQLExpression )
-        case Some(l) ~ f ~ _ ~ (a@AttributeOQLExpression(ids, _)) ~ _ =>          ExpressionOQLProject(l,a )
-  }
+  lazy val attributeProject: PackratParser[OQLProject] =
+    opt(label) ~ ident ~ "(" ~ argument ~ ")" ^^ {
+      case None ~ f ~ _ ~ StarOQLExpression ~ _                       => ExpressionOQLProject(f, StarOQLExpression)
+      case None ~ f ~ _ ~ (a @ AttributeOQLExpression(ids, _)) ~ _    => ExpressionOQLProject(Ident(ids.head.s, ids.head.pos), a)
+      case Some(l) ~ f ~ _ ~ StarOQLExpression ~ _                    => ExpressionOQLProject(l, StarOQLExpression)
+      case Some(l) ~ f ~ _ ~ (a @ AttributeOQLExpression(ids, _)) ~ _ => ExpressionOQLProject(l, a)
+    }
 
-    lazy val label = ident <~ ":"
+  lazy val label: OQLParser.Parser[Ident] = ident <~ ":"
 
-    lazy val argument: PackratParser[OQLExpression] =      attributeExpression | starExpression
+  lazy val argument: PackratParser[OQLExpression] = attributeExpression | starExpression
 
-    lazy val entityName: PackratParser[Ident] = ident
+  lazy val entityName: PackratParser[Ident] = ident
 
-    lazy val attributeName: PackratParser[Ident] = ident
+  lazy val attributeName: PackratParser[Ident] = ident
 
-    lazy val attributeExpression: PackratParser[OQLExpression] = ident ^^ (id => AttributeOQLExpression(List(id)))
+  lazy val attributeExpression: PackratParser[OQLExpression] = ident ^^ (id => AttributeOQLExpression(List(id)))
 
-    lazy val starExpression: PackratParser[OQLExpression] = "*" ^^^ StarOQLExpression
+  lazy val starExpression: PackratParser[OQLExpression] = "*" ^^^ StarOQLExpression
 
-    lazy val group
+  lazy val group: PackratParser[List[OQLExpression]] = "/" ~> expressions <~ "/"
 
-    lazy val logicalExpression: PackratParser[OQLExpression] = additive
+  lazy val order: PackratParser[List[OQLOrdering]] = "<" ~> rep1sep(ordering, ",") <~ ">"
 
-    lazy val expression: PackratParser[OQLExpression] = additive
+  lazy val ordering: PackratParser[OQLOrdering] =
+    expression ~ opt("ASC" | "DESC") ~ opt("NULLS" ~> ("FIRST" | "LAST")) ^^ {
+      case e ~ d ~ n =>
+        OQLOrdering(
+          e,
+          (d, n) match {
+            case (None, None) | (Some("ASC"), None) => "ASC NULLS FIRST"
+            case (None, Some(nulls))                => s"ASC NULLS ${nulls.toUpperCase}"
+            case (_, None)                          => "DESC NULLS LAST"
+            case (Some(dir), Some(nulls))           => s"${dir.toUpperCase} NULLS ${nulls.toUpperCase}"
+          }
+        )
+    }
+
+  lazy val expressions: PackratParser[List[OQLExpression]] = rep1sep(expression, ",")
+
+  lazy val logicalExpression: PackratParser[OQLExpression] = additive
+
+  lazy val expression: PackratParser[OQLExpression] = additive
 
   lazy val additive: PackratParser[OQLExpression] =
     additive ~ ("+" | "-") ~ multiplicative ^^ {
@@ -66,8 +85,8 @@ object OQLParser extends RegexParsers with PackratParsers {
       primary
 
   lazy val primary: PackratParser[OQLExpression] =
-    pos ~ integer ^^ {case p ~ n => IntegerOQLExpression(n, p)} |
-      pos ~ float ^^ {case p ~ n => FloatOQLExpression(n, p)}
+    pos ~ integer ^^ { case p ~ n => IntegerOQLExpression(n, p) } |
+      pos ~ float ^^ { case p ~ n => FloatOQLExpression(n, p) }
 
   lazy val float: PackratParser[Double] = """[0-9]*\.[0-9]+([eE][+-]?[0-9]+)?""".r ^^ (_.toDouble)
 
