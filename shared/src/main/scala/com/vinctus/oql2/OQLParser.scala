@@ -1,6 +1,6 @@
 package com.vinctus.oql2
 
-import com.vinctus.oql2.OQLParser.logicalExpression
+import com.vinctus.oql2.OQLParser.booleanExpression
 import com.vinctus.oql2.StarOQLProject.label
 import org.checkerframework.checker.units.qual.{g, s}
 import sun.jvm.hotspot.HelloWorld.e
@@ -19,7 +19,7 @@ object OQLParser extends RegexParsers with PackratParsers {
   lazy val command: PackratParser[OQLAST] = query //| insert
 
   lazy val query: PackratParser[OQLQuery] =
-    entityName ~ project ~ opt("[" ~> logicalExpression <~ "]") ~ opt(group) ~ opt(order) ~ restrict ^^ {
+    entityName ~ project ~ opt("[" ~> booleanExpression <~ "]") ~ opt(group) ~ opt(order) ~ restrict ^^ {
       case e ~ p ~ s ~ g ~ o ~ Seq(lim, off) => OQLQuery(e, null, null, p, s, g, o, lim, off)
     }
 
@@ -105,7 +105,26 @@ object OQLParser extends RegexParsers with PackratParsers {
 
   lazy val expressions: PackratParser[List[OQLExpression]] = rep1sep(expression, ",")
 
-  lazy val logicalExpression: PackratParser[OQLExpression] = additive
+  lazy val booleanExpression: PackratParser[OQLExpression] = orExpression
+
+  lazy val orExpression: PackratParser[OQLExpression] =
+    orExpression ~ kw("AND") ~ andExpression ^^ { case l ~ _ ~ r => InfixOQLExpression(l, "AND", r) } |
+      andExpression
+
+  lazy val andExpression: PackratParser[OQLExpression] =
+    andExpression ~ kw("AND") ~ notExpression ^^ { case l ~ _ ~ r => InfixOQLExpression(l, "AND", r) } |
+      notExpression
+
+  lazy val notExpression: PackratParser[OQLExpression] =
+    kw("NOT") ~> booleanPrimary ^^ (e => PrefixOQLExpression("NOT", e)) | booleanPrimary
+
+  lazy val booleanPrimary: PackratParser[OQLExpression] =
+    expression ~ comparison ~ expression ^^ { case l ~ c ~ r => InfixOQLExpression(l, c, r) }
+
+  lazy val comparison: PackratParser[String] =
+    ("<=" | ">=" | "<" | ">" | "=" | "!=" | kw("LIKE") | kw("ILIKE") | (kw("NOT") ~ kw("LIKE") ^^^ "NOT LIKE") | (kw("NOT") ~ kw("ILIKE") ^^^ "NOT ILIKE"))
+
+  lazy val booleanLiteral: PackratParser[OQLExpression] = ("TRUE" | "FALSE") ^^ BooleanOQLExpression
 
   lazy val expression: PackratParser[OQLExpression] = additive
 
@@ -126,18 +145,21 @@ object OQLParser extends RegexParsers with PackratParsers {
       float ^^ FloatOQLExpression |
       string ^^ LiteralOQLExpression |
       starExpression |
-      ("TRUE" | "FALSE") ^^ BooleanOQLExpression |
+      booleanLiteral |
       applyExpression |
       parameterExpression |
       qualifiedAttributeExpression |
       "&" ~> idents ^^ ReferenceOQLExpression |
-      caseExpression
+      caseExpression |
+      "-" ~> primary ^^ (e => PrefixOQLExpression("-", e)) |
+      "(" ~> query <~ ")" ^^ QueryOQLExpression |
+      "(" ~> expression <~ ")" ^^ GroupedOQLExpression
 
   lazy val caseExpression: OQLParser.Parser[CaseOQLExpression] =
     "CASE" ~> rep1(when) ~ opt("ELSE" ~> expression) <~ "END" ^^ { case ws ~ e => CaseOQLExpression(ws, e) }
 
   lazy val when: OQLParser.Parser[OQLWhen] =
-    kw("WHEN") ~ logicalExpression ~ kw("THEN") ~ expression ^^ { case _ ~ l ~ _ ~ e => OQLWhen(l, e) }
+    kw("WHEN") ~ booleanExpression ~ kw("THEN") ~ expression ^^ { case _ ~ l ~ _ ~ e => OQLWhen(l, e) }
 
   lazy val float: PackratParser[Double] = """[0-9]*\.[0-9]+([eE][+-]?[0-9]+)?""".r ^^ (_.toDouble)
 

@@ -142,17 +142,6 @@ when returns [OQLWhen w]
     { $w = new OQLWhen($logicalExpression.e, $expression.e); }
   ;
 
-logicalPrimary returns [OQLExpression e]
-  : b=('TRUE' | 'FALSE')
-    { $e = new BooleanOQLExpression($b.text, new Position($b.line, $b.pos)); }
-  | parameter
-    { $e = $parameter.e; }
-  | qualifiedAttributeName
-    { $e = $qualifiedAttributeName.e; }
-  | '(' logicalExpression ')'
-    { $e = new GroupedOQLExpression($logicalExpression.e); }
-  ;
-
 qualifiedAttributeName returns [AttributeOQLExpression e]
   : identifiers
     { $e = new AttributeOQLExpression($identifiers.ids.toList(), null); }
@@ -227,6 +216,17 @@ comparisonExpression returns [OQLExpression e]
     { $e = new ExistsOQLExpression($query.q); }
   | ex=logicalPrimary
     { $e = $ex.e; }
+  ;
+
+logicalPrimary returns [OQLExpression e]
+  : b=('TRUE' | 'FALSE')
+    { $e = new BooleanOQLExpression($b.text, new Position($b.line, $b.pos)); }
+  | parameter
+    { $e = $parameter.e; }
+  | qualifiedAttributeName
+    { $e = $qualifiedAttributeName.e; }
+  | '(' logicalExpression ')'
+    { $e = new GroupedOQLExpression($logicalExpression.e); }
   ;
 
 in
