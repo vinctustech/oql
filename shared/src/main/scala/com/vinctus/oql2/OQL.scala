@@ -1,5 +1,6 @@
 package com.vinctus.oql2
 
+import com.vinctus.oql2.OQLParser.{order, query}
 import xyz.hyperreal.pretty.prettyPrint
 
 import java.time.Instant
@@ -39,37 +40,32 @@ class OQL(dm: String, val ds: SQLDataSource) {
 
   def entity(name: String): Entity = model.entities(name)
 
-  def parseQuery(oql: String): OQLQuery =
-    OQLParse(oql) match {
-      case None => sys.error("error parsing query")
-      case Some(query: OQLQuery) =>
-        queryProjects(None, query, model, ds, oql)
-        query.select foreach (decorate(query.entity, _, model, ds, oql))
-        query.group foreach (_ foreach (decorate(query.entity, _, model, ds, oql)))
-        query.order foreach (_ foreach { case OQLOrdering(expr, _) => decorate(query.entity, expr, model, ds, oql) })
-        query
-    }
+  def parseQuery(oql: String): OQLQuery = {
+    val query = OQLParser.parseQuery(oql)
+
+    queryProjects(None, query, model, ds, oql)
+    query.select foreach (decorate(query.entity, _, model, ds, oql))
+    query.group foreach (_ foreach (decorate(query.entity, _, model, ds, oql)))
+    query.order foreach (_ foreach { case OQLOrdering(expr, _) => decorate(query.entity, expr, model, ds, oql) })
+    query
+  }
 
   def parseCondition(cond: String, entity: Entity): OQLExpression = {
-    OQLParse.logicalExpression(cond) match {
-      case None => sys.error("error parsing condition")
-      case Some(expr: OQLExpression) =>
-        decorate(entity, expr, model, ds, cond)
-        expr
-    }
+    val expr = OQLParser.parseBooleanExpression(cond)
+
+    decorate(entity, expr, model, ds, cond)
+    expr
   }
 
   def count(oql: String): Int = {
-    OQLParse(oql) match {
-      case None => sys.error("error parsing query")
-      case Some(query: OQLQuery) =>
-        query.project = List(ExpressionOQLProject(Ident("count", null), ApplyOQLExpression(Ident("count", null), List(StarOQLExpression))))
-        queryProjects(None, query, model, ds, oql)
-        query.select foreach (decorate(query.entity, _, model, ds, oql))
-        query.group foreach (_ foreach (decorate(query.entity, _, model, ds, oql)))
-        query.copy(order = None)
-        count(query, oql)
-    }
+    val query = OQLParser.parseQuery(oql)
+
+    query.project = List(ExpressionOQLProject(Ident("count", null), ApplyOQLExpression(Ident("count", null), List(StarOQLExpression))))
+    queryProjects(None, query, model, ds, oql)
+    query.select foreach (decorate(query.entity, _, model, ds, oql))
+    query.group foreach (_ foreach (decorate(query.entity, _, model, ds, oql)))
+    query.copy(order = None)
+    count(query, oql)
   }
 
   def count(query: OQLQuery, oql: String): Int = {

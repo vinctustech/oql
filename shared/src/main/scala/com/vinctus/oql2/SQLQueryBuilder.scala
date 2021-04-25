@@ -121,10 +121,10 @@ class SQLQueryBuilder(val parms: Parameters, oql: String, ds: SQLDataSource, val
       case PostfixOQLExpression(expr, op)                    => s"${expression(expr, table)} $op"
       case BetweenOQLExpression(expr, op, lower, upper) =>
         s"${expression(expr, table)} $op ${expression(lower, table)} AND ${expression(upper, table)}"
-      case GroupedOQLExpression(expr)   => s"(${expression(expr, table)})"
-      case FloatOQLExpression(n, pos)   => n.toString
-      case IntegerOQLExpression(n, pos) => n.toString
-      case LiteralOQLExpression(s, pos) => s"'${quote(s)}'"
+      case GroupedOQLExpression(expr) => s"(${expression(expr, table)})"
+      case FloatOQLExpression(n)      => n.toString
+      case IntegerOQLExpression(n)    => n.toString
+      case LiteralOQLExpression(s)    => s"'${quote(s)}'"
       case AttributeOQLExpression(ids, dmrefs) =>
         var alias = table
 
@@ -135,7 +135,7 @@ class SQLQueryBuilder(val parms: Parameters, oql: String, ds: SQLDataSource, val
         }
 
         s"$q$alias$q.$q${dmrefs.last._2.column}$q"
-      case BooleanOQLExpression(b, pos) => b
+      case BooleanOQLExpression(b) => b
       case CaseOQLExpression(whens, els) =>
         s"CASE ${whens map {
           case OQLWhen(cond, expr) =>

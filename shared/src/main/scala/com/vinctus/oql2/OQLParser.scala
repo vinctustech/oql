@@ -1,6 +1,6 @@
 package com.vinctus.oql2
 
-import com.vinctus.oql2.OQLParser.booleanExpression
+import com.vinctus.oql2.OQLParser.{booleanExpression, expressions, query}
 import com.vinctus.oql2.StarOQLProject.label
 import org.checkerframework.checker.units.qual.{g, s}
 import sun.jvm.hotspot.HelloWorld.e
@@ -24,9 +24,11 @@ object OQLParser extends RegexParsers with PackratParsers {
     }
 
   lazy val project: PackratParser[List[OQLProject]] =
-    "{" ~ "*" ~ subtracts ~ rep1(attributeProject) ~ "}" ^^ {
+    "{" ~ "*" ~ subtracts ~ rep(attributeProject) ~ "}" ^^ {
       case _ ~ _ ~ s ~ ps ~ _ => s.prepended(StarOQLProject).appendedAll(ps)
-    }
+    } |
+      "{" ~> rep1(attributeProject) <~ "}" |
+      success(List(StarOQLProject))
 
   lazy val subtracts: PackratParser[List[OQLProject]] = rep("-" ~> attributeName ^^ SubtractOQLProject)
 
@@ -119,7 +121,23 @@ object OQLParser extends RegexParsers with PackratParsers {
     kw("NOT") ~> booleanPrimary ^^ (e => PrefixOQLExpression("NOT", e)) | booleanPrimary
 
   lazy val booleanPrimary: PackratParser[OQLExpression] =
-    expression ~ comparison ~ expression ^^ { case l ~ c ~ r => InfixOQLExpression(l, c, r) }
+    expression ~ comparison ~ expression ^^ { case l ~ c ~ r => InfixOQLExpression(l, c, r) } |
+      expression ~ ((kw("NOT") ~ kw("BETWEEN") ^^^ "NOT BETWEEN") | kw("BETWEEN")) ~ expression ~ kw("AND") ~ expression ^^ {
+        case e ~ b ~ l ~ _ ~ u => BetweenOQLExpression(e, b, l, u)
+      } |
+      expression ~ isNull ^^ { case e ~ n                                => PostfixOQLExpression(e, n) } |
+      expression ~ in ~ ("(" ~> expressions <~ ")") ^^ { case e ~ i ~ es => InArrayOQLExpression(e, i, es) } |
+      expression ~ in ~ parameterExpression ^^ { case e ~ i ~ p          => InParameterOQLExpression(e, i, p) } |
+      expression ~ in ~ ("(" ~> query <~ ")") ^^ { case e ~ i ~ q        => InQueryOQLExpression(e, i, q) } |
+      kw("EXISTS") ~> "(" ~> query <~ ")" ^^ ExistsOQLExpression |
+      booleanLiteral |
+      parameterExpression |
+      qualifiedAttributeExpression |
+      "(" ~> booleanExpression <~ ")" ^^ GroupedOQLExpression
+
+  lazy val isNull: PackratParser[String] = kw("IS") ~ kw("NULL") ^^^ "IS NULL" | kw("IS") ~ kw("NOT") ~ kw("NULL") ^^^ "IS NOT NULL"
+
+  lazy val in: PackratParser[String] = kw("NOT") ~ kw("IN") ^^^ "NOT IN" | kw("IN")
 
   lazy val comparison: PackratParser[String] =
     ("<=" | ">=" | "<" | ">" | "=" | "!=" | kw("LIKE") | kw("ILIKE") | (kw("NOT") ~ kw("LIKE") ^^^ "NOT LIKE") | (kw("NOT") ~ kw("ILIKE") ^^^ "NOT ILIKE"))
@@ -180,6 +198,12 @@ object OQLParser extends RegexParsers with PackratParsers {
 
   def parseQuery(input: String): OQLQuery =
     parseAll(phrase(query), new PackratReader(new CharSequenceReader(input))) match {
+      case Success(result, _)     => result
+      case NoSuccess(error, rest) => sys.error(s"$error: ${rest.pos}")
+    }
+
+  def parseBooleanExpression(input: String): OQLExpression =
+    parseAll(phrase(booleanExpression), new PackratReader(new CharSequenceReader(input))) match {
       case Success(result, _)     => result
       case NoSuccess(error, rest) => sys.error(s"$error: ${rest.pos}")
     }
