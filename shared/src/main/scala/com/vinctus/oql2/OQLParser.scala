@@ -31,11 +31,19 @@ object OQLParser extends RegexParsers with PackratParsers {
 
   lazy val attributeProject: PackratParser[OQLProject] =
     opt(label) ~ ident ~ "(" ~ argument ~ ")" ^^ {
-      case None ~ f ~ _ ~ StarOQLExpression ~ _                       => ExpressionOQLProject(f, ApplyOQLExpression(f, List(StarOQLExpression)))
-      case None ~ f ~ _ ~ (a @ AttributeOQLExpression(ids, _)) ~ _    => ExpressionOQLProject(Ident(ids.head.s, ids.head.pos), a)
-      case Some(l) ~ f ~ _ ~ StarOQLExpression ~ _                    => ExpressionOQLProject(l, StarOQLExpression)
-      case Some(l) ~ f ~ _ ~ (a @ AttributeOQLExpression(ids, _)) ~ _ => ExpressionOQLProject(l, a)
-    }
+      case None ~ f ~ _ ~ StarOQLExpression ~ _ => ExpressionOQLProject(f, ApplyOQLExpression(f, List(StarOQLExpression)))
+      case None ~ f ~ _ ~ (a @ AttributeOQLExpression(ids, _)) ~ _ =>
+        ExpressionOQLProject(Ident(f.s ++ ids.head.s, f.pos), ApplyOQLExpression(f, List(a)))
+      case Some(l) ~ f ~ _ ~ StarOQLExpression ~ _                    => ExpressionOQLProject(l, ApplyOQLExpression(f, List(StarOQLExpression)))
+      case Some(l) ~ f ~ _ ~ (a @ AttributeOQLExpression(ids, _)) ~ _ => ExpressionOQLProject(l, ApplyOQLExpression(f, List(a)))
+    } |
+      label ~ applyExpression ^^ { case l ~ e              => ExpressionOQLProject(l, e) } |
+      label ~ qualifiedAttributeExpression ^^ { case l ~ e => ExpressionOQLProject(l, e) } |
+      label ~ ("(" ~> expression <~ ")") ^^ { case l ~ e   => ExpressionOQLProject(l, e) } |
+      opt(label) ~ attributeExpression ^^ {
+        case None ~ a    => ExpressionOQLProject(a.ids.head, a)
+        case Some(l) ~ a => ExpressionOQLProject(l, a)
+      }
 
   lazy val label: OQLParser.Parser[Ident] = ident <~ ":"
 
@@ -45,7 +53,13 @@ object OQLParser extends RegexParsers with PackratParsers {
 
   lazy val attributeName: PackratParser[Ident] = ident
 
-  lazy val attributeExpression: PackratParser[OQLExpression] = ident ^^ (id => AttributeOQLExpression(List(id)))
+  lazy val applyExpression: PackratParser[OQLExpression] =
+    ident ~ ("(" ~> expressions <~ ")") ^^ { case f ~ as => ApplyOQLExpression(f, as) }
+
+  lazy val attributeExpression: PackratParser[AttributeOQLExpression] = ident ^^ (id => AttributeOQLExpression(List(id)))
+
+  lazy val qualifiedAttributeExpression: PackratParser[OQLExpression] =
+    rep1sep(attributeName, ".") ^^ (ids => AttributeOQLExpression(ids))
 
   lazy val starExpression: PackratParser[OQLExpression] = "*" ^^^ StarOQLExpression
 
