@@ -2,7 +2,7 @@ package com.vinctus.oql2
 
 trait PGDataSource extends SQLDataSource {
 
-  val domain: String
+  val host: String
   val port: Int
   val database: String
   val user: String

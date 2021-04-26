@@ -1,9 +1,12 @@
 package com.vinctus.oql2
 
-object Main extends App with BookDB {
+object Main extends App /*with BookDB*/ {
 
-  println(db.ds.schema(db.model) mkString "\n\n")
-  db.showQuery()
-  println(test("book"))
+  val db = new OQL()
+
+  println("asdf")
+//  println(db.ds.schema(db.model) mkString "\n\n")
+//  db.showQuery()
+//  println(test("book"))
 
 }

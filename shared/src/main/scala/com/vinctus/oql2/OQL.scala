@@ -1,7 +1,5 @@
 package com.vinctus.oql2
 
-import xyz.hyperreal.pretty.prettyPrint
-
 import java.time.Instant
 import java.util.UUID
 import scala.collection.mutable

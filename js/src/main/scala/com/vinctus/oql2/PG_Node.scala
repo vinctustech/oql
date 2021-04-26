@@ -2,7 +2,7 @@ package com.vinctus.oql2
 
 import scalajs.js
 
-class PG_Node(val domain: String,
+class PG_Node(val host: String,
               val port: Int,
               val database: String,
               val user: String,
@@ -18,6 +18,6 @@ class PG_Node(val domain: String,
 
   def uuid(id: String): Any = id
 
-  def connect: OQLConnection = ???
+  def connect: OQLConnection = new PGNodeConnection(this)
 
 }

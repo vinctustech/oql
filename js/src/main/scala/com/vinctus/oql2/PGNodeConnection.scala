@@ -1,17 +1,42 @@
 package com.vinctus.oql2
 
-import java.sql.Statement
+import typings.pg.mod.{Pool, PoolClient, PoolConfig, QueryArrayConfig}
+
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import scala.scalajs.js
 
-class PGNodeConnection(dataSource: PG_Node) extends OQLConnection {
+class PGNodeConnection(val dataSource: PG_Node) extends OQLConnection {
 
-  override def query(query: String): Future[OQLResultSet] = Future(new PGNodeResultSet(stmt.executeQuery(query)))
+  private val pool = new Pool(
+    PoolConfig()
+      .setHost(dataSource.host)
+      .setPort(dataSource.port)
+      .setDatabase(dataSource.database)
+      .setUser(dataSource.user)
+      .setPassword(dataSource.password)
+      .setSsl(dataSource.ssl)
+      .setIdleTimeoutMillis(dataSource.idleTimeoutMillis)
+      .setMax(dataSource.max))
 
-  def insert(command: String): Future[JDBCResultSet] =
-    Future {
-      stmt.executeUpdate(command, Statement.RETURN_GENERATED_KEYS)
-      new JSONResultSet(stmt.getGeneratedKeys)
-    }
+  def query(sql: String): Future[PGNodeResultSet] =
+    pool
+      .connect()
+      .toFuture
+      .flatMap(
+        (client: PoolClient) =>
+          client
+            .query[js.Array[js.Any], js.Any](QueryArrayConfig[js.Any](sql))
+            .toFuture
+            .map(rs => new PGNodeResultSet(rs))
+            .andThen(_ => client.release()))
+
+  def insert(command: String): Future[OQLResultSet] = ???
+
+  def execute(command: String): Future[Unit] = ???
+
+  def create(model: DataModel): Future[Unit] = ???
+
+  def close(): Unit = pool.end()
 
 }

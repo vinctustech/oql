@@ -1,7 +1,5 @@
 package com.vinctus.oql2
 
-import org.checkerframework.checker.units.qual.s
-
 import scala.collection.immutable.VectorMap
 import scala.collection.mutable
 
