@@ -8,10 +8,6 @@ trait PGDataSource extends SQLDataSource {
   val user: String
   val password: String
 
-  def timestamp(t: String): Any
-
-  def uuid(id: String): Any
-
   def mapType(typ: TypeSpecifier): String =
     typ match {
       case TextType              => "TEXT"

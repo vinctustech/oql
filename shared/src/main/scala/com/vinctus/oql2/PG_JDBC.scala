@@ -12,7 +12,4 @@ class PG_JDBC(val host: String, val port: Int, val database: String, val user: S
 
   def connect: OQLConnection = new PGJDBCConnection(this)
 
-  def timestamp(t: String): Any = Instant.parse(if (t endsWith "Z") t else s"${t}Z")
-
-  def uuid(id: String): Any = UUID.fromString(id)
 }

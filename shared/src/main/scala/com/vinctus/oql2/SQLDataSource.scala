@@ -45,4 +45,8 @@ trait SQLDataSource extends OQLDataSource {
 
   def convert(data: Any, typ: String): Any
 
+  def timestamp(t: String): Any
+
+  def uuid(id: String): Any
+
 }
