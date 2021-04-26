@@ -87,7 +87,7 @@ class OQL(dm: String, val ds: SQLDataSource) {
     new QueryBuilder(this, OQLQuery(null, null, null, List(StarOQLProject), None, None, None, None, None))
 
   def json(oql: String, parameters: Map[String, Any] = Map(), tab: Int = 2, format: Boolean = true): Future[String] =
-    queryMany(oql, parameters) map (JSON(_, tab, format))
+    queryMany(oql, parameters) map (JSON(_, ds.platformSpecific, tab, format))
 
   def queryMany(oql: String, parameters: Map[String, Any] = Map()): Future[List[Any]] = queryMany(parseQuery(oql), oql, parameters)
 

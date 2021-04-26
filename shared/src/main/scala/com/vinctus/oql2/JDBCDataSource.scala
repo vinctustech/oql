@@ -18,4 +18,8 @@ abstract class JDBCDataSource(driver: String) extends SQLDataSource {
 
   def uuid(id: String): Any = UUID.fromString(id)
 
+  val platformSpecific: PartialFunction[Any, String] = {
+    case v @ (_: Instant | _: UUID) => s""""$v""""
+  }
+
 }

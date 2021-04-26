@@ -1,10 +1,8 @@
 package com.vinctus.oql2
 
-import java.sql.Timestamp
-import java.time.Instant
 import scala.annotation.tailrec
 import scala.collection.immutable.ArraySeq
-import scala.collection.mutable.{ArrayBuffer, ListBuffer}
+import scala.collection.mutable.ArrayBuffer
 import scala.language.postfixOps
 
 object JSON {
@@ -207,7 +205,7 @@ object JSON {
     v
   }
 
-  def apply(value: Any, tab: Int = 2, format: Boolean = false): String = {
+  def apply(value: Any, platformSpecific: PartialFunction[Any, String], tab: Int = 2, format: Boolean = false): String = {
     val buf = new StringBuilder
     var level = 0
 
@@ -253,15 +251,16 @@ object JSON {
 
     def jsonValue(value: Any): Unit =
       value match {
-        case _: Double | _: Int | _: Long | _: Boolean | _: BigDecimal | _: java.math.BigDecimal | _: java.util.UUID | null =>
+        case p if platformSpecific isDefinedAt p => platformSpecific(p)
+        case _: Double | _: Int | _: Long | _: Boolean | _: BigDecimal | _: java.math.BigDecimal | null =>
           buf ++= String.valueOf(value)
         case m: collection.Map[_, _]           => jsonObject(m.toSeq.asInstanceOf[Seq[(String, Any)]])
         case s: collection.Seq[_] if s.isEmpty => buf ++= "[]"
         case s: collection.Seq[_]              => aggregate('[', s, ']')(jsonValue)
         case a: Array[_]                       => jsonValue(a.toList)
         case p: Product                        => jsonObject(p.productElementNames zip p.productIterator toList)
-        case t: Timestamp                      => jsonValue(t.toInstant.toString)
-        case _: String | _: Instant =>
+//        case t: Timestamp                      => jsonValue(t.toInstant.toString) //  | _: Instant  _: java.util.UUID
+        case _: String =>
           buf += '"'
           buf ++=
             List("\\" -> "\\\\", "\"" -> "\\\"", "\t" -> "\\t", "\n" -> "\\n", "\r" -> "\\r").foldLeft(value.toString) {

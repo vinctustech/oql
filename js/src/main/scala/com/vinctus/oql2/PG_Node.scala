@@ -20,4 +20,8 @@ class PG_Node(val host: String,
 
   def connect: OQLConnection = new PGNodeConnection(this)
 
+  val platformSpecific: PartialFunction[Any, String] = {
+    case d: js.Date => s""""${d.toISOString()}""""
+  }
+
 }

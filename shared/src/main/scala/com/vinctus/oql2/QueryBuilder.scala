@@ -93,6 +93,6 @@ class QueryBuilder private[oql2] (private val oql: OQL, private[oql2] val q: OQL
   def getCount: Future[Int] = oql.count(q, "")
 
   def json(parameters: Map[String, Any] = Map(), tab: Int = 2, format: Boolean = true): Future[String] =
-    getMany(parameters) map (JSON(_, format = true))
+    getMany(parameters) map (JSON(_, oql.ds.platformSpecific, format = true))
 
 }

@@ -49,4 +49,6 @@ trait SQLDataSource extends OQLDataSource {
 
   def uuid(id: String): Any
 
+  val platformSpecific: PartialFunction[Any, String]
+
 }
