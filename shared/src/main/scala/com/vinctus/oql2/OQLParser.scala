@@ -1,7 +1,5 @@
 package com.vinctus.oql2
 
-import com.vinctus.oql2.StarOQLProject.label
-
 import scala.util.matching.Regex
 import scala.util.parsing.combinator.{PackratParsers, RegexParsers}
 import scala.util.parsing.input.{CharSequenceReader, Position, Positional}
