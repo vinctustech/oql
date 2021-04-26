@@ -1,6 +1,6 @@
 import sbt.Keys.libraryDependencies
 
-lazy val oql2 = crossProject( /*JSPlatform,*/ JVMPlatform /*, NativePlatform*/ )
+lazy val oql2 = crossProject(JSPlatform, JVMPlatform /*, NativePlatform*/ )
   .in(file("."))
   .settings(
     name := "oql2",
@@ -39,15 +39,16 @@ lazy val oql2 = crossProject( /*JSPlatform,*/ JVMPlatform /*, NativePlatform*/ )
       "org.antlr" % "ST4" % "4.3.1"
     ),
     libraryDependencies += "xyz.hyperreal" %% "pretty" % "0.2.1" // % "test",
-  ) /*.
+  )
+  .
 //  nativeSettings(
 //    nativeLinkStubs := true
 //  ).
   jsSettings(
-    jsEnv := new org.scalajs.jsenv.nodejs.NodeJSEnv(),
-//    Test / scalaJSUseMainModuleInitializer := true,
-//    Test / scalaJSUseTestModuleInitializer := false,
-    Test / scalaJSUseMainModuleInitializer := false,
-    Test / scalaJSUseTestModuleInitializer := true,
-    scalaJSUseMainModuleInitializer := true,
-  )*/
+  jsEnv := new org.scalajs.jsenv.nodejs.NodeJSEnv(),
+  Test / scalaJSUseMainModuleInitializer := true,
+  Test / scalaJSUseTestModuleInitializer := false,
+//  Test / scalaJSUseMainModuleInitializer := false,
+//  Test / scalaJSUseTestModuleInitializer := true,
+  scalaJSUseMainModuleInitializer := true
+)

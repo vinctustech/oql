@@ -9,6 +9,7 @@ CREATE TABLE book (
   year INT,
   author BIGINT
 );
+
 ALTER TABLE book ADD FOREIGN KEY (author) REFERENCES author;
 
 insert into author (name) values
@@ -24,9 +25,3 @@ insert into book (title, year, author) values
 ('A Tale of Two Cities', 1859, 3),
 ('The Adventures of Tom Sawyer', 1876, 4),
 ('Adventures of Huckleberry Finn', 1884, 4);
-
-SELECT author.name as author_name, ARRAY(select row(book.id, book.title) from book where book.author = author.id)
-  FROM author;
-
-SELECT author.name as author_name, ARRAY(select json_build_array(book.id, book.title) from book where book.author = author.id)
-  FROM author;

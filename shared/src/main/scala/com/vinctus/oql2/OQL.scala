@@ -10,7 +10,6 @@ import scala.annotation.tailrec
 import scala.collection.immutable.VectorMap
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-import scala.util.{Failure, Success}
 
 class OQL(dm: String, val ds: SQLDataSource) {
 
