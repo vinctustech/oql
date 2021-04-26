@@ -1,6 +1,6 @@
 package com.vinctus.oql2
 
-class H2mem extends JDBCDataSource("org.h2.Driver") {
+class H2_mem extends JDBCDataSource("org.h2.Driver") {
 
   val name = "H2 (in memory)"
   val url = s"jdbc:h2:mem:test;DB_CLOSE_DELAY=-1"

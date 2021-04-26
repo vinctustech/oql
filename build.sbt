@@ -45,10 +45,15 @@ lazy val oql2 = crossProject(JSPlatform, JVMPlatform /*, NativePlatform*/ )
 //    nativeLinkStubs := true
 //  ).
   jsSettings(
-  jsEnv := new org.scalajs.jsenv.nodejs.NodeJSEnv(),
-  Test / scalaJSUseMainModuleInitializer := true,
-  Test / scalaJSUseTestModuleInitializer := false,
+    jsEnv := new org.scalajs.jsenv.nodejs.NodeJSEnv(),
+    Compile / npmDependencies ++= Seq(
+      "pg" -> "8.5.1",
+      "@types/pg" -> "7.14.9"
+    ),
+    Test / scalaJSUseMainModuleInitializer := true,
+    Test / scalaJSUseTestModuleInitializer := false,
 //  Test / scalaJSUseMainModuleInitializer := false,
 //  Test / scalaJSUseTestModuleInitializer := true,
-  scalaJSUseMainModuleInitializer := true
-)
+    scalaJSUseMainModuleInitializer := true
+  )
+  .enablePlugins(ScalablyTypedConverterPlugin)

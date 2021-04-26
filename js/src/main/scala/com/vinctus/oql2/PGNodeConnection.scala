@@ -4,7 +4,7 @@ import java.sql.Statement
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class PGConnection(dataSource: JDBCDataSource) extends JDBCConnection(dataSource) {
+class PGNodeConnection(dataSource: PG_Node) extends OQLConnection {
 
   override def query(query: String): Future[OQLResultSet] = Future(new JSONResultSet(stmt.executeQuery(query)))
 

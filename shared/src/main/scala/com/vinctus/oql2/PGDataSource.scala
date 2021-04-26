@@ -1,12 +1,16 @@
 package com.vinctus.oql2
 
-import java.time.Instant
-import java.util.UUID
+trait PGDataSource extends SQLDataSource {
 
-class PG(domain: String, port: Int, database: String, val user: String, val password: String) extends JDBCDataSource("org.postgresql.Driver") {
+  val domain: String
+  val port: Int
+  val database: String
+  val user: String
+  val password: String
 
-  val name = "PostgreSQL"
-  val url = s"jdbc:postgresql://$domain:$port/$database"
+  def timestamp(t: String): Any
+
+  def uuid(id: String): Any
 
   def mapType(typ: TypeSpecifier): String =
     typ match {
@@ -29,8 +33,6 @@ class PG(domain: String, port: Int, database: String, val user: String, val pass
       case _: DataType => mapType(typ)
     }
 
-  def connect: OQLConnection = new PGConnection(this)
-
   val resultArrayFunctionStart: String = "to_json(ARRAY("
   val resultArrayFunctionEnd: String = "))"
   val rowSequenceFunctionStart: String = "json_build_array("
@@ -41,8 +43,8 @@ class PG(domain: String, port: Int, database: String, val user: String, val pass
 
   def convert(data: Any, typ: String): Any =
     (data, typ) match {
-      case (t: String, "timestamp without time zone") => Instant.parse(if (t endsWith "Z") t else s"${t}Z")
-      case (t: String, "uuid")                        => UUID.fromString(t)
+      case (t: String, "timestamp without time zone") => timestamp(t)
+      case (id: String, "uuid")                       => uuid(id)
       case (n: String, "integer")                     => n.toInt
       case (n: String, "bigint")                      => n.toLong
       case (n: String, "double precision")            => n.toDouble

@@ -27,8 +27,8 @@ trait Test {
 
         Thread.sleep(2000)
 
-        new PG("localhost", 5432, "postgres", "postgres", "docker")
-      case "h2" => new H2mem
+        new PG_JDBC("localhost", 5432, "postgres", "postgres", "docker")
+      case "h2" => new H2_mem
     }
 
   val db: OQL
