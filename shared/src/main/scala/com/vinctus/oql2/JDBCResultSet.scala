@@ -2,7 +2,7 @@ package com.vinctus.oql2
 
 import java.sql.ResultSet
 
-class JDBCResultSet(val rs: ResultSet) extends OQLResultSet {
+abstract class JDBCResultSet(val rs: ResultSet) extends OQLResultSet {
 
   def next: Boolean = rs.next
 
@@ -10,6 +10,6 @@ class JDBCResultSet(val rs: ResultSet) extends OQLResultSet {
 
   def getString(idx: Int): String = rs.getString(idx + 1)
 
-  def getResultSet(idx: Int): OQLResultSet = new JDBCResultSet(rs.getArray(idx + 1).getResultSet)
+  def getResultSet(idx: Int): OQLResultSet //= new JDBCResultSet(rs.getArray(idx + 1).getResultSet)
 
 }

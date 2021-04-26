@@ -1,9 +1,7 @@
 package com.vinctus.oql2
 
-import java.sql.ResultSet
+trait JSONResultSet { self: OQLResultSet =>
 
-class JSONResultSet(rs: ResultSet) extends JDBCResultSet(rs) {
-
-  override def getResultSet(idx: Int): OQLResultSet = SequenceResultSet.fromJSON(getString(idx))
+  def getResultSet(idx: Int): OQLResultSet = SequenceResultSet.fromJSON(getString(idx))
 
 }
