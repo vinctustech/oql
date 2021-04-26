@@ -364,7 +364,7 @@ object OQL {
           case Some(Attribute(name, column, pk, required, typ: DataType)) =>
             val attr = AttributeOQLExpression(List(query.source), null)
 
-            decorate(entity, attr, model, ds, oql)
+            decorate(entity, attr, model, ds, oql) // todo: should be done without call to 'decorate' because we have the attribute instance
             ExpressionOQLProject(label, attr)
           case Some(_) =>
             queryProjects(Some(entity), query, model, ds, oql)

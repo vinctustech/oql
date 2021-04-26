@@ -2,7 +2,15 @@ package com.vinctus.oql2
 
 import scalajs.js
 
-class PG_Node(val domain: String, val port: Int, val database: String, val user: String, val password: String) extends PGDataSource {
+class PG_Node(val domain: String,
+              val port: Int,
+              val database: String,
+              val user: String,
+              val password: String,
+              val ssl: Boolean,
+              val idleTimeoutMillis: Int,
+              val max: Int)
+    extends PGDataSource {
 
   val name: String = "PostgreSQL (node-pg)"
 
