@@ -3,6 +3,7 @@ package com.vinctus.oql2
 import xyz.hyperreal.importer.{Column, Importer, Table}
 import xyz.hyperreal.pretty.prettyPrint
 
+import scala.concurrent.Future
 import scala.language.postfixOps
 import scala.sys.process._
 
@@ -32,7 +33,7 @@ trait Test {
 
   val db: OQL
 
-  def test(oql: String, parameters: Map[String, Any] = Map()): String = db.json(oql, parameters)
+  def test(oql: String, parameters: Map[String, Any] = Map()): Future[String] = db.json(oql, parameters)
 
   def testmap(oql: String, parameters: Map[String, Any] = Map()): String = prettyPrint(db.queryMany(oql, parameters), classes = true)
 

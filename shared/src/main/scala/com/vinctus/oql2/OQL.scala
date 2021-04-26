@@ -8,6 +8,9 @@ import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
 import scala.annotation.tailrec
 import scala.collection.immutable.VectorMap
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
+import scala.util.{Failure, Success}
 
 class OQL(dm: String, val ds: SQLDataSource) {
 
@@ -27,15 +30,15 @@ class OQL(dm: String, val ds: SQLDataSource) {
 
   def connect: OQLConnection = ds.connect
 
-  def execute[R](action: OQLConnection => R): R = {
+  def execute[R](action: OQLConnection => Future[R]): Future[R] = {
     val conn = connect
     val res = action(conn)
 
-    conn.close()
+    res onComplete (_ => conn.close())
     res
   }
 
-  def create(): Unit = execute(_.create(model))
+  def create(): Future[Unit] = execute(_.create(model))
 
   def entity(name: String): Entity = model.entities(name)
 
@@ -56,7 +59,7 @@ class OQL(dm: String, val ds: SQLDataSource) {
     expr
   }
 
-  def count(oql: String): Int = {
+  def count(oql: String): Future[Int] = {
     val query = OQLParser.parseQuery(oql)
 
     query.project = List(ExpressionOQLProject(Ident("count", null), ApplyOQLExpression(Ident("count", null), List(StarOQLExpression))))
@@ -67,18 +70,17 @@ class OQL(dm: String, val ds: SQLDataSource) {
     count(query, oql)
   }
 
-  def count(query: OQLQuery, oql: String): Int = {
-    queryMany(query, oql, Map()) match {
+  def count(query: OQLQuery, oql: String): Future[Int] =
+    queryMany(query, oql, Map()) map {
       case Nil       => sys.error("count: zero rows were found")
       case List(row) => row.asInstanceOf[Map[String, Number]]("count").intValue()
       case _         => sys.error("count: more than one row was found")
     }
-  }
 
-  def queryOne(oql: String, parameters: Map[String, Any] = Map()): Option[Any] = queryOne(parseQuery(oql), oql, parameters)
+  def queryOne(oql: String, parameters: Map[String, Any] = Map()): Future[Option[Any]] = queryOne(parseQuery(oql), oql, parameters)
 
-  def queryOne(q: OQLQuery, oql: String, parameters: Map[String, Any]): Option[Any] =
-    queryMany(q, oql, parameters) match {
+  def queryOne(q: OQLQuery, oql: String, parameters: Map[String, Any]): Future[Option[Any]] =
+    queryMany(q, oql, parameters) map {
       case Nil       => None
       case List(row) => Some(row)
       case _         => sys.error("queryOne: more than one row was found")
@@ -89,12 +91,12 @@ class OQL(dm: String, val ds: SQLDataSource) {
   def queryBuilder() =
     new QueryBuilder(this, OQLQuery(null, null, null, List(StarOQLProject), None, None, None, None, None))
 
-  def json(oql: String, parameters: Map[String, Any] = Map(), tab: Int = 2, format: Boolean = true): String =
-    JSON(queryMany(oql, parameters), tab, format)
+  def json(oql: String, parameters: Map[String, Any] = Map(), tab: Int = 2, format: Boolean = true): Future[String] =
+    queryMany(oql, parameters) map (JSON(_, tab, format))
 
-  def queryMany(oql: String, parameters: Map[String, Any] = Map()): List[Any] = queryMany(parseQuery(oql), oql, parameters)
+  def queryMany(oql: String, parameters: Map[String, Any] = Map()): Future[List[Any]] = queryMany(parseQuery(oql), oql, parameters)
 
-  def queryMany(query: OQLQuery, oql: String, parameters: Map[String, Any]): List[Any] = {
+  def queryMany(query: OQLQuery, oql: String, parameters: Map[String, Any]): Future[List[Any]] = {
     val parms = new Parameters(parameters)
     val root: ResultNode = ResultNode(query, objectNode(query.project))
     val sqlBuilder = new SQLQueryBuilder(parms, oql, ds)
@@ -115,10 +117,6 @@ class OQL(dm: String, val ds: SQLDataSource) {
     }
 
     execute { c =>
-      val rs = c.query(sql)
-
-//      println(TextTable(rs.peer.asInstanceOf[ResultSet]))
-
       def buildResult(node: Node, resultSet: OQLResultSet): Any =
         node match {
           case ResultNode(_, element) =>
@@ -187,7 +185,11 @@ class OQL(dm: String, val ds: SQLDataSource) {
 //          case SequenceNode(seq) => ni
         }
 
-      buildResult(root, rs).asInstanceOf[List[Any]]
+      c.query(sql) map { rs =>
+        //      println(TextTable(rs.peer.asInstanceOf[ResultSet]))
+
+        buildResult(root, rs).asInstanceOf[List[Any]]
+      }
     }
   }
 

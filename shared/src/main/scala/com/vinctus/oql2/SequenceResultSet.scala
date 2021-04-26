@@ -1,9 +1,5 @@
 package com.vinctus.oql2
 
-import xyz.hyperreal.json.DefaultJSONReader
-
-import scala.collection.immutable.ArraySeq
-
 object SequenceResultSet {
 
   def fromJSON(json: String) = new SequenceResultSet(JSON.readArray(json).asInstanceOf[IndexedSeq[IndexedSeq[Any]]])
