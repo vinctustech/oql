@@ -68,10 +68,12 @@ class OQL(dm: String, val ds: SQLDataSource) {
   }
 
   def count(query: OQLQuery, oql: String): Future[Int] =
-    queryMany(query, oql, () => new ScalaResultBuilder, Map()) map {
-      case Nil       => sys.error("count: zero rows were found")
-      case List(row) => row.asInstanceOf[Map[String, Number]]("count").intValue()
-      case _         => sys.error("count: more than one row was found")
+    queryMany(query, oql, () => new ScalaResultBuilder, Map()) map { r =>
+      r.arrayResult match {
+        case Nil       => sys.error("count: zero rows were found")
+        case List(row) => row.asInstanceOf[Map[String, Number]]("count").intValue()
+        case _         => sys.error("count: more than one row was found")
+      }
     }
 
 //  def queryOne(oql: String, parameters: Map[String, Any] = Map()): Future[Option[Any]] = queryOne(parseQuery(oql), oql, parameters)
