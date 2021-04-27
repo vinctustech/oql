@@ -2,7 +2,7 @@ package com.vinctus.oql2
 
 import scala.collection.mutable
 
-class Parameters(map: Map[String, Any]) {
+class Parameters(map: collection.Map[String, Any]) {
 
   private val requested = new mutable.HashSet[String]
 

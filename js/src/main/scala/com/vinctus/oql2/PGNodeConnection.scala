@@ -6,7 +6,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.scalajs.js
 
-class PGNodeConnection(val dataSource: PG_Node) extends OQLConnection {
+class PGNodeConnection(val dataSource: PG_NodePG) extends OQLConnection {
 
   private val pool = new Pool(
     PoolConfig()

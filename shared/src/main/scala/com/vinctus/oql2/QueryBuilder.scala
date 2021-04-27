@@ -17,7 +17,7 @@ class QueryBuilder private[oql2] (private val oql: OQL, private[oql2] val q: OQL
     override def getOne(newResultBuilder: () => ResultBuilder = () => new ScalaResultBuilder,
                         parameters: Map[String, Any] = Map()): Future[Option[Any]] = na
 
-    override def getCount: Future[Int] = na
+    override def getCount(parameters: Map[String, Any] = Map()): Future[Int] = na
 
     override def limit(a: Int): QueryBuilder = QueryBuilder.this
 
@@ -93,7 +93,7 @@ class QueryBuilder private[oql2] (private val oql: OQL, private[oql2] val q: OQL
   def getOne(newResultBuilder: () => ResultBuilder = () => new ScalaResultBuilder, parameters: Map[String, Any] = Map()): Future[Option[Any]] =
     check.oql.queryOne(q, "", newResultBuilder, parameters)
 
-  def getCount: Future[Int] = oql.count(q, "")
+  def getCount(parameters: Map[String, Any] = Map()): Future[Int] = oql.count(q, "", parameters)
 
   def json(parameters: Map[String, Any] = Map(), tab: Int = 2, format: Boolean = true): Future[String] =
     getMany(() => new ScalaResultBuilder, parameters) map (r => JSON(r.arrayResult, oql.ds.platformSpecific, format = true))

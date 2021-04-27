@@ -53,7 +53,7 @@ class OQL(dm: String, val ds: SQLDataSource) {
     expr
   }
 
-  def count(oql: String): Future[Int] = {
+  def count(oql: String, parameters: collection.Map[String, Any] = Map()): Future[Int] = {
     val query = OQLParser.parseQuery(oql)
 
     query.project = List(ExpressionOQLProject(Ident("count", null), ApplyOQLExpression(Ident("count", null), List(StarOQLExpression))))
@@ -61,10 +61,10 @@ class OQL(dm: String, val ds: SQLDataSource) {
     query.select foreach (decorate(query.entity, _, model, ds, oql))
     query.group foreach (_ foreach (decorate(query.entity, _, model, ds, oql)))
     query.copy(order = None)
-    count(query, oql)
+    count(query, oql, parameters)
   }
 
-  def count(query: OQLQuery, oql: String): Future[Int] =
+  def count(query: OQLQuery, oql: String, parameters: collection.Map[String, Any]): Future[Int] =
     queryMany(query, oql, () => new ScalaResultBuilder, Map()) map { r =>
       r.arrayResult match {
         case Nil       => sys.error("count: zero rows were found")
@@ -75,9 +75,9 @@ class OQL(dm: String, val ds: SQLDataSource) {
 
   def queryOne(oql: String,
                newResultBuilder: () => ResultBuilder = () => new ScalaResultBuilder,
-               parameters: Map[String, Any] = Map()): Future[Option[Any]] = queryOne(parseQuery(oql), oql, newResultBuilder, parameters)
+               parameters: collection.Map[String, Any] = Map()): Future[Option[Any]] = queryOne(parseQuery(oql), oql, newResultBuilder, parameters)
 
-  def queryOne(q: OQLQuery, oql: String, newResultBuilder: () => ResultBuilder, parameters: Map[String, Any]): Future[Option[Any]] =
+  def queryOne(q: OQLQuery, oql: String, newResultBuilder: () => ResultBuilder, parameters: collection.Map[String, Any]): Future[Option[Any]] =
     queryMany(q, oql, newResultBuilder, parameters) map { r =>
       r.arrayResult match {
         case Nil       => None
@@ -90,15 +90,18 @@ class OQL(dm: String, val ds: SQLDataSource) {
 
   def queryBuilder() = new QueryBuilder(this, OQLQuery(null, null, null, List(StarOQLProject), None, None, None, None, None))
 
-  def json(oql: String, parameters: Map[String, Any] = Map(), tab: Int = 2, format: Boolean = true): Future[String] =
+  def json(oql: String, parameters: collection.Map[String, Any] = Map(), tab: Int = 2, format: Boolean = true): Future[String] =
     queryMany(oql, () => new ScalaResultBuilder, parameters) map (r => JSON(r.arrayResult, ds.platformSpecific, tab, format))
 
   def queryMany(oql: String,
                 newResultBuilder: () => ResultBuilder = () => new ScalaResultBuilder,
-                parameters: Map[String, Any] = Map()): Future[ResultBuilder] =
+                parameters: collection.Map[String, Any] = Map()): Future[ResultBuilder] =
     queryMany(parseQuery(oql), oql, newResultBuilder, parameters)
 
-  def queryMany(query: OQLQuery, oql: String, newResultBuilder: () => ResultBuilder, parameters: Map[String, Any]): Future[ResultBuilder] = {
+  def queryMany(query: OQLQuery,
+                oql: String,
+                newResultBuilder: () => ResultBuilder,
+                parameters: collection.Map[String, Any]): Future[ResultBuilder] = {
     val parms = new Parameters(parameters)
     val root: ResultNode = ResultNode(query, objectNode(query.project))
     val sqlBuilder = new SQLQueryBuilder(parms, oql, ds)
