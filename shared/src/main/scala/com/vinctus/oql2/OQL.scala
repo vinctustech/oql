@@ -76,19 +76,22 @@ class OQL(dm: String, val ds: SQLDataSource) {
       }
     }
 
-//  def queryOne(oql: String, parameters: Map[String, Any] = Map()): Future[Option[Any]] = queryOne(parseQuery(oql), oql, parameters)
-//
-//  def queryOne(q: OQLQuery, oql: String, parameters: Map[String, Any]): Future[Option[Any]] =
-//    queryMany(q, oql, parameters) map {
-//      case Nil       => None
-//      case List(row) => Some(row)
-//      case _         => sys.error("queryOne: more than one row was found")
-//    }
+  def queryOne(oql: String,
+               newResultBuilder: () => ResultBuilder = () => new ScalaResultBuilder,
+               parameters: Map[String, Any] = Map()): Future[Option[Any]] = queryOne(parseQuery(oql), oql, newResultBuilder, parameters)
+
+  def queryOne(q: OQLQuery, oql: String, newResultBuilder: () => ResultBuilder, parameters: Map[String, Any]): Future[Option[Any]] =
+    queryMany(q, oql, newResultBuilder, parameters) map { r =>
+      r.arrayResult match {
+        case Nil       => None
+        case List(row) => Some(row)
+        case _         => sys.error("queryOne: more than one row was found")
+      }
+    }
 
   def showQuery(): Unit = _showQuery = true
 
-  def queryBuilder() =
-    new QueryBuilder(this, OQLQuery(null, null, null, List(StarOQLProject), None, None, None, None, None))
+  def queryBuilder() = new QueryBuilder(this, OQLQuery(null, null, null, List(StarOQLProject), None, None, None, None, None))
 
   def json(oql: String, parameters: Map[String, Any] = Map(), tab: Int = 2, format: Boolean = true): Future[String] =
     queryMany(oql, () => new ScalaResultBuilder, parameters) map (r => JSON(r.arrayResult, ds.platformSpecific, tab, format))

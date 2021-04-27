@@ -14,7 +14,8 @@ class QueryBuilder private[oql2] (private val oql: OQL, private[oql2] val q: OQL
     override def getMany(newResultBuilder: () => ResultBuilder = () => new ScalaResultBuilder,
                          parameters: Map[String, Any] = Map()): Future[ResultBuilder] = na
 
-//    override def getOne: Future[Option[Any]] = na
+    override def getOne(newResultBuilder: () => ResultBuilder = () => new ScalaResultBuilder,
+                        parameters: Map[String, Any] = Map()): Future[Option[Any]] = na
 
     override def getCount: Future[Int] = na
 
@@ -90,8 +91,8 @@ class QueryBuilder private[oql2] (private val oql: OQL, private[oql2] val q: OQL
   def getMany(newResultBuilder: () => ResultBuilder = () => new ScalaResultBuilder, parameters: Map[String, Any] = Map()): Future[ResultBuilder] =
     check.oql.queryMany(q, null, newResultBuilder, parameters)
 
-//  def getOne(newResultBuilder: () => ResultBuilder = () => new ScalaResultBuilder, parameters: Map[String, Any] = Map()): Future[ResultBuilder] =
-//    check.oql.queryOne(q, "", newResultBuilder, parameters)
+  def getOne(newResultBuilder: () => ResultBuilder = () => new ScalaResultBuilder, parameters: Map[String, Any] = Map()): Future[Option[Any]] =
+    check.oql.queryOne(q, "", newResultBuilder, parameters)
 
   def getCount: Future[Int] = oql.count(q, "")
 
