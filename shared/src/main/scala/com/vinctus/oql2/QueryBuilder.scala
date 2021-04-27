@@ -80,7 +80,6 @@ class QueryBuilder private[oql2] (private val oql: OQL, private[oql2] val q: OQL
     val attr = AttributeOQLExpression(List(Ident(attribute)), null)
 
     OQL.decorate(q.entity, attr, oql.model, oql.ds, null)
-
     new QueryBuilder(oql, q.copy(order = Some(List(OQLOrdering(attr, sorting)))))
   }
 
