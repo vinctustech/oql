@@ -24,4 +24,6 @@ class PG_Node(val host: String,
     case d: js.Date => s""""${d.toISOString()}""""
   }
 
+  def resultBuilder: ResultBuilder = new JSResultBuilder
+
 }

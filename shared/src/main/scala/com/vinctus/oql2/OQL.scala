@@ -1,5 +1,7 @@
 package com.vinctus.oql2
 
+import jdk.nashorn.internal.objects.NativeDebug.map
+
 import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
 import scala.annotation.tailrec
@@ -66,20 +68,20 @@ class OQL(dm: String, val ds: SQLDataSource) {
   }
 
   def count(query: OQLQuery, oql: String): Future[Int] =
-    queryMany(query, oql, Map()) map {
+    queryMany(query, oql, () => new ScalaResultBuilder, Map()) map {
       case Nil       => sys.error("count: zero rows were found")
       case List(row) => row.asInstanceOf[Map[String, Number]]("count").intValue()
       case _         => sys.error("count: more than one row was found")
     }
 
-  def queryOne(oql: String, parameters: Map[String, Any] = Map()): Future[Option[Any]] = queryOne(parseQuery(oql), oql, parameters)
-
-  def queryOne(q: OQLQuery, oql: String, parameters: Map[String, Any]): Future[Option[Any]] =
-    queryMany(q, oql, parameters) map {
-      case Nil       => None
-      case List(row) => Some(row)
-      case _         => sys.error("queryOne: more than one row was found")
-    }
+//  def queryOne(oql: String, parameters: Map[String, Any] = Map()): Future[Option[Any]] = queryOne(parseQuery(oql), oql, parameters)
+//
+//  def queryOne(q: OQLQuery, oql: String, parameters: Map[String, Any]): Future[Option[Any]] =
+//    queryMany(q, oql, parameters) map {
+//      case Nil       => None
+//      case List(row) => Some(row)
+//      case _         => sys.error("queryOne: more than one row was found")
+//    }
 
   def showQuery(): Unit = _showQuery = true
 
@@ -87,11 +89,14 @@ class OQL(dm: String, val ds: SQLDataSource) {
     new QueryBuilder(this, OQLQuery(null, null, null, List(StarOQLProject), None, None, None, None, None))
 
   def json(oql: String, parameters: Map[String, Any] = Map(), tab: Int = 2, format: Boolean = true): Future[String] =
-    queryMany(oql, parameters) map (JSON(_, ds.platformSpecific, tab, format))
+    queryMany(oql, () => new ScalaResultBuilder, parameters) map (r => JSON(r.arrayResult, ds.platformSpecific, tab, format))
 
-  def queryMany(oql: String, parameters: Map[String, Any] = Map()): Future[List[Any]] = queryMany(parseQuery(oql), oql, parameters)
+  def queryMany(oql: String,
+                newResultBuilder: () => ResultBuilder = () => new ScalaResultBuilder,
+                parameters: Map[String, Any] = Map()): Future[ResultBuilder] =
+    queryMany(parseQuery(oql), oql, newResultBuilder, parameters)
 
-  def queryMany(query: OQLQuery, oql: String, parameters: Map[String, Any]): Future[List[Any]] = {
+  def queryMany(query: OQLQuery, oql: String, newResultBuilder: () => ResultBuilder, parameters: Map[String, Any]): Future[ResultBuilder] = {
     val parms = new Parameters(parameters)
     val root: ResultNode = ResultNode(query, objectNode(query.project))
     val sqlBuilder = new SQLQueryBuilder(parms, oql, ds)
@@ -115,11 +120,11 @@ class OQL(dm: String, val ds: SQLDataSource) {
       def buildResult(node: Node, resultSet: OQLResultSet): Any =
         node match {
           case ResultNode(_, element) =>
-            val array = new ListBuffer[Any]
+            val result = newResultBuilder().newArray
 
-            while (resultSet.next) array += buildResult(element, resultSet)
+            while (resultSet.next) result += buildResult(element, resultSet)
 
-            array.toList
+            result
           case n @ ManyToOneNode(_, element) =>
             if (n.idx.isDefined && resultSet.get(n.idx.get) == null) null
             else buildResult(element, resultSet)
@@ -136,18 +141,18 @@ class OQL(dm: String, val ds: SQLDataSource) {
             else buildResult(element, sequenceResultSet)
           case n @ OneToManyNode(_, element) =>
             val sequenceResultSet = resultSet.getResultSet(n.idx)
-            val array = new ListBuffer[Any]
+            val result = newResultBuilder().newArray
 
-            while (sequenceResultSet.next) array += buildResult(element, sequenceResultSet)
+            while (sequenceResultSet.next) result += buildResult(element, sequenceResultSet)
 
-            array.toList
+            result.arrayResult
           case n @ ManyToManyNode(_, element) =>
             val sequenceResultSet = resultSet.getResultSet(n.idx)
-            val array = new ListBuffer[Any]
+            val result = newResultBuilder().newArray
 
-            while (sequenceResultSet.next) array += buildResult(element, sequenceResultSet)
+            while (sequenceResultSet.next) result += buildResult(element, sequenceResultSet)
 
-            array.toList
+            result.arrayResult
           case v @ ValueNode(expr) =>
             val x = resultSet get v.idx
 
@@ -171,19 +176,19 @@ class OQL(dm: String, val ds: SQLDataSource) {
                 case _                                          => x
               }
           case ObjectNode(properties) =>
-            val map = new mutable.LinkedHashMap[String, Any]
+            val result = newResultBuilder().newObject
 
             for ((label, node) <- properties)
-              map(label) = buildResult(node, resultSet)
+              result(label) = buildResult(node, resultSet)
 
-            map to VectorMap
+            result.objectResult
 //          case SequenceNode(seq) => ni
         }
 
       c.query(sql) map { rs =>
         //      println(TextTable(rs.peer.asInstanceOf[ResultSet]))
 
-        buildResult(root, rs).asInstanceOf[List[Any]]
+        buildResult(root, rs).asInstanceOf[ResultBuilder]
       }
     }
   }

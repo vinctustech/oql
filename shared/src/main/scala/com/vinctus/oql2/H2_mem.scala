@@ -39,4 +39,6 @@ class H2_mem extends JDBCDataSource("org.h2.Driver") {
 
   def convert(data: Any, typ: String): Any = data
 
+  def resultBuilder: ResultBuilder = new ScalaResultBuilder
+
 }

@@ -51,4 +51,6 @@ trait SQLDataSource extends OQLDataSource {
 
   val platformSpecific: PartialFunction[Any, String]
 
+  def resultBuilder: ResultBuilder
+
 }
