@@ -11,13 +11,11 @@ class QueryBuilder private[oql2] (private val oql: OQL, private[oql2] val q: OQL
 
     override def cond(b: Boolean): QueryBuilder = na
 
-    override def getMany(newResultBuilder: () => ResultBuilder = () => new ScalaResultBuilder,
-                         parameters: Map[String, Any] = Map()): Future[ResultBuilder] = na
+    override def getMany(parameters: collection.Map[String, Any] = Map()): Future[ResultBuilder] = na
 
-    override def getOne(newResultBuilder: () => ResultBuilder = () => new ScalaResultBuilder,
-                        parameters: Map[String, Any] = Map()): Future[Option[Any]] = na
+    override def getOne(parameters: collection.Map[String, Any] = Map()): Future[Option[Any]] = na
 
-    override def getCount(parameters: Map[String, Any] = Map()): Future[Int] = na
+    override def getCount(parameters: collection.Map[String, Any] = Map()): Future[Int] = na
 
     override def limit(a: Int): QueryBuilder = QueryBuilder.this
 
@@ -61,8 +59,7 @@ class QueryBuilder private[oql2] (private val oql: OQL, private[oql2] val q: OQL
 //        q.copy(source = Ident(resource))
 //    )
 
-  def query(query: String): QueryBuilder =
-    new QueryBuilder(oql, oql.parseQuery(query))
+  def query(query: String): QueryBuilder = new QueryBuilder(oql, oql.parseQuery(query))
 
   def select(s: String): QueryBuilder = {
     val sel = oql.parseCondition(s, q.entity)
@@ -87,15 +84,15 @@ class QueryBuilder private[oql2] (private val oql: OQL, private[oql2] val q: OQL
 
   def offset(a: Int): QueryBuilder = new QueryBuilder(oql, q.copy(offset = Some(a)))
 
-  def getMany(newResultBuilder: () => ResultBuilder = () => new ScalaResultBuilder, parameters: Map[String, Any] = Map()): Future[ResultBuilder] =
-    check.oql.queryMany(q, null, newResultBuilder, parameters)
+  def getMany(parameters: collection.Map[String, Any] = Map()): Future[ResultBuilder] =
+    check.oql.queryMany(q, null, () => new ScalaResultBuilder, parameters)
 
-  def getOne(newResultBuilder: () => ResultBuilder = () => new ScalaResultBuilder, parameters: Map[String, Any] = Map()): Future[Option[Any]] =
-    check.oql.queryOne(q, "", newResultBuilder, parameters)
+  def getOne(parameters: collection.Map[String, Any] = Map()): Future[Option[Any]] =
+    check.oql.queryOne(q, "", () => new ScalaResultBuilder, parameters)
 
-  def getCount(parameters: Map[String, Any] = Map()): Future[Int] = oql.count(q, "", parameters)
+  def getCount(parameters: collection.Map[String, Any] = Map()): Future[Int] = oql.count(q, "", parameters)
 
-  def json(parameters: Map[String, Any] = Map(), tab: Int = 2, format: Boolean = true): Future[String] =
-    getMany(() => new ScalaResultBuilder, parameters) map (r => JSON(r.arrayResult, oql.ds.platformSpecific, format = true))
+  def json(parameters: collection.Map[String, Any] = Map()): Future[String] =
+    check.oql.queryMany(q, null, () => new ScalaResultBuilder, parameters) map (r => JSON(r.arrayResult, oql.ds.platformSpecific, format = true))
 
 }

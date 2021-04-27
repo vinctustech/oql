@@ -4,9 +4,6 @@ import scala.scalajs.js
 
 class JSResultBuilder extends ResultBuilder {
 
-  type Array = js.Array[Any]
-  type Object = js.Object
-
   private var array: js.Array[Any] = _
   private var obj: js.Object = _
 

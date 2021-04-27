@@ -10,7 +10,7 @@ class OQL(dm: String, val ds: SQLDataSource) {
 
   import OQL._
 
-  private var _showQuery = false
+  protected var _showQuery = false
 
   val model: DataModel = {
     val p = new DMLParser()
@@ -65,7 +65,7 @@ class OQL(dm: String, val ds: SQLDataSource) {
   }
 
   def count(query: OQLQuery, oql: String, parameters: collection.Map[String, Any]): Future[Int] =
-    queryMany(query, oql, () => new ScalaResultBuilder, Map()) map { r =>
+    queryMany(query, oql, () => new ScalaResultBuilder, parameters) map { r =>
       r.arrayResult match {
         case Nil       => sys.error("count: zero rows were found")
         case List(row) => row.asInstanceOf[Map[String, Number]]("count").intValue()
