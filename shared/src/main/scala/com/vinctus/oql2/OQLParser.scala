@@ -80,7 +80,7 @@ object OQLParser extends RegexParsers with PackratParsers {
   lazy val order: PackratParser[List[OQLOrdering]] = "<" ~> rep1sep(ordering, ",") <~ ">"
 
   lazy val ordering: PackratParser[OQLOrdering] =
-    expression ~ opt("ASC" | "DESC") ~ opt("NULLS" ~> ("FIRST" | "LAST")) ^^ {
+    expression ~ opt(kw("ASC") | kw("DESC")) ~ opt(kw("NULLS") ~> (kw("FIRST") | kw("LAST"))) ^^ {
       case e ~ d ~ n =>
         OQLOrdering(
           e,
@@ -135,7 +135,7 @@ object OQLParser extends RegexParsers with PackratParsers {
   lazy val comparison: PackratParser[String] =
     ("<=" | ">=" | "<" | ">" | "=" | "!=" | kw("LIKE") | kw("ILIKE") | (kw("NOT") ~ kw("LIKE") ^^^ "NOT LIKE") | (kw("NOT") ~ kw("ILIKE") ^^^ "NOT ILIKE"))
 
-  lazy val booleanLiteral: PackratParser[OQLExpression] = ("TRUE" | "FALSE") ^^ BooleanOQLExpression
+  lazy val booleanLiteral: PackratParser[OQLExpression] = (kw("TRUE") | kw("FALSE")) ^^ BooleanOQLExpression
 
   lazy val expression: PackratParser[OQLExpression] = additive
 
@@ -167,7 +167,7 @@ object OQLParser extends RegexParsers with PackratParsers {
       "(" ~> expression <~ ")" ^^ GroupedOQLExpression
 
   lazy val caseExpression: OQLParser.Parser[CaseOQLExpression] =
-    "CASE" ~> rep1(when) ~ opt("ELSE" ~> expression) <~ "END" ^^ { case ws ~ e => CaseOQLExpression(ws, e) }
+    kw("CASE") ~> rep1(when) ~ opt(kw("ELSE") ~> expression) <~ kw("END") ^^ { case ws ~ e => CaseOQLExpression(ws, e) }
 
   lazy val when: OQLParser.Parser[OQLWhen] =
     kw("WHEN") ~ booleanExpression ~ kw("THEN") ~ expression ^^ { case _ ~ l ~ _ ~ e => OQLWhen(l, e) }

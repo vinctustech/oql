@@ -1,11 +1,8 @@
 package com.vinctus.oql2
 
-import jdk.nashorn.internal.objects.NativeDebug.map
-
 import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
 import scala.annotation.tailrec
-import scala.collection.immutable.VectorMap
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
