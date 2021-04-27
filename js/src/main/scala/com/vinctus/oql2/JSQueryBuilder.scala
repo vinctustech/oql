@@ -3,9 +3,9 @@ package com.vinctus.oql2
 import com.vinctus.oql2.OQL_TS_NodePG.jsParameters
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
 import scala.scalajs.js
 import scala.scalajs.js.JSConverters._
+import scala.scalajs.js.annotation.JSExport
 
 class JSQueryBuilder private[oql2] (private val oql: OQL_TS_NodePG, private[oql2] val q: OQLQuery) {
   private def check = if (q.source eq null) sys.error("QueryBuilder: no source was given") else this
@@ -13,7 +13,8 @@ class JSQueryBuilder private[oql2] (private val oql: OQL_TS_NodePG, private[oql2
   private class DoNothingQueryBuilder extends JSQueryBuilder(oql, q) {
     private def na = sys.error("not applicable")
 
-    override def cond(b: Boolean): JSQueryBuilder = na
+    @JSExport
+    override def cond(v: Any): JSQueryBuilder = na
 
     override def getMany(parameters: js.UndefOr[js.Any] = js.undefined): js.Promise[js.Array[js.Any]] = na
 
@@ -36,7 +37,8 @@ class JSQueryBuilder private[oql2] (private val oql: OQL_TS_NodePG, private[oql2
     override def select(s: String): JSQueryBuilder = JSQueryBuilder.this
   }
 
-  def cond(b: Boolean): JSQueryBuilder = if (b) this else new DoNothingQueryBuilder
+  @JSExport("cond")
+  def cond(v: Any): JSQueryBuilder = if (v != () && v != null && v != false && v != 0 && v != "") this else new DoNothingQueryBuilder
 
 //  def add(attribute: QueryBuilder) =
 //    new QueryBuilder(
@@ -93,8 +95,5 @@ class JSQueryBuilder private[oql2] (private val oql: OQL_TS_NodePG, private[oql2
   def getOne(parameters: js.UndefOr[js.Any] = js.undefined): js.Promise[js.UndefOr[Any]] = check.oql.jsqueryOne(q, null, parameters)
 
   def getCount(parameters: js.UndefOr[js.Any] = js.undefined): js.Promise[Int] = check.oql.count(q, null, jsParameters(parameters)).toJSPromise
-
-  def json(parameters: collection.Map[String, Any] = Map()): Future[String] =
-    check.oql.queryMany(q, null, () => new ScalaResultBuilder, parameters) map (r => JSON(r.arrayResult, oql.ds.platformSpecific, format = true))
 
 }
