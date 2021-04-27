@@ -2,11 +2,11 @@ export class QueryBuilder {
 
   cond(v: any): QueryBuilder
 
-  add(attribute: QueryBuilder): QueryBuilder
-
-  add(query: String): QueryBuilder
-
-  project(resource: string, ...attributes: string[]): QueryBuilder
+//   add(attribute: QueryBuilder): QueryBuilder
+//
+//   add(query: String): QueryBuilder
+//
+//   project(resource: string, ...attributes: string[]): QueryBuilder
 
   query(oql: string): QueryBuilder
 
@@ -28,11 +28,11 @@ export class QueryBuilder {
 
 export class OQL {
 
-  constructor(conn: Connection, erd: string)
+  constructor(dm: string, host: string, port: number, database: string, user: string, password: string, ssl: boolean, idleTimeoutMillis: number, max: number)
 
-  trace: boolean
-
-  entity(resource: string): Resource
+//   trace: boolean
+//
+//   entity(resource: string): Resource
 
   queryBuilder(): QueryBuilder
 
@@ -43,19 +43,5 @@ export class OQL {
   count(oql: string, parameters?: any): Promise<number>
 
   raw(sql: string, values?: any[]): Promise<any[]>
-
-}
-
-export class PostgresConnection extends Connection {
-
-  constructor(host: string, port: number, database: string, user: string, password: string, ssl: boolean, idleTimeoutMillis: number, max: number)
-
-  close(): void
-
-}
-
-export abstract class Connection {
-
-  close(): void
 
 }
