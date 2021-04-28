@@ -28,7 +28,7 @@ export class QueryBuilder {
 
 export class OQL2 {
 
-  constructor(dm: string, host: string, port: number, database: string, user: string, password: string, ssl: boolean, idleTimeoutMillis: number, max: number)
+  constructor(dm: string, host: string, port: number, database: string, user: string, password: string, ssl: any, idleTimeoutMillis: number, max: number)
 
   showQuery(): void
 
