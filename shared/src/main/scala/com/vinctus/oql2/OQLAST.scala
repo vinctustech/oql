@@ -17,6 +17,7 @@ case class OQLQuery(source: Ident,
 
 trait OQLProject { val label: Ident }
 case object StarOQLProject extends OQLProject { val label: Ident = null }
+case object SQLStarOQLProject extends OQLProject { val label: Ident = null }
 case class SubtractOQLProject(id: Ident) extends OQLProject { val label: Ident = null }
 case class ExpressionOQLProject(label: Ident, expr: OQLExpression) extends OQLProject
 case class QueryOQLProject(label: Ident, query: OQLQuery) extends OQLProject

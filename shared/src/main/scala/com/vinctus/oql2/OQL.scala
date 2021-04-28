@@ -224,6 +224,7 @@ object OQL {
 
     expr match {
       case ExistsOQLExpression(query) =>
+        query.project = List(SQLStarOQLProject)
         queryProjects(Some(entity), query, model, ds, oql)
 
         if (!query.attr.typ.isArrayType)
@@ -427,6 +428,7 @@ object OQL {
             decorate(entity, expr, model, ds, oql)
             expProj
         }
+      case SQLStarOQLProject => map(null) = ExpressionOQLProject(Ident(null), StarOQLExpression)
     }
 
     query.project = map.values.toList
