@@ -21,12 +21,10 @@ class PG_NodePG(val host: String,
 
   def uuid(id: String): Any = id
 
-  def connect: OQLConnection = new PGNodeConnection(this)
+  val connect: NodePGConnection = new NodePGConnection(this)
 
   val platformSpecific: PartialFunction[Any, String] = {
     case d: js.Date => s""""${d.toISOString()}""""
   }
-
-  def resultBuilder: ResultBuilder = new JSResultBuilder
 
 }

@@ -4,7 +4,7 @@ import typings.pg.mod.QueryArrayResult
 
 import scala.scalajs.js
 
-class PGNodeResultSet(rs: QueryArrayResult[js.Array[js.Any]]) extends OQLResultSet with JSONResultSet {
+class NodePGResultSet(rs: QueryArrayResult[js.Array[js.Any]]) extends OQLResultSet with JSONResultSet {
   private var first = false
   private var ridx: Int = _
   private var row: js.Array[js.Any] = _

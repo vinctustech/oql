@@ -1,25 +1,28 @@
 package com.vinctus.oql2
 
-import com.vinctus.oql2.OQL_TS_NodePG.jsParameters
+import com.vinctus.oql2.OQL_NodePG.jsParameters
 import typings.node.tlsMod.ConnectionOptions
 
 import scala.scalajs.js
 import scala.scalajs.js.|
 import js.JSConverters._
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 import scala.scalajs.js.annotation.{JSExport, JSExportTopLevel}
 
-@JSExportTopLevel("OQL")
-class OQL_TS_NodePG(dm: String,
-                    host: String,
-                    port: Int,
-                    database: String,
-                    user: String,
-                    password: String,
-                    ssl: Boolean | ConnectionOptions,
-                    idleTimeoutMillis: Int,
-                    max: Int)
+@JSExportTopLevel("OQL2")
+class OQL_NodePG(dm: String,
+                 host: String,
+                 port: Int,
+                 database: String,
+                 user: String,
+                 password: String,
+                 ssl: Boolean | ConnectionOptions,
+                 idleTimeoutMillis: Int,
+                 max: Int)
     extends OQL(dm, new PG_NodePG(host, port, database, user, password, ssl, idleTimeoutMillis, max)) {
+
+  override def execute[R](action: OQLConnection => Future[R]): Future[R] = action(connect)
 
   @JSExport
   override def showQuery(): Unit = _showQuery = true
@@ -44,9 +47,15 @@ class OQL_TS_NodePG(dm: String,
   @JSExport("queryBuilder")
   def jsqueryBuilder() = new JSQueryBuilder(this, OQLQuery(null, null, null, List(StarOQLProject), None, None, None, None, None))
 
+  @JSExport
+  def raw(sql: String, values: js.UndefOr[js.Array[js.Any]]): js.Promise[js.Array[js.Any]] =
+    ds.asInstanceOf[PG_NodePG]
+      .connect
+      .raw(sql, if (values.isEmpty) js.Array() else values.get)
+
 }
 
-object OQL_TS_NodePG {
+object OQL_NodePG {
 
   private[oql2] def jsParameters(parameters: js.UndefOr[js.Any]): collection.Map[String, Any] =
     if (parameters.isEmpty) Map()

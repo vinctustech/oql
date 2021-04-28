@@ -1,13 +1,13 @@
 package com.vinctus.oql2
 
-import com.vinctus.oql2.OQL_TS_NodePG.jsParameters
+import com.vinctus.oql2.OQL_NodePG.jsParameters
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.scalajs.js
 import scala.scalajs.js.JSConverters._
 import scala.scalajs.js.annotation.JSExport
 
-class JSQueryBuilder private[oql2] (private val oql: OQL_TS_NodePG, private[oql2] val q: OQLQuery) {
+class JSQueryBuilder private[oql2] (private val oql: OQL_NodePG, private[oql2] val q: OQLQuery) {
   private def check = if (q.source eq null) sys.error("QueryBuilder: no source was given") else this
 
   private class DoNothingQueryBuilder extends JSQueryBuilder(oql, q) {
