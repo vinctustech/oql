@@ -82,7 +82,7 @@ class OQL(dm: String, val ds: SQLDataSource) {
       r.arrayResult match {
         case Nil       => None
         case List(row) => Some(row)
-        case _         => sys.error("queryOne: more than one row was found")
+        case _         => sys.error(s"queryOne: more than one row was found")
       }
     }
 

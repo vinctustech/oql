@@ -35,7 +35,12 @@ class OQL_NodePG(dm: String,
     jsqueryOne(parseQuery(oql), oql, parameters)
 
   def jsqueryOne(query: OQLQuery, oql: String, parameters: js.UndefOr[js.Any]): js.Promise[js.UndefOr[Any]] =
-    queryOne(query, oql, () => new JSResultBuilder, jsParameters(parameters)).map(_.orUndefined).toJSPromise
+//    queryOne(query, oql, () => new JSResultBuilder, jsParameters(parameters)).map(_.orUndefined).toJSPromise
+    jsqueryMany(query, oql, parameters).toFuture map {
+      case a if a.length == 0 => js.undefined
+      case a if a.length == 1 => a.head
+      case _                  => sys.error(s"queryOne: more than one row was found")
+    } toJSPromise
 
   @JSExport("queryMany")
   def jsqueryMany(oql: String, parameters: js.UndefOr[js.Any] = js.undefined): js.Promise[js.Array[js.Any]] =
