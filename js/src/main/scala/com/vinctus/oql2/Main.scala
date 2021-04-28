@@ -9,27 +9,27 @@ import scala.util.Success
 
 object Main extends App {
 
-  val dm: String =
-    """
-      |entity book {
-      | *id: bigint
-      |  title: text
-      |  year: int
-      |  author: author
-      |}
-      |
-      |entity author {
-      | *id: bigint
-      |  name: text
-      |  books: [book]
-      |}
-      |""".stripMargin
-  val db = new OQL(dm, new PG_NodePG("localhost", 5432, "postgres", "postgres", "docker", false, 0, 10))
-//  val db = new OQL_NodePG(dm, "localhost", 5432, "postgres", "postgres", "docker", false, 0, 10)
-
-  db.showQuery()
-  db.json("author { name } [EXISTS (books [year < 1840])]").onComplete {
-    case Success(value) => println(value)
-  }
+//  val dm: String =
+//    """
+//      |entity book {
+//      | *id: bigint
+//      |  title: text
+//      |  year: int
+//      |  author: author
+//      |}
+//      |
+//      |entity author {
+//      | *id: bigint
+//      |  name: text
+//      |  books: [book]
+//      |}
+//      |""".stripMargin
+//  val db = new OQL(dm, new PG_NodePG("localhost", 5432, "postgres", "postgres", "docker", false, 0, 10))
+////  val db = new OQL_NodePG(dm, "localhost", 5432, "postgres", "postgres", "docker", false, 0, 10)
+//
+//  db.showQuery()
+//  db.json("author { name } [EXISTS (books [year < 1840])]").onComplete {
+//    case Success(value) => println(value)
+//  }
 
 }
