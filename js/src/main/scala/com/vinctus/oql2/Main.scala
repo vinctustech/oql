@@ -24,12 +24,12 @@ object Main extends App {
 //      |  books: [book]
 //      |}
 //      |""".stripMargin
-//  val db = new OQL(dm, new PG_NodePG("localhost", 5432, "postgres", "postgres", "docker", false, 0, 10))
-////  val db = new OQL_NodePG(dm, "localhost", 5432, "postgres", "postgres", "docker", false, 0, 10)
+////  val db = new OQL(dm, new PG_NodePG("localhost", 5432, "postgres", "postgres", "docker", false, 0, 10))
+//  val db = new OQL_NodePG(dm, "localhost", 5432, "postgres", "postgres", "docker", false, 0, 10)
 //
 //  db.showQuery()
-//  db.json("author { name } [EXISTS (books [year < 1840])]").onComplete {
-//    case Success(value) => println(value)
+//  db.jsqueryMany("author { name } [id IN :ids]", js.Dictionary("ids" -> js.Array(1, 2))).toFuture.onComplete {
+//    case Success(value) => console.log(value)
 //  }
 
 }

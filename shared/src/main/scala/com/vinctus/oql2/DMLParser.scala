@@ -34,11 +34,11 @@ class DMLParser extends RegexParsers {
 
   def typeSpecifier: Parser[DMLTypeSpecifier] =
     ("text" |
-      "integer" | "int" | "int4" |
-      "bool" | "boolean" |
+      "integer" | "int4" | "int" |
+      "boolean" | "bool" |
       "bigint" |
       "date" |
-      "float" | "float8" |
+      "float8" | "float" |
       "uuid" |
       "timestamp") ^^ DMLSimpleDataType |
       "decimal" ~ "(" ~ integer ~ "," ~ integer ~ ")" ^^ {

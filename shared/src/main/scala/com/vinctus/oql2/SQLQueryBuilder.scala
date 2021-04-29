@@ -4,6 +4,7 @@ import com.vinctus.oql2.OQL._
 
 import scala.collection.mutable.ArrayBuffer
 import scala.language.postfixOps
+import scala.scalajs.js
 
 object SQLQueryBuilder {
 
@@ -100,16 +101,19 @@ class SQLQueryBuilder(val parms: Parameters, oql: String, ds: SQLDataSource, val
         s"${expression(left, table)} $op (\n$sql${" " * (margin + 2 * SQLQueryBuilder.INDENT)})"
       case InParameterOQLExpression(left, op, right @ ParameterOQLExpression(p)) =>
         parms.get(p.s) match {
-          case Some(value) if !value.isInstanceOf[Seq[_]] => problem(p.pos, s"parameter '${p.s}' is not an array", oql)
-          case _                                          => s"${expression(left, table)} $op ${expression(right, table)}"
+          case Some(_: js.Array[_] | _: collection.Seq[_]) =>
+            s"${expression(left, table)} $op ${expression(right, table)}" // todo: reference to js.Array is platform specific
+          case Some(_) => problem(p.pos, s"parameter '${p.s}' is not an array", oql)
+          case None    => problem(p.pos, s"parameter '${p.s}' not found", oql)
         }
       case InArrayOQLExpression(left, op, right) => s"${expression(left, table)} $op (${right map (expression(_, table)) mkString ", "})"
       case ParameterOQLExpression(p) =>
         parms get p.s match {
-          case Some(parm: Seq[_]) => parm.mkString("(", ", ", ")")
-          case Some(parm: Number) => parm.toString
-          case Some(parm: String) => s"'${quote(parm)}'"
-          case None               => problem(p.pos, s"parameter '${p.s}' not found", oql)
+          case Some(parm: js.Array[_])       => parm.mkString("(", ", ", ")") // todo: reference to js.Array is platform specific
+          case Some(parm: collection.Seq[_]) => parm.mkString("(", ", ", ")")
+          case Some(parm: Number)            => parm.toString
+          case Some(parm: String)            => s"'${quote(parm)}'"
+          case None                          => problem(p.pos, s"parameter '${p.s}' not found", oql)
         }
       case ApplyOQLExpression(f, args)                       => s"${f.s}(${args map (expression(_, table)) mkString ", "})"
       case StarOQLExpression                                 => "*"
