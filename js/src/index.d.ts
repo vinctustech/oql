@@ -8,9 +8,9 @@ export class QueryBuilder {
 //
 //   project(resource: string, ...attributes: string[]): QueryBuilder
 
-  query(oql: string): QueryBuilder
+  query(oql: string, parameters?: any): QueryBuilder
 
-  select(oql: string): QueryBuilder
+  select(oql: string, parameters?: any): QueryBuilder
 
   order(attribute: string, sorting: string): QueryBuilder
 
@@ -18,11 +18,11 @@ export class QueryBuilder {
 
   offset(a: number): QueryBuilder
 
-  getOne(parameters?: any): Promise<any | undefined>
+  getOne(): Promise<any | undefined>
 
-  getMany(parameters?: any): Promise<any[]>
+  getMany(): Promise<any[]>
 
-  getCount(parameters?: any): Promise<number>
+  getCount(): Promise<number>
 
 }
 

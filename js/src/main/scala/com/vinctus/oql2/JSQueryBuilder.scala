@@ -1,11 +1,11 @@
 package com.vinctus.oql2
 
-import com.vinctus.oql2.OQL_NodePG.jsParameters
-
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.scalajs.js
-import scala.scalajs.js.JSConverters._
 import scala.scalajs.js.annotation.JSExport
+import scala.scalajs.js.JSConverters._
+
+import OQL_NodePG._
 
 class JSQueryBuilder private[oql2] (private val oql: OQL_NodePG, private[oql2] val q: OQLQuery) {
   private def check = if (q.source eq null) sys.error("QueryBuilder: no source was given") else this
@@ -17,13 +17,13 @@ class JSQueryBuilder private[oql2] (private val oql: OQL_NodePG, private[oql2] v
     override def cond(v: Any): JSQueryBuilder = na
 
     @JSExport
-    override def getMany(parameters: js.UndefOr[js.Any] = js.undefined): js.Promise[js.Array[js.Any]] = na
+    override def getMany: js.Promise[js.Array[js.Any]] = na
 
     @JSExport
-    override def getOne(parameters: js.UndefOr[js.Any] = js.undefined): js.Promise[js.UndefOr[Any]] = na
+    override def getOne: js.Promise[js.UndefOr[Any]] = na
 
     @JSExport
-    override def getCount(parameters: js.UndefOr[js.Any] = js.undefined): js.Promise[Int] = na
+    override def getCount: js.Promise[Int] = na
 
     @JSExport
     override def limit(a: Int): JSQueryBuilder = JSQueryBuilder.this
@@ -39,10 +39,10 @@ class JSQueryBuilder private[oql2] (private val oql: OQL_NodePG, private[oql2] v
 //    override def add(attribute: QueryBuilder): QueryBuilder = QueryBuilder.this
 
     @JSExport
-    override def query(query: String): JSQueryBuilder = JSQueryBuilder.this
+    override def query(query: String, parameters: js.UndefOr[js.Any] = js.undefined): JSQueryBuilder = JSQueryBuilder.this
 
     @JSExport
-    override def select(s: String): JSQueryBuilder = JSQueryBuilder.this
+    override def select(s: String, parameters: js.UndefOr[js.Any] = js.undefined): JSQueryBuilder = JSQueryBuilder.this
   }
 
   @JSExport("cond")
@@ -74,11 +74,12 @@ class JSQueryBuilder private[oql2] (private val oql: OQL_NodePG, private[oql2] v
 //    )
 
   @JSExport
-  def query(query: String): JSQueryBuilder = new JSQueryBuilder(oql, oql.parseQuery(query))
+  def query(query: String, parameters: js.UndefOr[js.Any] = js.undefined): JSQueryBuilder =
+    new JSQueryBuilder(oql, oql.parseQuery(substitute(query, parameters)))
 
   @JSExport
-  def select(s: String): JSQueryBuilder = {
-    val sel = oql.parseCondition(s, q.entity)
+  def select(s: String, parameters: js.UndefOr[js.Any] = js.undefined): JSQueryBuilder = {
+    val sel = oql.parseCondition(substitute(s, parameters), q.entity)
 
     new JSQueryBuilder(
       oql,
@@ -104,12 +105,12 @@ class JSQueryBuilder private[oql2] (private val oql: OQL_NodePG, private[oql2] v
   def offset(a: Int): JSQueryBuilder = new JSQueryBuilder(oql, q.copy(offset = Some(a)))
 
   @JSExport
-  def getMany(parameters: js.UndefOr[js.Any] = js.undefined): js.Promise[js.Array[js.Any]] = check.oql.jsqueryMany(q, null, parameters)
+  def getMany: js.Promise[js.Array[js.Any]] = check.oql.jsqueryMany(q, null)
 
   @JSExport
-  def getOne(parameters: js.UndefOr[js.Any] = js.undefined): js.Promise[js.UndefOr[Any]] = check.oql.jsqueryOne(q, null, parameters)
+  def getOne: js.Promise[js.UndefOr[Any]] = check.oql.jsqueryOne(q, null)
 
   @JSExport
-  def getCount(parameters: js.UndefOr[js.Any] = js.undefined): js.Promise[Int] = check.oql.count(q, null, jsParameters(parameters)).toJSPromise
+  def getCount: js.Promise[Int] = check.oql.count(q, null).toJSPromise
 
 }
