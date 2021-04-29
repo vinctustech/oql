@@ -17,13 +17,13 @@ class JSQueryBuilder private[oql2] (private val oql: OQL_NodePG, private[oql2] v
     override def cond(v: Any): JSQueryBuilder = na
 
     @JSExport
-    override def getMany: js.Promise[js.Array[js.Any]] = na
+    override def getMany(): js.Promise[js.Array[js.Any]] = na
 
     @JSExport
-    override def getOne: js.Promise[js.UndefOr[Any]] = na
+    override def getOne(): js.Promise[js.UndefOr[Any]] = na
 
     @JSExport
-    override def getCount: js.Promise[Int] = na
+    override def getCount(): js.Promise[Int] = na
 
     @JSExport
     override def limit(a: Int): JSQueryBuilder = JSQueryBuilder.this
@@ -105,12 +105,12 @@ class JSQueryBuilder private[oql2] (private val oql: OQL_NodePG, private[oql2] v
   def offset(a: Int): JSQueryBuilder = new JSQueryBuilder(oql, q.copy(offset = Some(a)))
 
   @JSExport
-  def getMany: js.Promise[js.Array[js.Any]] = check.oql.jsqueryMany(q, null)
+  def getMany(): js.Promise[js.Array[js.Any]] = check.oql.jsqueryMany(q, null)
 
   @JSExport
-  def getOne: js.Promise[js.UndefOr[Any]] = check.oql.jsqueryOne(q, null)
+  def getOne(): js.Promise[js.UndefOr[Any]] = check.oql.jsqueryOne(q, null)
 
   @JSExport
-  def getCount: js.Promise[Int] = check.oql.count(q, null).toJSPromise
+  def getCount(): js.Promise[Int] = check.oql.count(q, null).toJSPromise
 
 }
