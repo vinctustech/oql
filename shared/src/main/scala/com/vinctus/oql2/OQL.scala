@@ -53,7 +53,7 @@ class OQL(dm: String, val ds: SQLDataSource) {
     expr
   }
 
-  def count(oql: String, parameters: collection.Map[String, Any] = Map()): Future[Int] = {
+  def count(oql: String): Future[Int] = {
     val query = OQLParser.parseQuery(oql)
 
     query.project = List(ExpressionOQLProject(Ident("count", null), ApplyOQLExpression(Ident("count", null), List(StarOQLExpression))))
@@ -61,11 +61,11 @@ class OQL(dm: String, val ds: SQLDataSource) {
     query.select foreach (decorate(query.entity, _, model, ds, oql))
     query.group foreach (_ foreach (decorate(query.entity, _, model, ds, oql)))
     query.copy(order = None)
-    count(query, oql, parameters)
+    count(query, oql)
   }
 
-  def count(query: OQLQuery, oql: String, parameters: collection.Map[String, Any]): Future[Int] =
-    queryMany(query, oql, () => new ScalaResultBuilder, parameters) map { r =>
+  def count(query: OQLQuery, oql: String): Future[Int] =
+    queryMany(query, oql, () => new ScalaResultBuilder) map { r =>
       r.arrayResult match {
         case Nil       => sys.error("count: zero rows were found")
         case List(row) => row.asInstanceOf[Map[String, Number]]("count").intValue()
@@ -73,12 +73,11 @@ class OQL(dm: String, val ds: SQLDataSource) {
       }
     }
 
-  def queryOne(oql: String,
-               newResultBuilder: () => ResultBuilder = () => new ScalaResultBuilder,
-               parameters: collection.Map[String, Any] = Map()): Future[Option[Any]] = queryOne(parseQuery(oql), oql, newResultBuilder, parameters)
+  def queryOne(oql: String, newResultBuilder: () => ResultBuilder = () => new ScalaResultBuilder): Future[Option[Any]] =
+    queryOne(parseQuery(oql), oql, newResultBuilder)
 
-  def queryOne(q: OQLQuery, oql: String, newResultBuilder: () => ResultBuilder, parameters: collection.Map[String, Any]): Future[Option[Any]] =
-    queryMany(q, oql, newResultBuilder, parameters) map { r =>
+  def queryOne(q: OQLQuery, oql: String, newResultBuilder: () => ResultBuilder): Future[Option[Any]] =
+    queryMany(q, oql, newResultBuilder) map { r =>
       r.arrayResult match {
         case Nil       => None
         case List(row) => Some(row)
@@ -90,31 +89,20 @@ class OQL(dm: String, val ds: SQLDataSource) {
 
   def queryBuilder() = new QueryBuilder(this, OQLQuery(null, null, null, List(StarOQLProject), None, None, None, None, None))
 
-  def json(oql: String, parameters: collection.Map[String, Any] = Map(), tab: Int = 2, format: Boolean = true): Future[String] =
-    queryMany(oql, () => new ScalaResultBuilder, parameters) map (r => JSON(r.arrayResult, ds.platformSpecific, tab, format))
+  def json(oql: String, tab: Int = 2, format: Boolean = true): Future[String] =
+    queryMany(oql, () => new ScalaResultBuilder) map (r => JSON(r.arrayResult, ds.platformSpecific, tab, format))
 
-  def queryMany(oql: String,
-                newResultBuilder: () => ResultBuilder = () => new ScalaResultBuilder,
-                parameters: collection.Map[String, Any] = Map()): Future[ResultBuilder] =
-    queryMany(parseQuery(oql), oql, newResultBuilder, parameters)
+  def queryMany(oql: String, newResultBuilder: () => ResultBuilder = () => new ScalaResultBuilder): Future[ResultBuilder] =
+    queryMany(parseQuery(oql), oql, newResultBuilder)
 
-  def queryMany(query: OQLQuery,
-                oql: String,
-                newResultBuilder: () => ResultBuilder,
-                parameters: collection.Map[String, Any]): Future[ResultBuilder] = {
-    val parms = new Parameters(parameters)
+  def queryMany(query: OQLQuery, oql: String, newResultBuilder: () => ResultBuilder): Future[ResultBuilder] = {
     val root: ResultNode = ResultNode(query, objectNode(query.project))
-    val sqlBuilder = new SQLQueryBuilder(parms, oql, ds)
+    val sqlBuilder = new SQLQueryBuilder(oql, ds)
 
 //    println(prettyPrint(root))
     writeQuery(root, null, Left(sqlBuilder), oql, ds)
 
     val sql = sqlBuilder.toString
-
-    parameters.keySet diff parms.keySet match {
-      case set: Set[_] if set.nonEmpty => sys.error(s"superfluous query parameters: ${set mkString ", "}")
-      case _                           =>
-    }
 
     if (_showQuery) {
       println(sql)
@@ -274,9 +262,6 @@ object OQL {
       case InArrayOQLExpression(left, op, right) =>
         _decorate(left)
         right foreach _decorate
-      case InParameterOQLExpression(left, op, right) =>
-        _decorate(left)
-        _decorate(right)
       case e @ InfixOQLExpression(left, _, right) =>
         _decorate(left)
         _decorate(right)
@@ -321,11 +306,11 @@ object OQL {
 
         query.select foreach (decorate(query.entity, _, model, ds, oql))
         query.order foreach (_ foreach { case OQLOrdering(expr, _) => decorate(query.entity, expr, model, ds, oql) })
-      case e: LiteralOQLExpression                                                                         => e.typ = TextType
-      case e: FloatOQLExpression                                                                           => e.typ = FloatType
-      case e: IntegerOQLExpression                                                                         => e.typ = IntegerType
-      case e: BooleanOQLExpression                                                                         => e.typ = BooleanType
-      case StarOQLExpression | _: RawOQLExpression | _: ReferenceOQLExpression | _: ParameterOQLExpression =>
+      case e: LiteralOQLExpression                                             => e.typ = TextType
+      case e: FloatOQLExpression                                               => e.typ = FloatType
+      case e: IntegerOQLExpression                                             => e.typ = IntegerType
+      case e: BooleanOQLExpression                                             => e.typ = BooleanType
+      case StarOQLExpression | _: RawOQLExpression | _: ReferenceOQLExpression =>
     }
   }
 
@@ -435,11 +420,7 @@ object OQL {
     query
   }
 
-  private[oql2] def writeQuery(node: Node,
-                               table: String,
-                               builder: Either[SQLQueryBuilder, (Parameters, Int)],
-                               oql: String,
-                               ds: SQLDataSource): SQLQueryBuilder =
+  private[oql2] def writeQuery(node: Node, table: String, builder: Either[SQLQueryBuilder, Int], oql: String, ds: SQLDataSource): SQLQueryBuilder =
     node match {
       case ResultNode(query, element) =>
         builder.left.toOption.get.table(query.entity.table, None)
@@ -487,8 +468,8 @@ object OQL {
         val alias = s"$table$$$name"
         val subquery =
           if (builder.isLeft)
-            new SQLQueryBuilder(builder.left.toOption.get.parms, oql, ds, builder.left.toOption.get.margin + 2 * SQLQueryBuilder.INDENT)
-          else new SQLQueryBuilder(builder.toOption.get._1, oql, ds, builder.toOption.get._2, true)
+            new SQLQueryBuilder(oql, ds, builder.left.toOption.get.margin + 2 * SQLQueryBuilder.INDENT)
+          else new SQLQueryBuilder(oql, ds, builder.toOption.get, true)
         val joinAlias = s"$alias$$${targetAttr.name}"
 
         if (builder.isLeft)
@@ -510,8 +491,8 @@ object OQL {
         val alias = s"$table$$$name"
         val subquery =
           if (builder.isLeft)
-            new SQLQueryBuilder(builder.left.toOption.get.parms, oql, ds, builder.left.toOption.get.margin + 2 * SQLQueryBuilder.INDENT)
-          else new SQLQueryBuilder(builder.toOption.get._1, oql, ds, builder.toOption.get._2, true)
+            new SQLQueryBuilder(oql, ds, builder.left.toOption.get.margin + 2 * SQLQueryBuilder.INDENT)
+          else new SQLQueryBuilder(oql, ds, builder.toOption.get, true)
 
         if (builder.isLeft)
           n.idx = builder.left.toOption.get.projectQuery(subquery)
@@ -535,8 +516,8 @@ object OQL {
         val alias = s"$table$$$name"
         val subquery =
           if (builder.isLeft)
-            new SQLQueryBuilder(builder.left.toOption.get.parms, oql, ds, builder.left.toOption.get.margin + 2 * SQLQueryBuilder.INDENT)
-          else new SQLQueryBuilder(builder.toOption.get._1, oql, ds, builder.toOption.get._2, true)
+            new SQLQueryBuilder(oql, ds, builder.left.toOption.get.margin + 2 * SQLQueryBuilder.INDENT)
+          else new SQLQueryBuilder(oql, ds, builder.toOption.get, true)
 
         if (builder.isLeft)
           n.idx = builder.left.toOption.get.projectQuery(subquery)

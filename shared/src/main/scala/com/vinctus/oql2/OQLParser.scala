@@ -48,12 +48,7 @@ object OQLParser extends RegexParsers with PackratParsers {
       opt(label) ~ ("&" ~> attributeName) ^^ {
         case None ~ a    => ExpressionOQLProject(a, ReferenceOQLExpression(List(a)))
         case Some(l) ~ a => ExpressionOQLProject(l, ReferenceOQLExpression(List(a)))
-      } |
-      opt(label) ~ parameterExpression ^^ {
-        case None ~ e    => ExpressionOQLProject(e.p, e)
-        case Some(l) ~ e => ExpressionOQLProject(l, e)
       }
-  lazy val parameterExpression: OQLParser.Parser[ParameterOQLExpression] = ":" ~> ident ^^ ParameterOQLExpression
 
   lazy val label: OQLParser.Parser[Ident] = ident <~ ":"
 
@@ -120,11 +115,9 @@ object OQLParser extends RegexParsers with PackratParsers {
       } |
       expression ~ isNull ^^ { case e ~ n                                => PostfixOQLExpression(e, n) } |
       expression ~ in ~ ("(" ~> expressions <~ ")") ^^ { case e ~ i ~ es => InArrayOQLExpression(e, i, es) } |
-      expression ~ in ~ parameterExpression ^^ { case e ~ i ~ p          => InParameterOQLExpression(e, i, p) } |
       expression ~ in ~ ("(" ~> query <~ ")") ^^ { case e ~ i ~ q        => InQueryOQLExpression(e, i, q) } |
       kw("EXISTS") ~> "(" ~> query <~ ")" ^^ ExistsOQLExpression |
       booleanLiteral |
-      parameterExpression |
       qualifiedAttributeExpression |
       "(" ~> booleanExpression <~ ")" ^^ GroupedOQLExpression
 
@@ -158,7 +151,6 @@ object OQLParser extends RegexParsers with PackratParsers {
       starExpression |
       booleanLiteral |
       applyExpression |
-      parameterExpression |
       qualifiedAttributeExpression |
       "&" ~> idents ^^ ReferenceOQLExpression |
       caseExpression |

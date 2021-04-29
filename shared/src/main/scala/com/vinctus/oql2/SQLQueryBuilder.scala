@@ -14,7 +14,7 @@ object SQLQueryBuilder {
 
 }
 
-class SQLQueryBuilder(val parms: Parameters, oql: String, ds: SQLDataSource, val margin: Int = 0, subquery: Boolean = false) {
+class SQLQueryBuilder(oql: String, ds: SQLDataSource, val margin: Int = 0, subquery: Boolean = false) {
 
   import SQLQueryBuilder._
 
@@ -85,36 +85,21 @@ class SQLQueryBuilder(val parms: Parameters, oql: String, ds: SQLDataSource, val
   def expression(expr: OQLExpression, table: String): String =
     expr match {
       case ExistsOQLExpression(query) =>
-        val subquery = writeQuery(innerQuery(query), table, Right((parms, margin + 2 * SQLQueryBuilder.INDENT)), oql, ds)
+        val subquery = writeQuery(innerQuery(query), table, Right(margin + 2 * SQLQueryBuilder.INDENT), oql, ds)
         val sql = subquery.toString
 
         s"EXISTS (\n$sql${" " * (margin + 2 * SQLQueryBuilder.INDENT)})"
       case QueryOQLExpression(query) =>
-        val subquery = writeQuery(innerQuery(query), table, Right((parms, margin + 2 * SQLQueryBuilder.INDENT)), oql, ds)
+        val subquery = writeQuery(innerQuery(query), table, Right(margin + 2 * SQLQueryBuilder.INDENT), oql, ds)
         val sql = subquery.toString
 
         s"(\n$sql${" " * (margin + 2 * SQLQueryBuilder.INDENT)})"
       case InQueryOQLExpression(left, op, query) =>
-        val subquery = writeQuery(innerQuery(query), table, Right((parms, margin + 2 * SQLQueryBuilder.INDENT)), oql, ds)
+        val subquery = writeQuery(innerQuery(query), table, Right(margin + 2 * SQLQueryBuilder.INDENT), oql, ds)
         val sql = subquery.toString
 
         s"${expression(left, table)} $op (\n$sql${" " * (margin + 2 * SQLQueryBuilder.INDENT)})"
-      case InParameterOQLExpression(left, op, right @ ParameterOQLExpression(p)) =>
-        parms.get(p.s) match {
-          case Some(_: js.Array[_] | _: collection.Seq[_]) =>
-            s"${expression(left, table)} $op ${expression(right, table)}" // todo: reference to js.Array is platform specific
-          case Some(_) => problem(p.pos, s"parameter '${p.s}' is not an array", oql)
-          case None    => problem(p.pos, s"parameter '${p.s}' not found", oql)
-        }
-      case InArrayOQLExpression(left, op, right) => s"${expression(left, table)} $op (${right map (expression(_, table)) mkString ", "})"
-      case ParameterOQLExpression(p) =>
-        parms get p.s match {
-          case Some(parm: js.Array[_])       => parm.mkString("(", ", ", ")") // todo: reference to js.Array is platform specific
-          case Some(parm: collection.Seq[_]) => parm.mkString("(", ", ", ")")
-          case Some(parm: Number)            => parm.toString
-          case Some(parm: String)            => s"'${quote(parm)}'"
-          case None                          => problem(p.pos, s"parameter '${p.s}' not found", oql)
-        }
+      case InArrayOQLExpression(left, op, right)             => s"${expression(left, table)} $op (${right map (expression(_, table)) mkString ", "})"
       case ApplyOQLExpression(f, args)                       => s"${f.s}(${args map (expression(_, table)) mkString ", "})"
       case StarOQLExpression                                 => "*"
       case RawOQLExpression(s)                               => s
