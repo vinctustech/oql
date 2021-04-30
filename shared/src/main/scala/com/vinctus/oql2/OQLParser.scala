@@ -1,5 +1,7 @@
 package com.vinctus.oql2
 
+import com.vinctus.oql2.OQLParser.literalExpression
+
 import scala.util.matching.Regex
 import scala.util.parsing.combinator.{PackratParsers, RegexParsers}
 import scala.util.parsing.input.{CharSequenceReader, Position, Positional}
@@ -10,7 +12,13 @@ object OQLParser extends RegexParsers with PackratParsers {
 
   def kw(s: String): Regex = (s"(?i)$s\\b").r
 
-  lazy val command: PackratParser[OQLAST] = query //| insert
+  lazy val command: PackratParser[OQLAST] = query | insert
+
+  lazy val insert: PackratParser[OQLInsert] = entityName ~ "<-" ~ rep1sep(value, ",") ^^ { case e ~ _ ~ vs => OQLInsert(e, vs) }
+
+  lazy val value: PackratParser[Seq[OQLKeyValue]] = "{" ~> rep1(pair) <~ "}"
+
+  lazy val pair: PackratParser[OQLKeyValue] = ident ~ ":" ~ literalExpression ^^ { case k ~ _ ~ v => OQLKeyValue(k, v) }
 
   lazy val query: PackratParser[OQLQuery] =
     entityName ~ project ~ opt("[" ~> booleanExpression <~ "]") ~ opt(group) ~ opt(order) ~ restrict ^^ {
@@ -144,12 +152,15 @@ object OQLParser extends RegexParsers with PackratParsers {
     } |
       primary
 
-  lazy val primary: PackratParser[OQLExpression] =
+  lazy val literalExpression: PackratParser[OQLExpression] =
     integer ^^ IntegerOQLExpression |
       float ^^ FloatOQLExpression |
       string ^^ LiteralOQLExpression |
+      booleanLiteral
+
+  lazy val primary: PackratParser[OQLExpression] =
+    literalExpression |
       starExpression |
-      booleanLiteral |
       applyExpression |
       qualifiedAttributeExpression |
       "&" ~> idents ^^ ReferenceOQLExpression |

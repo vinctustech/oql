@@ -24,6 +24,8 @@ class OQL_NodePG(dm: String,
 
   import OQL_NodePG._
 
+  def mutate(command: String): Any
+
   override def execute[R](action: OQLConnection => Future[R]): Future[R] = action(connect)
 
   @JSExport

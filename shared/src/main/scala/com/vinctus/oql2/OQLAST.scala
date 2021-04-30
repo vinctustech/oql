@@ -48,5 +48,5 @@ case class GroupedOQLExpression(expr: OQLExpression) extends OQLExpression
 
 case class OQLWhen(cond: OQLExpression, expr: OQLExpression)
 
-case class OQLKeyValuePair(key: Ident, value: OQLExpression)
-case class OQLInsert(entity: Ident, values: Seq[Seq[OQLKeyValuePair]]) extends OQLAST
+case class OQLKeyValue(key: Ident, value: OQLExpression)
+case class OQLInsert(entity: Ident, values: Seq[Seq[OQLKeyValue]]) extends OQLAST

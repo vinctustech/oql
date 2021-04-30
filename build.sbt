@@ -20,6 +20,7 @@ lazy val oql2 = crossProject(JSPlatform, JVMPlatform /*, NativePlatform*/ )
       ),
     organization := "com.vinctus",
     mainClass := Some("com.vinctus.oql2.Main"),
+    Test / mainClass := Some("com.vinctus.oql2.Main"),
     libraryDependencies += "org.scalatest" %%% "scalatest" % "3.2.5" % "test",
     Test / parallelExecution := false,
     libraryDependencies += "org.scala-lang.modules" %%% "scala-parser-combinators" % "1.2.0-RC2",
