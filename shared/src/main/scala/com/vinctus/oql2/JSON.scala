@@ -60,7 +60,8 @@ object JSON {
 
     def space(): Unit = while (next.isWhitespace) advance()
 
-    def chmatch(c: Char): Unit = if (ch != c) error(if (c == EOI) "expected end of input" else s"expected '$c', but found '$prev'")
+    def chmatch(c: Char): Unit =
+      if (ch != c) error(if (c == EOI) "expected end of input" else s"expected '$c', but found '$prev':\n$json\n${(" " * idx) :+ '^'}")
 
     def delim(c: Char): Unit = {
       chmatch(c)
