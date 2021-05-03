@@ -119,8 +119,10 @@ class SQLQueryBuilder(oql: String, ds: SQLDataSource, val margin: Int = 0, subqu
 
         dmrefs dropRight 1 foreach {
           case (e: Entity, Attribute(name, column, _, _, _)) =>
+            val old_alias = alias
+
             alias = s"$alias$$$name"
-            leftJoin(table, column, e.table, alias, e.pk.get.column)
+            leftJoin(old_alias, column, e.table, alias, e.pk.get.column)
         }
 
         s"$q$alias$q.$q${dmrefs.last._2.column}$q"

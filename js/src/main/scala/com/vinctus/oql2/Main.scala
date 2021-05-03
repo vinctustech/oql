@@ -36,3 +36,4 @@ object Main extends App {
 }
 
 // todo: error check for query type projects that are really datatype attributes: make sure there's no select, order, ...
+// todo: add "author { name } [EXISTS (books [author.name = 'Charles Dickens'])]" ~~> "Charles Dickens" to unit tests
