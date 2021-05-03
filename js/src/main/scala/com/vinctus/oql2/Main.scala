@@ -12,24 +12,27 @@ object Main extends App {
 //  val dm: String =
 //    """
 //      |entity book {
-//      | *id: bigint
+//      | *id (pk_book_id): bigint
 //      |  title: text
 //      |  year: int
-//      |  author: author
+//      |  author (author_id): author
 //      |}
 //      |
 //      |entity author {
-//      | *id: bigint
+//      | *id (pk_author_id): bigint
 //      |  name: text
 //      |  books: [book]
 //      |}
 //      |""".stripMargin
-////  val db = new OQL(dm, new PG_NodePG("localhost", 5432, "postgres", "postgres", "docker", false, 0, 10))
+//////  val db = new OQL(dm, new PG_NodePG("localhost", 5432, "postgres", "postgres", "docker", false, 0, 10))
 //  val db = new OQL_NodePG(dm, "localhost", 5432, "postgres", "postgres", "docker", false, 0, 10)
 //
 //  db.showQuery()
-//  db.jsqueryMany("author { name } [id IN :ids]", js.Dictionary("ids" -> js.Array(1, 2))).toFuture.onComplete {
-//    case Success(value) => console.log(value)
+////  db.jsqueryMany("author { name } [id IN :ids]", js.Dictionary("ids" -> js.Array(1, 2))).toFuture.onComplete {
+//  db.json("author { name } [EXISTS (books [author.name = 'Charles Dickens'])]").onComplete {
+//    case Success(value) => println(value)
 //  }
 
 }
+
+// todo: error check for query type projects that are really datatype attributes: make sure there's no select, order, ...

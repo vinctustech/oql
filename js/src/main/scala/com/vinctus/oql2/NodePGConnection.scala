@@ -1,6 +1,8 @@
 package com.vinctus.oql2
 
 import typings.pg.mod.{Pool, PoolClient, PoolConfig, QueryArrayConfig}
+import typings.pg.mod.types
+import typings.pgTypes.mod.TypeId
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -8,6 +10,8 @@ import scala.scalajs.js
 import scala.scalajs.js.JSConverters._
 
 class NodePGConnection(val dataSource: PG_NodePG) extends OQLConnection {
+
+  types.setTypeParser(114.asInstanceOf[TypeId], (s: String) => s)
 
   private val pool = new Pool(
     PoolConfig()
