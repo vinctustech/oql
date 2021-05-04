@@ -9,29 +9,29 @@ import scala.util.Success
 
 object Main extends App {
 
-  val dm: String =
-    """
-      |entity book {
-      | *id (pk_book_id): bigint
-      |  title: text
-      |  year: int
-      |  author (author_id): author
-      |}
-      |
-      |entity author {
-      | *id (pk_author_id): bigint
-      |  name: text
-      |  books: [book]
-      |}
-      |""".stripMargin
-////  val db = new OQL(dm, new PG_NodePG("localhost", 5432, "postgres", "postgres", "docker", false, 0, 10))
-  val db = new OQL_NodePG(dm, "localhost", 5432, "postgres", "postgres", "docker", false, 0, 10)
-
-  db.showQuery()
-//  db.jsqueryMany("author { name } [id IN :ids]", js.Dictionary("ids" -> js.Array(1, 2))).toFuture.onComplete {
-  db.jsqueryBuilder().query("author").getCount().toFuture.onComplete {
-    case Success(value) => println(value)
-  }
+//  val dm: String =
+//    """
+//      |entity book {
+//      | *id (pk_book_id): bigint
+//      |  title: text
+//      |  year: int
+//      |  author (author_id): author
+//      |}
+//      |
+//      |entity author {
+//      | *id (pk_author_id): bigint
+//      |  name: text
+//      |  books: [book]
+//      |}
+//      |""".stripMargin
+//////  val db = new OQL(dm, new PG_NodePG("localhost", 5432, "postgres", "postgres", "docker", false, 0, 10))
+//  val db = new OQL_NodePG(dm, "localhost", 5432, "postgres", "postgres", "docker", false, 0, 10)
+//
+//  db.showQuery()
+////  db.jsqueryMany("author { name } [id IN :ids]", js.Dictionary("ids" -> js.Array(1, 2))).toFuture.onComplete {
+//  db.jsqueryBuilder().query("author").getCount().toFuture.onComplete {
+//    case Success(value) => println(value)
+//  }
 
 }
 
