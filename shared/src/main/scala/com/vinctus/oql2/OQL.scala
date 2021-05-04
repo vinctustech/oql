@@ -1,5 +1,7 @@
 package com.vinctus.oql2
 
+import com.vinctus.oql2.OQLParser.order
+
 import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
 import scala.annotation.tailrec
@@ -39,7 +41,7 @@ class OQL(dm: String, val ds: SQLDataSource) {
   def parseQuery(oql: String): OQLQuery = {
     val query = OQLParser.parseQuery(oql)
 
-    queryProjects(None, query, model, ds, oql)
+    queryProjects(None, query, model, ds, oql) // todo: should be called "queryPreprocess" and do all decorating
     query.select foreach (decorate(query.entity, _, model, ds, oql))
     query.group foreach (_ foreach (decorate(query.entity, _, model, ds, oql)))
     query.order foreach (_ foreach { case OQLOrdering(expr, _) => decorate(query.entity, expr, model, ds, oql) })
@@ -53,25 +55,22 @@ class OQL(dm: String, val ds: SQLDataSource) {
     expr
   }
 
-  def count(oql: String): Future[Int] = {
-    val query = OQLParser.parseQuery(oql)
+  def count(oql: String): Future[Int] = count(OQLParser.parseQuery(oql), oql)
 
+  def count(query: OQLQuery, oql: String): Future[Int] = {
     query.project = List(ExpressionOQLProject(Ident("count", null), ApplyOQLExpression(Ident("count", null), List(StarOQLExpression))))
     queryProjects(None, query, model, ds, oql)
     query.select foreach (decorate(query.entity, _, model, ds, oql))
     query.group foreach (_ foreach (decorate(query.entity, _, model, ds, oql)))
-    query.copy(order = None)
-    count(query, oql)
-  }
 
-  def count(query: OQLQuery, oql: String): Future[Int] =
-    queryMany(query, oql, () => new ScalaResultBuilder) map { r =>
+    queryMany(query.copy(order = None), oql, () => new ScalaResultBuilder) map { r =>
       r.arrayResult match {
         case Nil       => sys.error("count: zero rows were found")
         case List(row) => row.asInstanceOf[Map[String, Number]]("count").intValue()
-        case _         => sys.error("count: more than one row was found")
+        case a         => sys.error(s"count: more than one row was found: ${a}")
       }
     }
+  }
 
   def queryOne(oql: String, newResultBuilder: () => ResultBuilder = () => new ScalaResultBuilder): Future[Option[Any]] =
     queryOne(parseQuery(oql), oql, newResultBuilder)

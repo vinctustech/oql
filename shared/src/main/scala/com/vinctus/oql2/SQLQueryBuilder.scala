@@ -184,14 +184,16 @@ class SQLQueryBuilder(oql: String, ds: SQLDataSource, val margin: Int = 0, subqu
     in()
 
     val whereClause = where map { case (table, expr) => s"WHERE ${expression(expr, table)}" }
-    val groupByClause = _group map {
-      case (table, groupings) =>
-        s"GROUP BY ${groupings map (expr => s"${expression(expr, table)}") mkString ", "}"
-    }
-    val orderByClause = _order map {
-      case (table, orderings) =>
-        s"ORDER BY ${orderings map { case OQLOrdering(expr, ordering) => s"${expression(expr, table)} $ordering" } mkString ", "}"
-    }
+    val groupByClause =
+      _group map {
+        case (table, groupings) =>
+          s"GROUP BY ${groupings map (expr => s"${expression(expr, table)}") mkString ", "}"
+      }
+    val orderByClause =
+      _order map {
+        case (table, orderings) =>
+          s"ORDER BY ${orderings map { case OQLOrdering(expr, ordering) => s"${expression(expr, table)} $ordering" } mkString ", "}"
+      }
 
     for (Join(t1, c1, t2, alias, c2) <- innerJoins)
       line(s"JOIN $q$t2$q AS $q$alias$q ON $q$t1$q.$q$c1$q = $q$alias$q.$q$c2$q")
