@@ -161,10 +161,10 @@ object OQLParser extends RegexParsers with PackratParsers {
   lazy val primary: PackratParser[OQLExpression] =
     literalExpression |
       starExpression |
+      caseExpression |
       applyExpression |
       qualifiedAttributeExpression |
       "&" ~> idents ^^ ReferenceOQLExpression |
-      caseExpression |
       "-" ~> primary ^^ (e => PrefixOQLExpression("-", e)) |
       "(" ~> query <~ ")" ^^ QueryOQLExpression |
       "(" ~> expression <~ ")" ^^ GroupedOQLExpression
