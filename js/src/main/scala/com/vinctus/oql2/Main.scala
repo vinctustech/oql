@@ -29,7 +29,7 @@ object Main extends App {
 //
 //  db.showQuery()
 ////  db.jsqueryMany("author { name } [id IN :ids]", js.Dictionary("ids" -> js.Array(1, 2))).toFuture.onComplete {
-//  db.jsqueryBuilder().query("author").getCount().toFuture.onComplete {
+//  db.queryBuilder().query("author { asdf: (CASE WHEN TRUE THEN 123 END) }").getMany.onComplete {
 //    case Success(value) => println(value)
 //  }
 
