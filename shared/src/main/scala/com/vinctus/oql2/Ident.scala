@@ -1,7 +1,11 @@
 package com.vinctus.oql2
 
-case class Ident(s: String, pos: Position) {
-  def this(s: String, line: Int, col: Int) = this(s, Position(line, col))
-}
+import scala.util.parsing.input.Position
 
-case class Position(line: Int, col: Int)
+case class Ident(s: String, pos: Position = null)
+
+//case class Ident(s: String, pos: Position = null) {
+//  def this(s: String, line: Int, col: Int) = this(s, Position(line, col))
+//}
+//
+//case class Position(line: Int, col: Int)

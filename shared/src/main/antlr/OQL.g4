@@ -11,15 +11,17 @@ grammar OQL;
 }
 
 command returns [OQLAST c]
-  : query
+  : query EOF
     { $c = $query.q; }
-  | insert
+  | insert EOF
     { $c = $insert.i; }
   ;
 
+// todo: use /= to represent 'DISTINCT'
 query returns [OQLQuery q]
-  : entityName project select? group? order? restrict
-    { $q = new OQLQuery($entityName.id, OQLParse.project($project.ps), OQLParse.select($select.ctx), OQLParse.group($group.ctx), OQLParse.order($order.ctx), $restrict.r); }
+  : entityName project ('[' logicalExpression ']')? group? order? restrict
+    { $q = new OQLQuery($entityName.id, null, null, OQLParse.project($project.ps), OQLParse.select($logicalExpression.ctx),
+      OQLParse.group($group.ctx), OQLParse.order($order.ctx), $restrict.r.limit(), $restrict.r.offset()); }
   ;
 
 project returns [Buffer<OQLProject> ps]
@@ -55,18 +57,29 @@ attributeProjects returns [ListBuffer<OQLProject> ps]
   ;
 
 attributeProject returns [OQLProject p]
-  : label? applyExpression
-    { $p = new ExpressionOQLProject(OQLParse.label($label.ctx), $applyExpression.e); }
+  : label? identifier '(' argument ')'
+    { $p = new ExpressionOQLProject(OQLParse.label($label.ctx, $identifier.id, $argument.e), new ApplyOQLExpression($identifier.id, new ListBuffer<OQLExpression>().addOne($argument.e).toList())); }
+  | label applyExpression
+    { $p = new ExpressionOQLProject($label.id, $applyExpression.e); }
+  | label qualifiedAttributeName
+    { $p = new ExpressionOQLProject($label.id, $qualifiedAttributeName.e); }
   | label '(' expression ')'
-    { $p = new ExpressionOQLProject(new Some($label.id), $expression.e); }
-  | label? query
-    { $p = new QueryOQLProject(OQLParse.label($label.ctx), $query.q); }
-//  | label? qualifiedAttributeName
-//    { $p = new ExpressionOQLProject(OQLParse.label($label.ctx), $qualifiedAttributeName.e); }
-  | label? reference
-    { $p = new ExpressionOQLProject(OQLParse.label($label.ctx), $reference.e); }
+    { $p = new ExpressionOQLProject($label.id, $expression.e); }
+  | label? attributeName
+    { $p = new ExpressionOQLProject(OQLParse.label($label.ctx, $attributeName.id), new AttributeOQLExpression(new ListBuffer<Ident>().addOne($attributeName.id).toList(), null)); }
+  | label? '&' attributeName
+    { $p = new ExpressionOQLProject(OQLParse.label($label.ctx, $attributeName.id), new ReferenceOQLExpression(new ListBuffer<Ident>().addOne($attributeName.id).toList())); }
   | label? parameter
-    { $p = new ExpressionOQLProject(OQLParse.label($label.ctx), $parameter.e); }
+    { $p = new ExpressionOQLProject(OQLParse.label($label.ctx, $parameter.e), $parameter.e); }
+  | label? query
+    { $p = new QueryOQLProject(OQLParse.label($label.ctx, $query.q), $query.q); }
+  ;
+
+argument returns [OQLExpression e]
+  : identifier
+    { $e = new AttributeOQLExpression(new ListBuffer<Ident>().addOne($identifier.id).toList(), null); }
+  | '*'
+    { $e = StarOQLExpression$.MODULE$; }
   ;
 
 label returns [Ident id]
@@ -75,9 +88,7 @@ label returns [Ident id]
   ;
 
 expression returns [OQLExpression e]
-  : '*'
-    { $e = StarOQLExpression$.MODULE$; }
-  | additive
+  : additive
     { $e = $additive.e; }
   ;
 
@@ -101,10 +112,14 @@ applyExpression returns [OQLExpression e]
   ;
 
 primary returns [OQLExpression e]
-  : NUMBER
-    { $e = new NumberOQLExpression(Double.parseDouble($NUMBER.text), new Position($NUMBER.line, $NUMBER.pos)); }
+  : FLOAT
+    { $e = new FloatOQLExpression(Double.parseDouble($FLOAT.text), new Position($FLOAT.line, $FLOAT.pos)); }
+  | INTEGER
+    { $e = new IntegerOQLExpression(Integer.parseInt($INTEGER.text), new Position($INTEGER.line, $INTEGER.pos)); }
   | STRING
     { $e = new LiteralOQLExpression($STRING.text.substring(1, $STRING.text.length() - 1), new Position($STRING.line, $STRING.pos)); }
+  | '*'
+    { $e = StarOQLExpression$.MODULE$; }
   | b=('TRUE' | 'FALSE')
     { $e = new BooleanOQLExpression($b.text, new Position($b.line, $b.pos)); }
   | applyExpression
@@ -113,14 +128,16 @@ primary returns [OQLExpression e]
     { $e = $parameter.e; }
   | qualifiedAttributeName
     { $e = $qualifiedAttributeName.e; }
-  | reference
-    { $e = $reference.e; }
+  | '&' identifiers
+    { $e = new ReferenceOQLExpression($identifiers.ids.toList()); }
   | caseExpression
     { $e = $caseExpression.e; }
   | '-' primary
     { $e = new PrefixOQLExpression("-", $primary.e); }
+  | '(' query ')'
+    { $e = new QueryOQLExpression($query.q); }
   | '(' expression ')'
-    { $e = new GroupingOQLExpression($expression.e); }
+    { $e = new GroupedOQLExpression($expression.e); }
   ;
 
 caseExpression returns [OQLExpression e]
@@ -133,20 +150,9 @@ when returns [OQLWhen w]
     { $w = new OQLWhen($logicalExpression.e, $expression.e); }
   ;
 
-logicalPrimary returns [OQLExpression e]
-  : b=('TRUE' | 'FALSE')
-    { $e = new BooleanOQLExpression($b.text, new Position($b.line, $b.pos)); }
-  | parameter
-    { $e = $parameter.e; }
-  | qualifiedAttributeName
-    { $e = $qualifiedAttributeName.e; }
-  | '(' logicalExpression ')'
-    { $e = $logicalExpression.e; }
-  ;
-
 qualifiedAttributeName returns [AttributeOQLExpression e]
   : identifiers
-    { $e = new AttributeOQLExpression($identifiers.ids.toList(), null, null); }
+    { $e = new AttributeOQLExpression($identifiers.ids.toList(), null); }
   ;
 
 identifiers returns [ListBuffer<Ident> ids]
@@ -156,12 +162,7 @@ identifiers returns [ListBuffer<Ident> ids]
     { $ids = new ListBuffer<Ident>().addOne($identifier.id); }
   ;
 
-reference returns [OQLExpression e]
-  : '&' identifiers
-    { $e = new ReferenceOQLExpression($identifiers.ids.toList()); }
-  ;
-
-parameter returns [OQLExpression e]
+parameter returns [ParameterOQLExpression e]
   : ':' identifier
     { $e = new ParameterOQLExpression($identifier.id); }
   ;
@@ -178,11 +179,6 @@ qualifiedAttributeNames returns [ListBuffer<AttributeOQLExpression> es]
     { $es = $l.es.addOne($qualifiedAttributeName.e); }
   | qualifiedAttributeName
     { $es = new ListBuffer<AttributeOQLExpression>().addOne($qualifiedAttributeName.e); }
-  ;
-
-select returns [OQLExpression e]
-  : '[' logicalExpression ']'
-    { $e = $logicalExpression.e; }
   ;
 
 logicalExpression returns [OQLExpression e]
@@ -218,11 +214,27 @@ comparisonExpression returns [OQLExpression e]
     { $e = new BetweenOQLExpression($exp.e, $between.text, $l.e, $u.e); }
   | expression isNull
     { $e = new PostfixOQLExpression($expression.e, $isNull.text); }
-//  | expression in expressions
-//  | expression in '(' query ')'
-//  | 'EXISTS' '(' query ')'
+  | expression in '(' expressions ')'
+    { $e = new InArrayOQLExpression($expression.e, $in.text, $expressions.es.toList()); }
+  | expression in parameter
+    { $e = new InParameterOQLExpression($expression.e, $in.text, $parameter.e); }
+  | expression in '(' query ')'
+    { $e = new InQueryOQLExpression($expression.e, $in.text, $query.q); }
+  | 'EXISTS' '(' query ')'
+    { $e = new ExistsOQLExpression($query.q); }
   | ex=logicalPrimary
     { $e = $ex.e; }
+  ;
+
+logicalPrimary returns [OQLExpression e]
+  : b=('TRUE' | 'FALSE')
+    { $e = new BooleanOQLExpression($b.text, new Position($b.line, $b.pos)); }
+  | parameter
+    { $e = $parameter.e; }
+  | qualifiedAttributeName
+    { $e = $qualifiedAttributeName.e; }
+  | '(' logicalExpression ')'
+    { $e = new GroupedOQLExpression($logicalExpression.e); }
   ;
 
 in
@@ -241,9 +253,9 @@ isNull
   : 'IS' 'NULL' | 'IS' 'NOT' 'NULL'
   ;
 
-group returns  [ListBuffer<AttributeOQLExpression> es]
-  : '(' qualifiedAttributeNames ')'
-    { $es = $qualifiedAttributeNames.es; }
+group returns  [ListBuffer<OQLExpression> es]
+  : '/' expressions '/'
+    { $es = $expressions.es; }
   ;
 
 order returns [ListBuffer<OQLOrdering> os]
@@ -272,10 +284,10 @@ nulls
   ;
 
 restrict returns [OQLRestrict r]
-  : '|' l=NUMBER (',' o=NUMBER)? '|'
+  : '|' l=INTEGER (',' o=INTEGER)? '|'
     { $r = OQLParse.restrict($l.text, $o.text); }
-  | '|' ',' NUMBER '|'
-    { $r = OQLParse.restrict(null, $NUMBER.text); }
+  | '|' ',' INTEGER '|'
+    { $r = OQLParse.restrict(null, $INTEGER.text); }
   | // empty
     { $r = OQLParse.restrict(null, null); }
   ;
@@ -324,13 +336,12 @@ pair returns [OQLKeyValuePair p]
     { $p = new OQLKeyValuePair($label.id, $expression.e); }
   ;
 
-NUMBER
-  : [0-9]+ ('.' [0-9]+)? EXPONENT?
-  | '.' [0-9]+ EXPONENT?
+FLOAT
+  : [0-9]* '.' [0-9]+ ([eE] [+-]? [0-9]+)?
   ;
 
-fragment EXPONENT
-  : [eE] [+-]? [0-9]+
+INTEGER
+  : [0-9]+
   ;
 
 STRING

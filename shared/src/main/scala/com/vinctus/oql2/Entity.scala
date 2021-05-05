@@ -1,6 +1,6 @@
 package com.vinctus.oql2
 
-class Entity(val name: String, val table: String) {
+case class Entity(name: String, table: String) {
 
   private[oql2] var _attributes: Map[String, Attribute] = _
   lazy val attributes: Map[String, Attribute] = _attributes
@@ -8,7 +8,7 @@ class Entity(val name: String, val table: String) {
   lazy val pk: Option[Attribute] = _pk
 
   def insert(obj: OBJECT): OBJECT = {
-/*
+    /*
     // check if the object has a primary key
     entity.pk foreach { pk =>
       // object being inserted should not have a primary key property
@@ -97,8 +97,8 @@ class Entity(val name: String, val table: String) {
 
           attrs map { case (k, _) => k -> res.getOrElse(k, null) } to ListMap
       }))
-*/
-  Map()
+     */
+    Map()
   }
 
 }

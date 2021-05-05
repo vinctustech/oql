@@ -1,69 +1,164 @@
 package com.vinctus.oql2
 
-import xyz.hyperreal.pretty._
+import com.vinctus.oql2.OQL._
 
-import scala.+:
-import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
+import scala.language.postfixOps
+import scala.scalajs.js
 
-class SQLQueryBuilder(margin: Int = 0) {
+object SQLQueryBuilder {
 
-  private val tables = new mutable.HashMap[String, Int]
+  val INDENT = 2
+
+  private val q = '"'
+
+}
+
+class SQLQueryBuilder(oql: String, ds: SQLDataSource, val margin: Int = 0, subquery: Boolean = false) {
+
+  import SQLQueryBuilder._
+
+  private var projectQuery: Boolean = false
+
+  def call(f: String, args: String): String = f.replace("?", args)
+
+  private trait Project
+  private case class ValueProject(expr: OQLExpression, table: String, typed: Boolean) extends Project {
+    override def toString: String = {
+      val exp =
+        if (projectQuery && ds.convertFunction.isDefined && (expr.typ == UUIDType || expr.typ == TimestampType))
+          call(ds.convertFunction.get, expression(expr, table))
+        else
+          expression(expr, table)
+
+      val typing = if (typed) s", ${call(ds.typeFunction.get, expression(expr, table))}" else ""
+
+      s"$exp$typing"
+    }
+  }
+  private case class QueryProject(query: SQLQueryBuilder) extends Project { override def toString: String = query.toString.trim }
+
+  private var from: (String, Option[String]) = _
   private val innerJoins = new ArrayBuffer[Join]
-  private val outerJoins = new ArrayBuffer[Join]
-  private val projects = new ArrayBuffer[OQLExpression]
+  private val leftJoins = new ArrayBuffer[Join]
+  private var idx = 0
+  private val projects = new ArrayBuffer[Project]
+  private var where: Option[(String, OQLExpression)] = None
+  private var _group: Option[(String, List[OQLExpression])] = None
+  private var _order: Option[(String, List[OQLOrdering])] = None
+  private var _limit: Option[Int] = None
+  private var _offset: Option[Int] = None
 
-  def table(name: String): String = {
-    tables get name match {
-      case Some(a) =>
-        val alias = a + 1
+  def table(name: String, alias: Option[String]): Unit = if (from eq null) from = (name, alias)
 
-        tables(name) = alias
-        s"$name$$$alias"
-      case None =>
-        tables(name) = 0
-        name
+  def select(cond: OQLExpression, table: String): Unit =
+    where = where match {
+      case Some((_, cur)) =>
+        Some((table, InfixOQLExpression(GroupedOQLExpression(cur), "AND", GroupedOQLExpression(cond))))
+      case None => Some((table, cond))
     }
+
+  def group(groupings: List[OQLExpression], table: String): Unit = _group = Some((table, groupings))
+
+  def order(orderings: List[OQLOrdering], table: String): Unit = _order = Some((table, orderings))
+
+  def limit(n: Int): Unit = _limit = Some(n)
+
+  def offset(n: Int): Unit = _offset = Some(n)
+
+  def projectValue(expr: OQLExpression, table: String): (Int, Boolean) = {
+    val cur = idx
+    val typed = projectQuery && ds.typeFunction.isDefined && expr.typ == null
+
+    projects += ValueProject(expr, table, typed)
+    idx += (if (typed) 2 else 1)
+    (cur, typed)
   }
 
-  def ref(tab: String, col: String): String = s"$tab.$col"
-
-  def project(expr: OQLExpression): SQLQueryBuilder = {
-    projects += expr
-    this
+  def projectQuery(builder: SQLQueryBuilder): Int = {
+    builder.projectQuery = true
+    projects += QueryProject(builder)
+    idx += 1
+    idx - 1
   }
 
-  def expression(expr: OQLExpression): String =
+  def expression(expr: OQLExpression, table: String): String =
     expr match {
-      case InfixOQLExpression(left, op @ ("+" | "-"), right) => s"${expression(left)} $op ${expression(right)}"
-      case InfixOQLExpression(left, op, right)               => s"${expression(left)}$op${expression(right)}"
-      case PrefixOQLExpression(op, expr)                     => s"$op${expression(expr)}"
-      case PostfixOQLExpression(expr, op)                    => s"${expression(expr)} $op"
-      case GroupingOQLExpression(expr)                       => s"($expr)"
-      case NumberOQLExpression(n, pos)                       => n.toString
-      case LiteralOQLExpression(s, pos)                      => s"'${quote(s)}'"
-      case AttributeOQLExpression(ids, _, column)            => column
+      case ExistsOQLExpression(query) =>
+        val subquery = writeQuery(innerQuery(query), table, Right(margin + 2 * SQLQueryBuilder.INDENT), oql, ds)
+        val sql = subquery.toString
+
+        s"EXISTS (\n$sql${" " * (margin + 2 * SQLQueryBuilder.INDENT)})"
+      case QueryOQLExpression(query) =>
+        val subquery = writeQuery(innerQuery(query), table, Right(margin + 2 * SQLQueryBuilder.INDENT), oql, ds)
+        val sql = subquery.toString
+
+        s"(\n$sql${" " * (margin + 2 * SQLQueryBuilder.INDENT)})"
+      case InQueryOQLExpression(left, op, query) =>
+        val subquery = writeQuery(innerQuery(query), table, Right(margin + 2 * SQLQueryBuilder.INDENT), oql, ds)
+        val sql = subquery.toString
+
+        s"${expression(left, table)} $op (\n$sql${" " * (margin + 2 * SQLQueryBuilder.INDENT)})"
+      case InArrayOQLExpression(left, op, right)             => s"${expression(left, table)} $op (${right map (expression(_, table)) mkString ", "})"
+      case ApplyOQLExpression(f, args)                       => s"${f.s}(${args map (expression(_, table)) mkString ", "})"
+      case StarOQLExpression                                 => "*"
+      case RawOQLExpression(s)                               => s
+      case InfixOQLExpression(left, op @ ("*" | "/"), right) => s"${expression(left, table)}$op${expression(right, table)}"
+      case InfixOQLExpression(left, op, right)               => s"${expression(left, table)} $op ${expression(right, table)}"
+      case PrefixOQLExpression("-", expr)                    => s"-${expression(expr, table)}"
+      case PrefixOQLExpression(op, expr)                     => s"$op ${expression(expr, table)}"
+      case PostfixOQLExpression(expr, op)                    => s"${expression(expr, table)} $op"
+      case BetweenOQLExpression(expr, op, lower, upper) =>
+        s"${expression(expr, table)} $op ${expression(lower, table)} AND ${expression(upper, table)}"
+      case GroupedOQLExpression(expr) => s"(${expression(expr, table)})"
+      case FloatOQLExpression(n)      => n.toString
+      case IntegerOQLExpression(n)    => n.toString
+      case LiteralOQLExpression(s)    => s"'${quote(s)}'"
+      case AttributeOQLExpression(ids, dmrefs) =>
+        var alias = table
+
+        dmrefs dropRight 1 foreach {
+          case (e: Entity, Attribute(name, column, _, _, _)) =>
+            val old_alias = alias
+
+            alias = s"$alias$$$name"
+            leftJoin(old_alias, column, e.table, alias, e.pk.get.column)
+        }
+
+        s"$q$alias$q.$q${dmrefs.last._2.column}$q"
+      case BooleanOQLExpression(b) => b
+      case CaseOQLExpression(whens, els) =>
+        s"CASE ${whens map {
+          case OQLWhen(cond, expr) =>
+            s"WHEN ${expression(cond, table)} THEN ${expression(expr, table)}"
+        } mkString}${if (els.isDefined) s" ELSE ${expression(els.get, table)}" else ""} END"
     }
 
-  def outerJoin(t1: String, c1: String, t2: String, c2: String): SQLQueryBuilder = {
-    outerJoins += Join(t1, c1, t2, c2)
+  def leftJoin(t1: String, c1: String, t2: String, alias: String, c2: String): SQLQueryBuilder = {
+    if (!leftJoins.exists { case Join(_, _, curt2, curalias, _) => curt2 == t2 && curalias == alias })
+      leftJoins += Join(t1, c1, t2, alias, c2)
+
     this
   }
 
-  def innerJoin(t1: String, c1: String, t2: String, c2: String): SQLQueryBuilder = {
-    innerJoins += Join(t1, c1, t2, c2)
+  def innerJoin(t1: String, c1: String, t2: String, alias: String, c2: String): SQLQueryBuilder = {
+    innerJoins += Join(t1, c1, t2, alias, c2)
     this
   }
 
-  private case class Join(t1: String, c1: String, t2: String, c2: String)
+  private case class Join(t1: String, c1: String, t2: String, alias: String, c2: String)
 
   override def toString: String = {
-    val INDENT = 2
     val buf = new StringBuilder
     var indent = margin
+    var first = true
 
     def line(s: String): Unit = {
-      buf ++= " " * indent
+      if (first && !subquery)
+        first = false
+      else
+        buf ++= " " * indent
+
       buf ++= s
       buf += '\n'
     }
@@ -72,29 +167,51 @@ class SQLQueryBuilder(margin: Int = 0) {
 
     def out(): Unit = indent -= INDENT
 
-    line(s"SELECT ${expression(projects.head)}${if (projects.tail.nonEmpty) "," else ""}")
-    indent += 7
+    def pq(yes: String, no: String = "") = if (projectQuery) yes else no
 
-    val plen = projects.tail.length
-
-    for ((p, i) <- projects.tail.zipWithIndex)
-      line(s"${expression(p)}${if (i < plen - 1) "," else ""}")
-
-    indent -= 7
+    line(s"${pq(s"(${ds.resultArrayFunctionStart}")}SELECT ${pq(ds.rowSequenceFunctionStart)}")
+    in()
     in()
 
-    val froms = tables.toList.flatMap { case (t, a) => t +: ((1 to a) map (i => s"$t AS $t$$$i")) }
+    for ((p, i) <- projects.zipWithIndex)
+      line(s"$p${if (i < projects.length - 1) "," else pq(ds.rowSequenceFunctionEnd)}")
 
-    line(s"FROM ${froms.head}${if (froms.tail.nonEmpty) "," else ""}")
-    indent += 5
+    out()
 
-    val flen = froms.tail.length
+    val (table, alias) = from
 
-    for ((f, i) <- froms.tail.zipWithIndex)
-      line(s"$f${if (i < flen - 1) "," else ""}")
+    line(s"FROM $q$table$q${if (alias.isDefined) s" AS $q${alias.get}$q" else ""}")
+    in()
 
-    indent -= 5
+    val whereClause = where map { case (table, expr) => s"WHERE ${expression(expr, table)}" }
+    val groupByClause =
+      _group map {
+        case (table, groupings) =>
+          s"GROUP BY ${groupings map (expr => s"${expression(expr, table)}") mkString ", "}"
+      }
+    val orderByClause =
+      _order map {
+        case (table, orderings) =>
+          s"ORDER BY ${orderings map { case OQLOrdering(expr, ordering) => s"${expression(expr, table)} $ordering" } mkString ", "}"
+      }
 
+    for (Join(t1, c1, t2, alias, c2) <- innerJoins)
+      line(s"JOIN $q$t2$q AS $q$alias$q ON $q$t1$q.$q$c1$q = $q$alias$q.$q$c2$q")
+
+    for (Join(t1, c1, t2, alias, c2) <- leftJoins)
+      line(s"LEFT JOIN $q$t2$q AS $q$alias$q ON $q$t1$q.$q$c1$q = $q$alias$q.$q$c2$q")
+
+    out()
+    whereClause foreach line
+    groupByClause foreach line
+    orderByClause foreach line
+    _limit foreach (n => line(s"LIMIT $n"))
+    _offset foreach (n => line(s"OFFSET $n"))
+
+    if (projectQuery)
+      line(s"${ds.resultArrayFunctionEnd})")
+
+    out()
     buf.toString
   }
 
