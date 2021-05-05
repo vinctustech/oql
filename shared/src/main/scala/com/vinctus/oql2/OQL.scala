@@ -1,6 +1,7 @@
 package com.vinctus.oql2
 
 import com.vinctus.oql2.OQLParser.order
+import com.vinctus.oql2.StarOQLExpression.typ
 
 import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
@@ -209,6 +210,44 @@ object OQL {
   private[oql2] def decorate(entity: Entity, expr: OQLExpression, model: DataModel, ds: SQLDataSource, oql: String): Unit = {
     def _decorate(expr: OQLExpression): Unit = decorate(entity, expr, model, ds, oql)
 
+    def lookup(expr: OQLExpression, ids: List[Ident], ref: Boolean): List[(Entity, Attribute)] = {
+      val dmrefs = new ListBuffer[(Entity, Attribute)]
+
+      @tailrec
+      def lookup(ids: List[Ident], entity: Entity): Unit =
+        ids match {
+          case List(id) =>
+            entity.attributes get id.s match {
+              case Some(attr) =>
+                dmrefs += (entity -> attr)
+
+                if (ref) {
+                  if (!attr.typ.isInstanceOf[ManyToOneType])
+                    problem(id.pos, s"attribute '${id.s}' is not many-to-one", oql)
+
+                  expr.typ = attr.typ.asInstanceOf[ManyToOneType].entity.pk.get.typ.asInstanceOf[DataType]
+                } else {
+                  if (!attr.typ.isDataType)
+                    problem(id.pos, s"attribute '${id.s}' is not a DBMS data type", oql)
+
+                  expr.typ = attr.typ.asInstanceOf[DataType]
+                }
+              case None => problem(id.pos, s"entity '${entity.name}' does not have attribute '${id.s}'", oql)
+            }
+          case head :: tail =>
+            entity.attributes get head.s match {
+              case Some(attr @ Attribute(name, column, pk, required, ManyToOneType(mtoEntity))) =>
+                dmrefs += (mtoEntity -> attr)
+                lookup(tail, mtoEntity)
+              case Some(_) => problem(head.pos, s"attribute '${head.s}' of entity '${entity.name}' does not have an entity type", oql)
+              case None    => problem(head.pos, s"entity '${entity.name}' does not have attribute '${head.s}'", oql)
+            }
+        }
+
+      lookup(ids, entity)
+      dmrefs.toList
+    }
+
     expr match {
       case ExistsOQLExpression(query) =>
         query.project = List(SQLStarOQLProject)
@@ -267,35 +306,8 @@ object OQL {
 
         if (left.typ == right.typ)
           e.typ = left.typ
-      case attrexp @ AttributeOQLExpression(ids, _) =>
-        val dmrefs = new ListBuffer[(Entity, Attribute)]
-
-        @tailrec
-        def lookup(ids: List[Ident], entity: Entity): Unit =
-          ids match {
-            case List(id) =>
-              entity.attributes get id.s match {
-                case Some(attr) =>
-                  dmrefs += (entity -> attr)
-
-                  if (!attr.typ.isDataType)
-                    problem(id.pos, s"attribute '${id.s}' is not a DBMS data type", oql)
-
-                  attrexp.typ = attr.typ.asInstanceOf[DataType]
-                case None => problem(id.pos, s"entity '${entity.name}' does not have attribute '${id.s}'", oql)
-              }
-            case head :: tail =>
-              entity.attributes get head.s match {
-                case Some(attr @ Attribute(name, column, pk, required, ManyToOneType(mtoEntity))) =>
-                  dmrefs += (mtoEntity -> attr)
-                  lookup(tail, mtoEntity)
-                case Some(_) => problem(head.pos, s"attribute '${head.s}' of entity '${entity.name}' does not have an entity type", oql)
-                case None    => problem(head.pos, s"entity '${entity.name}' does not have attribute '${head.s}'", oql)
-              }
-          }
-
-        lookup(ids, entity)
-        attrexp.dmrefs = dmrefs.toList
+      case attrexp @ ReferenceOQLExpression(ids, _) => attrexp.dmrefs = lookup(attrexp, ids, ref = true)
+      case attrexp @ AttributeOQLExpression(ids, _) => attrexp.dmrefs = lookup(attrexp, ids, ref = false)
       case InQueryOQLExpression(left, op, query) =>
         _decorate(left)
         queryProjects(Some(entity), query, model, ds, oql)
@@ -305,11 +317,11 @@ object OQL {
 
         query.select foreach (decorate(query.entity, _, model, ds, oql))
         query.order foreach (_ foreach { case OQLOrdering(expr, _) => decorate(query.entity, expr, model, ds, oql) })
-      case e: LiteralOQLExpression                                             => e.typ = TextType
-      case e: FloatOQLExpression                                               => e.typ = FloatType
-      case e: IntegerOQLExpression                                             => e.typ = IntegerType
-      case e: BooleanOQLExpression                                             => e.typ = BooleanType
-      case StarOQLExpression | _: RawOQLExpression | _: ReferenceOQLExpression =>
+      case e: LiteralOQLExpression                 => e.typ = TextType
+      case e: FloatOQLExpression                   => e.typ = FloatType
+      case e: IntegerOQLExpression                 => e.typ = IntegerType
+      case e: BooleanOQLExpression                 => e.typ = BooleanType
+      case StarOQLExpression | _: RawOQLExpression =>
     }
   }
 

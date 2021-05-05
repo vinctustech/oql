@@ -82,7 +82,21 @@ class SQLQueryBuilder(oql: String, ds: SQLDataSource, val margin: Int = 0, subqu
     idx - 1
   }
 
-  def expression(expr: OQLExpression, table: String): String =
+  def expression(expr: OQLExpression, table: String): String = {
+    def attribute(dmrefs: List[(Entity, Attribute)]): String = {
+      var alias = table
+
+      dmrefs dropRight 1 foreach {
+        case (e: Entity, Attribute(name, column, _, _, _)) =>
+          val old_alias = alias
+
+          alias = s"$alias$$$name"
+          leftJoin(old_alias, column, e.table, alias, e.pk.get.column)
+      }
+
+      s"$q$alias$q.$q${dmrefs.last._2.column}$q"
+    }
+
     expr match {
       case ExistsOQLExpression(query) =>
         val subquery = writeQuery(innerQuery(query), table, Right(margin + 2 * SQLQueryBuilder.INDENT), oql, ds)
@@ -110,29 +124,20 @@ class SQLQueryBuilder(oql: String, ds: SQLDataSource, val margin: Int = 0, subqu
       case PostfixOQLExpression(expr, op)                    => s"${expression(expr, table)} $op"
       case BetweenOQLExpression(expr, op, lower, upper) =>
         s"${expression(expr, table)} $op ${expression(lower, table)} AND ${expression(upper, table)}"
-      case GroupedOQLExpression(expr) => s"(${expression(expr, table)})"
-      case FloatOQLExpression(n)      => n.toString
-      case IntegerOQLExpression(n)    => n.toString
-      case LiteralOQLExpression(s)    => s"'${quote(s)}'"
-      case AttributeOQLExpression(ids, dmrefs) =>
-        var alias = table
-
-        dmrefs dropRight 1 foreach {
-          case (e: Entity, Attribute(name, column, _, _, _)) =>
-            val old_alias = alias
-
-            alias = s"$alias$$$name"
-            leftJoin(old_alias, column, e.table, alias, e.pk.get.column)
-        }
-
-        s"$q$alias$q.$q${dmrefs.last._2.column}$q"
-      case BooleanOQLExpression(b) => b
+      case GroupedOQLExpression(expr)        => s"(${expression(expr, table)})"
+      case FloatOQLExpression(n)             => n.toString
+      case IntegerOQLExpression(n)           => n.toString
+      case LiteralOQLExpression(s)           => s"'${quote(s)}'"
+      case ReferenceOQLExpression(_, dmrefs) => attribute(dmrefs)
+      case AttributeOQLExpression(_, dmrefs) => attribute(dmrefs)
+      case BooleanOQLExpression(b)           => b
       case CaseOQLExpression(whens, els) =>
         s"CASE ${whens map {
           case OQLWhen(cond, expr) =>
             s"WHEN ${expression(cond, table)} THEN ${expression(expr, table)}"
         } mkString}${if (els.isDefined) s" ELSE ${expression(els.get, table)}" else ""} END"
     }
+  }
 
   def leftJoin(t1: String, c1: String, t2: String, alias: String, c2: String): SQLQueryBuilder = {
     if (!leftJoins.exists { case Join(_, _, curt2, curalias, _) => curt2 == t2 && curalias == alias })

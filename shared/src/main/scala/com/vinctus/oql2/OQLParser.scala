@@ -2,6 +2,7 @@ package com.vinctus.oql2
 
 import com.vinctus.oql2.OQLParser.literalExpression
 
+import scala.scalajs.js.|
 import scala.util.matching.Regex
 import scala.util.parsing.combinator.{PackratParsers, RegexParsers}
 import scala.util.parsing.input.{CharSequenceReader, Position, Positional}
@@ -164,7 +165,7 @@ object OQLParser extends RegexParsers with PackratParsers {
       caseExpression |
       applyExpression |
       qualifiedAttributeExpression |
-      "&" ~> idents ^^ ReferenceOQLExpression |
+      "&" ~> idents ^^ (ReferenceOQLExpression(_)) |
       "-" ~> primary ^^ (e => PrefixOQLExpression("-", e)) |
       "(" ~> query <~ ")" ^^ QueryOQLExpression |
       "(" ~> expression <~ ")" ^^ GroupedOQLExpression

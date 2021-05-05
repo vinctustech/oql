@@ -84,9 +84,9 @@ class DataModel(model: DMLModel, dml: String) {
 
         if (a.pk) {
           if (!typ.isDataType)
-            printError(typ.asInstanceOf[DMLEntityType].entity.pos, "primary key must be a non-relational data type", dml)
+            printError(typ.asInstanceOf[DMLEntityType].entity.pos, "primary key must be a DBMS data type", dml)
           if (a.required)
-            printError(a.name.pos, "primary keys are already \"NOT NULL\" (required)", dml)
+            printError(a.name.pos, "primary keys are \"NOT NULL\" (required) by definition", dml)
 
           pk = Some(attr)
         }
