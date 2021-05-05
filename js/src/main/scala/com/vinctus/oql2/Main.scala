@@ -37,4 +37,5 @@ object Main extends App {
 
 // todo: error check for query type projects that are really datatype attributes: make sure there's no select, order, ...
 // todo: add a unit test that has a deep (more than one) many-to-one reference in the select condition
-// todo: add "author { name } [EXISTS (books [author.name = 'Charles Dickens'])]" ~~> "Charles Dickens" to unit tests
+// todo: unit test: "author { name } [EXISTS (books [author.name = 'Charles Dickens'])]" ~~> "Charles Dickens"
+// todo: unit test: "book { author ref: &author }" (reference)
