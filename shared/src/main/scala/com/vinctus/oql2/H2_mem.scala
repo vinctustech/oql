@@ -37,8 +37,6 @@ class H2_mem extends JDBCDataSource("org.h2.Driver") {
   val convertFunction: Option[String] = Some("CONVERT(?, VARCHAR)")
   val functionReturnType = Map("count" -> BigintType)
 
-  def convert(data: Any, typ: String): Any = data
-
-  def resultBuilder: ResultBuilder = new ScalaResultBuilder
+  def reverseMapType(typ: String): DataType = null
 
 }

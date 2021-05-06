@@ -17,10 +17,6 @@ class PG_NodePG(val host: String,
 
   val name: String = "PostgreSQL (node-pg)"
 
-  def timestamp(t: String): Any = new js.Date(t)
-
-  def uuid(id: String): Any = id
-
   val connect: NodePGConnection = new NodePGConnection(this)
 
   val platformSpecific: PartialFunction[Any, String] = {

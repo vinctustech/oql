@@ -9,6 +9,4 @@ class PG_JDBC(val host: String, val port: Int, val database: String, val user: S
 
   def connect: OQLConnection = new PGJDBCConnection(this)
 
-  def resultBuilder: ResultBuilder = new ScalaResultBuilder
-
 }

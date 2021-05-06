@@ -43,11 +43,7 @@ trait SQLDataSource extends OQLDataSource {
   val rowSequenceFunctionEnd: String
   val functionReturnType: Map[String, DataType]
 
-  def convert(data: Any, typ: String): Any
-
-  def timestamp(t: String): Any
-
-  def uuid(id: String): Any
+  def reverseMapType(typ: String): DataType
 
   val platformSpecific: PartialFunction[Any, String]
 

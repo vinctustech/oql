@@ -29,6 +29,15 @@ trait PGDataSource extends SQLDataSource {
       case _: DataType => mapType(typ)
     }
 
+  def reverseMapType(typ: String): DataType =
+    typ match {
+      case "timestamp without time zone" => TimestampType
+      case "uuid"                        => UUIDType
+      case "integer"                     => IntegerType
+      case "bigint"                      => BigintType
+      case "double precision"            => FloatType
+    }
+
   val resultArrayFunctionStart: String = "to_json(ARRAY("
   val resultArrayFunctionEnd: String = "))"
   val rowSequenceFunctionStart: String = "json_build_array("
@@ -36,15 +45,5 @@ trait PGDataSource extends SQLDataSource {
   val typeFunction: Option[String] = Some("pg_typeof(?)")
   val convertFunction: Option[String] = None
   val functionReturnType = Map("count" -> BigintType)
-
-  def convert(data: Any, typ: String): Any =
-    (data, typ) match {
-      case (t: String, "timestamp without time zone") => timestamp(t)
-      case (id: String, "uuid")                       => uuid(id)
-      case (n: String, "integer")                     => n.toInt
-      case (n: String, "bigint")                      => n.toLong
-      case (n: String, "double precision")            => n.toDouble
-      case _                                          => data
-    }
 
 }

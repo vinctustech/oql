@@ -9,7 +9,7 @@ import scala.annotation.tailrec
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class OQL(dm: String, val ds: SQLDataSource) {
+class OQL(dm: String, val ds: SQLDataSource, rbf: ResultBuilderFactory) {
 
   import OQL._
 
@@ -68,7 +68,7 @@ class OQL(dm: String, val ds: SQLDataSource) {
       r.arrayResult match {
         case Nil       => sys.error("count: zero rows were found")
         case List(row) => row.asInstanceOf[Map[String, Number]]("count").intValue()
-        case a         => sys.error(s"count: more than one row was found: ${a}")
+        case a         => sys.error(s"count: more than one row was found: $a")
       }
     }
   }
@@ -146,17 +146,18 @@ class OQL(dm: String, val ds: SQLDataSource) {
             while (sequenceResultSet.next) result += buildResult(element, sequenceResultSet)
 
             result.arrayResult
-          case v @ ValueNode(expr) =>
-            val x = resultSet get v.idx
+          case n @ ValueNode(expr) =>
+            val v = resultSet get n.idx
+            val typ =
+              if (n.typed) ds.reverseMapType(resultSet getString (n.idx + 1))
+              else expr.typ
 
-            if (v.typed) ds.convert(x, resultSet getString (v.idx + 1))
-            else
-              (x, expr.typ) match {
-                case (s: String, IntegerType)   => s.toInt
-                case (s: String, FloatType)     => s.toDouble
-                case (s: String, BigintType)    => s.toLong
-                case (s: String, UUIDType)      => ds.uuid(s) //UUID.fromString(s)
-                case (t: String, TimestampType) => ds.timestamp(t)
+            (v, typ) match {
+              case (s: String, IntegerType)   => s.toInt
+              case (s: String, FloatType)     => s.toDouble
+              case (s: String, BigintType)    => rbf.long(s)
+              case (s: String, UUIDType)      => rbf.uuid(s)
+              case (t: String, TimestampType) => rbf.timestamp(t)
 //                  Instant.parse {
 //                    val z =
 //                      if (t.endsWith("Z")) t
@@ -165,9 +166,9 @@ class OQL(dm: String, val ds: SQLDataSource) {
 //
 //                    if (z.charAt(10) != 'T') s"${z.substring(0, 10)}T${z.substring(11)}" else z
 //                  }
-                case (d: String, DecimalType(precision, scale)) => BigDecimal(d)
-                case _                                          => x
-              }
+              case (d: String, DecimalType(precision, scale)) => BigDecimal(d)
+              case _                                          => v
+            }
           case ObjectNode(properties) =>
             val result = newResultBuilder().newObject
 
