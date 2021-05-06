@@ -20,7 +20,7 @@ class OQL_NodePG(dm: String,
                  ssl: Boolean | ConnectionOptions,
                  idleTimeoutMillis: Int,
                  max: Int)
-    extends OQL(dm, new PG_NodePG(host, port, database, user, password, ssl, idleTimeoutMillis, max), JSResultBuilderFactory) {
+    extends OQL(dm, new PG_NodePG(host, port, database, user, password, ssl, idleTimeoutMillis, max), JSConversions) {
 
   import OQL_NodePG._
 

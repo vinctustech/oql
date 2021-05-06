@@ -2,9 +2,7 @@ package com.vinctus.oql2
 
 import scala.scalajs.js
 
-object JSResultBuilderFactory extends ResultBuilderFactory {
-
-  def newResultBuilder: ResultBuilder = new JSResultBuilder
+object JSConversions extends Conversions {
 
   def timestamp(t: String): Any = new js.Date(t)
 

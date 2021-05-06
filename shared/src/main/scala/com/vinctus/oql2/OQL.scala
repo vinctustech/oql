@@ -1,15 +1,12 @@
 package com.vinctus.oql2
 
-import com.vinctus.oql2.OQLParser.order
-import com.vinctus.oql2.StarOQLExpression.typ
-
 import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
 import scala.annotation.tailrec
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class OQL(dm: String, val ds: SQLDataSource, rbf: ResultBuilderFactory) {
+class OQL(dm: String, val ds: SQLDataSource, conv: Conversions) {
 
   import OQL._
 
@@ -155,9 +152,9 @@ class OQL(dm: String, val ds: SQLDataSource, rbf: ResultBuilderFactory) {
             (v, typ) match {
               case (s: String, IntegerType)   => s.toInt
               case (s: String, FloatType)     => s.toDouble
-              case (s: String, BigintType)    => rbf.long(s)
-              case (s: String, UUIDType)      => rbf.uuid(s)
-              case (t: String, TimestampType) => rbf.timestamp(t)
+              case (s: String, BigintType)    => conv.long(s)
+              case (s: String, UUIDType)      => conv.uuid(s)
+              case (t: String, TimestampType) => conv.timestamp(t)
 //                  Instant.parse {
 //                    val z =
 //                      if (t.endsWith("Z")) t
@@ -166,7 +163,7 @@ class OQL(dm: String, val ds: SQLDataSource, rbf: ResultBuilderFactory) {
 //
 //                    if (z.charAt(10) != 'T') s"${z.substring(0, 10)}T${z.substring(11)}" else z
 //                  }
-              case (d: String, DecimalType(precision, scale)) => rbf.decimal(d)
+              case (d: String, DecimalType(precision, scale)) => conv.decimal(d)
               case _                                          => v
             }
           case ObjectNode(properties) =>

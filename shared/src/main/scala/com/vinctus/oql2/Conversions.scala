@@ -1,8 +1,6 @@
 package com.vinctus.oql2
 
-abstract class ResultBuilderFactory {
-
-  def newResultBuilder: ResultBuilder
+abstract class Conversions {
 
   def timestamp(t: String): Any
 
