@@ -166,7 +166,7 @@ class OQL(dm: String, val ds: SQLDataSource, rbf: ResultBuilderFactory) {
 //
 //                    if (z.charAt(10) != 'T') s"${z.substring(0, 10)}T${z.substring(11)}" else z
 //                  }
-              case (d: String, DecimalType(precision, scale)) => BigDecimal(d)
+              case (d: String, DecimalType(precision, scale)) => rbf.decimal(d)
               case _                                          => v
             }
           case ObjectNode(properties) =>
