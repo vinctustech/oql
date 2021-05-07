@@ -24,7 +24,7 @@ class NodePGConnection(val dataSource: PG_NodePG) extends OQLConnection {
       .setIdleTimeoutMillis(dataSource.idleTimeoutMillis)
       .setMax(dataSource.max))
 
-  def query(sql: String): Future[NodePGResultSet] =
+  def command(sql: String): Future[NodePGResultSet] =
     pool
       .connect()
       .toFuture

@@ -6,7 +6,7 @@ import scala.concurrent.Future
 
 class PGJDBCConnection(dataSource: JDBCDataSource) extends JDBCConnection(dataSource) {
 
-  override def query(query: String): Future[OQLResultSet] = Future(new JDBCJSONResultSet(stmt.executeQuery(query)))
+  override def command(query: String): Future[OQLResultSet] = Future(new JDBCJSONResultSet(stmt.executeQuery(query)))
 
   def insert(command: String): Future[JDBCResultSet] =
     Future {

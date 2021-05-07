@@ -1,16 +1,19 @@
 package com.vinctus.oql2
 
+import jdk.internal.org.jline.keymap.KeyMap.display
+
 import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
 import scala.annotation.tailrec
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import scala.reflect.runtime.universe.show
 
 class OQL(dm: String, val ds: SQLDataSource, conv: Conversions) {
 
   import OQL._
 
-  protected var _showQuery = false
+  private var _showQuery = false
 
   val model: DataModel = {
     val p = new DMLParser()
@@ -84,6 +87,13 @@ class OQL(dm: String, val ds: SQLDataSource, conv: Conversions) {
 
   def showQuery(): Unit = _showQuery = true
 
+  private[oql2] def show(sql: String): Unit = {
+    if (_showQuery) {
+      println(sql)
+      _showQuery = false
+    }
+  }
+
   def queryBuilder() = new QueryBuilder(this, OQLQuery(null, null, null, List(StarOQLProject), None, None, None, None, None))
 
   def json(oql: String, tab: Int = 2, format: Boolean = true): Future[String] =
@@ -101,10 +111,7 @@ class OQL(dm: String, val ds: SQLDataSource, conv: Conversions) {
 
     val sql = sqlBuilder.toString
 
-    if (_showQuery) {
-      println(sql)
-      _showQuery = false
-    }
+    show(sql)
 
     execute { c =>
       def buildResult(node: Node, resultSet: OQLResultSet): Any =
@@ -176,9 +183,8 @@ class OQL(dm: String, val ds: SQLDataSource, conv: Conversions) {
 //          case SequenceNode(seq) => ni
         }
 
-      c.query(sql) map { rs =>
+      c.command(sql) map { rs =>
         //      println(TextTable(rs.peer.asInstanceOf[ResultSet]))
-
         buildResult(root, rs).asInstanceOf[ResultBuilder]
       }
     }

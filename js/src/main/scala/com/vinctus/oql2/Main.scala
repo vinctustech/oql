@@ -28,7 +28,7 @@ object Main extends App {
   val db = new OQL_NodePG(dm, "localhost", 5432, "postgres", "postgres", "docker", false, 0, 10)
 
   db.showQuery()
-  db.jsqueryMany("book { author ref: &author }").toFuture.onComplete {
+  db.jsqueryMany("book { author ref: &author } [CURRENT_TIMESTAMP = '2021-05-07T15:46:39.465Z']").toFuture.onComplete {
 //  db.queryBuilder().query("author { asdf: (CASE WHEN TRUE THEN 123 END) }").getMany.onComplete {
     case Success(value) => console.log(value)
   }

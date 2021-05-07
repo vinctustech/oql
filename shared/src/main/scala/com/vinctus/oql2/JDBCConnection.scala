@@ -11,7 +11,7 @@ abstract class JDBCConnection(val dataSource: JDBCDataSource) extends OQLConnect
     catch { case e: SQLException => sys.error(e.getMessage) }
   private[oql2] val stmt = conn.createStatement
 
-  def query(query: String): Future[OQLResultSet] = Future(new JDBCResultSet(stmt.executeQuery(query)) with ArrayResultSet)
+  def command(query: String): Future[OQLResultSet] = Future(new JDBCResultSet(stmt.executeQuery(query)) with ArrayResultSet)
 
   def execute(command: String): Future[Unit] = Future(stmt.executeUpdate(command))
 

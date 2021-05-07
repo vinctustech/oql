@@ -6,7 +6,7 @@ abstract class OQLConnection {
 
   val dataSource: OQLDataSource
 
-  def query(query: String): Future[OQLResultSet]
+  def command(query: String): Future[OQLResultSet]
 
   def insert(command: String): Future[OQLResultSet]
 
