@@ -45,5 +45,6 @@ trait PGDataSource extends SQLDataSource {
   val typeFunction: Option[String] = Some("pg_typeof(?)")
   val convertFunction: Option[String] = None
   val functionReturnType = Map("count" -> BigintType)
+  val builtinVariables = Map("CURRENT_DATE" -> DateType, "CURRENT_TIMESTAMP" -> TimestampType, "CURRENT_TIME" -> TimeType)
 
 }

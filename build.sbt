@@ -4,7 +4,7 @@ lazy val oql2 = crossProject(JSPlatform, JVMPlatform /*, NativePlatform*/ )
   .in(file("."))
   .settings(
     name := "@vinctus/oql2",
-    version := "2.0.0-beta.2.1",
+    version := "2.0.0-beta.2.2",
     scalaVersion := "2.13.5",
     scalacOptions ++=
       Seq(
@@ -19,6 +19,8 @@ lazy val oql2 = crossProject(JSPlatform, JVMPlatform /*, NativePlatform*/ )
         "-Xasync"
       ),
     organization := "com.vinctus",
+    githubOwner := "vinctustech",
+    githubRepository := "oql",
     mainClass := Some("com.vinctus.oql2.Main"),
     Test / mainClass := Some("com.vinctus.oql2.Main"),
     libraryDependencies += "org.scalatest" %%% "scalatest" % "3.2.5" % "test",

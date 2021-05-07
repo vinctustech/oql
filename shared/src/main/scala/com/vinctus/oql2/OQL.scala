@@ -39,7 +39,7 @@ class OQL(dm: String, val ds: SQLDataSource, conv: Conversions) {
   def parseQuery(oql: String): OQLQuery = {
     val query = OQLParser.parseQuery(oql)
 
-    queryProjects(None, query, model, ds, oql) // todo: should be called "queryPreprocess" and do all decorating
+    preprocessQuery(None, query, model, ds, oql) // todo: should be called "preprocessQuery" and do all decorating
     query.select foreach (decorate(query.entity, _, model, ds, oql))
     query.group foreach (_ foreach (decorate(query.entity, _, model, ds, oql)))
     query.order foreach (_ foreach { case OQLOrdering(expr, _) => decorate(query.entity, expr, model, ds, oql) })
@@ -57,7 +57,7 @@ class OQL(dm: String, val ds: SQLDataSource, conv: Conversions) {
 
   def count(query: OQLQuery, oql: String): Future[Int] = {
     query.project = List(ExpressionOQLProject(Ident("count", null), ApplyOQLExpression(Ident("count", null), List(StarOQLExpression))))
-    queryProjects(None, query, model, ds, oql)
+    preprocessQuery(None, query, model, ds, oql)
     query.select foreach (decorate(query.entity, _, model, ds, oql))
     query.group foreach (_ foreach (decorate(query.entity, _, model, ds, oql)))
 
@@ -249,7 +249,7 @@ object OQL {
     expr match {
       case ExistsOQLExpression(query) =>
         query.project = List(SQLStarOQLProject)
-        queryProjects(Some(entity), query, model, ds, oql)
+        preprocessQuery(Some(entity), query, model, ds, oql)
 
         if (!query.attr.typ.isArrayType)
           problem(query.source.pos, s"attribute ${query.source.s} does not have an array type", oql)
@@ -257,7 +257,7 @@ object OQL {
         query.select foreach (decorate(query.entity, _, model, ds, oql))
         query.order foreach (_ foreach { case OQLOrdering(expr, _) => decorate(query.entity, expr, model, ds, oql) })
       case QueryOQLExpression(query) =>
-        queryProjects(Some(entity), query, model, ds, oql)
+        preprocessQuery(Some(entity), query, model, ds, oql)
 
         if (!query.attr.typ.isArrayType)
           problem(query.source.pos, s"attribute ${query.source.s} does not have an array type", oql)
@@ -305,10 +305,12 @@ object OQL {
         if (left.typ == right.typ)
           e.typ = left.typ
       case attrexp @ ReferenceOQLExpression(ids, _) => attrexp.dmrefs = lookup(attrexp, ids, ref = true)
+      case AttributeOQLExpression(List(id), _) if ds.builtinVariables contains id.s =>
+        expr.typ = ds.builtinVariables(id.s) // it's a built-in variable so assign type from `builtinVariables` map but leave dmrefs null
       case attrexp @ AttributeOQLExpression(ids, _) => attrexp.dmrefs = lookup(attrexp, ids, ref = false)
       case InQueryOQLExpression(left, op, query) =>
         _decorate(left)
-        queryProjects(Some(entity), query, model, ds, oql)
+        preprocessQuery(Some(entity), query, model, ds, oql)
 
         if (!query.attr.typ.isArrayType)
           problem(query.source.pos, s"attribute ${query.source.s} does not have an array type", oql)
@@ -323,7 +325,7 @@ object OQL {
     }
   }
 
-  private[oql2] def queryProjects(outer: Option[Entity], query: OQLQuery, model: DataModel, ds: SQLDataSource, oql: String): OQLQuery = {
+  private[oql2] def preprocessQuery(outer: Option[Entity], query: OQLQuery, model: DataModel, ds: SQLDataSource, oql: String): OQLQuery = {
     val map = new mutable.LinkedHashMap[String, OQLProject]
     val entity =
       if (outer.isDefined) {
@@ -331,23 +333,11 @@ object OQL {
           query.entity
         } else {
           outer.get.attributes get query.source.s match {
-            case Some(attr @ Attribute(name, column, pk, required, OneToOneType(entity, _))) =>
-              query.entity = entity
+            case Some(attr @ Attribute(name, column, pk, required, typ: RelationalType)) =>
+              query.entity = typ.entity
               query.attr = attr
-              entity
-            case Some(attr @ Attribute(name, column, pk, required, ManyToOneType(entity))) =>
-              query.entity = entity
-              query.attr = attr
-              entity
-            case Some(attr @ Attribute(name, column, pk, required, OneToManyType(entity, otmAttr))) =>
-              query.entity = entity
-              query.attr = attr
-              entity
-            case Some(attr @ Attribute(name, column, pk, required, ManyToManyType(entity, link, self, target))) =>
-              query.entity = entity
-              query.attr = attr
-              entity
-            case None => problem(query.source.pos, s"entity '${outer.get}' does not have attribute '${query.source.s}'", oql)
+              typ.entity
+            case None => problem(query.source.pos, s"entity '${outer.get}' does not have relational attribute '${query.source.s}'", oql)
           }
         }
       } else
@@ -360,7 +350,7 @@ object OQL {
     val subtracts = new mutable.HashSet[String]
 
     query.project foreach {
-      case p @ QueryOQLProject(label, query) =>
+      case proj @ QueryOQLProject(label, query) =>
         map(label.s) = entity.attributes get query.source.s match {
           case Some(Attribute(name, column, pk, required, typ: DataType)) =>
             val attr = AttributeOQLExpression(List(query.source), null)
@@ -368,10 +358,12 @@ object OQL {
             decorate(entity, attr, model, ds, oql) // todo: should be done without call to 'decorate' because we have the attribute instance
             ExpressionOQLProject(label, attr)
           case Some(_) =>
-            queryProjects(Some(entity), query, model, ds, oql)
+            preprocessQuery(Some(entity), query, model, ds, oql)
             query.select foreach (decorate(query.entity, _, model, ds, oql))
             query.order foreach (_ foreach { case OQLOrdering(expr, _) => decorate(query.entity, expr, model, ds, oql) })
-            p
+            proj
+          case None if ds.builtinVariables contains query.source.s =>
+            ExpressionOQLProject(label, RawOQLExpression(query.source.s)) // it's a built-in variable so sent it through raw
           case None => problem(query.source.pos, s"entity '${entity.name}' does not have attribute '${query.source.s}'", oql)
         }
       case StarOQLProject =>
@@ -402,21 +394,22 @@ object OQL {
             entity.attributes get id.s match {
               case Some(attr @ Attribute(_, _, _, _, _: DataType)) =>
                 a.dmrefs = List((entity, attr))
-                decorate(entity, a, model, ds, oql)
+                decorate(entity, a, model, ds, oql) // todo: shouldn't have to call `decorate` because we have the Attribute object
                 expProj
               case Some(attr @ Attribute(_, _, _, _, ManyToManyType(mtmEntity, link, self, target))) =>
                 QueryOQLProject(
                   label,
-                  queryProjects(Some(entity), OQLQuery(id, mtmEntity, attr, List(StarOQLProject), None, None, None, None, None), model, ds, oql))
+                  preprocessQuery(Some(entity), OQLQuery(id, mtmEntity, attr, List(StarOQLProject), None, None, None, None, None), model, ds, oql))
               case Some(attr @ Attribute(_, _, _, _, ManyToOneType(mtoEntity))) =>
                 QueryOQLProject(
                   label,
-                  queryProjects(Some(entity), OQLQuery(id, mtoEntity, attr, List(StarOQLProject), None, None, None, None, None), model, ds, oql))
+                  preprocessQuery(Some(entity), OQLQuery(id, mtoEntity, attr, List(StarOQLProject), None, None, None, None, None), model, ds, oql))
               case Some(attr @ Attribute(_, _, _, _, OneToManyType(otmEntity, otmAttr))) =>
                 QueryOQLProject(
                   label,
-                  queryProjects(Some(entity), OQLQuery(id, otmEntity, attr, List(StarOQLProject), None, None, None, None, None), model, ds, oql))
-              case None => problem(id.pos, s"entity '${entity.name}' does not have attribute '${id.s}'", oql)
+                  preprocessQuery(Some(entity), OQLQuery(id, otmEntity, attr, List(StarOQLProject), None, None, None, None, None), model, ds, oql))
+              case None if ds.builtinVariables contains id.s => expProj // it's a built-in variable so leave dmrefs null and let it go through
+              case None                                      => problem(id.pos, s"entity '${entity.name}' does not have attribute '${id.s}'", oql)
             }
           case _ =>
             decorate(entity, expr, model, ds, oql)

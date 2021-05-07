@@ -47,4 +47,6 @@ trait SQLDataSource extends OQLDataSource {
 
   val platformSpecific: PartialFunction[Any, String]
 
+  val builtinVariables: Map[String, DataType]
+
 }

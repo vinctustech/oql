@@ -9,11 +9,12 @@ case object BooleanType extends DataType
 case object BigintType extends DataType
 case class DecimalType(precision: Int, scale: Int) extends DataType
 case object DateType extends DataType
+case object TimeType extends DataType
 case object FloatType extends DataType
 case object UUIDType extends DataType
 case object TimestampType extends DataType
 
-trait RelationalType extends TypeSpecifier { val isDataType = false; val isColumnType = false; val isArrayType = false }
+trait RelationalType extends TypeSpecifier { val entity: Entity; val isDataType = false; val isColumnType = false; val isArrayType = false }
 case class ManyToOneType(entity: Entity) extends RelationalType { override val isColumnType = true }
 case class OneToOneType(entity: Entity, attribute: Attribute) extends RelationalType
 
