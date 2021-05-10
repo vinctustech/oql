@@ -4,7 +4,7 @@ lazy val oql2 = crossProject(JSPlatform, JVMPlatform /*, NativePlatform*/ )
   .in(file("."))
   .settings(
     name := "@vinctus/oql2",
-    version := "2.0.0-beta.2.3",
+    version := "2.0.0-beta.2.4",
     scalaVersion := "2.13.5",
     scalacOptions ++=
       Seq(

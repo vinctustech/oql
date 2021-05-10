@@ -34,8 +34,8 @@ class OQL_NodePG(dm: String,
     else
       new Mutation(this, entity(s))
 
-  @JSExport
-  override def showQuery(): Unit = _showQuery = true
+  @JSExport("showQuery")
+  def jsshowQuery(): Unit = showQuery()
 
   @JSExport("count")
   def jscount(oql: String, parameters: js.UndefOr[js.Any] = js.undefined): js.Promise[Int] = count(substitute(oql, parameters)).toJSPromise

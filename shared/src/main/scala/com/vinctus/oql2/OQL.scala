@@ -7,7 +7,6 @@ import scala.collection.mutable.ListBuffer
 import scala.annotation.tailrec
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-import scala.reflect.runtime.universe.show
 
 class OQL(dm: String, val ds: SQLDataSource, conv: Conversions) {
 
