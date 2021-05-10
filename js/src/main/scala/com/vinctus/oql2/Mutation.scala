@@ -76,7 +76,7 @@ class Mutation private[oql2] (oql: OQL_NodePG, entity: Entity) {
     // build insert command
     command append s"INSERT INTO ${entity.table} (${columns mkString ", "}) VALUES\n"
     command append s"  (${values mkString ", "})\n"
-    entity.pk.get.column foreach (pk => command append s"  RETURNING $pk\n")
+    command append s"  RETURNING ${entity.pk.get.column}\n"
     oql.show(command.toString)
 
     // execute insert command (to get a future)
