@@ -40,4 +40,14 @@ class H2_mem extends JDBCDataSource("org.h2.Driver") {
 
   def reverseMapType(typ: String): DataType = null
 
+  private val specialRegex = """(['\\\r\n])""".r
+
+  def quote(s: String): String =
+    specialRegex.replaceAllIn(s, _.group(1) match {
+      case "'"  => "''"
+      case "\\" => """\\\\"""
+      case "\r" => """\\r"""
+      case "\n" => """\\n"""
+    })
+
 }

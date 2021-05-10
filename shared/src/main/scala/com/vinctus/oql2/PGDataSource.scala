@@ -47,4 +47,14 @@ trait PGDataSource extends SQLDataSource {
   val functionReturnType = Map("count" -> BigintType)
   val builtinVariables = Map("CURRENT_DATE" -> DateType, "CURRENT_TIMESTAMP" -> TimestampType, "CURRENT_TIME" -> TimeType)
 
+  private val specialRegex = """(['\\\r\n])""".r
+
+  def quote(s: String): String =
+    specialRegex.replaceAllIn(s, _.group(1) match {
+      case "'"  => "''"
+      case "\\" => """\\\\"""
+      case "\r" => """\\r"""
+      case "\n" => """\\n"""
+    })
+
 }

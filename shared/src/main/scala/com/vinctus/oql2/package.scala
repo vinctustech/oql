@@ -1,5 +1,6 @@
 package com.vinctus
 
+import scala.scalajs.js
 import scala.util.parsing.input.Position
 
 package object oql2 {
@@ -45,15 +46,5 @@ package object oql2 {
 //  )
 //
 //  def escape(s: String): String = escapeReplaceMap.foldLeft(s) { case (acc, (c, r)) => acc.replace(c, r) }
-
-  private val specialRegex = """(['\\\r\n])""".r
-
-  def quote(s: String): String =
-    specialRegex.replaceAllIn(s, _.group(1) match {
-      case "'"  => "''"
-      case "\\" => """\\\\"""
-      case "\r" => """\\r"""
-      case "\n" => """\\n"""
-    })
 
 }

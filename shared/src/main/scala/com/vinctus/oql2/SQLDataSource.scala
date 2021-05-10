@@ -49,4 +49,6 @@ trait SQLDataSource extends OQLDataSource {
 
   val builtinVariables: Map[String, DataType]
 
+  def quote(s: String): String
+
 }

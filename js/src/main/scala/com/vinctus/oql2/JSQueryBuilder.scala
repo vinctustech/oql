@@ -75,11 +75,11 @@ class JSQueryBuilder private[oql2] (private val oql: OQL_NodePG, private[oql2] v
 
   @JSExport
   def query(query: String, parameters: js.UndefOr[js.Any] = js.undefined): JSQueryBuilder =
-    new JSQueryBuilder(oql, oql.parseQuery(substitute(query, parameters)))
+    new JSQueryBuilder(oql, oql.parseQuery(oql.substitute(query, parameters)))
 
   @JSExport
   def select(s: String, parameters: js.UndefOr[js.Any] = js.undefined): JSQueryBuilder = {
-    val sel = oql.parseCondition(substitute(s, parameters), q.entity)
+    val sel = oql.parseCondition(oql.substitute(s, parameters), q.entity)
 
     new JSQueryBuilder(
       oql,

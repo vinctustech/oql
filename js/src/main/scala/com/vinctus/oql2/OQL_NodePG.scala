@@ -73,12 +73,7 @@ class OQL_NodePG(dm: String,
       .connect
       .raw(sql, if (values.isEmpty) js.Array() else values.get)
 
-}
-
-object OQL_NodePG {
-
   private val varRegex = ":([a-zA-Z_][a-zA-Z0-9_]*)" r
-  private val specialRegex = """(['\\\r\n])""" r
 
   def substitute(s: String, parameters: js.UndefOr[js.Any]): String = // todo: unit tests for parameters
     if (parameters.isEmpty) s
@@ -94,18 +89,19 @@ object OQL_NodePG {
 
   def render(a: Any): String =
     a match {
-      case s: String      => s"'${quote(s)}'"
+      case s: String      => s"'${ds.quote(s)}'"
       case d: js.Date     => s"'${d.toISOString()}'"
       case a: js.Array[_] => s"(${a map render mkString ","})"
       case _              => String.valueOf(a)
     }
 
-  def quote(s: String): String =
-    specialRegex.replaceAllIn(s, _.group(1) match {
-      case "'"  => "''"
-      case "\\" => """\\\\"""
-      case "\r" => """\\r"""
-      case "\n" => """\\n"""
-    })
+}
+
+object OQL_NodePG {
+
+  def jsArray(v: Any): Boolean = v.isInstanceOf[js.Array[_]]
+
+  def jsObject(v: Any): Boolean =
+    js.typeOf(v) == "object" && (v != null) && !v.isInstanceOf[Long] && !v.isInstanceOf[js.Date] && !jsArray(v)
 
 }
