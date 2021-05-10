@@ -26,13 +26,27 @@ export class QueryBuilder {
 
 }
 
+export class Mutation {
+
+  insert(obj: any): Promise<any>
+
+  link(id1: any, resource: string, id2: any): Promise<void>
+
+  unlink(id1: any, resource: string, id2: any): Promise<void>
+
+  update(id: any, updates: any): Promise<void>
+
+  delete(id: any): Promise<void>
+
+}
+
 export class OQL2 {
 
   constructor(dm: string, host: string, port: number, database: string, user: string, password: string, ssl: any, idleTimeoutMillis: number, max: number)
 
   showQuery(): void
 
-//   entity(resource: string): Resource
+  entity(name: string): Mutation
 
   queryBuilder(): QueryBuilder
 

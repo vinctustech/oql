@@ -1,9 +1,7 @@
 package com.vinctus.oql2
 
 import com.vinctus.oql2.OQL_NodePG.jsObject
-import typings.std.stdStrings.map
 
-import scala.scalajs
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.scalajs.js
 import scala.scalajs.js.JSConverters._
@@ -109,5 +107,40 @@ class Mutation private[oql2] (oql: OQL_NodePG, entity: Entity) {
     // execute update command (to get a future)
     oql.connect.command(command.toString) map (_ => ()) toJSPromise
   }
+
+//  @JSExport("link")
+//  def jsLink(e1: js.Any, resource: String, e2: js.Any): js.Promise[Unit] = {
+//    val id1 = if (jsObject(e1)) e1.asInstanceOf[js.Dictionary[String]](entity.pk.get.name) else e1
+//    val id2 = if (jsObject(e2)) e2.asInstanceOf[js.Dictionary[String]](entity.pk.get.name) else e2
+//
+//    link(id1, resource, id2)
+//  }
+//
+//  def link(id1: Any, attribute: String, id2: Any): js.Promise[Unit] =
+//    entity.attributes get attribute match {
+//      case Some(Attribute(name, column, pk, required, ManyToManyType(mtmEntity, link, self, target))) =>
+////      case Some(ObjectArrayJunctionEntityAttribute(_, otherEntity, attrEntityAttr, junctionType, junction)) =>
+//        val thisAttr =
+//          junction.attributes
+//            .find {
+//              case (_, attr) =>
+//                attr.isInstanceOf[ObjectEntityAttribute] && attr.asInstanceOf[ObjectEntityAttribute].entity == entity
+//            }
+//            .get
+//            ._1
+//        val thatAttr =
+//          junction.attributes
+//            .find {
+//              case (_, attr) =>
+//                attr
+//                  .isInstanceOf[ObjectEntityAttribute] && attr.asInstanceOf[ObjectEntityAttribute].entity == otherEntity
+//            }
+//            .get
+//            ._1
+//
+//        oql.entity(junctionType).insert((thisAttr -> id1, thatAttr -> id2)) map (_ => ())
+//      case Some(_) => sys.error(s"attribute '$attribute' is not many-to-many")
+//      case None    => sys.error(s"attribute '$attribute' does not exist on entity '${entity.name}'")
+//    }
 
 }
