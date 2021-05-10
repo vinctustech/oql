@@ -28,11 +28,10 @@ class OQL_NodePG(dm: String,
 
   override def execute[R](action: OQLConnection => Future[R]): Future[R] = action(connect)
 
-  def mutation(s: String): Mutation =
-    if (s.exists(c => !(c.isLetterOrDigit || c == '_')))
-      sys.error("mutation parsing not supported yet")
-    else
-      new Mutation(this, entity(s))
+  @JSExport
+  def entity(name: String): Mutation = new Mutation(this, model.entities(name))
+
+//  def mutation(s: String): Mutation =
 
   @JSExport("showQuery")
   def jsshowQuery(): Unit = showQuery()

@@ -34,8 +34,6 @@ class OQL(dm: String, val ds: SQLDataSource, conv: Conversions) {
 
   def create(): Future[Unit] = execute(_.create(model))
 
-  def entity(name: String): Entity = model.entities(name)
-
   def parseQuery(oql: String): OQLQuery = {
     val query = OQLParser.parseQuery(oql)
 
