@@ -1,7 +1,6 @@
 package com.vinctus.oql2
 
 import typings.node.global.console
-import typings.std.stdStrings.a
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future.never.onComplete

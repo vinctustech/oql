@@ -1,14 +1,17 @@
 package com.vinctus.oql2
 
 import com.vinctus.oql2.OQL_NodePG.jsObject
+import typings.std.stdStrings.map
 
 import scala.scalajs
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.scalajs.js
 import scala.scalajs.js.JSConverters._
+import scala.scalajs.js.annotation.JSExport
 
-class Mutation(oql: OQL_NodePG, entity: Entity) {
+class Mutation private[oql2] (oql: OQL_NodePG, entity: Entity) {
 
+  @JSExport
   def insert(obj: js.Dictionary[js.Any]): js.Promise[js.Dictionary[js.Any]] = {
     // check if the object has a primary key
     entity.pk foreach { pk =>
@@ -75,9 +78,7 @@ class Mutation(oql: OQL_NodePG, entity: Entity) {
     // build insert command
     command append s"INSERT INTO ${entity.table} (${columns mkString ", "}) VALUES\n"
     command append s"  (${values mkString ", "})\n"
-
     entity.pk.get.column foreach (pk => command append s"  RETURNING $pk\n")
-
     oql.show(command.toString)
 
     // execute insert command (to get a future)
@@ -92,6 +93,21 @@ class Mutation(oql: OQL_NodePG, entity: Entity) {
 
       obj
     } toJSPromise
+  }
+
+  @JSExport("delete")
+  def jsDelete(e: js.Any): js.Promise[Unit] = delete(if (jsObject(e)) e.asInstanceOf[js.Dictionary[String]](entity.pk.get.name) else e)
+
+  def delete(id: Any): js.Promise[Unit] = {
+    val command = new StringBuilder
+
+    // build delete command
+    command append s"DELETE FROM ${entity.table}\n"
+    command append s"  WHERE ${entity.pk.get.column} = ${oql.render(id)}\n"
+    oql.show(command.toString)
+
+    // execute update command (to get a future)
+    oql.connect.command(command.toString) map (_ => ()) toJSPromise
   }
 
 }

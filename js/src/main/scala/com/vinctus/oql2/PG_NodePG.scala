@@ -17,6 +17,8 @@ class PG_NodePG(val host: String,
 
   val name: String = "PostgreSQL (node-pg)"
 
+  // this has to be a `val` and not a `def` because it contains a `node-pg` connection pool
+  // this should only be instantiated once
   val connect: NodePGConnection = new NodePGConnection(this)
 
   val platformSpecific: PartialFunction[Any, String] = {

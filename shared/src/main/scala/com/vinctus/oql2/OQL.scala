@@ -1,7 +1,5 @@
 package com.vinctus.oql2
 
-import jdk.internal.org.jline.keymap.KeyMap.display
-
 import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
 import scala.annotation.tailrec
