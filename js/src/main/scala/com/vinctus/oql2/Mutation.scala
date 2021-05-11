@@ -151,97 +151,79 @@ class Mutation private[oql2] (oql: OQL_NodePG, entity: Entity) {
       case None    => sys.error(s"attribute '$attribute' does not exist on entity '${entity.name}'")
     }
 
-//  @JSExport("update")
-//  def jsjsUpdate(e: js.Any, updates: js.Any): js.Promise[Unit] = jsUpdate(e, updates).toJSPromise
-//
-//  def jsUpdate(e: js.Any, updates: js.Any): Future[Unit] =
-//    update(if (jsObject(e)) e.asInstanceOf[js.Dictionary[String]](entity.pk.get) else e, toMap(updates))
-//
-//  def update(e: Any, updates: collection.Map[String, Any]): Future[Unit] = {
-//    // check if updates has a primary key
-//    entity.pk foreach (pk =>
-//      // object being updated should not have it's primary key changed
-//      if (updates.contains(pk))
-//        sys.error(s"Resource.set: primary key can not be changed: $pk"))
-//
-//    // get sub-map of all column attributes
-//    val attrs =
-//      entity.attributes
-//        .filter {
-//          case (_, _: EntityColumnAttribute) => true
-//          case _                             => false
-//        }
-//        .asInstanceOf[ListMap[String, EntityColumnAttribute]]
-//
-//    // get sub-map of column attributes excluding primary key
-//    val attrsNoPK = entity.pk.fold(attrs)(attrs - _)
-//
-//    // get key set of column attributes excluding primary key
-//    val attrsNoPKKeys = attrsNoPK.keySet
-//
-//    // get updates key set
-//    val keyset = updates.keySet
-//
-//    // check if object contains extrinsic attributes
-//    if ((keyset diff attrsNoPKKeys).nonEmpty)
-//      sys.error(s"extrinsic properties not found in entity '${entity.name}': ${(keyset diff attrsNoPKKeys) map (p => s"'$p'") mkString ", "}")
-//
-//    // build list of attributes to update
-//    val pairs =
-//      updates map {
-//        case (k, v) =>
-//          val v1 =
-//            v match {
-//              case p: Product =>
-//                entity.attributes(k) match {
-//                  case ObjectEntityAttribute(_, _, e, _) if e.pk.isDefined =>
-//                    p.productElementNames.indexOf(e.pk.get) match {
-//                      case -1  => sys.error(s"primary key not found in case class: ${e.pk.get}")
-//                      case idx => p.productElement(idx)
-//                    }
-//                  case ObjectEntityAttribute(_, _, e, _) =>
-//                    sys.error(s"entity '${e.name}' does not have a declared primary key")
-//                  case _ => sys.error(s"attribute '$k' of entity '${entity.name}' is not an entity attribute")
-//                }
-//              case _ =>
-//                if (jsObject(v))
-//                  entity.attributes(k) match {
-//                    case ObjectEntityAttribute(_, _, e, _) if e.pk.isDefined =>
-//                      v.asInstanceOf[Map[String, Any]](e.pk.get) // todo: unit test
-//                    case ObjectEntityAttribute(_, _, e, _) =>
-//                      sys.error(s"entity '${e.name}' does not have a declared primary key")
-//                    case _ => sys.error(s"attribute '$k' of entity '${entity.name}' is not an entity attribute")
-//                  } else
-//                  v
-//            }
-//
-//          attrs(k).column -> render(v1)
-//      }
-//
-//    val command = new StringBuilder
-//    val id =
-//      e match {
-//        case m: Map[_, _] =>
-//          m.asInstanceOf[Map[String, Any]].get(entity.pk.get) match {
-//            case None     => sys.error(s"primary key not found in map: ${entity.pk.get}")
-//            case Some(pk) => pk
-//          }
-//        case p: Product =>
-//          p.productElementNames.indexOf(entity.pk.get) match {
-//            case -1  => sys.error(s"primary key not found in case class: ${entity.pk.get}")
-//            case idx => p.productElement(idx)
-//          }
-//        case _ => e
-//      }
-//
-//    // build update command
-//    command append s"UPDATE ${entity.table}\n"
-//    command append s"  SET ${pairs map { case (k, v) => s"$k = $v" } mkString ", "}\n"
-//    command append s"  WHERE ${entity.pk.get.column} = ${oql.render(id)}\n"
-//    oql.show(command.toString)
-//
-//    // execute update command (to get a future)
-//    oql.connect.command(command.toString) map (_ => ())
-//  }
+  @JSExport("update")
+  def jsUpdate(e: js.Any, updates: js.Any): js.Promise[Unit] =
+    update(if (jsObject(e)) e.asInstanceOf[js.Dictionary[Any]](entity.pk.get.name) else e, updates.asInstanceOf[js.Dictionary[Any]]).toJSPromise
+
+  def update(e: Any, updates: collection.Map[String, Any]): Future[Unit] = {
+    // check if updates has a primary key
+    entity.pk foreach (pk =>
+      // object being updated should not have it's primary key changed
+      if (updates.contains(pk.name))
+        sys.error(s"update: primary key can not be changed: $pk"))
+
+    // get sub-map of all column attributes
+    val attrs =
+      entity.attributes
+        .filter {
+          case (_, Attribute(name, column, pk, required, typ)) if typ.isColumnType => true
+          case _                                                                   => false
+        }
+
+    // get sub-map of column attributes excluding primary key
+    val attrsNoPK = entity.pk.fold(attrs)(attrs - _.name)
+
+    // get key set of column attributes excluding primary key
+    val attrsNoPKKeys = attrsNoPK.keySet
+
+    // get updates key set
+    val keyset = updates.keySet
+
+    // check if object contains extrinsic attributes
+    if ((keyset diff attrsNoPKKeys).nonEmpty)
+      sys.error(s"extrinsic properties not found in entity '${entity.name}': ${(keyset diff attrsNoPKKeys) map (p => s"'$p'") mkString ", "}")
+
+    // build list of attributes to update
+    val pairs =
+      updates map {
+        case (k, v) =>
+          val v1 =
+            if (jsObject(v))
+              entity.attributes(k) match {
+                case Attribute(_, _, _, _, ManyToOneType(mtoEntity)) if mtoEntity.pk.isDefined =>
+                  v.asInstanceOf[Map[String, Any]](mtoEntity.pk.get.name)
+                case Attribute(_, _, _, _, ManyToOneType(mtoEntity)) =>
+                  sys.error(s"entity '${mtoEntity.name}' does not have a declared primary key")
+                case _ => sys.error(s"attribute '$k' of entity '${entity.name}' is not an entity attribute")
+              } else v
+
+          attrs(k).column -> oql.render(v1)
+      }
+
+    val command = new StringBuilder
+    val id =
+      e match {
+        case m: Map[_, _] =>
+          m.asInstanceOf[Map[String, Any]].get(entity.pk.get.name) match {
+            case None     => sys.error(s"primary key not found in map: ${entity.pk.get}")
+            case Some(pk) => pk
+          }
+        case p: Product =>
+          p.productElementNames.indexOf(entity.pk.get) match {
+            case -1  => sys.error(s"primary key not found in case class: ${entity.pk.get}")
+            case idx => p.productElement(idx)
+          }
+        case _ => e
+      }
+
+    // build update command
+    command append s"UPDATE ${entity.table}\n"
+    command append s"  SET ${pairs map { case (k, v) => s"$k = $v" } mkString ", "}\n"
+    command append s"  WHERE ${entity.pk.get.column} = ${oql.render(id)}\n"
+    oql.show(command.toString)
+
+    // execute update command (to get a future)
+    oql.connect.command(command.toString) map (_ => ())
+  }
 
 }
