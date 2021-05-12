@@ -52,9 +52,9 @@ trait PGDataSource extends SQLDataSource {
   def quote(s: String): String =
     specialRegex.replaceAllIn(s, _.group(1) match {
       case "'"  => "''"
-      case "\\" => """\\\\"""
-      case "\r" => """\\r"""
-      case "\n" => """\\n"""
+      case "\\" => """\\"""
+      case "\r" => """\r"""
+      case "\n" => """\n"""
     })
 
 }
