@@ -122,7 +122,7 @@ class Mutation private[oql2] (oql: OQL_NodePG, entity: Entity) {
   def link(id1: js.Any, attribute: String, id2: js.Any): js.Promise[Unit] =
     entity.attributes get attribute match {
       case Some(Attribute(name, column, pk, required, ManyToManyType(mtmEntity, link, self, target))) =>
-        new Mutation(oql, link).insert(js.Dictionary(self.column -> id1, target.column -> id2)) map (_ => ()) toJSPromise
+        new Mutation(oql, link).insert(js.Dictionary(self.name -> id1, target.name -> id2)) map (_ => ()) toJSPromise
       case Some(_) => sys.error(s"attribute '$attribute' is not many-to-many")
       case None    => sys.error(s"attribute '$attribute' does not exist on entity '${entity.name}'")
     }
