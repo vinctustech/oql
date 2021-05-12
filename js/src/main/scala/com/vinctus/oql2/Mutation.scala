@@ -79,7 +79,7 @@ class Mutation private[oql2] (oql: OQL_NodePG, entity: Entity) {
     // build insert command
     command append s"INSERT INTO ${entity.table} (${columns mkString ", "}) VALUES\n"
     command append s"  (${values mkString ", "})\n"
-    command append s"  RETURNING ${entity.pk.get.column}\n"
+    entity.pk foreach (pk => command append s"  RETURNING ${pk.column}\n")
     oql.show(command.toString)
 
     // execute insert command (to get a future)
@@ -88,7 +88,7 @@ class Mutation private[oql2] (oql: OQL_NodePG, entity: Entity) {
         sys.error("insert: empty result set")
 
       entity.pk match {
-        case None     => obj
+        case None     =>
         case Some(pk) => obj(pk.name) = rs.get(0).asInstanceOf[js.Any] // only one value is being requested: the primary key
       }
 
