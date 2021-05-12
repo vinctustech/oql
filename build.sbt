@@ -4,7 +4,7 @@ lazy val oql2 = crossProject(JSPlatform, JVMPlatform /*, NativePlatform*/ )
   .in(file("."))
   .settings(
     name := "@vinctus/oql2",
-    version := "2.0.0-beta.3.9",
+    version := "2.0.0-beta.3.11",
     scalaVersion := "2.13.5",
     scalacOptions ++=
       Seq(
@@ -49,6 +49,7 @@ lazy val oql2 = crossProject(JSPlatform, JVMPlatform /*, NativePlatform*/ )
 //  ).
   jsSettings(
     jsEnv := new org.scalajs.jsenv.nodejs.NodeJSEnv(),
+    libraryDependencies += "com.vinctus" %%% "sjs-utils" % "0.1.0-snapshot.21",
     Compile / npmDependencies ++= Seq(
       "pg" -> "8.5.1",
       "@types/pg" -> "7.14.9"

@@ -1,6 +1,6 @@
 package com.vinctus.oql2
 
-import com.vinctus.oql2.OQL_NodePG.jsObject
+import com.vinctus.sjs_utils.{jsObject, toMap}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.scalajs.js
@@ -153,9 +153,9 @@ class Mutation private[oql2] (oql: OQL_NodePG, entity: Entity) {
 
   @JSExport("update")
   def jsUpdate(e: js.Any, updates: js.Any): js.Promise[Unit] =
-    update(if (jsObject(e)) e.asInstanceOf[js.Dictionary[Any]](entity.pk.get.name) else e, updates.asInstanceOf[js.Dictionary[Any]]).toJSPromise
+    update(if (jsObject(e)) e.asInstanceOf[js.Dictionary[Any]](entity.pk.get.name) else e, toMap(updates)).toJSPromise
 
-  def update(e: Any, updates: collection.Map[String, Any]): Future[Unit] = {
+  def update(id: Any, updates: collection.Map[String, Any]): Future[Unit] = {
     // check if updates has a primary key
     entity.pk foreach (pk =>
       // object being updated should not have it's primary key changed
@@ -190,31 +190,14 @@ class Mutation private[oql2] (oql: OQL_NodePG, entity: Entity) {
           val v1 =
             if (jsObject(v))
               entity.attributes(k) match {
-                case Attribute(_, _, _, _, ManyToOneType(mtoEntity)) if mtoEntity.pk.isDefined =>
-                  v.asInstanceOf[Map[String, Any]](mtoEntity.pk.get.name)
-                case Attribute(_, _, _, _, ManyToOneType(mtoEntity)) =>
-                  sys.error(s"entity '${mtoEntity.name}' does not have a declared primary key")
-                case _ => sys.error(s"attribute '$k' of entity '${entity.name}' is not an entity attribute")
+                case Attribute(_, _, _, _, ManyToOneType(mtoEntity)) => v.asInstanceOf[Map[String, Any]](mtoEntity.pk.get.name)
+                case _                                               => sys.error(s"attribute '$k' of entity '${entity.name}' is not an entity attribute")
               } else v
 
           attrs(k).column -> oql.render(v1)
       }
 
     val command = new StringBuilder
-    val id =
-      e match {
-        case m: Map[_, _] =>
-          m.asInstanceOf[Map[String, Any]].get(entity.pk.get.name) match {
-            case None     => sys.error(s"primary key not found in map: ${entity.pk.get}")
-            case Some(pk) => pk
-          }
-        case p: Product =>
-          p.productElementNames.indexOf(entity.pk.get) match {
-            case -1  => sys.error(s"primary key not found in case class: ${entity.pk.get}")
-            case idx => p.productElement(idx)
-          }
-        case _ => e
-      }
 
     // build update command
     command append s"UPDATE ${entity.table}\n"

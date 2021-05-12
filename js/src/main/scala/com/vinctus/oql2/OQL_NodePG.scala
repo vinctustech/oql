@@ -22,8 +22,6 @@ class OQL_NodePG(dm: String,
                  max: Int)
     extends OQL(dm, new PG_NodePG(host, port, database, user, password, ssl, idleTimeoutMillis, max), JSConversions) {
 
-  import OQL_NodePG._
-
 //  def mutate(command: String): Any
 
   override def execute[R](action: OQLConnection => Future[R]): Future[R] = action(connect)
@@ -93,14 +91,5 @@ class OQL_NodePG(dm: String,
       case a: js.Array[_] => s"(${a map render mkString ","})"
       case _              => String.valueOf(a)
     }
-
-}
-
-object OQL_NodePG {
-
-  def jsArray(v: Any): Boolean = v.isInstanceOf[js.Array[_]]
-
-  def jsObject(v: Any): Boolean =
-    js.typeOf(v) == "object" && (v != null) && !v.isInstanceOf[Long] && !v.isInstanceOf[js.Date] && !jsArray(v)
 
 }
