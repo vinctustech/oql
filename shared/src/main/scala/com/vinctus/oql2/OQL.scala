@@ -450,8 +450,10 @@ object OQL {
         if (attr.required)
           n.idx = None
         else {
-          // ignore type because we only need it to check if the object is 'null'
-          n.idx = Some(builder.left.toOption.get.projectValue(AttributeOQLExpression(List(Ident(name)), List((entity, attr))), table)._1) // todo: can cause 'GROUP BY' to fail in Postgres: solution is to only add this project if the attribute is not marked "non null"
+          val mtoAttr = AttributeOQLExpression(List(Ident(name)), List((entity, attr)))
+
+          mtoAttr.typ = mtoEntity.pk.get.typ.asInstanceOf[DataType] // add type because we don't want SQLQueryBuilder to generate "typeof" function call
+          n.idx = Some(builder.left.toOption.get.projectValue(mtoAttr, table)._1)
         }
 
         builder.left.toOption.get.leftJoin(table, column, entity.table, alias, entity.pk.get.column)
