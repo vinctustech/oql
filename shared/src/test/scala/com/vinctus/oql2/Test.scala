@@ -39,7 +39,6 @@ trait Test {
 
   def insert(data: String): Unit = {
     val tables: Iterable[Table] = Importer.importFromString(data, doubleSpaces = true)
-    val q = '"'
 
     for (Table(name, header, data) <- tables) {
       val row =
@@ -49,7 +48,7 @@ trait Test {
             case v         => v
           } mkString ("(", ", ", ")")) mkString ", "
 
-      db.execute(_.insert(s"INSERT INTO $q$name$q (${header map { case Column(name, _, _) => s"$q$name$q" } mkString ", "}) VALUES $row"))
+      db.execute(_.insert(s"INSERT INTO \"$name\" (${header map { case Column(name, _, _) => s"\"$name\"" } mkString ", "}) VALUES $row"))
     }
   }
 

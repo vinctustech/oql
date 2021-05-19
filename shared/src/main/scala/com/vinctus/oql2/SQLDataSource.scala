@@ -7,7 +7,6 @@ trait SQLDataSource extends OQLDataSource {
   def mapPKType(typ: TypeSpecifier): String
 
   def schema(model: DataModel): Seq[String] = {
-    val q = '"'
     val tables =
       for (entity <- model.entities.values.toList.sortBy(_.table))
         yield {
@@ -15,9 +14,9 @@ trait SQLDataSource extends OQLDataSource {
             for (attribute <- entity.attributes.values if attribute.typ.isColumnType)
               yield
                 if (attribute.pk)
-                  s"  $q${attribute.column}$q ${mapPKType(attribute.typ)} PRIMARY KEY"
+                  s"  \"${attribute.column}\" ${mapPKType(attribute.typ)} PRIMARY KEY"
                 else
-                  s"  $q${attribute.column}$q ${mapType(attribute.typ)}${if (attribute.required) " NOT NULL" else ""}"
+                  s"  \"${attribute.column}\" ${mapType(attribute.typ)}${if (attribute.required) " NOT NULL" else ""}"
 
           s"""
              |CREATE TABLE "${entity.table}" (
@@ -30,7 +29,7 @@ trait SQLDataSource extends OQLDataSource {
         yield
           for (attribute <- entity.attributes.values if attribute.typ.isInstanceOf[ManyToOneType])
             yield
-              s"ALTER TABLE $q${entity.table}$q ADD FOREIGN KEY ($q${attribute.column}$q) REFERENCES $q${attribute.typ.asInstanceOf[ManyToOneType].entity.table}$q;"
+              s"ALTER TABLE \"${entity.table}\" ADD FOREIGN KEY (\"${attribute.column}\") REFERENCES \"${attribute.typ.asInstanceOf[ManyToOneType].entity.table}\";"
 
     tables ++ foreignKeys.flatten
   }

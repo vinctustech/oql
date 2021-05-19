@@ -4,8 +4,8 @@ lazy val oql2 = crossProject(JSPlatform, JVMPlatform /*, NativePlatform*/ )
   .in(file("."))
   .settings(
     name := "@vinctus/oql2",
-    version := "2.0.0-beta.3.13",
-    scalaVersion := "2.13.5",
+    version := "2.0.0-beta.3.14",
+    scalaVersion := "2.13.6",
     scalacOptions ++=
       Seq(
         "-deprecation",
@@ -25,7 +25,7 @@ lazy val oql2 = crossProject(JSPlatform, JVMPlatform /*, NativePlatform*/ )
     Test / mainClass := Some("com.vinctus.oql2.Main"),
     libraryDependencies += "org.scalatest" %%% "scalatest" % "3.2.5" % "test",
     Test / parallelExecution := false,
-    libraryDependencies += "org.scala-lang.modules" %%% "scala-parser-combinators" % "1.2.0-RC2",
+    libraryDependencies += "org.scala-lang.modules" %%% "scala-parser-combinators" % "2.0.0",
     libraryDependencies += "xyz.hyperreal" %%% "table" % "1.0.0-snapshot.3", // % "test",
     libraryDependencies += "xyz.hyperreal" %%% "cross-platform" % "0.1.0-snapshot.3",
     libraryDependencies += "xyz.hyperreal" %%% "importer" % "0.1.0-snapshot.1",

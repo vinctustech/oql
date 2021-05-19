@@ -10,8 +10,6 @@ object SQLQueryBuilder {
 
   val INDENT = 2
 
-  private val q = '"'
-
 }
 
 class SQLQueryBuilder(oql: String, ds: SQLDataSource, val margin: Int = 0, subquery: Boolean = false) {
@@ -94,7 +92,7 @@ class SQLQueryBuilder(oql: String, ds: SQLDataSource, val margin: Int = 0, subqu
           leftJoin(old_alias, column, e.table, alias, e.pk.get.column)
       }
 
-      s"$q$alias$q.$q${dmrefs.last._2.column}$q"
+      s"\"$alias\".\"${dmrefs.last._2.column}\""
     }
 
     expr match {
@@ -186,7 +184,7 @@ class SQLQueryBuilder(oql: String, ds: SQLDataSource, val margin: Int = 0, subqu
 
     val (table, alias) = from
 
-    line(s"FROM $q$table$q${if (alias.isDefined) s" AS $q${alias.get}$q" else ""}")
+    line(s"FROM \"$table\"${if (alias.isDefined) s" AS \"${alias.get}\"" else ""}")
     in()
 
     val whereClause = where map { case (table, expr) => s"WHERE ${expression(expr, table)}" }
@@ -202,10 +200,10 @@ class SQLQueryBuilder(oql: String, ds: SQLDataSource, val margin: Int = 0, subqu
       }
 
     for (Join(t1, c1, t2, alias, c2) <- innerJoins)
-      line(s"JOIN $q$t2$q AS $q$alias$q ON $q$t1$q.$q$c1$q = $q$alias$q.$q$c2$q")
+      line(s"JOIN \"$t2\" AS \"$alias\" ON \"$t1\".\"$c1\" = \"$alias\".\"$c2\"")
 
     for (Join(t1, c1, t2, alias, c2) <- leftJoins)
-      line(s"LEFT JOIN $q$t2$q AS $q$alias$q ON $q$t1$q.$q$c1$q = $q$alias$q.$q$c2$q")
+      line(s"LEFT JOIN \"$t2\" AS \"$alias\" ON \"$t1\".\"$c1\" = \"$alias\".\"$c2\"")
 
     out()
     whereClause foreach line
