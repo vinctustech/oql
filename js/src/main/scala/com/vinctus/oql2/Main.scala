@@ -36,10 +36,10 @@ object Main extends App {
 //    case Failure(exception) => println(exception.getMessage)
 //  }
 
-  val s = """ ["\"asdf"] """
-
-  println(s)
-  println(JSON.readArray(s))
+//  val s = """ ["\"asdf"] """
+//
+//  println(s)
+//  println(JSON.readArray(s))
 
 }
 

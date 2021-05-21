@@ -1,7 +1,5 @@
 package com.vinctus.oql2
 
-import com.vinctus.oql2.OQLParser.value
-
 import scala.annotation.tailrec
 import scala.collection.immutable.ArraySeq
 import scala.collection.mutable.ArrayBuffer

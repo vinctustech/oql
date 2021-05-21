@@ -8,7 +8,7 @@ lazy val oql2 = crossProject(JSPlatform, JVMPlatform /*, NativePlatform*/ )
   .enablePlugins(ParadoxPlugin)
   .settings(
     name := "@vinctus/oql2",
-    version := "2.0.0-beta.3.15",
+    version := "2.0.0-beta.3.16",
     scalaVersion := "2.13.6",
     scalacOptions ++=
       Seq(
