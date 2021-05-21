@@ -1,5 +1,7 @@
 package com.vinctus.oql2
 
+import com.vinctus.oql2.OQLParser.value
+
 import scala.annotation.tailrec
 import scala.collection.immutable.ArraySeq
 import scala.collection.mutable.ArrayBuffer
@@ -38,6 +40,8 @@ object JSON {
 
     a to ArraySeq
   }
+
+  private def hex(c: Char) = if (c < 128) HEX(c) else 0
 
   def readArray(json: String): IndexedSeq[Any] = {
     var idx: Int = 0
@@ -112,6 +116,20 @@ object JSON {
       @tailrec
       def content(): Unit =
         ch match {
+          case '\\' =>
+            buf +=
+              (ch match {
+                case '\\' => '\\'
+                case '"'  => '"'
+                case '/'  => '/'
+                case 'b'  => '\b'
+                case 'f'  => '\f'
+                case 'n'  => '\n'
+                case 'r'  => '\r'
+                case 't'  => '\t'
+                case 'u'  => (hex(ch) << 12 | hex(ch) << 8 | hex(ch) << 4 | hex(ch)).toChar
+              })
+            content()
           case '"' =>
           case c =>
             buf += c
@@ -120,56 +138,6 @@ object JSON {
 
       content()
       space()
-
-      var i = 0
-
-      while (i < buf.length) {
-        if (buf(i) == '\\') {
-          if (i + 1 < buf.length)
-            buf(i + 1) match {
-              case '"' =>
-                buf.replace(i, i + 2, "\"")
-                i += 2
-              case '\\' =>
-                buf.replace(i, i + 1, "\\")
-                i += 2
-              case '/' =>
-                buf.replace(i, i + 2, "/")
-                i += 2
-              case 'b' =>
-                buf.replace(i, i + 2, "\b")
-                i += 2
-              case 'f' =>
-                buf.replace(i, i + 2, "\f")
-                i += 2
-              case 'n' =>
-                buf.replace(i, i + 2, "\n")
-                i += 2
-              case 'r' =>
-                buf.replace(i, i + 2, "\r")
-                i += 2
-              case 't' =>
-                buf.replace(i, i + 2, "\t")
-                i += 2
-              case 'u' =>
-                if (i + 5 < buf.length) {
-                  def h(idx: Int) = {
-                    val c = buf(idx)
-
-                    if (c < 128) HEX(c) else 0
-                  }
-
-                  buf.setCharAt(i, (h(i + 2) << 12 | h(i + 3) << 8 | h(i + 4) << 4 | h(i + 5)).toChar)
-                  buf.delete(i + 1, i + 6)
-                }
-
-                i += 5
-              case _ => i += 2
-            } else
-            i += 1
-        } else
-          i += 1
-      }
 
       buf.toString
     }

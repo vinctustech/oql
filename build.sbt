@@ -1,10 +1,14 @@
-import sbt.Keys.libraryDependencies
+import sbt.Keys.{libraryDependencies, mainClass}
+
+val DocsConfig = config("docs")
 
 lazy val oql2 = crossProject(JSPlatform, JVMPlatform /*, NativePlatform*/ )
   .in(file("."))
+  .enablePlugins(ScalablyTypedConverterPlugin)
+  .enablePlugins(ParadoxPlugin)
   .settings(
     name := "@vinctus/oql2",
-    version := "2.0.0-beta.3.14",
+    version := "2.0.0-beta.3.15",
     scalaVersion := "2.13.6",
     scalacOptions ++=
       Seq(
@@ -21,6 +25,10 @@ lazy val oql2 = crossProject(JSPlatform, JVMPlatform /*, NativePlatform*/ )
     organization := "com.vinctus",
     githubOwner := "vinctustech",
     githubRepository := "oql",
+    paradoxTheme := Some(builtinParadoxTheme("generic")),
+    ParadoxPlugin.paradoxSettings(DocsConfig),
+    DocsConfig / sourceDirectory := baseDirectory.value / "docs",
+    DocsConfig / paradox / target := baseDirectory.value / "paradox" / "site",
     mainClass := Some("com.vinctus.oql2.Main"),
     Test / mainClass := Some("com.vinctus.oql2.Main"),
     libraryDependencies += "org.scalatest" %%% "scalatest" % "3.2.5" % "test",
@@ -48,16 +56,15 @@ lazy val oql2 = crossProject(JSPlatform, JVMPlatform /*, NativePlatform*/ )
 //    nativeLinkStubs := true
 //  ).
   jsSettings(
-    jsEnv := new org.scalajs.jsenv.nodejs.NodeJSEnv(),
-    libraryDependencies += "com.vinctus" %%% "sjs-utils" % "0.1.0-snapshot.21",
-    Compile / npmDependencies ++= Seq(
-      "pg" -> "8.5.1",
-      "@types/pg" -> "7.14.9"
-    ),
-    Test / scalaJSUseMainModuleInitializer := true,
-    Test / scalaJSUseTestModuleInitializer := false,
+  jsEnv := new org.scalajs.jsenv.nodejs.NodeJSEnv(),
+  libraryDependencies += "com.vinctus" %%% "sjs-utils" % "0.1.0-snapshot.21",
+  Compile / npmDependencies ++= Seq(
+    "pg" -> "8.5.1",
+    "@types/pg" -> "7.14.9"
+  ),
+  Test / scalaJSUseMainModuleInitializer := true,
+  Test / scalaJSUseTestModuleInitializer := false,
 //  Test / scalaJSUseMainModuleInitializer := false,
 //  Test / scalaJSUseTestModuleInitializer := true,
-    scalaJSUseMainModuleInitializer := true
-  )
-  .enablePlugins(ScalablyTypedConverterPlugin)
+  scalaJSUseMainModuleInitializer := true
+)

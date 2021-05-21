@@ -10,3 +10,5 @@ resolvers += Resolver.bintrayRepo("edadma", "sbt-plugins")
 addSbtPlugin("xyz.hyperreal" % "npm-plugin" % "0.1.13")
 
 addSbtPlugin("com.codecommit" % "sbt-github-packages" % "0.5.2")
+
+addSbtPlugin("com.lightbend.paradox" % "sbt-paradox" % "0.9.2")
