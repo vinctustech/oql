@@ -92,7 +92,7 @@ class JSQueryBuilder private[oql2] (private val oql: OQL_NodePG_JS, private[oql2
   def order(attribute: String, sorting: String): JSQueryBuilder = {
     val attr = AttributeOQLExpression(List(Ident(attribute)), null)
 
-    OQL.decorate(q.entity, attr, oql.model, oql.ds, null)
+    AbstractOQL.decorate(q.entity, attr, oql.model, oql.ds, null)
     new JSQueryBuilder(oql, q.copy(order = Some(List(OQLOrdering(attr, sorting)))))
   }
 

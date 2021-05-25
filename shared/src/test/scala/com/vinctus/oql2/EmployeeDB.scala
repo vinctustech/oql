@@ -27,7 +27,7 @@ trait EmployeeDB extends Test {
       |  jobs: [job] (employee)
       |}
       |""".stripMargin
-  val db = new OQL(dm, ds)
+  val db = new AbstractOQL(dm, ds)
 
   db.create()
   db.execute(_.insert("""insert into "job" ("id", "jobTitle") values 

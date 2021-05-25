@@ -17,7 +17,7 @@ trait BookDB extends Test {
       |  books: [book]
       |}
       |""".stripMargin
-  val db = new OQL(dm, ds)
+  val db = new AbstractOQL(dm, ds)
 
   db.create()
   db.execute(_.insert("""insert into "author" ("name") values 

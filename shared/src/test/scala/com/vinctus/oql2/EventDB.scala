@@ -23,7 +23,7 @@ trait EventDB extends Test {
       |  attendee: attendee
       |}
       |""".stripMargin
-  val db = new OQL(dm, ds)
+  val db = new AbstractOQL(dm, ds)
 
   db.create()
   db.execute(_.insert("""insert into "event" ("id", "what", "when", "duration") values 

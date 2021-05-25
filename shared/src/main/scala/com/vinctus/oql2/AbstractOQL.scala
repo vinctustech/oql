@@ -6,9 +6,9 @@ import scala.annotation.tailrec
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class OQL(dm: String, val ds: SQLDataSource, conv: Conversions) {
+abstract class AbstractOQL(dm: String, val ds: SQLDataSource, conv: Conversions) {
 
-  import OQL._
+  import AbstractOQL._
 
   private var _showQuery = false
 
@@ -24,13 +24,13 @@ class OQL(dm: String, val ds: SQLDataSource, conv: Conversions) {
 
   def connect: OQLConnection = ds.connect
 
-  def execute[R](action: OQLConnection => Future[R]): Future[R] = {
-    val conn = connect
-    val res = action(conn)
-
-    res onComplete (_ => conn.close())
-    res
-  }
+  def execute[R](action: OQLConnection => Future[R]): Future[R]
+//    val conn = connect
+//    val res = action(conn)
+//
+//    res onComplete (_ => conn.close())
+//    res
+//  }
 
   def create(): Future[Unit] = execute(_.create(model))
 
@@ -68,18 +68,6 @@ class OQL(dm: String, val ds: SQLDataSource, conv: Conversions) {
     }
   }
 
-  def queryOne(oql: String, newResultBuilder: () => ResultBuilder): Future[Option[Any]] =
-    queryOne(parseQuery(oql), oql, newResultBuilder)
-
-  def queryOne(q: OQLQuery, oql: String, newResultBuilder: () => ResultBuilder): Future[Option[Any]] =
-    queryMany(q, oql, newResultBuilder) map { r =>
-      r.arrayResult match {
-        case Nil       => None
-        case List(row) => Some(row)
-        case _         => sys.error(s"queryOne: more than one row was found")
-      }
-    }
-
   def showQuery(): Unit = _showQuery = true
 
   private[oql2] def show(sql: String): Unit = {
@@ -89,10 +77,14 @@ class OQL(dm: String, val ds: SQLDataSource, conv: Conversions) {
     }
   }
 
-  def queryBuilder() = new QueryBuilder(this, OQLQuery(null, null, null, List(StarOQLProject), None, None, None, None, None))
-
-  def json(oql: String, tab: Int = 2, format: Boolean = true): Future[String] =
-    queryMany(oql, () => new ScalaResultBuilder) map (r => JSON(r.arrayResult, ds.platformSpecific, tab, format))
+  def queryOne(q: OQLQuery, oql: String): Future[Option[Any]] =
+    queryMany(q, oql, () => new ScalaResultBuilder) map { r =>
+      r.arrayResult match {
+        case Nil       => None
+        case List(row) => Some(row)
+        case _         => sys.error(s"queryOne: more than one row was found")
+      }
+    }
 
   def queryMany(oql: String, newResultBuilder: () => ResultBuilder): Future[ResultBuilder] =
     queryMany(parseQuery(oql), oql, newResultBuilder)
@@ -187,7 +179,7 @@ class OQL(dm: String, val ds: SQLDataSource, conv: Conversions) {
 
 }
 
-object OQL {
+object AbstractOQL {
 
   private[oql2] def innerQuery(query: OQLQuery): Node =
     query.attr.typ match {

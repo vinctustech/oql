@@ -3,7 +3,7 @@ package com.vinctus.oql2
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class QueryBuilder private[oql2] (private val oql: OQL, private[oql2] val q: OQLQuery) {
+class QueryBuilder private[oql2] (private val oql: AbstractOQL, private[oql2] val q: OQLQuery) {
   private def check = if (q.source eq null) sys.error("QueryBuilder: no source was given") else this
 
   private class DoNothingQueryBuilder extends QueryBuilder(oql, q) {
@@ -76,7 +76,7 @@ class QueryBuilder private[oql2] (private val oql: OQL, private[oql2] val q: OQL
   def order(attribute: String, sorting: String): QueryBuilder = {
     val attr = AttributeOQLExpression(List(Ident(attribute)), null)
 
-    OQL.decorate(q.entity, attr, oql.model, oql.ds, null)
+    AbstractOQL.decorate(q.entity, attr, oql.model, oql.ds, null)
     new QueryBuilder(oql, q.copy(order = Some(List(OQLOrdering(attr, sorting)))))
   }
 
@@ -88,7 +88,7 @@ class QueryBuilder private[oql2] (private val oql: OQL, private[oql2] val q: OQL
     check.oql.queryMany(q, null, () => new ScalaResultBuilder)
 
   def getOne: Future[Option[Any]] =
-    check.oql.queryOne(q, "", () => new ScalaResultBuilder)
+    check.oql.queryOne(q, "")
 
   def getCount: Future[Int] = oql.count(q, "")
 

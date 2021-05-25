@@ -20,9 +20,9 @@ class OQL_NodePG_JS(dm: String,
                     ssl: Boolean | ConnectionOptions,
                     idleTimeoutMillis: Int,
                     max: Int)
-    extends OQL(dm, new PG_NodePG(host, port, database, user, password, ssl, idleTimeoutMillis, max), JSConversions) {
+    extends AbstractOQL(dm, new NodePG(host, port, database, user, password, ssl, idleTimeoutMillis, max), JSConversions) {
 
-  override def execute[R](action: OQLConnection => Future[R]): Future[R] = action(connect)
+  def execute[R](action: OQLConnection => Future[R]): Future[R] = action(connect)
 
   @JSExport
   def entity(name: String): Mutation = new Mutation(this, model.entities(name))
@@ -62,7 +62,7 @@ class OQL_NodePG_JS(dm: String,
 
   @JSExport
   def raw(sql: String, values: js.UndefOr[js.Array[js.Any]]): js.Promise[js.Array[js.Any]] =
-    ds.asInstanceOf[PG_NodePG]
+    ds.asInstanceOf[NodePG]
       .connect
       .raw(sql, if (values.isEmpty) js.Array() else values.get)
 

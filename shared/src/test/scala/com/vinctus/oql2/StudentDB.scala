@@ -24,7 +24,7 @@ trait StudentDB extends Test {
       |  grade: text
       |}
       |""".stripMargin
-  val db = new OQL(dm, ds)
+  val db = new AbstractOQL(dm, ds)
   val data: String =
     """
       |students

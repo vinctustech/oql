@@ -9,7 +9,7 @@ import scala.concurrent.Future
 import scala.scalajs.js
 import scala.scalajs.js.JSConverters._
 
-class NodePGConnection(val dataSource: PG_NodePG) extends OQLConnection {
+class NodePGConnection(val dataSource: NodePG) extends OQLConnection {
 
   types.setTypeParser(114.asInstanceOf[TypeId], (s: String) => s)
 

@@ -9,32 +9,32 @@ import scala.util.{Failure, Success}
 
 object Main extends App {
 
-//  val dm: String =
-//    """
-//      |entity book {
-//      | *id (pk_book_id): bigint
-//      |  title: text
-//      |  year: int
-//      |  author (author_id): author
-//      |}
-//      |
-//      |entity author {
-//      | *id (pk_author_id): bigint
-//      |  name: text
-//      |  books: [book]
-//      |}
-//      |""".stripMargin
-//////  val db = new OQL(dm, new PG_NodePG("localhost", 5432, "postgres", "postgres", "docker", false, 0, 10))
-//  val db = new OQL_NodePG(dm, "localhost", 5432, "postgres", "postgres", "docker", false, 0, 10)
-//
-//  db.showQuery()
-////  db.jsqueryMany("author { books { title author } <author.name> }").toFuture.onComplete {
-////    case Success(value) => console.log(value)
-////  }
-//  db.json("author { books { title author } <author.name> }").onComplete {
-//    case Success(json)      => println(json)
-//    case Failure(exception) => println(exception.getMessage)
+  val dm: String =
+    """
+      |entity book {
+      | *id (pk_book_id): bigint
+      |  title: text
+      |  year: int
+      |  author (author_id): author
+      |}
+      |
+      |entity author {
+      | *id (pk_author_id): bigint
+      |  name: text
+      |  books: [book]
+      |}
+      |""".stripMargin
+////  val db = new OQL(dm, new PG_NodePG("localhost", 5432, "postgres", "postgres", "docker", false, 0, 10))
+  val db = new OQL_NodePG(dm, "localhost", 5432, "postgres", "postgres", "docker", false, 0, 10)
+
+  db.showQuery()
+//  db.jsqueryMany("author { books { title author } <author.name> }").toFuture.onComplete {
+//    case Success(value) => console.log(value)
 //  }
+  db.json("author { name books } [name = 'Mark Twain']") onComplete {
+    case Success(json)      => println(json)
+    case Failure(exception) => println(exception.getMessage)
+  }
 
 //  val s = """ ["\"asdf"] """
 //

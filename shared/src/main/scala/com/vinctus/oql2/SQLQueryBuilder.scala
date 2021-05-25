@@ -1,6 +1,6 @@
 package com.vinctus.oql2
 
-import com.vinctus.oql2.OQL._
+import com.vinctus.oql2.AbstractOQL._
 
 import scala.collection.mutable.ArrayBuffer
 import scala.language.postfixOps
