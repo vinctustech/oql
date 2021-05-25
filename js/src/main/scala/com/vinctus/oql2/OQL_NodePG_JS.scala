@@ -25,7 +25,7 @@ class OQL_NodePG_JS(dm: String,
   def execute[R](action: OQLConnection => Future[R]): Future[R] = action(connect)
 
   @JSExport
-  def entity(name: String): Mutation = new Mutation(this, model.entities(name))
+  def entity(name: String): JSMutation = new JSMutation(this, model.entities(name))
 
   @JSExport("showQuery")
   def jsshowQuery(): Unit = showQuery()

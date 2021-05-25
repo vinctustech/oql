@@ -24,6 +24,8 @@ abstract class AbstractOQL(dm: String, val ds: SQLDataSource, conv: Conversions)
 
   def connect: OQLConnection = ds.connect
 
+  def render(a: Any): String
+
   def execute[R](action: OQLConnection => Future[R]): Future[R]
 //    val conn = connect
 //    val res = action(conn)
@@ -59,8 +61,8 @@ abstract class AbstractOQL(dm: String, val ds: SQLDataSource, conv: Conversions)
     query.select foreach (decorate(query.entity, _, model, ds, oql))
     query.group foreach (_ foreach (decorate(query.entity, _, model, ds, oql)))
 
-    queryMany(query.copy(order = None), oql, () => new ScalaResultBuilder) map { r =>
-      r.arrayResult match {
+    queryMany(query.copy(order = None), oql, () => new ScalaResultBuilder) map {
+      _.arrayResult match {
         case Nil       => sys.error("count: zero rows were found")
         case List(row) => row.asInstanceOf[Map[String, Number]]("count").intValue()
         case a         => sys.error(s"count: more than one row was found: $a")
@@ -78,8 +80,8 @@ abstract class AbstractOQL(dm: String, val ds: SQLDataSource, conv: Conversions)
   }
 
   def queryOne(q: OQLQuery, oql: String): Future[Option[Any]] =
-    queryMany(q, oql, () => new ScalaResultBuilder) map { r =>
-      r.arrayResult match {
+    queryMany(q, oql, () => new ScalaResultBuilder) map {
+      _.arrayResult match {
         case Nil       => None
         case List(row) => Some(row)
         case _         => sys.error(s"queryOne: more than one row was found")
