@@ -8,6 +8,6 @@ abstract class Conversions {
 
   def long(n: String): Any
 
-  def decimal(n: String): Any
+  def decimal(n: String, precision: Int, scale: Int): Any
 
 }

@@ -8,7 +8,7 @@ import scala.scalajs.js.JSConverters._
 import scala.scalajs.js.annotation.JSExport
 import scala.concurrent.Future
 
-class Mutation private[oql2] (oql: OQL_NodePG, entity: Entity) {
+class Mutation private[oql2] (oql: OQL_NodePG_JS, entity: Entity) {
 
   @JSExport("insert")
   def jsinsert(obj: js.Dictionary[js.Any]): js.Promise[js.Dictionary[js.Any]] = insert(obj).toJSPromise

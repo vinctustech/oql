@@ -10,6 +10,6 @@ object JSConversions extends Conversions {
 
   def long(n: String): Any = n.toDouble
 
-  def decimal(n: String): Any = n.toDouble
+  def decimal(n: String, precision: Int, scale: Int): Any = n.toDouble
 
 }

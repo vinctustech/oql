@@ -5,7 +5,7 @@ import scala.scalajs.js
 import scala.scalajs.js.annotation.JSExport
 import scala.scalajs.js.JSConverters._
 
-class JSQueryBuilder private[oql2] (private val oql: OQL_NodePG, private[oql2] val q: OQLQuery) {
+class JSQueryBuilder private[oql2] (private val oql: OQL_NodePG_JS, private[oql2] val q: OQLQuery) {
   private def check = if (q.source eq null) sys.error("QueryBuilder: no source was given") else this
 
   private class DoNothingQueryBuilder extends JSQueryBuilder(oql, q) {

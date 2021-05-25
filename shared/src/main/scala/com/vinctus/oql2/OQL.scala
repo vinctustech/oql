@@ -68,7 +68,7 @@ class OQL(dm: String, val ds: SQLDataSource, conv: Conversions) {
     }
   }
 
-  def queryOne(oql: String, newResultBuilder: () => ResultBuilder = () => new ScalaResultBuilder): Future[Option[Any]] =
+  def queryOne(oql: String, newResultBuilder: () => ResultBuilder): Future[Option[Any]] =
     queryOne(parseQuery(oql), oql, newResultBuilder)
 
   def queryOne(q: OQLQuery, oql: String, newResultBuilder: () => ResultBuilder): Future[Option[Any]] =
@@ -94,7 +94,7 @@ class OQL(dm: String, val ds: SQLDataSource, conv: Conversions) {
   def json(oql: String, tab: Int = 2, format: Boolean = true): Future[String] =
     queryMany(oql, () => new ScalaResultBuilder) map (r => JSON(r.arrayResult, ds.platformSpecific, tab, format))
 
-  def queryMany(oql: String, newResultBuilder: () => ResultBuilder = () => new ScalaResultBuilder): Future[ResultBuilder] =
+  def queryMany(oql: String, newResultBuilder: () => ResultBuilder): Future[ResultBuilder] =
     queryMany(parseQuery(oql), oql, newResultBuilder)
 
   def queryMany(query: OQLQuery, oql: String, newResultBuilder: () => ResultBuilder): Future[ResultBuilder] = {
@@ -165,7 +165,7 @@ class OQL(dm: String, val ds: SQLDataSource, conv: Conversions) {
 //
 //                    if (z.charAt(10) != 'T') s"${z.substring(0, 10)}T${z.substring(11)}" else z
 //                  }
-              case (d: String, DecimalType(precision, scale)) => conv.decimal(d)
+              case (d: String, DecimalType(precision, scale)) => conv.decimal(d, precision, scale)
               case _                                          => v
             }
           case ObjectNode(properties) =>
@@ -191,17 +191,17 @@ object OQL {
 
   private[oql2] def innerQuery(query: OQLQuery): Node =
     query.attr.typ match {
-      case ManyToOneType(mtoEntity)           => ManyToOneNode(query, objectNode(query.project))
-      case OneToOneType(_, _)                 => OneToOneNode(query, objectNode(query.project))
-      case OneToManyType(otmEntity, attr)     => OneToManyNode(query, objectNode(query.project))
-      case ManyToManyType(mtmEntity, _, _, _) => ManyToManyNode(query, objectNode(query.project))
+      case _: ManyToOneType  => ManyToOneNode(query, objectNode(query.project))
+      case _: OneToOneType   => OneToOneNode(query, objectNode(query.project))
+      case _: OneToManyType  => OneToManyNode(query, objectNode(query.project))
+      case _: ManyToManyType => ManyToManyNode(query, objectNode(query.project))
     }
 
   private[oql2] def objectNode(projects: List[OQLProject]): ObjectNode = {
     ObjectNode(projects map { p =>
       (p.label.s, p match {
-        case ExpressionOQLProject(label, expr) => ValueNode(expr)
-        case QueryOQLProject(label, query)     => innerQuery(query)
+        case ExpressionOQLProject(_, expr) => ValueNode(expr)
+        case QueryOQLProject(_, query)     => innerQuery(query)
       })
     })
   }
