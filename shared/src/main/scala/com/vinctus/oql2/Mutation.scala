@@ -79,11 +79,9 @@ class Mutation private[oql2] (oql: AbstractOQL, entity: Entity) {
         sys.error("insert: empty result set")
 
       entity.pk match {
-        case None     =>
+        case None     => obj
         case Some(pk) => obj + (pk.name -> rs.get(0)) // only one value is being requested: the primary key
       }
-
-      obj
     }
   }
 
