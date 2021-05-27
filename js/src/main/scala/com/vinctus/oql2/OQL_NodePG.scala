@@ -1,5 +1,7 @@
 package com.vinctus.oql2
 
+import com.vinctus.sjs_utils.{map2cc, Mappable}
+
 import typings.node.tlsMod.ConnectionOptions
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -25,7 +27,11 @@ class OQL_NodePG(dm: String,
 
   def selectDynamic(resource: String): Mutation = entity(resource)
 
+  def ccQueryOne[T <: Product: Mappable](oql: String): Future[Option[T]] = queryOne(oql) map (_.map(m => map2cc[T](m.asInstanceOf[Map[String, Any]])))
+
   def queryOne(oql: String): Future[Option[Any]] = queryOne(parseQuery(oql), oql)
+
+  def ccQueryMany[T <: Product: Mappable](oql: String): Future[List[T]] = queryMany(oql) map (_.map(m => map2cc[T](m.asInstanceOf[Map[String, Any]])))
 
   def queryMany(oql: String): Future[List[Any]] = queryMany(oql, () => new ScalaResultBuilder) map (_.arrayResult.asInstanceOf[List[Any]])
 
