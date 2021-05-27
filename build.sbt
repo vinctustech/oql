@@ -1,5 +1,3 @@
-import sbt.Keys.{libraryDependencies, mainClass}
-
 val DocsConfig = config("docs")
 
 lazy val oql2 = crossProject(JSPlatform, JVMPlatform /*, NativePlatform*/ )
@@ -8,7 +6,7 @@ lazy val oql2 = crossProject(JSPlatform, JVMPlatform /*, NativePlatform*/ )
   .enablePlugins(ParadoxPlugin)
   .settings(
     name := "@vinctus/oql2",
-    version := "2.0.0-beta.3.16",
+    version := "2.0.0-beta.4.0",
     scalaVersion := "2.13.6",
     scalacOptions ++=
       Seq(
@@ -25,6 +23,8 @@ lazy val oql2 = crossProject(JSPlatform, JVMPlatform /*, NativePlatform*/ )
     organization := "com.vinctus",
     githubOwner := "vinctustech",
     githubRepository := "oql",
+    resolvers += Resolver.githubPackages("vinctustech"),
+    resolvers += Resolver.githubPackages("edadma", "rdb-sjs"),
     paradoxTheme := Some(builtinParadoxTheme("generic")),
     ParadoxPlugin.paradoxSettings(DocsConfig),
     DocsConfig / sourceDirectory := baseDirectory.value / "docs",
@@ -37,7 +37,9 @@ lazy val oql2 = crossProject(JSPlatform, JVMPlatform /*, NativePlatform*/ )
     libraryDependencies += "xyz.hyperreal" %%% "table" % "1.0.0-snapshot.3", // % "test",
     libraryDependencies += "xyz.hyperreal" %%% "cross-platform" % "0.1.0-snapshot.3",
     libraryDependencies += "xyz.hyperreal" %%% "importer" % "0.1.0-snapshot.1",
+    libraryDependencies += "xyz.hyperreal" %%% "rdb-sjs" % "0.1.0-snapshot.6",
     publishMavenStyle := true,
+    //publishTo := Some("GitHub Package Registry" at "https://maven.pkg.github.com/[username]/[project]"),
     Test / publishArtifact := false,
     licenses += "ISC" -> url("https://opensource.org/licenses/ISC")
   )
