@@ -6,7 +6,7 @@ lazy val oql2 = crossProject(JSPlatform, JVMPlatform /*, NativePlatform*/ )
   .enablePlugins(ParadoxPlugin)
   .settings(
     name := "@vinctus/oql2",
-    version := "2.0.0-beta.4.1",
+    version := "2.0.0-beta.4.2",
     scalaVersion := "2.13.6",
     scalacOptions ++=
       Seq(
@@ -59,7 +59,7 @@ lazy val oql2 = crossProject(JSPlatform, JVMPlatform /*, NativePlatform*/ )
 //  ).
   jsSettings(
   jsEnv := new org.scalajs.jsenv.nodejs.NodeJSEnv(),
-  libraryDependencies += "com.vinctus" %%% "sjs-utils" % "0.1.0-snapshot.21",
+  libraryDependencies += "com.vinctus" %%% "sjs-utils" % "0.1.0-snapshot.23",
   Compile / npmDependencies ++= Seq(
     "pg" -> "8.5.1",
     "@types/pg" -> "7.14.9"

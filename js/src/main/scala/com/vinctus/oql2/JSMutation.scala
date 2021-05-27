@@ -1,6 +1,6 @@
 package com.vinctus.oql2
 
-import com.vinctus.sjs_utils.{jsObject, toMap}
+import com.vinctus.sjs_utils.{jsObject, toJS, toMap}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.scalajs.js
@@ -10,8 +10,7 @@ import scala.scalajs.js.annotation.JSExport
 class JSMutation private[oql2] (oql: OQL_NodePG_JS, entity: Entity) extends Mutation(oql, entity) {
 
   @JSExport("insert")
-  def jsinsert(obj: js.Dictionary[js.Any]): js.Promise[js.Dictionary[js.Any]] =
-    insert(toMap(obj)) map (_.asInstanceOf[js.Dictionary[js.Any]]) toJSPromise
+  def jsinsert(obj: js.Dictionary[js.Any]): js.Promise[js.Any] = insert(toMap(obj)) map toJS toJSPromise
 
   @JSExport("delete")
   def jsDelete(e: js.Any): js.Promise[Unit] = delete(if (jsObject(e)) e.asInstanceOf[js.Dictionary[String]](entity.pk.get.name) else e) toJSPromise
