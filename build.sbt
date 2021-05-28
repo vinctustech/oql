@@ -1,9 +1,8 @@
-val DocsConfig = config("docs")
+ThisBuild / licenses += "ISC" -> url("https://opensource.org/licenses/ISC")
 
 lazy val oql = crossProject(JSPlatform, JVMPlatform /*, NativePlatform*/ )
   .in(file("."))
   .enablePlugins(ScalablyTypedConverterPlugin)
-  .enablePlugins(ParadoxPlugin)
   .settings(
     name := "@vinctus/oql",
     version := "1.0.0-RC.1",
@@ -24,22 +23,18 @@ lazy val oql = crossProject(JSPlatform, JVMPlatform /*, NativePlatform*/ )
     githubOwner := "vinctustech",
     githubRepository := "oql",
     resolvers += Resolver.githubPackages("vinctustech"),
-    resolvers += Resolver.githubPackages("edadma", "rdb-sjs"),
-    paradoxTheme := Some(builtinParadoxTheme("generic")),
-    ParadoxPlugin.paradoxSettings(DocsConfig),
-    DocsConfig / sourceDirectory := baseDirectory.value / "docs",
-    DocsConfig / paradox / target := baseDirectory.value / "paradox" / "site",
+//    resolvers += Resolver.githubPackages("edadma", "rdb-sjs"),
     mainClass := Some("com.vinctus.oql.Main"),
     Test / mainClass := Some("com.vinctus.oql.Main"),
     libraryDependencies += "org.scalatest" %%% "scalatest" % "3.2.5" % "test",
     Test / parallelExecution := false,
     libraryDependencies += "org.scala-lang.modules" %%% "scala-parser-combinators" % "2.0.0",
-    libraryDependencies += "xyz.hyperreal" %%% "table" % "1.0.0-snapshot.3", // % "test",
-    libraryDependencies += "xyz.hyperreal" %%% "cross-platform" % "0.1.0-snapshot.3",
-    libraryDependencies += "xyz.hyperreal" %%% "importer" % "0.1.0-snapshot.1",
-    libraryDependencies += "xyz.hyperreal" %%% "rdb-sjs" % "0.1.0-snapshot.6",
+//    libraryDependencies += "xyz.hyperreal" %%% "table" % "1.0.0-snapshot.3", // % "test",
+//    libraryDependencies += "xyz.hyperreal" %%% "cross-platform" % "0.1.0-snapshot.3",
+//    libraryDependencies += "xyz.hyperreal" %%% "importer" % "0.1.0-snapshot.1",
+//    libraryDependencies += "xyz.hyperreal" %%% "rdb-sjs" % "0.1.0-snapshot.6",
     publishMavenStyle := true,
-    //publishTo := Some("GitHub Package Registry" at "https://maven.pkg.github.com/[username]/[project]"),
+    publishTo := Some("GitHub Package Registry" at "https://maven.pkg.github.com/vinctustech/oql"),
     Test / publishArtifact := false,
     licenses += "ISC" -> url("https://opensource.org/licenses/ISC")
   )
