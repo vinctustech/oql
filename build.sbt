@@ -1,12 +1,12 @@
 val DocsConfig = config("docs")
 
-lazy val oql2 = crossProject(JSPlatform, JVMPlatform /*, NativePlatform*/ )
+lazy val oql = crossProject(JSPlatform, JVMPlatform /*, NativePlatform*/ )
   .in(file("."))
   .enablePlugins(ScalablyTypedConverterPlugin)
   .enablePlugins(ParadoxPlugin)
   .settings(
-    name := "@vinctus/oql2",
-    version := "2.0.0-beta.4.3",
+    name := "@vinctus/oql",
+    version := "1.0.0-RC.1",
     scalaVersion := "2.13.6",
     scalacOptions ++=
       Seq(
@@ -29,8 +29,8 @@ lazy val oql2 = crossProject(JSPlatform, JVMPlatform /*, NativePlatform*/ )
     ParadoxPlugin.paradoxSettings(DocsConfig),
     DocsConfig / sourceDirectory := baseDirectory.value / "docs",
     DocsConfig / paradox / target := baseDirectory.value / "paradox" / "site",
-    mainClass := Some("com.vinctus.oql2.Main"),
-    Test / mainClass := Some("com.vinctus.oql2.Main"),
+    mainClass := Some("com.vinctus.oql.Main"),
+    Test / mainClass := Some("com.vinctus.oql.Main"),
     libraryDependencies += "org.scalatest" %%% "scalatest" % "3.2.5" % "test",
     Test / parallelExecution := false,
     libraryDependencies += "org.scala-lang.modules" %%% "scala-parser-combinators" % "2.0.0",
