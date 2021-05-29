@@ -1,10 +1,15 @@
 package com.vinctus.oql
 
+import com.vinctus.mappable.{map2cc, Mappable}
+
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.language.postfixOps
 
 class Mutation private[oql] (oql: AbstractOQL, entity: Entity) {
+
+  def insert[T <: Product: Mappable](obj: T): Future[T] =
+    insert(implicitly[Mappable[T]].toMap(obj)) map map2cc[T] //implicitly[Mappable[T]].fromMap(m))
 
   def insert(obj: Map[String, Any]): Future[Map[String, Any]] = {
     // check if the object has a primary key

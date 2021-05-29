@@ -1,13 +1,11 @@
 ThisBuild / licenses += "ISC" -> url("https://opensource.org/licenses/ISC")
 
-lazy val packageName = SettingKey[String]("packageName", "package name")
-
-lazy val oql = crossProject(JSPlatform, JVMPlatform /*, NativePlatform*/ )
+lazy val oql = crossProject(JSPlatform /*, JVMPlatform, NativePlatform*/ )
   .in(file("."))
   .enablePlugins(ScalablyTypedConverterPlugin)
   .settings(
-    name := "@vinctus/oql",//@vinctus/
-    version := "1.0.0-RC.2",
+    name := "oql", //@vinctus/
+    version := "1.0.0-RC.3.1",
     scalaVersion := "2.13.6",
     scalacOptions ++=
       Seq(
@@ -36,30 +34,32 @@ lazy val oql = crossProject(JSPlatform, JVMPlatform /*, NativePlatform*/ )
 //    libraryDependencies += "xyz.hyperreal" %%% "cross-platform" % "0.1.0-snapshot.3",
     libraryDependencies += "xyz.hyperreal" %%% "importer" % "0.1.0",
 //    libraryDependencies += "xyz.hyperreal" %%% "rdb-sjs" % "0.1.0-snapshot.6",
+    libraryDependencies += "com.vinctus" %%% "mappable" % "0.1.1",
+    publishConfiguration := publishConfiguration.value.withOverwrite(true),
     publishMavenStyle := true,
-    publishTo := Some("GitHub Package Registry" at "https://maven.pkg.github.com/vinctustech/oql"),
+    //publishTo := Some("GitHub Package Registry" at "https://maven.pkg.github.com/vinctustech/oql"),
     Test / publishArtifact := false,
     licenses += "ISC" -> url("https://opensource.org/licenses/ISC")
   )
-  .jvmSettings(
-    libraryDependencies += "org.scala-js" %% "scalajs-stubs" % "1.0.0" % "provided",
-    libraryDependencies += "com.h2database" % "h2" % "1.4.200",
-    libraryDependencies += "org.postgresql" % "postgresql" % "42.2.19",
-    libraryDependencies ++= Seq(
-      "org.antlr" % "antlr4-runtime" % "4.7.2",
-      "org.antlr" % "ST4" % "4.3.1"
-    ),
-    libraryDependencies += "xyz.hyperreal" %% "pretty" % "0.1.0" // % "test",
-  )
   .
+//  .jvmSettings(
+//    libraryDependencies += "org.scala-js" %% "scalajs-stubs" % "1.0.0" % "provided",
+//    libraryDependencies += "com.h2database" % "h2" % "1.4.200",
+//    libraryDependencies += "org.postgresql" % "postgresql" % "42.2.19",
+//    libraryDependencies ++= Seq(
+//      "org.antlr" % "antlr4-runtime" % "4.7.2",
+//      "org.antlr" % "ST4" % "4.3.1"
+//    ),
+//    libraryDependencies += "xyz.hyperreal" %% "pretty" % "0.1.0" // % "test",
+//  ).
 //  nativeSettings(
 //    nativeLinkStubs := true
 //  ).
   jsSettings(
-    packageName := "oql",
-    githubOwner := "vinctustech",
-    githubRepository := "oql",
-  publishTo := Some("GitHub Package Registry" at "https://maven.pkg.github.com/vinctustech/oql"),
+//    packageName := "oql",
+//    githubOwner := "vinctustech",
+//    githubRepository := "oql",
+//  publishTo := Some("GitHub Package Registry" at "https://maven.pkg.github.com/vinctustech/oql"),
   jsEnv := new org.scalajs.jsenv.nodejs.NodeJSEnv(),
   libraryDependencies += "com.vinctus" %%% "sjs-utils" % "0.1.0-snapshot.23",
   Compile / npmDependencies ++= Seq(
