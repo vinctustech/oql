@@ -1,8 +1,10 @@
 package com.vinctus.oql
 
 import com.vinctus.sjs_utils.Mappable
+import typings.node.global.console
 
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.scalajs.js
 import scala.util.{Failure, Success}
 
 object Main extends App {
@@ -22,14 +24,18 @@ object Main extends App {
 //      |  books: [book]
 //      |}
 //      |""".stripMargin
-//  val db = new OQL_NodePG(dm, "localhost", 5432, "postgres", "postgres", "postgres", false, 0, 10)
+//  val db = new OQL_NodePG_JS(dm, "localhost", 5432, "postgres", "postgres", "postgres", false, 0, 10)
 //
 //  case class Author(id: Int, name: String)
 //  case class Book(id: Int, title: String, year: Int)
 //
 //  db.showQuery()
-//  db.ccQueryMany[Book]("book [author.name = 'Mark Twain']") onComplete {
-//    case Success(result)    => println(result)
+////  db.entity("book").jsinsert(js.Dictionary("title" -> "as'df")).toFuture.onComplete {
+////    case Success(result)    => console.log(result)
+////    case Failure(exception) => println(exception.getMessage)
+////  }
+//  db.jsqueryMany("book [title = 'as\\'df']").toFuture.onComplete {
+//    case Success(result)    => console.log(result)
 //    case Failure(exception) => println(exception.getMessage)
 //  }
 

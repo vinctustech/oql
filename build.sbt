@@ -4,8 +4,8 @@ lazy val oql = crossProject(JSPlatform /*, JVMPlatform, NativePlatform*/ )
   .in(file("."))
   .enablePlugins(ScalablyTypedConverterPlugin)
   .settings(
-    name := "oql", //@vinctus/
-    version := "1.0.0-RC.3.1",
+    name := "@vinctus/oql", //@vinctus/
+    version := "1.0.0-RC.3.4",
     scalaVersion := "2.13.6",
     scalacOptions ++=
       Seq(

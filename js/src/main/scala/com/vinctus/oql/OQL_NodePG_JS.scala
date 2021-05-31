@@ -76,9 +76,17 @@ class OQL_NodePG_JS(dm: String,
         m =>
           parameters.asInstanceOf[js.Dictionary[Any]] get m.group(1) match {
             case None        => sys.error(s"template: parameter '${m.group(1)}' not found")
-            case Some(value) => Regex.quoteReplacement(render(value))
+            case Some(value) => Regex.quoteReplacement(subsrender(value))
         }
       )
+
+  def subsrender(a: Any): String =
+    a match {
+      case s: String      => s"'${s.replace("'", "\\'")}'"
+      case d: js.Date     => s"'${d.toISOString()}'"
+      case a: js.Array[_] => s"(${a map render mkString ","})"
+      case _              => String.valueOf(a)
+    }
 
   def render(a: Any): String =
     a match {
@@ -89,3 +97,5 @@ class OQL_NodePG_JS(dm: String,
     }
 
 }
+
+//todo: investigate 'subsrender' thoroughly
