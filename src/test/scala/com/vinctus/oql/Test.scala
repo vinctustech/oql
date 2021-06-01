@@ -31,9 +31,9 @@ trait Test {
       case "h2" => new H2_mem
     }
 
-  val db: AbstractOQL
+  val db: OQL_RDB
 
-  def test(oql: String, parameters: Map[String, Any] = Map()): Future[String] = db.json(oql, parameters)
+  def test(oql: String): Future[String] = db.json(oql)
 
   //def testmap(oql: String, parameters: Map[String, Any] = Map()): String = prettyPrint(db.queryMany(oql, parameters), classes = true)
 

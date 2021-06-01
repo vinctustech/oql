@@ -18,7 +18,7 @@ trait UNDB extends Test {
       |  country: country
       |}
       |""".stripMargin
-  val db = new AbstractOQL(dm, ds)
+  val db = new OQL_RDB(dm)
 
   db.create()
   db.execute(_.insert("""insert into "country" ("id", "name") values 

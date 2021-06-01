@@ -5,13 +5,13 @@ import com.vinctus.sjs_utils.{Mappable, map2cc}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class NodePGQueryBuilder private[oql] (private val oql: OQL_NodePG, private[oql] val q: OQLQuery) {
+class QueryBuilder private[oql] (private val oql: AbstractOQL, private[oql] val q: OQLQuery) {
   private def check = if (q.source eq null) sys.error("QueryBuilder: no source was given") else this
 
-  private class DoNothingNodePGQueryBuilder extends NodePGQueryBuilder(oql, q) {
+  private class DoNothingQueryBuilder extends QueryBuilder(oql, q) {
     private def na = sys.error("not applicable")
 
-    override def cond(b: Boolean): NodePGQueryBuilder = na
+    override def cond(b: Boolean): QueryBuilder = na
 
     override def getMany: Future[List[Any]] = na
 
@@ -23,22 +23,22 @@ class NodePGQueryBuilder private[oql] (private val oql: OQL_NodePG, private[oql]
 
     override def getCount: Future[Int] = na
 
-    override def limit(a: Int): NodePGQueryBuilder = NodePGQueryBuilder.this
+    override def limit(a: Int): QueryBuilder = QueryBuilder.this
 
-    override def offset(a: Int): NodePGQueryBuilder = NodePGQueryBuilder.this
+    override def offset(a: Int): QueryBuilder = QueryBuilder.this
 
-    override def order(attribute: String, sorting: String): NodePGQueryBuilder = NodePGQueryBuilder.this
+    override def order(attribute: String, sorting: String): QueryBuilder = QueryBuilder.this
 
 //    override def project(source: String, attributes: String*): QueryBuilder = QueryBuilder.this
 //
 //    override def add(attribute: QueryBuilder): QueryBuilder = QueryBuilder.this
 
-    override def query(query: String): NodePGQueryBuilder = NodePGQueryBuilder.this
+    override def query(query: String): QueryBuilder = QueryBuilder.this
 
-    override def select(s: String): NodePGQueryBuilder = NodePGQueryBuilder.this
+    override def select(s: String): QueryBuilder = QueryBuilder.this
   }
 
-  def cond(b: Boolean): NodePGQueryBuilder = if (b) this else new DoNothingNodePGQueryBuilder
+  def cond(b: Boolean): QueryBuilder = if (b) this else new DoNothingQueryBuilder
 
 //  def add(attribute: QueryBuilder) =
 //    new QueryBuilder(
@@ -65,12 +65,12 @@ class NodePGQueryBuilder private[oql] (private val oql: OQL_NodePG, private[oql]
 //        q.copy(source = Ident(resource))
 //    )
 
-  def query(query: String): NodePGQueryBuilder = new NodePGQueryBuilder(oql, oql.parseQuery(query))
+  def query(query: String): QueryBuilder = new QueryBuilder(oql, oql.parseQuery(query))
 
-  def select(s: String): NodePGQueryBuilder = {
+  def select(s: String): QueryBuilder = {
     val sel = oql.parseCondition(s, q.entity)
 
-    new NodePGQueryBuilder(
+    new QueryBuilder(
       oql,
       q.copy(
         select =
@@ -79,16 +79,16 @@ class NodePGQueryBuilder private[oql] (private val oql: OQL_NodePG, private[oql]
     )
   }
 
-  def order(attribute: String, sorting: String): NodePGQueryBuilder = {
+  def order(attribute: String, sorting: String): QueryBuilder = {
     val attr = AttributeOQLExpression(List(Ident(attribute)), null)
 
     AbstractOQL.decorate(q.entity, attr, oql.model, oql.ds, null)
-    new NodePGQueryBuilder(oql, q.copy(order = Some(List(OQLOrdering(attr, sorting)))))
+    new QueryBuilder(oql, q.copy(order = Some(List(OQLOrdering(attr, sorting)))))
   }
 
-  def limit(a: Int): NodePGQueryBuilder = new NodePGQueryBuilder(oql, q.copy(limit = Some(a)))
+  def limit(a: Int): QueryBuilder = new QueryBuilder(oql, q.copy(limit = Some(a)))
 
-  def offset(a: Int): NodePGQueryBuilder = new NodePGQueryBuilder(oql, q.copy(offset = Some(a)))
+  def offset(a: Int): QueryBuilder = new QueryBuilder(oql, q.copy(offset = Some(a)))
 
   def getMany: Future[List[Any]] = check.oql.queryMany(q, null, () => new ScalaResultBuilder) map (_.arrayResult.asInstanceOf[List[Any]])
 

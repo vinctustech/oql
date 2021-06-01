@@ -27,7 +27,7 @@ trait OrdersDB extends Test {
       |  name: text
       |}
       |""".stripMargin
-  val db = new AbstractOQL(dm, ds)
+  val db = new OQL_RDB(dm)
   val data: String =
     """
       |agent

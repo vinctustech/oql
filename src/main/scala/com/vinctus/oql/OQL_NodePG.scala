@@ -35,7 +35,7 @@ class OQL_NodePG(dm: String,
 
   def queryMany(oql: String): Future[List[Any]] = queryMany(oql, () => new ScalaResultBuilder) map (_.arrayResult.asInstanceOf[List[Any]])
 
-  def queryBuilder() = new NodePGQueryBuilder(this, OQLQuery(null, null, null, List(StarOQLProject), None, None, None, None, None))
+  def queryBuilder() = new QueryBuilder(this, OQLQuery(null, null, null, List(StarOQLProject), None, None, None, None, None))
 
   def json(oql: String, tab: Int = 2, format: Boolean = true): Future[String] =
     queryMany(oql, () => new ScalaResultBuilder) map (r => JSON(r.arrayResult, ds.platformSpecific, tab, format))

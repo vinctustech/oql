@@ -24,7 +24,7 @@ trait StarTrekDB extends Test {
       |  species: species
       |}
       |""".stripMargin
-  val db = new AbstractOQL(dm, ds)
+  val db = new OQL_RDB(dm)
   val data: String =
     """
         |planet
