@@ -1,6 +1,6 @@
-name := "@vinctus/oql"
+name := "oql"//@vinctus/
 
-version := "1.0.0-RC.3.5"
+version := "1.0.0-RC.3.7"
 
 description := "Object Query Language"
 
@@ -19,6 +19,8 @@ Global / onChangedBuildSource := ReloadOnSourceChanges
 resolvers += "Typesafe Repository" at "https://repo.typesafe.com/typesafe/releases/"
 
 resolvers += "Hyperreal Repository" at "https://dl.bintray.com/edadma/maven"
+
+resolvers += Resolver.githubPackages("vinctustech")
 
 resolvers += Resolver.githubPackages("edadma", "importer")
 

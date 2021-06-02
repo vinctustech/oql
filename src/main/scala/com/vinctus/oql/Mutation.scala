@@ -1,7 +1,9 @@
 package com.vinctus.oql
 
-import com.vinctus.mappable.{map2cc, Mappable}
+import com.vinctus.mappable.{Mappable, map2cc}
+import com.vinctus.sjs_utils.DynamicMap
 
+import scala.collection.immutable.VectorMap
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.language.postfixOps
@@ -11,7 +13,7 @@ class Mutation private[oql] (oql: AbstractOQL, entity: Entity) {
   def insert[T <: Product: Mappable](obj: T): Future[T] =
     insert(implicitly[Mappable[T]].toMap(obj)) map map2cc[T] //implicitly[Mappable[T]].fromMap(m))
 
-  def insert(obj: Map[String, Any]): Future[Map[String, Any]] = {
+  def insert(obj: collection.Map[String, Any]): Future[DynamicMap] = {
     // check if the object has a primary key
     entity.pk foreach { pk =>
       // object being inserted should not have a primary key property
@@ -83,10 +85,10 @@ class Mutation private[oql] (oql: AbstractOQL, entity: Entity) {
       if (!rs.next)
         sys.error("insert: empty result set")
 
-      entity.pk match {
-        case None     => obj
-        case Some(pk) => obj + (pk.name -> rs.get(0)) // only one value is being requested: the primary key
-      }
+      new DynamicMap(entity.pk match {
+        case None     => obj.to(VectorMap)
+        case Some(pk) => obj.to(VectorMap) + (pk.name -> rs.get(0)) // only one value is being requested: the primary key
+      })
     }
   }
 
@@ -126,7 +128,7 @@ class Mutation private[oql] (oql: AbstractOQL, entity: Entity) {
       case None    => sys.error(s"attribute '$attribute' does not exist on entity '${entity.name}'")
     }
 
-  def update(id: Any, updates: Map[String, Any]): Future[Unit] = {
+  def update(id: Any, updates: collection.Map[String, Any]): Future[Unit] = {
     // check if updates has a primary key
     entity.pk foreach (pk =>
       // object being updated should not have it's primary key changed
