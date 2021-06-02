@@ -1,6 +1,6 @@
 name := "oql"//@vinctus/
 
-version := "1.0.0-RC.3.7"
+version := "1.0.0-RC.3.13"
 
 description := "Object Query Language"
 
@@ -34,13 +34,16 @@ enablePlugins(ScalablyTypedConverterPlugin)
 
 stTypescriptVersion := "4.2.4"
 
+stIgnore += "source-map-support"
+
 Test / scalaJSUseMainModuleInitializer := true
 
 Test / scalaJSUseTestModuleInitializer := false
 
 Compile / npmDependencies ++= Seq(
   "pg" -> "8.5.1",
-  "@types/pg" -> "7.14.9"
+  "@types/pg" -> "7.14.9",
+  "source-map-support" -> "0.5.19"
 )
 
 libraryDependencies ++= Seq(

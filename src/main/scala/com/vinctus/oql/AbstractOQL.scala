@@ -1,5 +1,7 @@
 package com.vinctus.oql
 
+import com.vinctus.sjs_utils.DynamicMap
+
 import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
 import scala.annotation.tailrec
@@ -79,11 +81,11 @@ abstract class AbstractOQL(dm: String, val ds: SQLDataSource, conv: Conversions)
     }
   }
 
-  def queryOne(q: OQLQuery, oql: String): Future[Option[Any]] =
-    queryMany(q, oql, () => new ScalaResultBuilder) map {
+  def queryOne(q: OQLQuery, oql: String): Future[Option[DynamicMap]] =
+    queryMany(q, oql, () => new SJSResultBuilder) map {
       _.arrayResult match {
         case Nil       => None
-        case List(row) => Some(row)
+        case List(row) => Some(row.asInstanceOf[DynamicMap])
         case _         => sys.error(s"queryOne: more than one row was found")
       }
     }
