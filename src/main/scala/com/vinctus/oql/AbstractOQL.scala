@@ -12,6 +12,7 @@ abstract class AbstractOQL(dm: String, val ds: SQLDataSource, conv: Conversions)
 
   import AbstractOQL._
 
+  private var _transpileOnly = false
   private var _showQuery = false
 
   val model: DataModel = {
@@ -74,12 +75,16 @@ abstract class AbstractOQL(dm: String, val ds: SQLDataSource, conv: Conversions)
 
   def showQuery(): Unit = _showQuery = true
 
+  def transpileOnly(): Unit = _transpileOnly = true
+
   private[oql] def show(sql: String): Unit = {
-    if (_showQuery) {
+    if (_showQuery || _transpileOnly) {
       println(sql)
       _showQuery = false
     }
   }
+
+  private[oql] def exec: Boolean = !_transpileOnly
 
   def queryOne(q: OQLQuery, oql: String): Future[Option[DynamicMap]] =
     queryMany(q, oql, () => new SJSResultBuilder) map {
@@ -104,55 +109,56 @@ abstract class AbstractOQL(dm: String, val ds: SQLDataSource, conv: Conversions)
 
     show(sql)
 
-    execute { c =>
-      def buildResult(node: Node, resultSet: OQLResultSet): Any =
-        node match {
-          case ResultNode(_, element) =>
-            val result = newResultBuilder().newArray
+    if (exec)
+      execute { c =>
+        def buildResult(node: Node, resultSet: OQLResultSet): Any =
+          node match {
+            case ResultNode(_, element) =>
+              val result = newResultBuilder().newArray
 
-            while (resultSet.next) result += buildResult(element, resultSet)
+              while (resultSet.next) result += buildResult(element, resultSet)
 
-            result
-          case n @ ManyToOneNode(_, element) =>
-            if (n.idx.isDefined && resultSet.get(n.idx.get) == null) null
-            else buildResult(element, resultSet)
-          case n @ OneToOneNode(query, element) =>
-            val sequenceResultSet = resultSet.getResultSet(n.idx)
-            var rows = 0
+              result
+            case n @ ManyToOneNode(_, element) =>
+              if (n.idx.isDefined && resultSet.get(n.idx.get) == null) null
+              else buildResult(element, resultSet)
+            case n @ OneToOneNode(query, element) =>
+              val sequenceResultSet = resultSet.getResultSet(n.idx)
+              var rows = 0
 
-            while (sequenceResultSet.next) rows += 1
+              while (sequenceResultSet.next) rows += 1
 
-            if (rows > 1)
-              problem(query.source.pos, s"attribute '${query.source.s}' had a result set consisting of $rows rows", oql)
+              if (rows > 1)
+                problem(query.source.pos, s"attribute '${query.source.s}' had a result set consisting of $rows rows", oql)
 
-            if (rows == 0) null
-            else buildResult(element, sequenceResultSet)
-          case n @ OneToManyNode(_, element) =>
-            val sequenceResultSet = resultSet.getResultSet(n.idx)
-            val result = newResultBuilder().newArray
+              if (rows == 0) null
+              else buildResult(element, sequenceResultSet)
+            case n @ OneToManyNode(_, element) =>
+              val sequenceResultSet = resultSet.getResultSet(n.idx)
+              val result = newResultBuilder().newArray
 
-            while (sequenceResultSet.next) result += buildResult(element, sequenceResultSet)
+              while (sequenceResultSet.next) result += buildResult(element, sequenceResultSet)
 
-            result.arrayResult
-          case n @ ManyToManyNode(_, element) =>
-            val sequenceResultSet = resultSet.getResultSet(n.idx)
-            val result = newResultBuilder().newArray
+              result.arrayResult
+            case n @ ManyToManyNode(_, element) =>
+              val sequenceResultSet = resultSet.getResultSet(n.idx)
+              val result = newResultBuilder().newArray
 
-            while (sequenceResultSet.next) result += buildResult(element, sequenceResultSet)
+              while (sequenceResultSet.next) result += buildResult(element, sequenceResultSet)
 
-            result.arrayResult
-          case n @ ValueNode(expr) =>
-            val v = resultSet get n.idx
-            val typ =
-              if (n.typed) ds.reverseMapType(resultSet getString (n.idx + 1))
-              else expr.typ
+              result.arrayResult
+            case n @ ValueNode(expr) =>
+              val v = resultSet get n.idx
+              val typ =
+                if (n.typed) ds.reverseMapType(resultSet getString (n.idx + 1))
+                else expr.typ
 
-            (v, typ) match {
-              case (s: String, IntegerType)   => s.toInt
-              case (s: String, FloatType)     => s.toDouble
-              case (s: String, BigintType)    => conv.long(s)
-              case (s: String, UUIDType)      => conv.uuid(s)
-              case (t: String, TimestampType) => conv.timestamp(t)
+              (v, typ) match {
+                case (s: String, IntegerType)   => s.toInt
+                case (s: String, FloatType)     => s.toDouble
+                case (s: String, BigintType)    => conv.long(s)
+                case (s: String, UUIDType)      => conv.uuid(s)
+                case (t: String, TimestampType) => conv.timestamp(t)
 //                  Instant.parse {
 //                    val z =
 //                      if (t.endsWith("Z")) t
@@ -161,24 +167,24 @@ abstract class AbstractOQL(dm: String, val ds: SQLDataSource, conv: Conversions)
 //
 //                    if (z.charAt(10) != 'T') s"${z.substring(0, 10)}T${z.substring(11)}" else z
 //                  }
-              case (d: String, DecimalType(precision, scale)) => conv.decimal(d, precision, scale)
-              case _                                          => v
-            }
-          case ObjectNode(properties) =>
-            val result = newResultBuilder().newObject
+                case (d: String, DecimalType(precision, scale)) => conv.decimal(d, precision, scale)
+                case _                                          => v
+              }
+            case ObjectNode(properties) =>
+              val result = newResultBuilder().newObject
 
-            for ((label, node) <- properties)
-              result(label) = buildResult(node, resultSet)
+              for ((label, node) <- properties)
+                result(label) = buildResult(node, resultSet)
 
-            result.objectResult
+              result.objectResult
 //          case SequenceNode(seq) => ni
-        }
+          }
 
-      c.command(sql) map { rs =>
-        //      println(TextTable(rs.peer.asInstanceOf[ResultSet]))
-        buildResult(root, rs).asInstanceOf[ResultBuilder]
-      }
-    }
+        c.command(sql) map { rs =>
+          //      println(TextTable(rs.peer.asInstanceOf[ResultSet]))
+          buildResult(root, rs).asInstanceOf[ResultBuilder]
+        }
+      } else Future(null)
   }
 
 }

@@ -33,13 +33,13 @@ object Main extends App {
   case class Book(id: Int, title: String, year: Int)
 
   db.showQuery()
-//  db.entity("book").jsinsert(js.Dictionary("title" -> "as'df")).toFuture.onComplete {
-//    case Success(result)    => console.log(result)
-//    case Failure(exception) => println(exception.getMessage)
-//  }
-  db.jsqueryMany("book [title = as\\'df']").toFuture.onComplete {
-    case Success(result)    => console.log(result)
-    case Failure(exception) => println(exception.getMessage)
+
+  for {
+    insert <- db.entity("book").jsinsert(js.Dictionary("title" -> "as\ndf")).toFuture
+    query <- db.jsqueryMany("book").toFuture
+  } {
+    console.log(insert)
+    console.log(query)
   }
 
 }

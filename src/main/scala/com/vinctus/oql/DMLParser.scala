@@ -11,6 +11,8 @@ class DMLParser extends RegexParsers {
 
   def pos: Parser[Position] = positioned(success(new Positional {})) ^^ (_.pos)
 
+  def kw(s: String): Regex = (s"(?i)$s\\b").r
+
   def integer: Parser[String] = "[0-9]+".r
 
   def ident: Parser[Ident] =
@@ -21,7 +23,7 @@ class DMLParser extends RegexParsers {
   def model: Parser[DMLModel] = rep1(entity) ^^ DMLModel
 
   def entity: Parser[DMLEntity] =
-    "entity" ~ ident ~ opt("(" ~> ident <~ ")") ~ "{" ~ rep1(attribute) ~ "}" ^^ {
+    kw("entity") ~ ident ~ opt("(" ~> ident <~ ")") ~ "{" ~ rep1(attribute) ~ "}" ^^ {
       case _ ~ n ~ a ~ _ ~ as ~ _ =>
         DMLEntity(n, a, as)
     }
@@ -33,15 +35,15 @@ class DMLParser extends RegexParsers {
     }
 
   def typeSpecifier: Parser[DMLTypeSpecifier] =
-    ("text" |
-      "integer" | "int4" | "int" |
-      "boolean" | "bool" |
-      "bigint" |
-      "date" |
-      "float8" | "float" |
-      "uuid" |
-      "timestamp") ^^ DMLSimpleDataType |
-      "decimal" ~ "(" ~ integer ~ "," ~ integer ~ ")" ^^ {
+    (kw("text") |
+      kw("integer") | kw("int4") | kw("int") |
+      kw("boolean") | kw("bool") |
+      kw("bigint") |
+      kw("date") |
+      kw("float8") | kw("float") |
+      kw("uuid") |
+      kw("timestamp")) ^^ DMLSimpleDataType |
+      kw("decimal") ~ "(" ~ integer ~ "," ~ integer ~ ")" ^^ {
         case _ ~ _ ~ p ~ _ ~ s ~ _ => DMLParametricDataType("decimal", List(p, s))
       } |
       ident ^^ DMLManyToOneType |

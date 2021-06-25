@@ -1,8 +1,5 @@
 package com.vinctus.oql
 
-import com.vinctus.oql.OQLParser.literalExpression
-
-import scala.scalajs.js.|
 import scala.util.matching.Regex
 import scala.util.parsing.combinator.{PackratParsers, RegexParsers}
 import scala.util.parsing.input.{CharSequenceReader, Position, Positional}
