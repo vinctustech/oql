@@ -30,20 +30,20 @@ object Main extends App {
   val data =
     """
       |author
-      | id: integer, pk   name: text
-      | 1                 Robert Louis Stevenson
-      | 2                 Lewis Carroll
-      | 3                 Charles Dickens
-      | 4                 Mark Twain
+      | pk_author_id: integer, pk   name: text
+      | 1                           Robert Louis Stevenson
+      | 2                           Lewis Carroll
+      | 3                           Charles Dickens
+      | 4                           Mark Twain
       |
       |book
-      | title: text                         year: integer   author_id: integer, fk, author, id
-      | Treasure Island                     1883            1
-      | Alice''s Adventures in Wonderland   1865            2
-      | Oliver Twist                        1838            3
-      | A Tale of Two Cities                1859            3
-      | The Adventures of Tom Sawyer        1876            4
-      | Adventures of Huckleberry Finn      1884            4
+      | pk_book_id: integer, pk   title: text                         year: integer   author_id: integer, fk, author, pk_author_id
+      | 1                         Treasure Island                     1883            1
+      | 2                         Alice''s Adventures in Wonderland   1865            2
+      | 3                         Oliver Twist                        1838            3
+      | 4                         A Tale of Two Cities                1859            3
+      | 5                         The Adventures of Tom Sawyer        1876            4
+      | 6                         Adventures of Huckleberry Finn      1884            4
       |""".stripMargin
   val db = new OQL_RDB(dm, data)
 
@@ -52,10 +52,9 @@ object Main extends App {
 
   db.showQuery()
 
-  for {
-    query <- db.json("book [year = 1884]")
-  } {
-    println(js.typeOf(query))
+  db.json("book [year = 1884]") onComplete {
+    case Success(value)     => println(value)
+    case Failure(exception) => println(exception)
   }
 
 }
