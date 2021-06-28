@@ -1,13 +1,12 @@
 package com.vinctus.oql
 
-import scala.concurrent.Future
-
 import xyz.hyperreal.rdb_sjs
 import xyz.hyperreal.rdb_sjs.{CreateResult, InsertResult, RelationResult}
 
+import scala.concurrent.Future
+import scala.concurrent.ExecutionContext.Implicits.global
 
-class RDBConnection(val dataSource: RDBDataSource,data: String) extends OQLConnection {
-
+class RDBConnection(val dataSource: RDBDataSource, data: String) extends OQLConnection {
 
   private val client =
     new rdb_sjs.Connection {
@@ -16,6 +15,11 @@ class RDBConnection(val dataSource: RDBDataSource,data: String) extends OQLConne
     }
 
   def command(sql: String): Future[RDBResultSet] =
+    Future(new RDBResultSet(client.executeSQLStatement(sql) match {
+      case CreateResult(_)          => Iterator()
+      case RelationResult(relation) => relation.iterator
+      case InsertResult(auto, _)    => Iterator(auto.head.values.toIndexedSeq)
+    }))
 
   def insert(command: String): Future[OQLResultSet] = ???
 

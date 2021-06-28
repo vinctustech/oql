@@ -1,7 +1,9 @@
 package com.vinctus.oql
 
-class RDBResultSet(rs: Iterator[Array[Any]]) extends OQLResultSet with JSONResultSet {
-  private var row: Array[Any] = _
+import xyz.hyperreal.rdb_sjs.Tuple
+
+class RDBResultSet(rs: Iterator[Tuple]) extends OQLResultSet with JSONResultSet {
+  private var row: Tuple = _
 
   def next: Boolean =
     if (rs.hasNext) {

@@ -1,1 +1,1 @@
-node target/scala-2.13/scalajs-bundler/main/main.js
+node target/scala-2.13/scalajs-bundler/test/-vinctus-oql-test-fastopt.js

@@ -109,7 +109,7 @@ abstract class AbstractOQL(dm: String, val ds: SQLDataSource, conv: Conversions)
 
     show(sql)
 
-    if (exec)
+    if (exec) {
       execute { c =>
         def buildResult(node: Node, resultSet: OQLResultSet): Any =
           node match {
@@ -184,7 +184,8 @@ abstract class AbstractOQL(dm: String, val ds: SQLDataSource, conv: Conversions)
           //      println(TextTable(rs.peer.asInstanceOf[ResultSet]))
           buildResult(root, rs).asInstanceOf[ResultBuilder]
         }
-      } else Future(null)
+      }
+    } else Future(null)
   }
 
 }

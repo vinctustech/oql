@@ -27,7 +27,25 @@ object Main extends App {
       |  books: [book]
       |}
       |""".stripMargin
-  val db = new OQL_NodePG_JS(dm, "localhost", 5432, "postgres", "postgres", "postgres", false, 0, 10)
+  val data =
+    """
+      |author
+      | id: integer, pk   name: text
+      | 1                 Robert Louis Stevenson
+      | 2                 Lewis Carroll
+      | 3                 Charles Dickens
+      | 4                 Mark Twain
+      |
+      |book
+      | title: text                         year: integer   author_id: integer, fk, author, id
+      | Treasure Island                     1883            1
+      | Alice''s Adventures in Wonderland   1865            2
+      | Oliver Twist                        1838            3
+      | A Tale of Two Cities                1859            3
+      | The Adventures of Tom Sawyer        1876            4
+      | Adventures of Huckleberry Finn      1884            4
+      |""".stripMargin
+  val db = new OQL_RDB(dm, data)
 
   case class Author(id: Int, name: String)
   case class Book(id: Int, title: String, year: Int)
@@ -35,11 +53,9 @@ object Main extends App {
   db.showQuery()
 
   for {
-    insert <- db.entity("book").jsinsert(js.Dictionary("title" -> "as\ndf")).toFuture
-    query <- db.jsqueryMany("book").toFuture
+    query <- db.json("book [year = 1884]")
   } {
-    console.log(insert)
-    console.log(query)
+    println(js.typeOf(query))
   }
 
 }

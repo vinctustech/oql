@@ -1,6 +1,6 @@
 name := "@vinctus/oql"//@vinctus/
 
-version := "1.0.0-RC.3.14"
+version := "1.0.0-RC.3.15"
 
 description := "Object Query Language"
 
@@ -34,6 +34,8 @@ stTypescriptVersion := "4.2.4"
 
 stIgnore += "source-map-support"
 
+scalaJSUseMainModuleInitializer := true
+
 Test / scalaJSUseMainModuleInitializer := true
 
 Test / scalaJSUseTestModuleInitializer := false
@@ -47,8 +49,8 @@ Compile / npmDependencies ++= Seq(
 libraryDependencies ++= Seq(
   "org.scalatest" %%% "scalatest" % "3.2.5" % "test",
   "xyz.hyperreal" %%% "rdb-sjs" % "0.1.0-snapshot.7",
-  "com.vinctus" %%% "sjs-utils" % "0.1.0-snapshot.23",
-  "com.vinctus" %%% "mappable" % "0.1.1"
+  "com.vinctus" %%% "sjs-utils" % "0.1.0-snapshot.25",
+  "com.vinctus" %%% "mappable" % "0.1.2"
 )
 
 libraryDependencies ++= Seq(
