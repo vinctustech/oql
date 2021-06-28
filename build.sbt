@@ -18,8 +18,6 @@ Global / onChangedBuildSource := ReloadOnSourceChanges
 
 resolvers += "Typesafe Repository" at "https://repo.typesafe.com/typesafe/releases/"
 
-resolvers += "Hyperreal Repository" at "https://dl.bintray.com/edadma/maven"
-
 resolvers += Resolver.githubPackages("vinctustech")
 
 resolvers += Resolver.githubPackages("edadma", "importer")
@@ -48,7 +46,7 @@ Compile / npmDependencies ++= Seq(
 
 libraryDependencies ++= Seq(
   "org.scalatest" %%% "scalatest" % "3.2.5" % "test",
-  "xyz.hyperreal" %%% "rdb-sjs" % "0.1.0-snapshot.6" % "test",
+  "xyz.hyperreal" %%% "rdb-sjs" % "0.1.0-snapshot.7",
   "com.vinctus" %%% "sjs-utils" % "0.1.0-snapshot.23",
   "com.vinctus" %%% "mappable" % "0.1.1"
 )

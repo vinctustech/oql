@@ -2,9 +2,20 @@ package com.vinctus.oql
 
 import scala.concurrent.Future
 
-class RDBConnection(val dataSource: RDBDataSource) extends OQLConnection {
+import xyz.hyperreal.rdb_sjs
+import xyz.hyperreal.rdb_sjs.{CreateResult, InsertResult, RelationResult}
 
-  def command(sql: String): Future[RDBResultSet] = ???
+
+class RDBConnection(val dataSource: RDBDataSource,data: String) extends OQLConnection {
+
+
+  private val client =
+    new rdb_sjs.Connection {
+      if (data ne null)
+        load(data, doubleSpaces = true)
+    }
+
+  def command(sql: String): Future[RDBResultSet] =
 
   def insert(command: String): Future[OQLResultSet] = ???
 

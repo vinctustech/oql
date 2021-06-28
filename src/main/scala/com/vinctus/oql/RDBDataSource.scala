@@ -2,13 +2,11 @@ package com.vinctus.oql
 
 import scala.scalajs.js
 
-class RDBDataSource extends SQLDataSource {
+class RDBDataSource(data: String) extends SQLDataSource {
 
   val name: String = "RDB"
 
-  // this has to be a `val` and not a `def` because it contains a `node-pg` connection pool
-  // NodePGConnection should only be instantiated once
-  val connect = new RDBConnection(this)
+  val connect = new RDBConnection(this, data)
 
   val platformSpecific: PartialFunction[Any, String] = {
     case d: js.Date => s""""${d.toISOString()}""""
