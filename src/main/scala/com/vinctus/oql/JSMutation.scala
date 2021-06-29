@@ -10,7 +10,7 @@ import scala.scalajs.js.annotation.JSExport
 class JSMutation private[oql] (oql: OQL_NodePG_JS, entity: Entity) extends Mutation(oql, entity) {
 
   @JSExport("insert")
-  def jsinsert(obj: js.Dictionary[js.Any]): js.Promise[js.Any] = insert(toMap(obj)) map toJS toJSPromise
+  def jsInsert(obj: js.Dictionary[js.Any]): js.Promise[js.Any] = insert(toMap(obj)) map toJS toJSPromise
 
   @JSExport("delete")
   def jsDelete(e: js.Any): js.Promise[Unit] = delete(if (jsObject(e)) e.asInstanceOf[js.Dictionary[String]](entity.pk.get.name) else e) toJSPromise

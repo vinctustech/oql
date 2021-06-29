@@ -8,4 +8,4 @@ postgres:
     - '5432:5432'
   volumes:
     # copy the sql script to create tables
-    - ./test/book.sql:/docker-entrypoint-initdb.d/book.sql
+    - ./test/book.dm.sql:/docker-entrypoint-initdb.d/book.dm.sql

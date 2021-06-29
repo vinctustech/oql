@@ -6,7 +6,7 @@
 //class BookDBTests extends AsyncFreeSpec with Matchers with BookDB {
 //
 //  "simplest query" in {
-//    test("book") map { result =>
+//    test("book.dm") map { result =>
 //      result shouldBe
 //        """
 //        |[
@@ -46,7 +46,7 @@
 //  }
 //
 ////  "simplest query with select" in {
-////    test("book [year > 1880]") shouldBe
+////    test("book.dm [year > 1880]") shouldBe
 ////      """
 ////        |[
 ////        |  {
@@ -64,7 +64,7 @@
 ////  }
 ////
 ////  "simplest query with select using parameter" in {
-////    test("book [year > :year]", Map("year" -> 1880)) shouldBe
+////    test("book.dm [year > :year]", Map("year" -> 1880)) shouldBe
 ////      """
 ////        |[
 ////        |  {
@@ -82,7 +82,7 @@
 ////  }
 ////
 ////  "simplest many-to-one query" in {
-////    test("book { * author }") shouldBe
+////    test("book.dm { * author }") shouldBe
 ////      """
 ////        |[
 ////        |  {
@@ -144,7 +144,7 @@
 ////  }
 ////
 ////  "many-to-one query with select" in {
-////    test("book { title year author { name } } [year > 1880]") shouldBe
+////    test("book.dm { title year author { name } } [year > 1880]") shouldBe
 ////      """
 ////        |[
 ////        |  {
@@ -224,7 +224,7 @@
 ////  }
 ////
 ////  "query with select using IN" in {
-////    test("book [year IN (1883, 1884)]") shouldBe
+////    test("book.dm [year IN (1883, 1884)]") shouldBe
 ////      """
 ////        |[
 ////        |  {
@@ -242,7 +242,7 @@
 ////  }
 ////
 ////  "query with select using IN with parameter" in {
-////    test("book [year IN :years]", Map("years" -> List(1883, 1884))) shouldBe
+////    test("book.dm [year IN :years]", Map("years" -> List(1883, 1884))) shouldBe
 ////      """
 ////        |[
 ////        |  {

@@ -4,7 +4,7 @@
 //
 //  val dm: String =
 //    """
-//      |entity book {
+//      |entity book.dm {
 //      | *id: bigint
 //      |  title: text
 //      |  year: int
@@ -14,7 +14,7 @@
 //      |entity author {
 //      | *id: bigint
 //      |  name: text
-//      |  books: [book]
+//      |  books: [book.dm]
 //      |}
 //      |""".stripMargin
 //  val db = new OQL_RDB(dm)
@@ -26,7 +26,7 @@
 //                        |('Charles Dickens'),
 //                        |('Mark Twain')
 //                        |""".stripMargin))
-//  db.execute(_.insert("""insert into "book" ("title", "year", "author") values
+//  db.execute(_.insert("""insert into "book.dm" ("title", "year", "author") values
 //                        |('Treasure Island', 1883, 1),
 //                        |('Alice’s Adventures in Wonderland', 1865, 2),
 //                        |('Oliver Twist', 1838, 3),
