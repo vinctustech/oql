@@ -32,7 +32,7 @@ object Main extends App {
     case Success(value) =>
       println(value)
 
-      db.json("e") onComplete {
+      db.queryMany("e") onComplete {
         case Success(value)     => println(value)
         case Failure(exception) => exception.printStackTrace()
       }
