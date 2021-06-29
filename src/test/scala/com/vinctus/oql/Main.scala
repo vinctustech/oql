@@ -28,12 +28,26 @@ object Main extends App {
 
   db.showQuery()
 
-  db.entity("e").insert(Map("s" -> "this is \na test")) onComplete {
+  db.entity("e").insert(Map("s" -> "this is\na test")) onComplete {
     case Success(value) =>
       println(value)
 
+      val id = value.id.get
+
       db.queryMany("e") onComplete {
-        case Success(value)     => println(value)
+        case Success(value) =>
+          println(value)
+
+          db.entity("e").update(id, Map("s" -> "this is\nanother test")) onComplete {
+            case Success(value) =>
+              println(value)
+
+              db.queryMany("e") onComplete {
+                case Success(value)     => println(value)
+                case Failure(exception) => exception.printStackTrace()
+              }
+            case Failure(exception) => exception.printStackTrace()
+          }
         case Failure(exception) => exception.printStackTrace()
       }
     case Failure(exception) => exception.printStackTrace()
