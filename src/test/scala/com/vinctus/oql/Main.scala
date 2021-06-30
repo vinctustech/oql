@@ -14,14 +14,14 @@
 //
 //  val dm: String =
 //    """
-//      |entity e {
+//      |entity t {
 //      | *id: int
 //      |  s: text
 //      |}
 //      |""".stripMargin
 //  val data =
 //    """
-//      |e
+//      |t
 //      | id: integer, pk, auto   s: text
 //      |""".stripMargin
 //  val db = new OQL_RDB(dm, data)
@@ -54,12 +54,6 @@
 //  }
 //
 //}
-//
-//// todo: RDB insert without primary key value doesn't work
-//// todo: error check for query type projects that are really datatype attributes: make sure there's no select, order, ...
-//// todo: add a unit test that has a deep (more than one) many-to-one reference in the select condition
-//// todo: unit test: "author { name } [EXISTS (books [author.name = 'Charles Dickens'])]" ~~> "Charles Dickens"
-//// todo: unit test: "book.dm { author ref: &author }" (reference)
 
 package com.vinctus.oql
 
@@ -85,7 +79,6 @@ object Main extends App {
   val db = new OQL_NodePG_JS(dm, "localhost", 5432, "postgres", "postgres", "docker", false, 1000, 5)
 
   db.showQuery()
-
   db.entity("t").jsInsert(js.Dictionary("s" -> "this is\na test")).toFuture onComplete {
     case Success(value) =>
       console.log(value)
@@ -96,6 +89,7 @@ object Main extends App {
         case Success(value) =>
           console.log(value)
 
+          db.showQuery()
           db.entity("t").jsUpdate(id, js.Dictionary("s" -> "this is\nanother test")).toFuture onComplete {
             case Success(value) =>
               console.log(value)

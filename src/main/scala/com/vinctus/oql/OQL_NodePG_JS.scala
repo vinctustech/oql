@@ -83,9 +83,9 @@ class OQL_NodePG_JS(dm: String,
   def subsrender(a: Any): String =
     a match {
       case s: String =>
-        s"'${s
-          .replace("'", "\\'")
+        s"E'${s
           .replace("\\", """\\""")
+          .replace("'", "\\'")
           .replace("\r", """\r""")
           .replace("\n", """\n""")}'"
       case d: js.Date     => s"'${d.toISOString()}'"
@@ -95,7 +95,7 @@ class OQL_NodePG_JS(dm: String,
 
   def render(a: Any): String =
     a match {
-      case s: String      => s"'${ds.quote(s)}'"
+      case s: String      => s"E'${ds.quote(s)}'"
       case d: js.Date     => s"'${d.toISOString()}'"
       case a: js.Array[_] => s"(${a map render mkString ","})"
       case _              => String.valueOf(a)

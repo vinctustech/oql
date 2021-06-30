@@ -21,6 +21,7 @@ class NodePGResultSet(rs: QueryArrayResult[js.Array[js.Any]]) extends OQLResultS
       false
     else {
       row = rs.rows(ridx)
+      println("row", row.mkString(","))
       true
     }
   }
