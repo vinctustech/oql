@@ -168,9 +168,7 @@ abstract class AbstractOQL(dm: String, val ds: SQLDataSource, conv: Conversions)
 //                    if (z.charAt(10) != 'T') s"${z.substring(0, 10)}T${z.substring(11)}" else z
 //                  }
                 case (d: String, DecimalType(precision, scale)) => conv.decimal(d, precision, scale)
-                case _ =>
-                  println(v, v.getClass)
-                  v
+                case _                                          => v
               }
             case ObjectNode(properties) =>
               val result = newResultBuilder().newObject
