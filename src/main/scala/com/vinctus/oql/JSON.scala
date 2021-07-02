@@ -8,38 +8,6 @@ import scala.language.postfixOps
 object JSON {
 
   private val EOI = '\uE000'
-  private val HEX = {
-    val a = new Array[Int](128)
-
-    List(
-      '0' -> 0,
-      '1' -> 1,
-      '2' -> 2,
-      '3' -> 3,
-      '4' -> 4,
-      '5' -> 5,
-      '6' -> 6,
-      '7' -> 7,
-      '8' -> 8,
-      '9' -> 9,
-      'a' -> 10,
-      'A' -> 10,
-      'b' -> 11,
-      'B' -> 11,
-      'c' -> 12,
-      'C' -> 12,
-      'd' -> 13,
-      'D' -> 13,
-      'e' -> 14,
-      'E' -> 14,
-      'f' -> 15,
-      'F' -> 15
-    ) foreach { case (k, v) => a(k) = v }
-
-    a to ArraySeq
-  }
-
-  private def hex(c: Char) = if (c < 128) HEX(c) else 0
 
   def readArray(json: String): IndexedSeq[Any] = {
     var idx: Int = 0

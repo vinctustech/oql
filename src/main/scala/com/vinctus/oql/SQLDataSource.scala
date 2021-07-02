@@ -48,6 +48,6 @@ trait SQLDataSource extends OQLDataSource {
 
   val builtinVariables: Map[String, DataType]
 
-  def quote(s: String): String
+  def literal(s: String): String = s"E'${s.replace("\\", """\\""").replace("'", """\'""").replace("\r", """\r""").replace("\n", """\n""")}'"
 
 }

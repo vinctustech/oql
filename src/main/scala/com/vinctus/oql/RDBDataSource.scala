@@ -51,10 +51,6 @@ class RDBDataSource(data: String) extends SQLDataSource {
   val functionReturnType = Map("count" -> BigintType)
   val builtinVariables = Map("CURRENT_DATE" -> DateType, "CURRENT_TIMESTAMP" -> TimestampType, "CURRENT_TIME" -> TimeType)
 
-  def quote(s: String): String =
-    s.replace("'", "''")
-      .replace("\\", """\\""")
-      .replace("\r", """\r""")
-      .replace("\n", """\n""")
+  override def literal(s: String): String = super.literal(s).substring(1) // we don't want the 'E' prefix for RDB's version of SQL
 
 }

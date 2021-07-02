@@ -42,7 +42,7 @@ class OQL_RDB(dm: String, data: String) extends AbstractOQL(dm, new RDBDataSourc
 
   def render(a: Any): String =
     a match {
-      case s: String      => s"'${ds.quote(s)}'"
+      case s: String      => ds.literal(s)
       case d: js.Date     => s"'${d.toISOString()}'"
       case a: js.Array[_] => s"(${a map render mkString ","})"
       case _              => String.valueOf(a)

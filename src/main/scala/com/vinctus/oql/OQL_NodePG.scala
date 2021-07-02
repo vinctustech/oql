@@ -37,8 +37,7 @@ class OQL_NodePG(dm: String,
 
   def queryOne(oql: String): Future[Option[DynamicMap]] = queryOne(parseQuery(oql), oql)
 
-  def jsQueryMany[T <: js.Object](oql: String): Future[T] =
-    (queryMany(oql) map (toJS(_))).asInstanceOf[Future[T]]
+  def jsQueryMany[T <: js.Object](oql: String): Future[T] = (queryMany(oql) map (toJS(_))).asInstanceOf[Future[T]]
 
   def jsQueryMany[T <: js.Object](q: OQLQuery): Future[T] =
     (queryMany(q, "", () => new ScalaResultBuilder) map (toJS(_))).asInstanceOf[Future[T]]
@@ -54,7 +53,7 @@ class OQL_NodePG(dm: String,
 
   def render(a: Any): String =
     a match {
-      case s: String      => s"E'${ds.quote(s)}'"
+      case s: String      => ds.literal(s)
       case d: js.Date     => s"'${d.toISOString()}'"
       case a: js.Array[_] => s"(${a map render mkString ","})"
       case _              => String.valueOf(a)
