@@ -34,6 +34,12 @@ stTypescriptVersion := "4.2.4"
 
 stIgnore += "source-map-support"
 
+enablePlugins(ParadoxPlugin)
+
+paradoxTheme := Some(builtinParadoxTheme("generic"))
+
+Compile / paradox / target := baseDirectory.value / "docs"
+
 scalaJSUseMainModuleInitializer := true
 
 Test / scalaJSUseMainModuleInitializer := true

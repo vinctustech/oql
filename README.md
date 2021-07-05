@@ -73,33 +73,26 @@ Compile / npmDependencies ++= Seq(
 Usage
 -----
 
-### TypeScript
-
-The following TypeScript snippet provides an overview of the API.
-
 ```typescript
-import { OQL, PostgresConnection } from '@vinctus/oql'
+import { OQL } from '@vinctus/oql'
 
-const conn = new PostgresConnection( <host>, <port>, <database>, <user>, <password>, <max>)
-const oql = new OQL( conn, <data model> )
+const oql = new OQL(<data model>, <host>, <port>, <database>, <user>, <password>, <ssl>, <idleTimeoutMillis>, <max>)
 
-oql.query(<query>).then((result: any) => <handle result> )
+oql.queryMany(<query>).then((result: any) => <handle result> )
 ```
 
-`<host>`, `<port>`, `<database>`, `<user>`, `<password>`, and `<max>` are the connection pool (`PoolConfig`) parameters for the Postgres database you are querying.
+`<host>`, `<port>`, `<database>`, `<user>`, `<password>`, `<ssl>`, `<idleTimeoutMillis>`, and `<max>` are the connection pool (`PoolConfig`) parameters for the Postgres database you are querying.
 
-`<data model>` describes the parts of the database being queried.  It's not necessary to describe every field of every table in the database, only what is being retrieved with *OQL*.  However, primary keys of tables that are being queried should always be included, even if you're not interested in retrieving the primary keys themselves.
+`<data model>` describes the parts of the database available for querying.  It's not necessary to describe every field of every table in the database, only what is being retrieved with *OQL*.  However, primary keys of tables that are being queried should always be included, even if you're not interested in retrieving the primary keys themselves.
 
 `<query>` is the OQL query string.
 
 `<handle result>` is your result array handling code.  The `result` object will be predictably structured according to the query.
 
-### Scala.js
-
 API
 ---
 
-Full API documentation.
+Full API documentation is given [here]().
 
 Examples
 --------
@@ -114,4 +107,4 @@ in progress: ticket #OQL-24
 License
 -------
 
-Licensed under the commercial friendly open source [ISC](https://opensource.org/licenses/ISC) license.
+OQL uses the commercial friendly open source [ISC](https://raw.githubusercontent.com/vinctustech/oql/stable/LICENSE) license.
