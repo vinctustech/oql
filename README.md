@@ -1,12 +1,31 @@
-# OQL
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+**Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
 
-**Badges** 
+- [OQL](#oql)
+  - [Overview](#overview)
+  - [Installation](#installation)
+    - [TypeScript/JavaScript](#typescriptjavascript)
+    - [Scala.js](#scalajs)
+  - [Usage](#usage)
+    - [TypeScript](#typescript)
+    - [Scala.js](#scalajs-1)
+  - [API](#api)
+  - [Examples](#examples)
+  - [Tests](#tests)
+  - [License](#license)
+  
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
-Optional badges such as npm version, test and build coverage, and so on.
+OQL
+===
+
+![npm (scoped)](https://img.shields.io/npm/v/@vinctus/oql)
 
 Object Query Language (OQL) is a simple relational database query language inspired by GraphQL and SQL, but designed to be translated query-for-query into database engine specific SQL, with identical behaviour across supported engines.
 
-## Overview
+Overview
+--------
 
 *OQL* is a language for querying a relational database. The query syntax draws inspiration from GraphQL and is similar, but with many differences.  Some capabilities missing from GraphQL have been added, and some capabilities found in GraphQL have a different syntax.  We believe that much of conventional SQL syntax is still preferable to creating a completely new syntax for every single feature of the query language.  However, whereas SQL can be seen as a "low level" relational query language, OQL takes a higher level Entity-Relationship (ER) Model view of the database. 
 
@@ -19,7 +38,8 @@ Some features of the OQL language include:
 - works with the [PostgreSQL database system](https://www.postgresql.org/)
 - designed to work with existing databases without having to change the database at all
 
-## Installation
+Installation
+------------
 
 ### TypeScript/JavaScript
 
@@ -50,7 +70,8 @@ Compile / npmDependencies ++= Seq(
 )
 ```
 
-## Usage
+Usage
+-----
 
 ### TypeScript
 
@@ -75,18 +96,22 @@ oql.query(<query>).then((result: any) => <handle result> )
 
 ### Scala.js
 
-## API 
+API
+---
 
 Full API documentation.
 
-## Examples
+Examples
+--------
 
 Additional examples here.
 
-## Tests
+Tests
+-----
 
 in progress: ticket #OQL-24
 
-## License
+License
+-------
 
 Licensed under the commercial friendly open source [ISC](https://opensource.org/licenses/ISC) license.
