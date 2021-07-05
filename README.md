@@ -20,7 +20,7 @@
 OQL
 ===
 
-![npm (scoped)](https://img.shields.io/npm/v/@vinctus/oql)
+![npm (scoped)](https://img.shields.io/npm/v/@vinctus/oql) ![GitHub Release Date](https://img.shields.io/github/release-date/vinctustech/oql) ![GitHub](https://img.shields.io/github/license/vinctustech/oql) ![GitHub last commit](https://img.shields.io/github/last-commit/vinctustech/oql) ![GitHub issues](https://img.shields.io/github/issues/vinctustech/oql) ![Snyk Vulnerabilities for npm scoped package](https://img.shields.io/snyk/vulnerabilities/npm/@vinctus/oql) ![npm bundle size (scoped)](https://img.shields.io/bundlephobia/minzip/@vinctus/oql) ![GitHub Workflow Status](https://img.shields.io/github/workflow/status/vinctustech/oql/unit-tests)
 
 Object Query Language (OQL) is a simple relational database query language inspired by GraphQL and SQL, but designed to be translated query-for-query into database engine specific SQL, with identical behaviour across supported engines.
 
