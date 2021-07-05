@@ -10,4 +10,3 @@ OQL
 ===
 
 This is the home of Object Query Language (OQL) documentation.
-
