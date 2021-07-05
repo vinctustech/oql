@@ -40,6 +40,8 @@ paradoxTheme := Some(builtinParadoxTheme("generic"))
 
 Compile / paradox / target := baseDirectory.value / "docs"
 
+//Compile / paradoxProperties += ("github.base_url" -> "https://github.com/vinctustech/oql/blob/dev")
+
 scalaJSUseMainModuleInitializer := true
 
 Test / scalaJSUseMainModuleInitializer := true
