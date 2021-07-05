@@ -2,6 +2,7 @@
 
 * [Setup](setup.md)
 * [Usage](usage.md)
+* [API](api.md)
 
 @@@
 
