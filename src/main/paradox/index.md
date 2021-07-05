@@ -1,7 +1,7 @@
 @@@ index
 
 * [Overview](overview.md)
-* [Setup](setup.md)
+* [Installation](installation.md)
 * [Usage](usage.md)
 * [API](api.md)
 
