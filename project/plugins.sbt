@@ -12,3 +12,4 @@ addSbtPlugin("xyz.hyperreal" % "npm-plugin" % "0.1.13")
 addSbtPlugin("com.codecommit" % "sbt-github-packages" % "0.5.2")
 
 addSbtPlugin("com.lightbend.paradox" % "sbt-paradox" % "0.9.2")
+addSbtPlugin("io.github.jonas" % "sbt-paradox-material-theme" % "0.6.0")

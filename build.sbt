@@ -35,10 +35,18 @@ stTypescriptVersion := "4.2.4"
 stIgnore += "source-map-support"
 
 enablePlugins(ParadoxPlugin)
-
-paradoxTheme := Some(builtinParadoxTheme("generic"))
+enablePlugins(ParadoxMaterialThemePlugin)
+//paradoxTheme := Some(builtinParadoxTheme("generic"))
 
 Compile / paradox / target := baseDirectory.value / "docs"
+
+Compile / paradoxMaterialTheme := {
+  ParadoxMaterialTheme()
+    //.withColor("gray", "orange")
+    .withLogo("assets/images/vinctus.png")
+    .withRepository(uri("https://github.com/vinctustech/oql"))
+    .withCopyright("© Vinctus Technologies Inc. All Rights Reserved 2021")
+}
 
 //Compile / paradoxProperties += ("github.base_url" -> "https://github.com/vinctustech/oql/blob/dev")
 
