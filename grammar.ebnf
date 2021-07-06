@@ -2,12 +2,12 @@ Model ::= Entity+
 Entity ::= "entity" Identifier ("(" Alias ")")? "{" Attribute+ "}"
 Identifier ::= Letter | "_" | "$" (Letter | "_" | "$" | Digit)*
 Alias ::= Identifier
-Attribute ::= "*"? AttributeName ("(" Alias ")")? ":" Type "!"? | Identifier "=" JSON
+Attribute ::= "*"? Identifier ("(" Alias ")")? ":" Type "!"? | Identifier "=" JSON
 Type ::= DataType
-     | EntityType
-     | "[" EntityType "]" ("." AttributeName)?
-     | "<" EntityType ">" ("." AttributeName)?
-     | "[" EntityType "]" ("." AttributeName)? "(" EntityType ")"
+     | EntityName
+     | "[" EntityName "]" ("." AttributeName)?
+     | "<" EntityName ">" ("." AttributeName)?
+     | "[" EntityName "]" ("." AttributeName)? "(" EntityName ")"
 DataType ::= "text"
               | "integer" | "int" | "int4"
               | "bool" | "boolean"
@@ -17,7 +17,7 @@ DataType ::= "text"
               | "float" | "float8"
               | "uuid"
               | "timestamp"
-EntityType ::= Identifier
+EntityName ::= Identifier
 AttributeName ::= Identifier
 
 /* https://www.w3.org/TR/2010/REC-xquery-20101214/#EBNFNotation */

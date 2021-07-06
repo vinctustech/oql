@@ -202,6 +202,39 @@ vinctustech/oql
   <dt>Identifier</dt>
   <dd>An identifier can have letters, digits, underscores, and dollar signs, but may not begin with a digit.</dd>
   <dd><img src="assets/images/diagram/Identifier.png" alt="Identifier" /></dd>
+  <dt>Alias</dt>
+  <dd>Aliases are identifiers.</dd>
+  <dt>Attribute</dt>
+  <dd>Attributes correspond to columns in a table, if they have a datatype, or a simple entity type (i.e., just the name of an entity). An attribute that begins with an asterisk is the primary key. The name of an attribute can be aliased. An attribute that ends with an exclamation mark can&rsquo;t be null or excluded when inserting.</dd>
+  <dd><img src="assets/images/diagram/Attribute.png" alt="Attribute" /></dd>
+  <dt>Type</dt>
+  <dd>There are several kinds of attribute types:
+    <dl>
+      <dt>Datatype</dt>
+      <dd>Corresponds to a databased engine datatype. These attributes correspond to table columns that are not foreign keys.</dd>
+      <dt>Many-to-one
+      </dt>
+      <dd>This is the entity relationship type that corresponds to a column.</dd>
+      <dt>One-to-many
+      </dt>
+      <dd>This is the array entity relationship type that represents all the entities (rows) that are referencing any given entity.</dd>
+      <dt>Many-to-many
+      </dt>
+      <dd>the many-to-many relationship</dd>
+      <dt>One-to-many
+      </dt>
+      <dd>the one-to-many relationship</dd>
+    </dl>
+  </dd>
+  <dd>
+  <p><img src="assets/images/diagram/Type.png" alt="Type" /></p></dd>
+  <dt>DataType</dt>
+  <dd>Any one of the basic datatypes that are commonly support by database systems.</dd>
+  <dd><img src="assets/images/diagram/DataType.png" alt="DataType" /></dd>
+  <dt>EntityName</dt>
+  <dd>An EntityName is an identifier that corresponds either to the identifier given as the entity name if it wasn&rsquo;t aliased, or to the alias if it was.</dd>
+  <dt>AttributeName</dt>
+  <dd>An AttributeName is an identifier that corresponds either to the identifier given as the attribute name if it wasn&rsquo;t aliased, or to the alias if it was.</dd>
 </dl>
 </div>
 <div>
