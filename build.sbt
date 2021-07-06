@@ -43,6 +43,7 @@ Compile / paradox / target := baseDirectory.value / "docs"
 Compile / paradoxMaterialTheme := {
   ParadoxMaterialTheme()
     //.withColor("gray", "orange")
+    .withFavicon("assets/images/favicon.ico")
     .withLogo("assets/images/vinctus.png")
     .withRepository(uri("https://github.com/vinctustech/oql"))
     .withCopyright("© Vinctus Technologies Inc. All Rights Reserved 2021")
