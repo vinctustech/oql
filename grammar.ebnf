@@ -1,0 +1,25 @@
+Model ::= Entity+
+Entity ::= "entity" Identifier ("(" Alias ")")? "{" Attribute+ "}"
+Identifier ::= Letter | "_" | "$" (Letter | "_" | "$" | Digit)*
+Alias ::= Identifier
+Attribute ::= "*"? AttributeName ("(" Alias ")")? ":" Type "!"? | Identifier "=" JSON
+Type ::= DataType
+     | EntityType
+     | "[" EntityType "]" ("." AttributeName)?
+     | "<" EntityType ">" ("." AttributeName)?
+     | "[" EntityType "]" ("." AttributeName)? "(" EntityType ")"
+DataType ::= "text"
+              | "integer" | "int" | "int4"
+              | "bool" | "boolean"
+              | "bigint"
+              | "decimal"
+              | "date"
+              | "float" | "float8"
+              | "uuid"
+              | "timestamp"
+EntityType ::= Identifier
+AttributeName ::= Identifier
+
+/* https://www.w3.org/TR/2010/REC-xquery-20101214/#EBNFNotation */
+
+/* color: #009688 (teal) */

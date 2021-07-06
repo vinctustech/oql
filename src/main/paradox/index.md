@@ -4,6 +4,9 @@
 * [Installation](installation.md)
 * [Usage](usage.md)
 * [API](api.md)
+* [Syntax](syntax.md)
+* [Examples](examples.md)
+* [Release Notes](release-notes.md)
 
 @@@
 

@@ -15,13 +15,15 @@
 <meta name="lang:search.result.none" content="No matching documents">
 <meta name="lang:search.result.one" content="1 matching document">
 <meta name="lang:search.result.other" content="# matching documents">
-<meta name="lang:search.tokenizer" content="[\s\-]+">
+<meta name="lang:search.tokenizer" content="[\s\-\.]+">
 
 
 <meta name="description" content="Object Query Language">
 <link rel="shortcut icon" href="assets/images/favicon.ico">
 <title>OQL</title>
 <link rel="stylesheet" href="assets/stylesheets/application.451f80e5.css">
+<link rel="stylesheet" href="assets/stylesheets/application-palette.22915126.css">
+<meta name="theme-color" content="#009688" />
 <link rel="stylesheet" href="lib/material__tabs/dist/mdc.tabs.min.css">
 <link rel="stylesheet" href="lib/prettify/prettify.css">
 <script src="assets/javascripts/modernizr.1aa3b519.js"></script>
@@ -35,6 +37,8 @@ code,kbd,pre{font-family:"Roboto Mono","Courier New",Courier,monospace}
 <link rel="stylesheet" href="assets/stylesheets/paradox-material-theme.css">
 </head>
 <body
+data-md-color-primary="teal"
+data-md-color-accent="indigo"
 >
 <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
 <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
@@ -134,6 +138,9 @@ vinctustech/oql
   <li><a href="installation.html" class="page">Installation</a></li>
   <li><a href="usage.html" class="page">Usage</a></li>
   <li><a href="api.html" class="page">API</a></li>
+  <li><a href="syntax.html" class="page">Syntax</a></li>
+  <li><a href="examples.html" class="page">Examples</a></li>
+  <li><a href="release-notes.html" class="page">Release Notes</a></li>
 </ul>
 <nav class="md-nav md-nav--secondary">
 </nav>
@@ -156,7 +163,7 @@ vinctustech/oql
 <p>Object Query Language (OQL) is a simple relational database query language inspired by GraphQL and SQL, but designed to be translated query-for-query into database engine specific SQL, with identical behaviour across supported engines.</p>
 </div>
 <div>
-<a href="https://github.com/vinctustech/oql/tree/v1.0.0-RC.3.22/src/main/paradox/index.md" title="Edit this page" class="md-source-file md-edit">
+<a href="https://github.com/vinctustech/oql/tree/master/src/main/paradox/index.md" title="Edit this page" class="md-source-file md-edit">
 Edit this page
 </a>
 </div>
@@ -199,6 +206,10 @@ and
 <a href="https://jonas.github.io/paradox-material-theme/">Paradox Material Theme</a>
 
 </div>
+<div class="md-footer-social">
+<a href="https://github.com/vinctustech" class="md-footer-social__link fa fa-github"></a>
+</div>
+
 </div>
 </div>
 </footer>

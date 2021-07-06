@@ -42,14 +42,21 @@ Compile / paradox / target := baseDirectory.value / "docs"
 
 Compile / paradoxMaterialTheme := {
   ParadoxMaterialTheme()
-    //.withColor("gray", "orange")
+    .withColor("teal", "indigo")
     .withFavicon("assets/images/favicon.ico")
     .withLogo("assets/images/vinctus.png")
     .withRepository(uri("https://github.com/vinctustech/oql"))
     .withCopyright("© Vinctus Technologies Inc. All Rights Reserved 2021")
+    .withSocial(uri("https://github.com/vinctustech"))
+    .withLanguage(java.util.Locale.ENGLISH)
+    .withSearch(tokenizer = "[\\s\\-\\.]+")
 }
 
-//Compile / paradoxProperties += ("github.base_url" -> "https://github.com/vinctustech/oql/blob/dev")
+Compile / paradoxProperties ++=
+  Map(
+    "github.base_url" -> "https://github.com/vinctustech/oql/blob/dev",
+    "image.base_url" -> ".../assets/images"
+  )
 
 scalaJSUseMainModuleInitializer := true
 
