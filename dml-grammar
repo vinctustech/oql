@@ -1,6 +1,6 @@
 Model ::= Entity+
 Entity ::= "entity" Identifier ("(" Alias ")")? "{" Attribute+ "}"
-Identifier ::= Letter | "_" | "$" (Letter | "_" | "$" | Digit)*
+Identifier ::= letter | "_" | "$" (letter | "_" | "$" | digit)*
 Alias ::= Identifier
 Attribute ::= "*"? Identifier ("(" Alias ")")? ":" Type "!"? | Identifier "=" JSON
 Type ::= DataType

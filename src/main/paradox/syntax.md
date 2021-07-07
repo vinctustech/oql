@@ -7,7 +7,7 @@ The following syntax (or railroad) diagrams of both the data modeling and query 
 
 An "Entity-Relationship" style language is used to describe the database.  Only the portions of the database for which OQL is being used need to be described.
 
-#### Grammar Rules
+#### Data Modeling Grammar Rules
 
 Model
 : The complete data model is a series of entities.
@@ -57,3 +57,10 @@ EntityName
 
 AttributeName
 : An AttributeName is an identifier that corresponds either to the identifier given as the attribute name if it wasn't aliased, or to the alias if it was.
+
+### Query Language
+
+The query language is inspired by GraphQL. In the following grammar, all keywords (double-quoted string literals) are case-insensitive.
+
+#### Query Grammar Rules
+

@@ -1,0 +1,112 @@
+query
+  ::= entityName project ("[" booleanExpression "]")? group? order? restrict
+
+project
+  ::= "{" "*" subtracts attributeProject* "}"
+    | "{" attributeProject* "}"
+    | empty
+
+subtracts
+  ::= ("-" attributeName)*
+
+attributeProject
+  ::= label? ident "(" argument ")"
+    | label applyExpression
+    | label qualifiedAttributeExpression
+    | label "(" expression ")"
+    | label? query
+    | label? attributeExpression
+    | label? "&" attributeName
+
+label
+  ::= ident ":"
+
+argument
+  ::= attributeExpression | starExpression
+
+entityName
+  ::= ident
+
+attributeName
+  ::= ident
+
+applyExpression
+  ::= ident "(" expressions ")"
+
+attributeExpression
+  ::= ident
+
+qualifiedAttributeExpression
+  ::= idents
+
+starExpression
+  ::= "*"
+
+group
+  ::= "/" expressions "/"
+
+order
+  ::= "<" ordering ("," ordering)* ">"
+
+ordering
+  ::= expression ("ASC" | "DESC")? ("NULLS" ("FIRST" | "LAST"))?
+
+restrict
+  ::= "|" integer ("," integer)? "|"
+    | "|" "," integer "|"
+    | empty
+
+expressions
+  ::= expression ("," expression)*
+
+booleanExpression
+  ::= orExpression
+
+orExpression
+  ::= orExpression "OR" andExpression
+    | andExpression
+
+andExpression
+  ::= andExpression "AND" notExpression
+    | notExpression
+
+notExpression
+  ::= "NOT" booleanPrimary
+    | booleanPrimary
+
+booleanPrimary
+  ::= expression comparison expression
+    | expression (("NOT" "BETWEEN") | "BETWEEN") expression "AND" expression
+    | expression isNull
+    | expression in ("(" expressions ")")
+    | expression in ("(" query ")")
+    | "EXISTS" "(" query ")
+    | booleanLiteral
+    | qualifiedAttributeExpression
+    | "(" booleanExpression ")"
+
+isNull
+  ::= "IS" "NULL"
+    | "IS" "NOT" "NULL"
+
+in
+  ::= "NOT" "IN"
+    | "IN"
+
+comparison
+  ::= "<=" | ">=" | "<" | ">" | "=" | "!=" | "LIKE" | "ILIKE" | ("NOT" "LIKE") | ("NOT" "ILIKE")
+
+booleanLiteral
+  ::= "TRUE" | "FALSE"
+
+expression
+  ::= additive
+
+additive
+  ::= additive ("+" | "-") multiplicative
+    | multiplicative
+
+multiplicative
+  ::= multiplicative ("*" | "/") primary
+    | primary
+

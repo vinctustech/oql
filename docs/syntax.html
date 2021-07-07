@@ -143,8 +143,8 @@ vinctustech/oql
   <li><a href="installation.html" class="page">Installation</a></li>
   <li><a href="usage.html" class="page">Usage</a></li>
   <li><a href="api.html" class="page">API</a></li>
-  <li><a href="syntax.html" class="active page">Syntax</a></li>
   <li><a href="examples.html" class="page">Examples</a></li>
+  <li><a href="syntax.html" class="active page">Syntax</a></li>
   <li><a href="release-notes.html" class="page">Release Notes</a></li>
 </ul>
 <nav class="md-nav md-nav--secondary">
@@ -153,6 +153,7 @@ vinctustech/oql
   <li><a href="syntax.html#syntax" class="header">Syntax</a>
   <ul>
     <li><a href="syntax.html#data-modeling-language" class="header">Data Modeling Language</a></li>
+    <li><a href="syntax.html#query-language" class="header">Query Language</a></li>
   </ul></li>
 </ul>
 </nav>
@@ -177,6 +178,7 @@ vinctustech/oql
   <li><a href="syntax.html#syntax" class="header">Syntax</a>
   <ul>
     <li><a href="syntax.html#data-modeling-language" class="header">Data Modeling Language</a></li>
+    <li><a href="syntax.html#query-language" class="header">Query Language</a></li>
   </ul></li>
 </ul>
 </nav>
@@ -191,7 +193,7 @@ vinctustech/oql
 <p>The following syntax (or railroad) diagrams of both the data modeling and query language provide a clear description of those languages. The syntax for <code>json</code> (<a href="https://www.json.org/json-en.html">JSON syntax</a>) has been omitted.</p>
 <h3><a href="#data-modeling-language" name="data-modeling-language" class="anchor"><span class="anchor-link"></span></a>Data Modeling Language</h3>
 <p>An &ldquo;Entity-Relationship&rdquo; style language is used to describe the database. Only the portions of the database for which OQL is being used need to be described.</p>
-<h4><a href="#grammar-rules" name="grammar-rules" class="anchor"><span class="anchor-link"></span></a>Grammar Rules</h4>
+<h4><a href="#data-modeling-grammar-rules" name="data-modeling-grammar-rules" class="anchor"><span class="anchor-link"></span></a>Data Modeling Grammar Rules</h4>
 <dl>
   <dt>Model</dt>
   <dd>The complete data model is a series of entities.</dd>
@@ -236,6 +238,9 @@ vinctustech/oql
   <dt>AttributeName</dt>
   <dd>An AttributeName is an identifier that corresponds either to the identifier given as the attribute name if it wasn&rsquo;t aliased, or to the alias if it was.</dd>
 </dl>
+<h3><a href="#query-language" name="query-language" class="anchor"><span class="anchor-link"></span></a>Query Language</h3>
+<p>The query language is inspired by GraphQL. In the following grammar, all keywords (double-quoted string literals) are case-insensitive.</p>
+<h4><a href="#query-grammar-rules" name="query-grammar-rules" class="anchor"><span class="anchor-link"></span></a>Query Grammar Rules</h4>
 </div>
 <div>
 <a href="https://github.com/vinctustech/oql/tree/master/src/main/paradox/syntax.md" title="Edit this page" class="md-source-file md-edit">
@@ -254,7 +259,7 @@ Edit this page
 <footer class="md-footer">
 <div class="md-footer-nav">
 <nav class="md-footer-nav__inner md-grid">
-<a href="api.html" title="API" class="md-flex md-footer-nav__link md-footer-nav__link--prev" rel="prev">
+<a href="examples.html" title="Examples" class="md-flex md-footer-nav__link md-footer-nav__link--prev" rel="prev">
 <div class="md-flex__cell md-flex__cell--shrink">
 <i class="md-icon md-icon--arrow-back md-footer-nav__button"></i>
 </div>
@@ -263,17 +268,17 @@ Edit this page
 <span class="md-footer-nav__direction">
 Previous
 </span>
-API
+Examples
 </span>
 </div>
 </a>
-<a href="examples.html" title="Examples" class="md-flex md-footer-nav__link md-footer-nav__link--next" rel="next">
+<a href="release-notes.html" title="Release Notes" class="md-flex md-footer-nav__link md-footer-nav__link--next" rel="next">
 <div class="md-flex__cell md-flex__cell--stretch md-footer-nav__title">
 <span class="md-flex__ellipsis">
 <span class="md-footer-nav__direction">
 Next
 </span>
-Examples
+Release Notes
 </span>
 </div>
 <div class="md-flex__cell md-flex__cell--shrink">

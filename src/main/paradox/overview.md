@@ -1,9 +1,9 @@
 Overview
 ========
 
-*OQL* is a language for querying a relational database. The query syntax draws inspiration from GraphQL and is similar, but with many differences.  Some capabilities missing from GraphQL have been added, and some capabilities found in GraphQL have a different syntax.  We believe that much of conventional SQL syntax is still preferable to creating a completely new syntax for every single feature of the query language.  However, whereas SQL can be seen as a "low level" relational query language, OQL takes a higher level Entity-Relationship (ER) Model view of the database.
+*OQL* is a language for querying a relational database. The query syntax draws inspiration from GraphQL and is similar, but with many differences.  Some capabilities missing from GraphQL have been added, and some capabilities found in GraphQL have a different syntax.  We believe that much of conventional SQL syntax is still preferable to creating a completely new syntax for every single feature of the query language (i.e., conventional syntax wherever possible).  However, whereas SQL can be seen as a "low level" relational query language, OQL takes a higher level Entity-Relationship (ER) Model view of the database.
 
-The name "OQL" refers to both a software library, and a query language implemented within that library.  The OQL library provides support for data retrieval (via the OQL query language), and a query builder for constructing queries step by step in your code.  There are also class methods for performing all kinds of mutations, including mutations that support the ER model view of the database.  Furthermore, query and mutation operations all abide by the supplied ER data model.
+The name "OQL" refers to both a software library, and a query language implemented within that library.  The OQL library provides support for data retrieval (via the OQL query language) as well as a query builder for constructing queries in programmatically.  There are also class methods for performing all kinds of mutations, including mutations that support the ER view of the database.  Furthermore, query and mutation operations all abide by the supplied ER data model.
 
 Some features of the OQL language include:
 
