@@ -9,26 +9,26 @@ An "Entity-Relationship" style language is used to describe the database.  Only 
 
 #### Data Modeling Grammar Rules
 
-Model
+*Model*
 : The complete data model is a series of entities.
 : ![Model](.../dml-diagram/Model.png)
 
-Entity
+*Entity*
 : Entities correspond to tables in the database. An entity comprises an identifier matching the name of the corresponding table, which can be given an alias, and a series of attributes.
 : ![Entity](.../dml-diagram/Entity.png)
 
-Identifier
+*Identifier*
 : An identifier can have letters, digits, underscores, and dollar signs, but may not begin with a digit.
 : ![Identifier](.../dml-diagram/Identifier.png)
 
-Alias
+*Alias*
 : Aliases are identifiers.
 
-Attribute
+*Attribute*
 : Attributes correspond to columns in a table, if they have a datatype, or a simple entity type (i.e., just the name of an entity).  An attribute that begins with an asterisk is the primary key.  The name of an attribute can be aliased.  An attribute that ends with an exclamation mark can't be null or excluded when inserting.
 : ![Attribute](.../dml-diagram/Attribute.png)
 
-Type
+*Type*
 : There are several kinds of attribute types:
     - `DataType` corresponding to a database engine datatype. These attributes correspond to table columns that are not foreign keys.
     - `EntityName` representing the many-to-one relationship (from the point of view of the current entity). This is the entity relationship type that corresponds to a table column that is a foreign key.
@@ -37,14 +37,14 @@ Type
     - `< EntityName >` or `< EntityName > . AttributeName` representing the one-to-many relationship (the current entity is the one being referenced by a foreign key).
 : ![Type](.../dml-diagram/Type.png)
 
-DataType
+*DataType*
 : Any one of the basic datatypes that are commonly support by database systems.
 : ![DataType](.../dml-diagram/DataType.png)
 
-EntityName
+*EntityName*
 : An EntityName is an identifier that corresponds either to the identifier given as the entity name if it wasn't aliased, or to the alias if it was.
 
-AttributeName
+*AttributeName*
 : An AttributeName is an identifier that corresponds either to the identifier given as the attribute name if it wasn't aliased, or to the alias if it was.
 
 ### Query Language
@@ -53,7 +53,7 @@ The query language is inspired by GraphQL. In the following grammar, all keyword
 
 #### Query Grammar Rules
 
-query
+*query*
 : A data retrieval query expression begins with the name of the entity being queried followed by zero or more optional relational operations:
     - `project` specifies the structure of the results.  If omitted, result will comprise all datatype attributes only, in the order in which they were defined in the data model.
     - `select` contains a boolean row selection or filter expression.  If omitted, all rows will be retrieved.
@@ -62,10 +62,10 @@ query
     - `restrict` contains one or two integers giving the offset and limit. If the offset is omitted, there is no offset.
 : ![query](.../oql-diagram/query.png)
 
-project
-: The structure of the result be basically a sequence of expressions each with an implicit or explicit `label`: `attributeProject`.
+*project*
+: The structure of the result be basically a sequence of expressions each with an implicit or explicit `label`, namely `attributeProject`.
 : ![project](.../oql-diagram/project.png)
 
-select
+*select*
 : The row selection condition must be a boolean valued expression.
 : ![select](.../oql-diagram/select.png)

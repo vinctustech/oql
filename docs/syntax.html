@@ -195,21 +195,21 @@ vinctustech/oql
 <p>An &ldquo;Entity-Relationship&rdquo; style language is used to describe the database. Only the portions of the database for which OQL is being used need to be described.</p>
 <h4><a href="#data-modeling-grammar-rules" name="data-modeling-grammar-rules" class="anchor"><span class="anchor-link"></span></a>Data Modeling Grammar Rules</h4>
 <dl>
-  <dt>Model</dt>
+  <dt><em>Model</em></dt>
   <dd>The complete data model is a series of entities.</dd>
   <dd><img src="assets/images/dml-diagram/Model.png" alt="Model" /></dd>
-  <dt>Entity</dt>
+  <dt><em>Entity</em></dt>
   <dd>Entities correspond to tables in the database. An entity comprises an identifier matching the name of the corresponding table, which can be given an alias, and a series of attributes.</dd>
   <dd><img src="assets/images/dml-diagram/Entity.png" alt="Entity" /></dd>
-  <dt>Identifier</dt>
+  <dt><em>Identifier</em></dt>
   <dd>An identifier can have letters, digits, underscores, and dollar signs, but may not begin with a digit.</dd>
   <dd><img src="assets/images/dml-diagram/Identifier.png" alt="Identifier" /></dd>
-  <dt>Alias</dt>
+  <dt><em>Alias</em></dt>
   <dd>Aliases are identifiers.</dd>
-  <dt>Attribute</dt>
+  <dt><em>Attribute</em></dt>
   <dd>Attributes correspond to columns in a table, if they have a datatype, or a simple entity type (i.e., just the name of an entity). An attribute that begins with an asterisk is the primary key. The name of an attribute can be aliased. An attribute that ends with an exclamation mark can&rsquo;t be null or excluded when inserting.</dd>
   <dd><img src="assets/images/dml-diagram/Attribute.png" alt="Attribute" /></dd>
-  <dt>Type</dt>
+  <dt><em>Type</em></dt>
   <dd>There are several kinds of attribute types:
     <ul>
       <li><code>DataType</code> corresponding to a database engine datatype. These attributes correspond to table columns that are not foreign keys.</li>
@@ -220,19 +220,19 @@ vinctustech/oql
     </ul>
   </dd>
   <dd><img src="assets/images/dml-diagram/Type.png" alt="Type" /></dd>
-  <dt>DataType</dt>
+  <dt><em>DataType</em></dt>
   <dd>Any one of the basic datatypes that are commonly support by database systems.</dd>
   <dd><img src="assets/images/dml-diagram/DataType.png" alt="DataType" /></dd>
-  <dt>EntityName</dt>
+  <dt><em>EntityName</em></dt>
   <dd>An EntityName is an identifier that corresponds either to the identifier given as the entity name if it wasn&rsquo;t aliased, or to the alias if it was.</dd>
-  <dt>AttributeName</dt>
+  <dt><em>AttributeName</em></dt>
   <dd>An AttributeName is an identifier that corresponds either to the identifier given as the attribute name if it wasn&rsquo;t aliased, or to the alias if it was.</dd>
 </dl>
 <h3><a href="#query-language" name="query-language" class="anchor"><span class="anchor-link"></span></a>Query Language</h3>
 <p>The query language is inspired by GraphQL. In the following grammar, all keywords (double-quoted string literals) are case-insensitive.</p>
 <h4><a href="#query-grammar-rules" name="query-grammar-rules" class="anchor"><span class="anchor-link"></span></a>Query Grammar Rules</h4>
 <dl>
-  <dt>query</dt>
+  <dt><em>query</em></dt>
   <dd>A data retrieval query expression begins with the name of the entity being queried followed by zero or more optional relational operations:
     <ul>
       <li><code>project</code> specifies the structure of the results. If omitted, result will comprise all datatype attributes only, in the order in which they were defined in the data model.</li>
@@ -243,10 +243,10 @@ vinctustech/oql
     </ul>
   </dd>
   <dd><img src="assets/images/oql-diagram/query.png" alt="query" /></dd>
-  <dt>project</dt>
-  <dd>The structure of the result be basically a sequence of expressions each with an implicit or explicit <code>label</code>: <code>attributeProject</code>.</dd>
+  <dt><em>project</em></dt>
+  <dd>The structure of the result be basically a sequence of expressions each with an implicit or explicit <code>label</code>, namely <code>attributeProject</code>.</dd>
   <dd><img src="assets/images/oql-diagram/project.png" alt="project" /></dd>
-  <dt>select</dt>
+  <dt><em>select</em></dt>
   <dd>The row selection condition must be a boolean valued expression.</dd>
   <dd><img src="assets/images/oql-diagram/select.png" alt="select" /></dd>
 </dl>
