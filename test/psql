@@ -1,1 +1,1 @@
-PGPASSWORD=postgres psql -h localhost -U postgres
+PGPASSWORD=docker psql -h localhost -U postgres

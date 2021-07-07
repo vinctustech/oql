@@ -75,21 +75,12 @@ notExpression
 booleanPrimary
   ::= expression comparison expression
     | expression (("NOT" "BETWEEN") | "BETWEEN") expression "AND" expression
-    | expression isNull
-    | expression in ("(" expressions ")")
-    | expression in ("(" query ")")
+    | expression "IS" "NOT"? "NULL"
+    | expression "NOT"? "IN" ("(" (expressions | query) ")")
     | "EXISTS" "(" query ")"
     | booleanLiteral
     | qualifiedAttributeExpression
     | "(" booleanExpression ")"
-
-isNull
-  ::= "IS" "NULL"
-    | "IS" "NOT" "NULL"
-
-in
-  ::= "NOT" "IN"
-    | "IN"
 
 comparison
   ::= "<=" | ">=" | "<" | ">" | "=" | "!=" | "LIKE" | "ILIKE" | ("NOT" "LIKE") | ("NOT" "ILIKE")
@@ -122,8 +113,5 @@ caseExpression
   ::= "CASE" ("WHEN" booleanExpression "THEN" expression)+ ("ELSE" expression)? "END"
 
 identifier ::= letter | "_" | "$" (letter | "_" | "$" | digit)*
-
-string
-  ::= singleQuoteString | doubleQuoteString
 
 /* color: #009688 (teal) */

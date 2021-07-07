@@ -162,7 +162,7 @@ vinctustech/oql
 <ul style="display: none">
 <li class="md-nav__item md-version" id="project.version">
 <label class="md-nav__link" for="__version">
-<i class="md-icon" title="Version">label_outline</i> 1.0.0-RC.3.22
+<i class="md-icon" title="Version">label_outline</i> 1.0.0-RC.3.23
 </label>
 </li>
 </ul>
@@ -197,42 +197,32 @@ vinctustech/oql
 <dl>
   <dt>Model</dt>
   <dd>The complete data model is a series of entities.</dd>
-  <dd><img src="assets/images/diagram/Model.png" alt="Model" /></dd>
+  <dd><img src="assets/images/dml-diagram/Model.png" alt="Model" /></dd>
   <dt>Entity</dt>
   <dd>Entities correspond to tables in the database. An entity comprises an identifier matching the name of the corresponding table, which can be given an alias, and a series of attributes.</dd>
-  <dd><img src="assets/images/diagram/Entity.png" alt="Entity" /></dd>
+  <dd><img src="assets/images/dml-diagram/Entity.png" alt="Entity" /></dd>
   <dt>Identifier</dt>
   <dd>An identifier can have letters, digits, underscores, and dollar signs, but may not begin with a digit.</dd>
-  <dd><img src="assets/images/diagram/Identifier.png" alt="Identifier" /></dd>
+  <dd><img src="assets/images/dml-diagram/Identifier.png" alt="Identifier" /></dd>
   <dt>Alias</dt>
   <dd>Aliases are identifiers.</dd>
   <dt>Attribute</dt>
   <dd>Attributes correspond to columns in a table, if they have a datatype, or a simple entity type (i.e., just the name of an entity). An attribute that begins with an asterisk is the primary key. The name of an attribute can be aliased. An attribute that ends with an exclamation mark can&rsquo;t be null or excluded when inserting.</dd>
-  <dd><img src="assets/images/diagram/Attribute.png" alt="Attribute" /></dd>
+  <dd><img src="assets/images/dml-diagram/Attribute.png" alt="Attribute" /></dd>
   <dt>Type</dt>
   <dd>There are several kinds of attribute types:
-    <dl>
-      <dt>Datatype</dt>
-      <dd>Corresponds to a databased engine datatype. These attributes correspond to table columns that are not foreign keys.</dd>
-      <dt>Many-to-one
-      </dt>
-      <dd>This is the entity relationship type that corresponds to a column.</dd>
-      <dt>One-to-many
-      </dt>
-      <dd>This is the array entity relationship type that represents all the entities (rows) that are referencing any given entity.</dd>
-      <dt>Many-to-many
-      </dt>
-      <dd>the many-to-many relationship</dd>
-      <dt>One-to-many
-      </dt>
-      <dd>the one-to-many relationship</dd>
-    </dl>
+    <ul>
+      <li><code>DataType</code> corresponding to a database engine datatype. These attributes correspond to table columns that are not foreign keys.</li>
+      <li><code>EntityName</code> representing the many-to-one relationship (from the point of view of the current entity). This is the entity relationship type that corresponds to a table column that is a foreign key.</li>
+      <li><code>[ EntityName ]</code> or <code>[ EntityName ] . AttributeName</code> representing the one-to-many relationship (from the point of view of the current entity). This is the array type that represents all the entities (rows) that are referencing the current entity.</li>
+      <li><code>[ EntityName ] ( EntityName )</code> or <code>[ EntityName ] . AttributeName ( EntityName )</code> representing the many-to-many relationship. The second <code>EntityName</code> in parentheses refers to the junction or link entity (table).</li>
+      <li><code>&lt; EntityName &gt;</code> or <code>&lt; EntityName &gt; . AttributeName</code> representing the one-to-many relationship (the current entity is the one being referenced by a foreign key).</li>
+    </ul>
   </dd>
-  <dd>
-  <p><img src="assets/images/diagram/Type.png" alt="Type" /></p></dd>
+  <dd><img src="assets/images/dml-diagram/Type.png" alt="Type" /></dd>
   <dt>DataType</dt>
   <dd>Any one of the basic datatypes that are commonly support by database systems.</dd>
-  <dd><img src="assets/images/diagram/DataType.png" alt="DataType" /></dd>
+  <dd><img src="assets/images/dml-diagram/DataType.png" alt="DataType" /></dd>
   <dt>EntityName</dt>
   <dd>An EntityName is an identifier that corresponds either to the identifier given as the entity name if it wasn&rsquo;t aliased, or to the alias if it was.</dd>
   <dt>AttributeName</dt>
@@ -241,6 +231,25 @@ vinctustech/oql
 <h3><a href="#query-language" name="query-language" class="anchor"><span class="anchor-link"></span></a>Query Language</h3>
 <p>The query language is inspired by GraphQL. In the following grammar, all keywords (double-quoted string literals) are case-insensitive.</p>
 <h4><a href="#query-grammar-rules" name="query-grammar-rules" class="anchor"><span class="anchor-link"></span></a>Query Grammar Rules</h4>
+<dl>
+  <dt>query</dt>
+  <dd>A data retrieval query expression begins with the name of the entity being queried followed by zero or more optional relational operations:
+    <ul>
+      <li><code>project</code> specifies the structure of the results. If omitted, result will comprise all datatype attributes only, in the order in which they were defined in the data model.</li>
+      <li><code>select</code> contains a boolean row selection or filter expression. If omitted, all rows will be retrieved.</li>
+      <li><code>group</code> contains a series of one or more grouping expressions.</li>
+      <li><code>order</code> contains a series of one or more ordering expressions.</li>
+      <li><code>restrict</code> contains one or two integers giving the offset and limit. If the offset is omitted, there is no offset.</li>
+    </ul>
+  </dd>
+  <dd><img src="assets/images/oql-diagram/query.png" alt="query" /></dd>
+  <dt>project</dt>
+  <dd>The structure of the result be basically a sequence of expressions each with an implicit or explicit <code>label</code>: <code>attributeProject</code>.</dd>
+  <dd><img src="assets/images/oql-diagram/project.png" alt="project" /></dd>
+  <dt>select</dt>
+  <dd>The row selection condition must be a boolean valued expression.</dd>
+  <dd><img src="assets/images/oql-diagram/select.png" alt="select" /></dd>
+</dl>
 </div>
 <div>
 <a href="https://github.com/vinctustech/oql/tree/master/src/main/paradox/syntax.md" title="Edit this page" class="md-source-file md-edit">
@@ -249,7 +258,7 @@ Edit this page
 </div>
 <div class="print-only">
 <span class="md-source-file md-version">
-1.0.0-RC.3.22
+1.0.0-RC.3.23
 </span>
 </div>
 </article>

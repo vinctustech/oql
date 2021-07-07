@@ -56,7 +56,7 @@ object OQLParser extends RegexParsers with PackratParsers {
         case Some(l) ~ a => ExpressionOQLProject(l, ReferenceOQLExpression(List(a)))
       }
 
-  lazy val label: OQLParser.Parser[Ident] = identifier <~ ":"
+  lazy val label: PackratParser[Ident] = identifier <~ ":"
 
   lazy val argument: PackratParser[OQLExpression] = attributeExpression | starExpression
 
@@ -72,11 +72,11 @@ object OQLParser extends RegexParsers with PackratParsers {
   lazy val qualifiedAttributeExpression: PackratParser[OQLExpression] =
     identifiers ^^ (ids => AttributeOQLExpression(ids))
 
-  lazy val identifiers: OQLParser.Parser[List[Ident]] = rep1sep(attributeName, ".")
+  lazy val identifiers: PackratParser[List[Ident]] = rep1sep(attributeName, ".")
 
   lazy val starExpression: PackratParser[OQLExpression] = "*" ^^^ StarOQLExpression
 
-  lazy val select: Parser[OQLExpression] = "[" ~> booleanExpression <~ "]"
+  lazy val select: PackratParser[OQLExpression] = "[" ~> booleanExpression <~ "]"
 
   lazy val group: PackratParser[List[OQLExpression]] = "/" ~> expressions <~ "/"
 
@@ -169,10 +169,10 @@ object OQLParser extends RegexParsers with PackratParsers {
       "(" ~> query <~ ")" ^^ QueryOQLExpression |
       "(" ~> expression <~ ")" ^^ GroupedOQLExpression
 
-  lazy val caseExpression: OQLParser.Parser[CaseOQLExpression] =
+  lazy val caseExpression: PackratParser[CaseOQLExpression] =
     kw("CASE") ~> rep1(when) ~ opt(kw("ELSE") ~> expression) <~ kw("END") ^^ { case ws ~ e => CaseOQLExpression(ws, e) }
 
-  lazy val when: OQLParser.Parser[OQLWhen] =
+  lazy val when: PackratParser[OQLWhen] =
     kw("WHEN") ~ booleanExpression ~ kw("THEN") ~ expression ^^ { case _ ~ l ~ _ ~ e => OQLWhen(l, e) }
 
   lazy val float: PackratParser[Double] = """[0-9]*\.[0-9]+([eE][+-]?[0-9]+)?""".r ^^ (_.toDouble)

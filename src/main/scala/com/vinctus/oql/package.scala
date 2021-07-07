@@ -86,6 +86,7 @@ package object oql {
             (ch match {
               case '\\' => '\\'
               case '"'  => '"'
+              case '\'' => '\''
               case '/'  => '/'
               case 'b'  => '\b'
               case 'f'  => '\f'
