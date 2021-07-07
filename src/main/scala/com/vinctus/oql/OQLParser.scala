@@ -10,16 +10,16 @@ object OQLParser extends RegexParsers with PackratParsers {
 
   def kw(s: String): Regex = (s"(?i)$s\\b").r
 
-  lazy val command: PackratParser[OQLAST] = query | insert
-
-  lazy val insert: PackratParser[OQLInsert] = entityName ~ "<-" ~ rep1sep(value, ",") ^^ { case e ~ _ ~ vs => OQLInsert(e, vs) }
-
-  lazy val value: PackratParser[Seq[OQLKeyValue]] = "{" ~> rep1(pair) <~ "}"
-
-  lazy val pair: PackratParser[OQLKeyValue] = ident ~ ":" ~ literalExpression ^^ { case k ~ _ ~ v => OQLKeyValue(k, v) }
+  lazy val command: PackratParser[OQLAST] = query //| insert
+//
+//  lazy val insert: PackratParser[OQLInsert] = entityName ~ "<-" ~ rep1sep(value, ",") ^^ { case e ~ _ ~ vs => OQLInsert(e, vs) }
+//
+//  lazy val value: PackratParser[Seq[OQLKeyValue]] = "{" ~> rep1(pair) <~ "}"
+//
+//  lazy val pair: PackratParser[OQLKeyValue] = identifier ~ ":" ~ literalExpression ^^ { case k ~ _ ~ v => OQLKeyValue(k, v) }
 
   lazy val query: PackratParser[OQLQuery] =
-    entityName ~ project ~ opt("[" ~> booleanExpression <~ "]") ~ opt(group) ~ opt(order) ~ restrict ^^ {
+    entityName ~ project ~ opt(select) ~ opt(group) ~ opt(order) ~ restrict ^^ {
       case e ~ p ~ s ~ g ~ o ~ Seq(lim, off) => OQLQuery(e, null, null, p, s, g, o, lim, off)
     }
 
@@ -33,7 +33,7 @@ object OQLParser extends RegexParsers with PackratParsers {
   lazy val subtracts: PackratParser[List[OQLProject]] = rep("-" ~> attributeName ^^ SubtractOQLProject)
 
   lazy val attributeProject: PackratParser[OQLProject] =
-    opt(label) ~ ident ~ "(" ~ argument ~ ")" ^^ {
+    opt(label) ~ identifier ~ "(" ~ argument ~ ")" ^^ {
       case None ~ f ~ _ ~ StarOQLExpression ~ _ => ExpressionOQLProject(f, ApplyOQLExpression(f, List(StarOQLExpression)))
       case None ~ f ~ _ ~ (a @ AttributeOQLExpression(ids, _)) ~ _ =>
         ExpressionOQLProject(Ident(s"${f.s}_${ids.head.s}", f.pos), ApplyOQLExpression(f, List(a)))
@@ -56,25 +56,27 @@ object OQLParser extends RegexParsers with PackratParsers {
         case Some(l) ~ a => ExpressionOQLProject(l, ReferenceOQLExpression(List(a)))
       }
 
-  lazy val label: OQLParser.Parser[Ident] = ident <~ ":"
+  lazy val label: OQLParser.Parser[Ident] = identifier <~ ":"
 
   lazy val argument: PackratParser[OQLExpression] = attributeExpression | starExpression
 
-  lazy val entityName: PackratParser[Ident] = ident
+  lazy val entityName: PackratParser[Ident] = identifier
 
-  lazy val attributeName: PackratParser[Ident] = ident
+  lazy val attributeName: PackratParser[Ident] = identifier
 
   lazy val applyExpression: PackratParser[OQLExpression] =
-    ident ~ ("(" ~> expressions <~ ")") ^^ { case f ~ as => ApplyOQLExpression(f, as) }
+    identifier ~ ("(" ~> expressions <~ ")") ^^ { case f ~ as => ApplyOQLExpression(f, as) }
 
-  lazy val attributeExpression: PackratParser[AttributeOQLExpression] = ident ^^ (id => AttributeOQLExpression(List(id)))
+  lazy val attributeExpression: PackratParser[AttributeOQLExpression] = identifier ^^ (id => AttributeOQLExpression(List(id)))
 
   lazy val qualifiedAttributeExpression: PackratParser[OQLExpression] =
-    idents ^^ (ids => AttributeOQLExpression(ids))
+    identifiers ^^ (ids => AttributeOQLExpression(ids))
 
-  lazy val idents: OQLParser.Parser[List[Ident]] = rep1sep(attributeName, ".")
+  lazy val identifiers: OQLParser.Parser[List[Ident]] = rep1sep(attributeName, ".")
 
   lazy val starExpression: PackratParser[OQLExpression] = "*" ^^^ StarOQLExpression
+
+  lazy val select: Parser[OQLExpression] = "[" ~> booleanExpression <~ "]"
 
   lazy val group: PackratParser[List[OQLExpression]] = "/" ~> expressions <~ "/"
 
@@ -162,7 +164,7 @@ object OQLParser extends RegexParsers with PackratParsers {
       caseExpression |
       applyExpression |
       qualifiedAttributeExpression |
-      "&" ~> idents ^^ (ReferenceOQLExpression(_)) |
+      "&" ~> identifiers ^^ (ReferenceOQLExpression(_)) |
       "-" ~> primary ^^ (e => PrefixOQLExpression("-", e)) |
       "(" ~> query <~ ")" ^^ QueryOQLExpression |
       "(" ~> expression <~ ")" ^^ GroupedOQLExpression
@@ -177,7 +179,7 @@ object OQLParser extends RegexParsers with PackratParsers {
 
   lazy val integer: PackratParser[Int] = "[0-9]+".r ^^ (_.toInt)
 
-  lazy val ident: PackratParser[Ident] =
+  lazy val identifier: PackratParser[Ident] =
     pos ~ """[a-zA-Z_$][a-zA-Z0-9_$]*""".r ^^ {
       case p ~ s => Ident(s, p)
     }

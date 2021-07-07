@@ -1,16 +1,12 @@
 query
-  ::= entityName project ("[" booleanExpression "]")? group? order? restrict
+  ::= entityName project? select? group? order? restrict?
 
 project
-  ::= "{" "*" subtracts attributeProject* "}"
+  ::= "{" "*" ("-" attributeName)* attributeProject* "}"
     | "{" attributeProject* "}"
-    | empty
-
-subtracts
-  ::= ("-" attributeName)*
 
 attributeProject
-  ::= label? ident "(" argument ")"
+  ::= label? identifier "(" argument ")"
     | label applyExpression
     | label qualifiedAttributeExpression
     | label "(" expression ")"
@@ -19,28 +15,31 @@ attributeProject
     | label? "&" attributeName
 
 label
-  ::= ident ":"
+  ::= identifier ":"
 
 argument
-  ::= attributeExpression | starExpression
+  ::= attributeExpression | "*"
 
 entityName
-  ::= ident
+  ::= identifier
 
 attributeName
-  ::= ident
+  ::= identifier
 
 applyExpression
-  ::= ident "(" expressions ")"
+  ::= identifier "(" expressions ")"
 
 attributeExpression
-  ::= ident
+  ::= identifier
 
 qualifiedAttributeExpression
-  ::= idents
+  ::= identifiers
 
-starExpression
-  ::= "*"
+identifiers
+  ::= attributeName ("." attributeName)*
+
+select
+  ::= "[" booleanExpression "]"
 
 group
   ::= "/" expressions "/"
@@ -54,7 +53,6 @@ ordering
 restrict
   ::= "|" integer ("," integer)? "|"
     | "|" "," integer "|"
-    | empty
 
 expressions
   ::= expression ("," expression)*
@@ -80,7 +78,7 @@ booleanPrimary
     | expression isNull
     | expression in ("(" expressions ")")
     | expression in ("(" query ")")
-    | "EXISTS" "(" query ")
+    | "EXISTS" "(" query ")"
     | booleanLiteral
     | qualifiedAttributeExpression
     | "(" booleanExpression ")"
@@ -110,3 +108,22 @@ multiplicative
   ::= multiplicative ("*" | "/") primary
     | primary
 
+literalExpression
+  ::= float | integer | string | booleanLiteral
+
+primary
+  ::= literalExpression | "*" | caseExpression | applyExpression | qualifiedAttributeExpression
+    | "&" identifiers
+    | "-" primary
+    | "(" query ")"
+    | "(" expression ")"
+
+caseExpression
+  ::= "CASE" ("WHEN" booleanExpression "THEN" expression)+ ("ELSE" expression)? "END"
+
+identifier ::= letter | "_" | "$" (letter | "_" | "$" | digit)*
+
+string
+  ::= singleQuoteString | doubleQuoteString
+
+/* color: #009688 (teal) */
