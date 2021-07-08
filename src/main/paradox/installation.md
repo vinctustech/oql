@@ -1,2 +1,31 @@
 Installation
 ============
+
+### TypeScript/JavaScript
+
+There is a [Node.js](https://nodejs.org/en/) module available through the [npm registry](https://www.npmjs.com/).
+
+Install using the [npm install](https://docs.npmjs.com/downloading-and-installing-packages-locally) command:
+
+```bash
+npm install @vinctus/oql
+```
+
+TypeScript declarations are included in the package.
+
+### Scala.js
+
+There is a [Scala.js](https://www.scala-js.org/) library available through [Github Packages](https://github.com/features/packages).
+
+Add the following lines to your `build.sbt`:
+
+```sbt
+externalResolvers += "OQL" at "https://maven.pkg.github.com/vinctustech/oql"
+
+libraryDependencies += "com.vinctus" %%% "-vinctus-oql" % "1.0.0-RC.3.23"
+
+Compile / npmDependencies ++= Seq(
+  "pg" -> "8.5.1",
+  "@types/pg" -> "7.14.7"
+)
+```

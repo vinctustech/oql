@@ -148,6 +148,14 @@ vinctustech/oql
   <li><a href="release-notes.html" class="page">Release Notes</a></li>
 </ul>
 <nav class="md-nav md-nav--secondary">
+<label class="md-nav__title" for="__toc">Table of contents</label>
+<ul>
+  <li><a href="installation.html#installation" class="header">Installation</a>
+  <ul>
+    <li><a href="installation.html#typescript-javascript" class="header">TypeScript/JavaScript</a></li>
+    <li><a href="installation.html#scala-js" class="header">Scala.js</a></li>
+  </ul></li>
+</ul>
 </nav>
 
 </nav>
@@ -161,10 +169,45 @@ vinctustech/oql
 </div>
 </div>
 </div>
+<div class="md-sidebar md-sidebar--secondary" data-md-component="toc">
+<div class="md-sidebar__scrollwrap">
+<div class="md-sidebar__inner">
+<nav class="md-nav md-nav--secondary">
+<label class="md-nav__title" for="__toc">Table of contents</label>
+<ul>
+  <li><a href="installation.html#installation" class="header">Installation</a>
+  <ul>
+    <li><a href="installation.html#typescript-javascript" class="header">TypeScript/JavaScript</a></li>
+    <li><a href="installation.html#scala-js" class="header">Scala.js</a></li>
+  </ul></li>
+</ul>
+</nav>
+
+</div>
+</div>
+</div>
 <div class="md-content">
 <article class="md-content__inner md-typeset">
 <div class="md-content__searchable">
 <h1><a href="#installation" name="installation" class="anchor"><span class="anchor-link"></span></a>Installation</h1>
+<h3><a href="#typescript-javascript" name="typescript-javascript" class="anchor"><span class="anchor-link"></span></a>TypeScript/JavaScript</h3>
+<p>There is a <a href="https://nodejs.org/en/">Node.js</a> module available through the <a href="https://www.npmjs.com/">npm registry</a>.</p>
+<p>Install using the <a href="https://docs.npmjs.com/downloading-and-installing-packages-locally">npm install</a> command:</p>
+<pre class="prettyprint"><code class="language-bash">npm install @vinctus/oql
+</code></pre>
+<p>TypeScript declarations are included in the package.</p>
+<h3><a href="#scala-js" name="scala-js" class="anchor"><span class="anchor-link"></span></a>Scala.js</h3>
+<p>There is a <a href="https://www.scala-js.org/">Scala.js</a> library available through <a href="https://github.com/features/packages">Github Packages</a>.</p>
+<p>Add the following lines to your <code>build.sbt</code>:</p>
+<pre class="prettyprint"><code class="language-sbt">externalResolvers += &quot;OQL&quot; at &quot;https://maven.pkg.github.com/vinctustech/oql&quot;
+
+libraryDependencies += &quot;com.vinctus&quot; %%% &quot;-vinctus-oql&quot; % &quot;1.0.0-RC.3.23&quot;
+
+Compile / npmDependencies ++= Seq(
+  &quot;pg&quot; -&gt; &quot;8.5.1&quot;,
+  &quot;@types/pg&quot; -&gt; &quot;7.14.7&quot;
+)
+</code></pre>
 </div>
 <div>
 <a href="https://github.com/vinctustech/oql/tree/master/src/main/paradox/installation.md" title="Edit this page" class="md-source-file md-edit">

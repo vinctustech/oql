@@ -45,7 +45,7 @@ Installation
 
 There is a [Node.js](https://nodejs.org/en/) module available through the [npm registry](https://www.npmjs.com/).
 
-Installation is done using the [npm install command](https://docs.npmjs.com/downloading-and-installing-packages-locally):
+Install using the [npm install](https://docs.npmjs.com/downloading-and-installing-packages-locally) command:
 
 ```bash
 npm install @vinctus/oql
@@ -62,7 +62,7 @@ Add the following lines to your `build.sbt`:
 ```sbt
 externalResolvers += "OQL" at "https://maven.pkg.github.com/vinctustech/oql"
 
-libraryDependencies += "com.vinctus" %%% "-vinctus-oql" % "1.0.0-RC.3.22"
+libraryDependencies += "com.vinctus" %%% "-vinctus-oql" % "1.0.0-RC.3.23"
 
 Compile / npmDependencies ++= Seq(
   "pg" -> "8.5.1",
@@ -97,7 +97,7 @@ Full API documentation [here](https://vinctustech.github.io/oql/api.html).
 Examples
 --------
 
-Additional examples here.
+Additional examples [here](https://vinctustech.github.io/oql/examples.html).
 
 Tests
 -----
