@@ -94,12 +94,12 @@ oql.queryMany(<query>).then((result: any) => <handle result> )
 API
 ---
 
-Full API documentation [here](https://vinctustech.github.io/oql/api.html).
+Full API documentation can be found [here](https://vinctustech.github.io/oql/api.html).
 
 Examples
 --------
 
-Additional examples [here](https://vinctustech.github.io/oql/examples.html).
+Several examples are given [here](https://vinctustech.github.io/oql/examples.html).
 
 Tests
 -----
