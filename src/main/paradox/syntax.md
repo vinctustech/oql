@@ -38,7 +38,8 @@ An "Entity-Relationship" style language is used to describe the database.  Only 
 : ![Type](.../dml-diagram/Type.png)
 
 *DataType*
-: Any one of the basic datatypes that are commonly support by database systems.
+: Any one of the basic datatypes that are commonly support by database systems. Any group of datatypes that begin with the same spelling (beyond the first one or two letters) are synonymous (e.g., `bool` and `boolean` refer to the same datatype).
+
 : ![DataType](.../dml-diagram/DataType.png)
 
 *EntityName*
@@ -53,19 +54,23 @@ The query language is inspired by GraphQL. In the following grammar, all keyword
 
 #### Query Grammar Rules
 
-*query*
-: A data retrieval query expression begins with the name of the entity being queried followed by zero or more optional relational operations:
-    - `project` specifies the structure of the results.  If omitted, result will comprise all datatype attributes only, in the order in which they were defined in the data model.
-    - `select` contains a boolean row selection or filter expression.  If omitted, all rows will be retrieved.
-    - `group` contains a series of one or more grouping expressions.
-    - `order` contains a series of one or more ordering expressions.
-    - `restrict` contains one or two integers giving the offset and limit. If the offset is omitted, there is no offset.
-: ![query](.../oql-diagram/query.png)
+##### query
+A data retrieval query expression begins with the name of the entity being queried followed by zero or more optional relational operations:
+
+![query](.../oql-diagram/query.png)
 
 *project*
-: The structure of the result be basically a sequence of expressions each with an implicit or explicit `label`, namely `attributeProject`.
+: This relational operation specifies the structure of the results. If omitted, result will comprise all datatype attributes only, in the order in which they were defined in the data model. The structure of the result be basically a sequence of expressions each with an implicit or explicit `label`, namely `attributeProject`.
 : ![project](.../oql-diagram/project.png)
 
+*attributeProject*
+: The syntax of an attribute within a project is essentially a label, sometimes optional because it can be inferred, followed by an expression or an inner query in the case of a reference to an attribute that has an array type.
+: ![attributeProject](.../oql-diagram/attributeProject.png)
+
 *select*
-: The row selection condition must be a boolean valued expression.
+: This relational operation contains a boolean row selection or filter expression.  If omitted, all rows will be retrieved.The row selection condition must be a boolean valued expression.
 : ![select](.../oql-diagram/select.png)
+
+- `group` contains a series of one or more grouping expressions.
+- `order` contains a series of one or more ordering expressions.
+- `restrict` contains one or two integers giving the offset and limit. If the offset is omitted, there is no offset.

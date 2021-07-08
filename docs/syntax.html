@@ -144,6 +144,7 @@ vinctustech/oql
   <li><a href="usage.html" class="page">Usage</a></li>
   <li><a href="api.html" class="page">API</a></li>
   <li><a href="examples.html" class="page">Examples</a></li>
+  <li><a href="datatypes.html" class="page">Datatypes</a></li>
   <li><a href="syntax.html" class="active page">Syntax</a></li>
   <li><a href="release-notes.html" class="page">Release Notes</a></li>
 </ul>
@@ -221,8 +222,9 @@ vinctustech/oql
   </dd>
   <dd><img src="assets/images/dml-diagram/Type.png" alt="Type" /></dd>
   <dt><em>DataType</em></dt>
-  <dd>Any one of the basic datatypes that are commonly support by database systems.</dd>
-  <dd><img src="assets/images/dml-diagram/DataType.png" alt="DataType" /></dd>
+  <dd>Any one of the basic datatypes that are commonly support by database systems. Any group of datatypes that begin with the same spelling (beyond the first one or two letters) are synonymous (e.g., <code>bool</code> and <code>boolean</code> refer to the same datatype).</dd>
+  <dd>
+  <p><img src="assets/images/dml-diagram/DataType.png" alt="DataType" /></p></dd>
   <dt><em>EntityName</em></dt>
   <dd>An EntityName is an identifier that corresponds either to the identifier given as the entity name if it wasn&rsquo;t aliased, or to the alias if it was.</dd>
   <dt><em>AttributeName</em></dt>
@@ -231,28 +233,28 @@ vinctustech/oql
 <h3><a href="#query-language" name="query-language" class="anchor"><span class="anchor-link"></span></a>Query Language</h3>
 <p>The query language is inspired by GraphQL. In the following grammar, all keywords (double-quoted string literals) are case-insensitive.</p>
 <h4><a href="#query-grammar-rules" name="query-grammar-rules" class="anchor"><span class="anchor-link"></span></a>Query Grammar Rules</h4>
+<h5><a href="#query" name="query" class="anchor"><span class="anchor-link"></span></a>query</h5>
+<p>A data retrieval query expression begins with the name of the entity being queried followed by zero or more optional relational operations:</p>
+<p><img src="assets/images/oql-diagram/query.png" alt="query" /></p>
 <dl>
-  <dt><em>query</em></dt>
-  <dd>A data retrieval query expression begins with the name of the entity being queried followed by zero or more optional relational operations:
-    <ul>
-      <li><code>project</code> specifies the structure of the results. If omitted, result will comprise all datatype attributes only, in the order in which they were defined in the data model.</li>
-      <li><code>select</code> contains a boolean row selection or filter expression. If omitted, all rows will be retrieved.</li>
-      <li><code>group</code> contains a series of one or more grouping expressions.</li>
-      <li><code>order</code> contains a series of one or more ordering expressions.</li>
-      <li><code>restrict</code> contains one or two integers giving the offset and limit. If the offset is omitted, there is no offset.</li>
-    </ul>
-  </dd>
-  <dd><img src="assets/images/oql-diagram/query.png" alt="query" /></dd>
   <dt><em>project</em></dt>
-  <dd>The structure of the result be basically a sequence of expressions each with an implicit or explicit <code>label</code>, namely <code>attributeProject</code>.</dd>
+  <dd>This relational operation specifies the structure of the results. If omitted, result will comprise all datatype attributes only, in the order in which they were defined in the data model. The structure of the result be basically a sequence of expressions each with an implicit or explicit <code>label</code>, namely <code>attributeProject</code>.</dd>
   <dd><img src="assets/images/oql-diagram/project.png" alt="project" /></dd>
+  <dt><em>attributeProject</em></dt>
+  <dd>The syntax of an attribute within a project is essentially a label, sometimes optional because it can be inferred, followed by an expression or an inner query in the case of a reference to an attribute that has an array type.</dd>
+  <dd><img src="assets/images/oql-diagram/attributeProject.png" alt="attributeProject" /></dd>
   <dt><em>select</em></dt>
-  <dd>The row selection condition must be a boolean valued expression.</dd>
+  <dd>This relational operation contains a boolean row selection or filter expression. If omitted, all rows will be retrieved.The row selection condition must be a boolean valued expression.</dd>
   <dd><img src="assets/images/oql-diagram/select.png" alt="select" /></dd>
 </dl>
+<ul>
+  <li><code>group</code> contains a series of one or more grouping expressions.</li>
+  <li><code>order</code> contains a series of one or more ordering expressions.</li>
+  <li><code>restrict</code> contains one or two integers giving the offset and limit. If the offset is omitted, there is no offset.</li>
+</ul>
 </div>
 <div>
-<a href="https://github.com/vinctustech/oql/tree/master/src/main/paradox/syntax.md" title="Edit this page" class="md-source-file md-edit">
+<a href="https://github.com/vinctustech/oql/tree/v1.0.0-RC.3.23/src/main/paradox/syntax.md" title="Edit this page" class="md-source-file md-edit">
 Edit this page
 </a>
 </div>
@@ -268,7 +270,7 @@ Edit this page
 <footer class="md-footer">
 <div class="md-footer-nav">
 <nav class="md-footer-nav__inner md-grid">
-<a href="examples.html" title="Examples" class="md-flex md-footer-nav__link md-footer-nav__link--prev" rel="prev">
+<a href="datatypes.html" title="Datatypes" class="md-flex md-footer-nav__link md-footer-nav__link--prev" rel="prev">
 <div class="md-flex__cell md-flex__cell--shrink">
 <i class="md-icon md-icon--arrow-back md-footer-nav__button"></i>
 </div>
@@ -277,7 +279,7 @@ Edit this page
 <span class="md-footer-nav__direction">
 Previous
 </span>
-Examples
+Datatypes
 </span>
 </div>
 </a>

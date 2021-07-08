@@ -54,7 +54,7 @@ Compile / paradoxMaterialTheme := {
 
 Compile / paradoxProperties ++=
   Map(
-    "github.base_url" -> "https://github.com/vinctustech/oql/blob/dev",
+    //"github.base_url" -> "https://github.com/vinctustech/oql/blob/dev",
     "image.base_url" -> ".../assets/images"
   )
 

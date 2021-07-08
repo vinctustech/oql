@@ -5,6 +5,7 @@
 * [Usage](usage.md)
 * [API](api.md)
 * [Examples](examples.md)
+* [Datatypes](datatypes.md)
 * [Syntax](syntax.md)
 * [Release Notes](release-notes.md)
 
