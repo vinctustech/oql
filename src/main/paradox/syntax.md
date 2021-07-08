@@ -96,7 +96,7 @@ The query language is inspired by GraphQL. In the following grammar, all keyword
 : ![group](.../oql-diagram/group.png)
 
 *order*
-: The order operation contains a series of one or more ordering expressions by which an array result will be ordered.
+: The order operation contains a series of one or more ordering expressions by which an array result will be ordered.  Database engines differ in how they order results that contain null values.  OQL guarantees a consistent default behaviour across supported engines.  For ascending ordering, nulls are first.  For descending ordering, nulls are last.
 : ![order](.../oql-diagram/order.png)
 
 - `restrict` contains one or two integers giving the offset and limit. If omitted, the offset is zero.
