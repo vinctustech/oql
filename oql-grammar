@@ -61,20 +61,14 @@ notExpression
     | booleanPrimary
 
 booleanPrimary
-  ::= expression comparison expression
+  ::= expression ("<=" | ">=" | "<" | ">" | "=" | "!=" | "LIKE" | "ILIKE" | ("NOT" "LIKE") | ("NOT" "ILIKE")) expression
     | expression (("NOT" "BETWEEN") | "BETWEEN") expression "AND" expression
     | expression "IS" "NOT"? "NULL"
     | expression "NOT"? "IN" ("(" (expression ("," expression)* | query) ")")
     | "EXISTS" "(" query ")"
-    | booleanLiteral
+    | "TRUE" | "FALSE"
     | qualifiedAttributeExpression
     | "(" booleanExpression ")"
-
-comparison
-  ::= "<=" | ">=" | "<" | ">" | "=" | "!=" | "LIKE" | "ILIKE" | ("NOT" "LIKE") | ("NOT" "ILIKE")
-
-booleanLiteral
-  ::= "TRUE" | "FALSE"
 
 expression
   ::= additive
@@ -87,18 +81,15 @@ multiplicative
   ::= multiplicative ("*" | "/") primary
     | primary
 
-literalExpression
-  ::= float | integer | string | booleanLiteral
-
 primary
-  ::= literalExpression | "*" | caseExpression | applyExpression | qualifiedAttributeExpression
+  ::= float | integer | string | "TRUE" | "FALSE" | "*"
+    | "CASE" ("WHEN" booleanExpression "THEN" expression)+ ("ELSE" expression)? "END"
+    | applyExpression
+    | qualifiedAttributeExpression
     | "&" attributeName ("." attributeName)*
     | "-" primary
     | "(" query ")"
     | "(" expression ")"
-
-caseExpression
-  ::= "CASE" ("WHEN" booleanExpression "THEN" expression)+ ("ELSE" expression)? "END"
 
 identifier ::= letter | "_" | "$" (letter | "_" | "$" | digit)*
 

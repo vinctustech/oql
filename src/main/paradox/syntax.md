@@ -102,3 +102,31 @@ The query language is inspired by GraphQL. In the following grammar, all keyword
 *restrict*
 : This is really two operations that tend to go together: offsetting or skipping an initial number of results, and limiting the number of results.  The first integer is the offset (zero if omitted), and the second is the limit (unlimited if omitted).
 : ![restrict](.../oql-diagram/restrict.png)
+
+*booleanExpression*
+: A booleanExpression is a boolean (true or false) valued expression that may be a disjunction (logical "or") of two or more boolean valued expressions.
+: ![booleanExpression](.../oql-diagram/booleanExpression.png)
+
+*andExpression*
+: An andExpression is a boolean valued expression that may be a conjunction (logical "and") of two or more boolean valued expressions.
+: ![andExpression](.../oql-diagram/andExpression.png)
+
+*notExpression*
+: A notExpression allows a boolean valued expression to be negated.
+: ![notExpression](.../oql-diagram/notExpression.png)
+
+*booleanPrimary*
+: These are the most basic kinds of boolean valued expressions.
+: ![booleanPrimary](.../oql-diagram/booleanPrimary.png)
+
+*expression*
+: ![expression](.../oql-diagram/expression.png)
+
+*multiplicative*
+: ![multiplicative](.../oql-diagram/multiplicative.png)
+
+*primary*
+: ![primary](.../oql-diagram/primary.png)
+
+*identifier*
+: ![identifier](.../oql-diagram/identifier.png)
