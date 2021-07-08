@@ -146,6 +146,7 @@ vinctustech/oql
   <li><a href="examples.html" class="page">Examples</a></li>
   <li><a href="datatypes.html" class="page">Datatypes</a></li>
   <li><a href="syntax.html" class="page">Syntax</a></li>
+  <li><a href="supported-engines.html" class="page">Supported Engines</a></li>
   <li><a href="release-notes.html" class="page">Release Notes</a></li>
 </ul>
 <nav class="md-nav md-nav--secondary">
@@ -168,9 +169,9 @@ vinctustech/oql
 <h1><a href="#overview" name="overview" class="anchor"><span class="anchor-link"></span></a>Overview</h1>
 <p><em>OQL</em> is a language for querying a relational database. The query syntax draws inspiration from GraphQL and is similar, but with many differences. Some capabilities missing from GraphQL have been added, and some capabilities found in GraphQL have a different syntax. We believe that much of conventional SQL syntax is still preferable to creating a completely new syntax for every single feature of the query language (i.e., conventional syntax wherever possible). However, whereas SQL can be seen as a &ldquo;low level&rdquo; relational query language, OQL takes a higher level Entity-Relationship (ER) Model view of the database.</p>
 <p>The name &ldquo;OQL&rdquo; refers to both a software library, and a query language implemented within that library. The OQL library provides support for data retrieval (via the OQL query language) as well as a query builder for constructing queries in programmatically. There are also class methods for performing all kinds of mutations, including mutations that support the ER view of the database. Furthermore, query and mutation operations all abide by the supplied ER data model.</p>
-<p>Some features of the OQL language include:</p>
+<p>Some features of OQL include:</p>
 <ul>
-  <li>similar to <a href="https://graphql.org/">GraphQL</a> in that query results have exactly the structure requested in the query (i.e., you get what you ask for)</li>
+  <li>the query language is similar to <a href="https://graphql.org/">GraphQL</a> in that query results have exactly the structure requested in the query (i.e., you get what you ask for)</li>
   <li>uses a very simple <a href="https://en.wikipedia.org/wiki/Entity%E2%80%93relationship_model">Entity-Relationship Model</a> description of the database</li>
   <li>works with the <a href="https://www.postgresql.org/">PostgreSQL</a> database system</li>
   <li>designed to work with existing databases without having to change the database at all</li>

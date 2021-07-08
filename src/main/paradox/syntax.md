@@ -54,23 +54,49 @@ The query language is inspired by GraphQL. In the following grammar, all keyword
 
 #### Query Grammar Rules
 
-##### query
-A data retrieval query expression begins with the name of the entity being queried followed by zero or more optional relational operations:
-
-![query](.../oql-diagram/query.png)
+*query*
+: A data retrieval query expression begins with the name of the entity being queried followed by zero or more optional relational operations:
+: ![query](.../oql-diagram/query.png)
 
 *project*
 : This relational operation specifies the structure of the results. If omitted, result will comprise all datatype attributes only, in the order in which they were defined in the data model. The structure of the result be basically a sequence of expressions each with an implicit or explicit `label`, namely `attributeProject`.
 : ![project](.../oql-diagram/project.png)
 
 *attributeProject*
-: The syntax of an attribute within a project is essentially a label, sometimes optional because it can be inferred, followed by an expression or an inner query in the case of a reference to an attribute that has an array type.
+: The syntax of an attribute within a project is essentially a possibly optional label, followed by an expression, or an inner query if it is a reference to an array type attribute.
 : ![attributeProject](.../oql-diagram/attributeProject.png)
 
+*label*
+: Results are in the form of objects which can are thought of as a list of property/value pairs. Therefore, in order to build a result, the property names have to be known. A label, when it is given becomes the property name of the associated value.  If omitted, there are simple obvious rules for inferring it.
+: ![label](.../oql-diagram/label.png)
+
+*entityName*
+: An entityName is an identifier that names an entity (table) or it's alias.
+
+*attributeName*
+: An attributeName is an identifier that names a column (attribute) or it's alias.
+
+*applyExpression*
+: Function application has conventional syntax (e.g., `SUM(cost)`).  Currently, function names pass through transpilation unchecked.
+: ![applyExpression](.../oql-diagram/applyExpression.png)
+
+*attributeExpression*
+: An attributeExpression is an identifier that names an attribute, whether it's a column or not, or it's alias.
+
+*qualifiedAttributeExpression*
+: This is a reference to an attribute that essentially traverses or dereferences a foreign key.
+: ![qualifiedAttributeExpression](.../oql-diagram/qualifiedAttributeExpression.png)
+
 *select*
-: This relational operation contains a boolean row selection or filter expression.  If omitted, all rows will be retrieved.The row selection condition must be a boolean valued expression.
+: The select relational operation contains a boolean row selection or filter expression.  If omitted, all rows will be retrieved.The row selection condition must be a boolean valued expression.
 : ![select](.../oql-diagram/select.png)
 
-- `group` contains a series of one or more grouping expressions.
-- `order` contains a series of one or more ordering expressions.
-- `restrict` contains one or two integers giving the offset and limit. If the offset is omitted, there is no offset.
+*group*
+: The group operation contains a series of one or more grouping expressions by which an array result will be grouped.
+: ![group](.../oql-diagram/group.png)
+
+*order*
+: The order operation contains a series of one or more ordering expressions by which an array result will be ordered.
+: ![order](.../oql-diagram/order.png)
+
+- `restrict` contains one or two integers giving the offset and limit. If omitted, the offset is zero.

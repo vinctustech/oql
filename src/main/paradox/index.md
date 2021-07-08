@@ -7,6 +7,7 @@
 * [Examples](examples.md)
 * [Datatypes](datatypes.md)
 * [Syntax](syntax.md)
+* [Supported Engines](supported-engines.md)
 * [Release Notes](release-notes.md)
 
 @@@

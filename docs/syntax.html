@@ -146,6 +146,7 @@ vinctustech/oql
   <li><a href="examples.html" class="page">Examples</a></li>
   <li><a href="datatypes.html" class="page">Datatypes</a></li>
   <li><a href="syntax.html" class="active page">Syntax</a></li>
+  <li><a href="supported-engines.html" class="page">Supported Engines</a></li>
   <li><a href="release-notes.html" class="page">Release Notes</a></li>
 </ul>
 <nav class="md-nav md-nav--secondary">
@@ -233,24 +234,43 @@ vinctustech/oql
 <h3><a href="#query-language" name="query-language" class="anchor"><span class="anchor-link"></span></a>Query Language</h3>
 <p>The query language is inspired by GraphQL. In the following grammar, all keywords (double-quoted string literals) are case-insensitive.</p>
 <h4><a href="#query-grammar-rules" name="query-grammar-rules" class="anchor"><span class="anchor-link"></span></a>Query Grammar Rules</h4>
-<h5><a href="#query" name="query" class="anchor"><span class="anchor-link"></span></a>query</h5>
-<p>A data retrieval query expression begins with the name of the entity being queried followed by zero or more optional relational operations:</p>
-<p><img src="assets/images/oql-diagram/query.png" alt="query" /></p>
 <dl>
+  <dt><em>query</em></dt>
+  <dd>A data retrieval query expression begins with the name of the entity being queried followed by zero or more optional relational operations:</dd>
+  <dd><img src="assets/images/oql-diagram/query.png" alt="query" /></dd>
   <dt><em>project</em></dt>
   <dd>This relational operation specifies the structure of the results. If omitted, result will comprise all datatype attributes only, in the order in which they were defined in the data model. The structure of the result be basically a sequence of expressions each with an implicit or explicit <code>label</code>, namely <code>attributeProject</code>.</dd>
   <dd><img src="assets/images/oql-diagram/project.png" alt="project" /></dd>
   <dt><em>attributeProject</em></dt>
-  <dd>The syntax of an attribute within a project is essentially a label, sometimes optional because it can be inferred, followed by an expression or an inner query in the case of a reference to an attribute that has an array type.</dd>
+  <dd>The syntax of an attribute within a project is essentially a possibly optional label, followed by an expression, or an inner query if it is a reference to an array type attribute.</dd>
   <dd><img src="assets/images/oql-diagram/attributeProject.png" alt="attributeProject" /></dd>
+  <dt><em>label</em></dt>
+  <dd>Results are in the form of objects which can are thought of as a list of property/value pairs. Therefore, in order to build a result, the property names have to be known. A label, when it is given becomes the property name of the associated value. If omitted, there are simple obvious rules for inferring it.</dd>
+  <dd><img src="assets/images/oql-diagram/label.png" alt="label" /></dd>
+  <dt><em>entityName</em></dt>
+  <dd>An entityName is an identifier that names an entity (table) or it&rsquo;s alias.</dd>
+  <dt><em>attributeName</em></dt>
+  <dd>An attributeName is an identifier that names a column (attribute) or it&rsquo;s alias.</dd>
+  <dt><em>applyExpression</em></dt>
+  <dd>Function application has conventional syntax (e.g., <code>SUM(cost)</code>). Currently, function names pass through transpilation unchecked.</dd>
+  <dd><img src="assets/images/oql-diagram/applyExpression.png" alt="applyExpression" /></dd>
+  <dt><em>attributeExpression</em></dt>
+  <dd>An attributeExpression is an identifier that names an attribute, whether it&rsquo;s a column or not, or it&rsquo;s alias.</dd>
+  <dt><em>qualifiedAttributeExpression</em></dt>
+  <dd>This is a reference to an attribute that essentially traverses or dereferences a foreign key.</dd>
+  <dd><img src="assets/images/oql-diagram/qualifiedAttributeExpression.png" alt="qualifiedAttributeExpression" /></dd>
   <dt><em>select</em></dt>
-  <dd>This relational operation contains a boolean row selection or filter expression. If omitted, all rows will be retrieved.The row selection condition must be a boolean valued expression.</dd>
+  <dd>The select relational operation contains a boolean row selection or filter expression. If omitted, all rows will be retrieved.The row selection condition must be a boolean valued expression.</dd>
   <dd><img src="assets/images/oql-diagram/select.png" alt="select" /></dd>
+  <dt><em>group</em></dt>
+  <dd>The group operation contains a series of one or more grouping expressions by which an array result will be grouped.</dd>
+  <dd><img src="assets/images/oql-diagram/group.png" alt="group" /></dd>
+  <dt><em>order</em></dt>
+  <dd>The order operation contains a series of one or more ordering expressions by which an array result will be ordered.</dd>
+  <dd><img src="assets/images/oql-diagram/order.png" alt="order" /></dd>
 </dl>
 <ul>
-  <li><code>group</code> contains a series of one or more grouping expressions.</li>
-  <li><code>order</code> contains a series of one or more ordering expressions.</li>
-  <li><code>restrict</code> contains one or two integers giving the offset and limit. If the offset is omitted, there is no offset.</li>
+  <li><code>restrict</code> contains one or two integers giving the offset and limit. If omitted, the offset is zero.</li>
 </ul>
 </div>
 <div>
@@ -283,13 +303,13 @@ Datatypes
 </span>
 </div>
 </a>
-<a href="release-notes.html" title="Release Notes" class="md-flex md-footer-nav__link md-footer-nav__link--next" rel="next">
+<a href="supported-engines.html" title="Supported Engines" class="md-flex md-footer-nav__link md-footer-nav__link--next" rel="next">
 <div class="md-flex__cell md-flex__cell--stretch md-footer-nav__title">
 <span class="md-flex__ellipsis">
 <span class="md-footer-nav__direction">
 Next
 </span>
-Release Notes
+Supported Engines
 </span>
 </div>
 <div class="md-flex__cell md-flex__cell--shrink">

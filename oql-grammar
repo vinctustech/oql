@@ -6,7 +6,7 @@ project
     | "{" attributeProject* "}"
 
 attributeProject
-  ::= label? identifier "(" argument ")"
+  ::= label? identifier "(" (attributeExpression | "*") ")"
     | label applyExpression
     | label qualifiedAttributeExpression
     | label "(" expression ")"
@@ -17,9 +17,6 @@ attributeProject
 label
   ::= identifier ":"
 
-argument
-  ::= attributeExpression | "*"
-
 entityName
   ::= identifier
 
@@ -27,35 +24,26 @@ attributeName
   ::= identifier
 
 applyExpression
-  ::= identifier "(" expressions ")"
+  ::= identifier "(" expression ("," expression)* ")"
 
 attributeExpression
   ::= identifier
 
 qualifiedAttributeExpression
-  ::= identifiers
-
-identifiers
   ::= attributeName ("." attributeName)*
 
 select
   ::= "[" booleanExpression "]"
 
 group
-  ::= "/" expressions "/"
+  ::= "/" expression ("," expression)* "/"
 
 order
-  ::= "<" ordering ("," ordering)* ">"
-
-ordering
-  ::= expression ("ASC" | "DESC")? ("NULLS" ("FIRST" | "LAST"))?
+  ::= "<" expression ("ASC" | "DESC")? ("NULLS" ("FIRST" | "LAST"))? ("," expression ("ASC" | "DESC")? ("NULLS" ("FIRST" | "LAST"))?)* ">"
 
 restrict
   ::= "|" integer ("," integer)? "|"
     | "|" "," integer "|"
-
-expressions
-  ::= expression ("," expression)*
 
 booleanExpression
   ::= orExpression
@@ -76,7 +64,7 @@ booleanPrimary
   ::= expression comparison expression
     | expression (("NOT" "BETWEEN") | "BETWEEN") expression "AND" expression
     | expression "IS" "NOT"? "NULL"
-    | expression "NOT"? "IN" ("(" (expressions | query) ")")
+    | expression "NOT"? "IN" ("(" (expression ("," expression)* | query) ")")
     | "EXISTS" "(" query ")"
     | booleanLiteral
     | qualifiedAttributeExpression
@@ -104,7 +92,7 @@ literalExpression
 
 primary
   ::= literalExpression | "*" | caseExpression | applyExpression | qualifiedAttributeExpression
-    | "&" identifiers
+    | "&" attributeName ("." attributeName)*
     | "-" primary
     | "(" query ")"
     | "(" expression ")"
