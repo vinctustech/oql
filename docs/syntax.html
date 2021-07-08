@@ -239,7 +239,7 @@ vinctustech/oql
   <dd>A data retrieval query expression begins with the name of the entity being queried followed by zero or more optional relational operations:</dd>
   <dd><img src="assets/images/oql-diagram/query.png" alt="query" /></dd>
   <dt><em>project</em></dt>
-  <dd>This relational operation specifies the structure of the results. If omitted, result will comprise all datatype attributes only, in the order in which they were defined in the data model. The structure of the result be basically a sequence of expressions each with an implicit or explicit <code>label</code>, namely <code>attributeProject</code>.</dd>
+  <dd>This relational operation specifies the structure of the result. If omitted, the result will comprise all datatype attributes (i.e., columns that are not foreign keys) only, in the order in which they were defined in the data model. The fact that relational attributes must be explicitly specified prevents circularity as well as the retrieval of, possibly very large amounts of unneeded data. The structure of the result is basically a sequence of expressions each with an (often implicit) label.</dd>
   <dd><img src="assets/images/oql-diagram/project.png" alt="project" /></dd>
   <dt><em>attributeProject</em></dt>
   <dd>The syntax of an attribute within a project is essentially a possibly optional label, followed by an expression, or an inner query if it is a reference to an array type attribute.</dd>

@@ -59,7 +59,7 @@ The query language is inspired by GraphQL. In the following grammar, all keyword
 : ![query](.../oql-diagram/query.png)
 
 *project*
-: This relational operation specifies the structure of the results. If omitted, result will comprise all datatype attributes only, in the order in which they were defined in the data model. The structure of the result be basically a sequence of expressions each with an implicit or explicit `label`, namely `attributeProject`.
+: This relational operation specifies the structure of the result. If omitted, the result will comprise all datatype attributes (i.e., columns that are not foreign keys) only, in the order in which they were defined in the data model. The fact that relational attributes must be explicitly specified prevents circularity as well as the retrieval of, possibly very large amounts of unneeded data.  The structure of the result is basically a sequence of expressions each with an (often implicit) label.
 : ![project](.../oql-diagram/project.png)
 
 *attributeProject*
