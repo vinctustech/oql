@@ -130,3 +130,9 @@ The query language is inspired by GraphQL. In the following grammar, all keyword
 
 *identifier*
 : ![identifier](.../oql-diagram/identifier.png)
+
+*string*
+: There are two types of string literals: single quoted and double quoted.  Single quoted strings are delimited by single quotes, and so cannot contain a single quote unless it is escaped.  Double quoted strings are delimited by double quotes, and so cannot contain a double quote unless it is escaped.  Strings can have the following characters and escape sequences:
+    - any unicode character except for: characters in the range \x00-\x1F, character \x7F
+    - backslashes are not allowed unless followed by one of the characters: `\'"bfnrtu`
+    - if a backslash is followed by a `u`, then 4 hexadecimal digits must follow after that

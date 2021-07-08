@@ -291,6 +291,14 @@ vinctustech/oql
   <dd><img src="assets/images/oql-diagram/primary.png" alt="primary" /></dd>
   <dt><em>identifier</em></dt>
   <dd><img src="assets/images/oql-diagram/identifier.png" alt="identifier" /></dd>
+  <dt><em>string</em></dt>
+  <dd>There are two types of string literals: single quoted and double quoted. Single quoted strings are delimited by single quotes, and so cannot contain a single quote unless it is escaped. Double quoted strings are delimited by double quotes, and so cannot contain a double quote unless it is escaped. Strings can have the following characters and escape sequences:
+    <ul>
+      <li>any unicode character except for: characters in the range \x00-\x1F, character \x7F</li>
+      <li>backslashes are not allowed unless followed by one of the characters: <code>\&#39;&quot;bfnrtu</code></li>
+      <li>if a backslash is followed by a <code>u</code>, then 4 hexadecimal digits must follow after that</li>
+    </ul>
+  </dd>
 </dl>
 </div>
 <div>

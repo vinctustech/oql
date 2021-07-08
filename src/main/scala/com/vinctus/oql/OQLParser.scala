@@ -185,10 +185,10 @@ object OQLParser extends RegexParsers with PackratParsers {
     }
 
   lazy val singleQuoteString: PackratParser[String] =
-    """'(?:''|[^'\x00-\x1F\x7F\\]|\\[\\'"bfnrt]|\\u[a-fA-F0-9]{4})*'""".r ^^ (s => s.substring(1, s.length - 1))
+    """'(?:[^'\x00-\x1F\x7F\\]|\\[\\'"bfnrt]|\\u[a-fA-F0-9]{4})*'""".r ^^ (s => s.substring(1, s.length - 1))
 
   lazy val doubleQuoteString: PackratParser[String] =
-    """"(?:""|[^"\x00-\x1F\x7F\\]|\\[\\'"bfnrt]|\\u[a-fA-F0-9]{4})*"""".r ^^ (s => s.substring(1, s.length - 1))
+    """"(?:[^"\x00-\x1F\x7F\\]|\\[\\'"bfnrt]|\\u[a-fA-F0-9]{4})*"""".r ^^ (s => s.substring(1, s.length - 1))
 
   lazy val string: PackratParser[String] = singleQuoteString | doubleQuoteString
 
