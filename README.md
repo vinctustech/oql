@@ -24,6 +24,8 @@ OQL
 
 Object Query Language (OQL) is a simple relational database query language inspired by GraphQL and SQL, but designed to be translated query-for-query into database engine specific SQL, with identical behaviour across supported engines.
 
+Full library documentation can be found [here](https://vinctustech.github.io/oql).
+
 Overview
 --------
 
