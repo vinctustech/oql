@@ -99,4 +99,6 @@ The query language is inspired by GraphQL. In the following grammar, all keyword
 : The order operation contains a series of one or more ordering expressions by which an array result will be ordered.  Database engines differ in how they order results that contain null values.  OQL guarantees a consistent default behaviour across supported engines.  For ascending ordering, nulls are first.  For descending ordering, nulls are last.
 : ![order](.../oql-diagram/order.png)
 
-- `restrict` contains one or two integers giving the offset and limit. If omitted, the offset is zero.
+*restrict*
+: This is really two operations that tend to go together: offsetting or skipping an initial number of results, and limiting the number of results.  The first integer is the offset (zero if omitted), and the second is the limit (unlimited if omitted).
+: ![restrict](.../oql-diagram/restrict.png)

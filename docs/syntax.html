@@ -266,12 +266,12 @@ vinctustech/oql
   <dd>The group operation contains a series of one or more grouping expressions by which an array result will be grouped.</dd>
   <dd><img src="assets/images/oql-diagram/group.png" alt="group" /></dd>
   <dt><em>order</em></dt>
-  <dd>The order operation contains a series of one or more ordering expressions by which an array result will be ordered.</dd>
+  <dd>The order operation contains a series of one or more ordering expressions by which an array result will be ordered. Database engines differ in how they order results that contain null values. OQL guarantees a consistent default behaviour across supported engines. For ascending ordering, nulls are first. For descending ordering, nulls are last.</dd>
   <dd><img src="assets/images/oql-diagram/order.png" alt="order" /></dd>
+  <dt><em>restrict</em></dt>
+  <dd>This is really two operations that tend to go together: offsetting or skipping an initial number of results, and limiting the number of results. The first integer is the offset (zero if omitted), and the second is the limit (unlimited if omitted).</dd>
+  <dd><img src="assets/images/oql-diagram/restrict.png" alt="restrict" /></dd>
 </dl>
-<ul>
-  <li><code>restrict</code> contains one or two integers giving the offset and limit. If omitted, the offset is zero.</li>
-</ul>
 </div>
 <div>
 <a href="https://github.com/vinctustech/oql/tree/v1.0.0-RC.3.23/src/main/paradox/syntax.md" title="Edit this page" class="md-source-file md-edit">
