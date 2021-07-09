@@ -42,8 +42,16 @@ The `decimal(p, s)` datatype corresponds to the PostgreSQL `NUMERIC(p, s)` param
 Boolean
 -------
 
+The boolean type has three values: `TRUE`, `FALSE`, and `NULL` (representing the unknown state). 
+
+In OQL, this is the `boolean` datatype, which has one synonym: `bool`.
+
+The `boolean` datatype corresponds to the PostgreSQL `BOOLEAN` datatype and materializes as a TypeScript `boolean` primitive or a Scala `Boolean` type object.
+
 UUID
 ----
+
+Universally Unique Identifiers have type `uuid` which corresponds to the PostgreSQL `UUID` datatype and materializes as a TypeScript `string` primitive or a Scala `String` type object.
 
 Time and Date
 -------------

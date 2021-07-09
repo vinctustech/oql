@@ -1,7 +1,7 @@
 Syntax
 ======
 
-The following syntax (or railroad) diagrams of both the data modeling and query language provide a clear description of those languages.  The syntax for `json` ([JSON syntax](https://www.json.org/json-en.html)) has been omitted.
+The following syntax (or railroad) diagrams of both the data modeling and query language provide a clear description of those languages.  The syntax for `JSON` ([JSON syntax](https://www.json.org/json-en.html)) has been omitted.
 
 ### Data Modeling Language
 
