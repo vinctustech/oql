@@ -1,17 +1,17 @@
 Examples
 ========
 
-Several examples are presented, each one creating a different database.  Each example presents a different use case.
+Here we present several examples, where each one creates a different dockerized [PostgreSQL](https://www.postgresql.org/) database.  Therefore, you will need to have [docker](https://www.docker.com/) installed.
 
-### Example (many-to-one)
+### Example: many-to-one
 
-This example presents a very simple "employee" database where employees have a manager and a department (among other things), so that the employees and their managers are in a *many-to-one* relationship, which also requires that the employee table to joined to itself.  Employees and departments are also in a *many-to-one* relationship.
+This example creates a very simple employee database where employees have a manager and a department (among other things), so that the employees and their managers are in a *many-to-one* relationship.  This example also demonstrates self-referential entities.  Employees and departments are also in a *many-to-one* relationship.
 
 Get [PostgreSQL](https://hub.docker.com/_/postgres) running in a [docker container](https://www.docker.com/resources/what-container):
 
 ```
-sudo docker pull postgres
-sudo docker run --rm --name pg-docker -e POSTGRES_PASSWORD=docker -d -p 5432:5432 postgres
+docker pull postgres
+docker run --rm --name pg-docker -e POSTGRES_PASSWORD=docker -d -p 5432:5432 postgres
 ```
 
 Run the [PostgreSQL terminal](https://www.postgresql.org/docs/9.3/app-psql.html) to create a database:
@@ -62,27 +62,31 @@ INSERT INTO employee (emp_id, emp_name, job_title, manager_id, dep_id) VALUES
   (69324, 'MARKER', 'CLERK', 67832, 1001);
 ```
 
+Create a text file called `dm` (for "data model") and copy the following text into it.
+
+```
+entity employee {
+ *emp_id: integer
+  name (emp_name): text
+  job_title: text
+  manager (manager_id): employee
+  department (dep_id): department
+}
+
+entity department {
+ *dep_id: integer
+  name (dep_name): text
+}
+```
+
 Run the following TypeScript program:
 
 ```typescript
-import { OQL, PostgresConnection } from '@vinctus/oql'
+import { OQL } from '@vinctus/oql'
 
-const conn = new PostgresConnection("localhost", 5432, "postgres", 'postgres', 'docker', false)
+const conn = new OQL("localhost", 5432, "postgres", 'postgres', 'docker', false)
 const oql = 
-  new OQL(`
-    entity employee {
-     *emp_id: integer
-      name (emp_name): text
-      job_title: text
-      manager (manager_id): employee
-      department (dep_id): department
-    }
-    
-    entity department {
-     *dep_id: integer
-      name (dep_name): text
-    }
-  `)
+  new OQL()
 
 oql
   .query("employee { name manager.name department.name } [job_title = 'CLERK']", conn)
