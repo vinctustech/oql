@@ -144,12 +144,21 @@ vinctustech/oql
   <li><a href="usage.html" class="page">Usage</a></li>
   <li><a href="api.html" class="active page">API</a></li>
   <li><a href="examples.html" class="page">Examples</a></li>
-  <li><a href="datatypes.html" class="page">Datatypes</a></li>
+  <li><a href="datatypes.html" class="page">Data types</a></li>
   <li><a href="syntax.html" class="page">Syntax</a></li>
   <li><a href="supported-engines.html" class="page">Supported Engines</a></li>
   <li><a href="release-notes.html" class="page">Release Notes</a></li>
 </ul>
 <nav class="md-nav md-nav--secondary">
+<label class="md-nav__title" for="__toc">Table of contents</label>
+<ul>
+  <li><a href="api.html#api" class="header">API</a>
+  <ul>
+    <li><a href="api.html#the-oql-class" class="header">The <code>OQL</code> Class</a></li>
+    <li><a href="api.html#the-querybuilder-class" class="header">The <code>QueryBuilder</code> Class</a></li>
+    <li><a href="api.html#the-mutation-class" class="header">The <code>Mutation</code> Class</a></li>
+  </ul></li>
+</ul>
 </nav>
 
 </nav>
@@ -163,10 +172,91 @@ vinctustech/oql
 </div>
 </div>
 </div>
+<div class="md-sidebar md-sidebar--secondary" data-md-component="toc">
+<div class="md-sidebar__scrollwrap">
+<div class="md-sidebar__inner">
+<nav class="md-nav md-nav--secondary">
+<label class="md-nav__title" for="__toc">Table of contents</label>
+<ul>
+  <li><a href="api.html#api" class="header">API</a>
+  <ul>
+    <li><a href="api.html#the-oql-class" class="header">The <code>OQL</code> Class</a></li>
+    <li><a href="api.html#the-querybuilder-class" class="header">The <code>QueryBuilder</code> Class</a></li>
+    <li><a href="api.html#the-mutation-class" class="header">The <code>Mutation</code> Class</a></li>
+  </ul></li>
+</ul>
+</nav>
+
+</div>
+</div>
+</div>
 <div class="md-content">
 <article class="md-content__inner md-typeset">
 <div class="md-content__searchable">
 <h1><a href="#api" name="api" class="anchor"><span class="anchor-link"></span></a>API</h1>
+<p>The TypeScript API is documented first here followed by a few notes on the Scala.js API which is very similar.</p>
+<h2><a href="#the-oql-class" name="the-oql-class" class="anchor"><span class="anchor-link"></span></a>The <code>OQL</code> Class</h2>
+<p>These are the methods of the <code>OQL</code> class, which are the main methods that you will be using. Brackets around a parameter signify an optional parameter.</p>
+<h3><a href="#count-query-parameters-" name="count-query-parameters-" class="anchor"><span class="anchor-link"></span></a><code>count(query, [parameters])</code></h3>
+<p>Returns a promise for the number of objects where <em>query</em> is the query string written in the <a href="#query-language">OQL query language</a>. If <em>parameters</em> is given, each parameter is referenced in the query as <code>:name</code> where <em>name</em> is the name of the parameter.</p>
+<p>For example</p>
+<pre class="prettyprint"><code class="language-typescript">oql.count(&#39;product [price &lt; :max]&#39;, {max: 100.00})
+</code></pre>
+<p>gets the number of products that are less than $100.</p>
+<h3><a href="#entity-name-" name="entity-name-" class="anchor"><span class="anchor-link"></span></a><code>entity(name)</code></h3>
+<p>Returns a <code>Mutation</code> instance for OQL class instance that it was called on. See <a href="#the-resource-class">The <code>Mutation</code> Class</a> for a method reference.</p>
+<h3><a href="#querybuilder-" name="querybuilder-" class="anchor"><span class="anchor-link"></span></a><code>queryBuilder()</code></h3>
+<p>Returns a <code>QueryBuilder</code> instance for OQL class instance that it was called on. See <a href="#the-querybuilder-class">The <code>QueryBuilder</code> Class</a> for a method reference.</p>
+<h3><a href="#queryone-query-parameters-" name="queryone-query-parameters-" class="anchor"><span class="anchor-link"></span></a><code>queryOne(query, [parameters])</code></h3>
+<p>Returns a promise for zero or one object where <em>query</em> is the query string written in the <a href="#query-language">OQL query language</a>. If <em>parameters</em> is given, each parameter is referenced in the query as <code>:name</code> where <em>name</em> is the name of the parameter.</p>
+<p>For example</p>
+<pre class="prettyprint"><code class="language-typescript">oql.queryOne(&#39;user {id name email} [id &lt; :id]&#39;, {id: 12345})
+</code></pre>
+<p>gets the <em>id</em>, <em>name</em>, and <em>email</em> for user with id 12345.</p>
+<h3><a href="#querymany-query-parameters-" name="querymany-query-parameters-" class="anchor"><span class="anchor-link"></span></a><code>queryMany(query, [parameters])</code></h3>
+<p>Returns a promise for an array of objects where <em>query</em> is the query string written in the <a href="#query-language">OQL query language</a>. If <em>parameters</em> is given, each parameter is referenced in the query as <code>:name</code> where <em>name</em> is the name of the parameter.</p>
+<p>For example</p>
+<pre class="prettyprint"><code class="language-typescript">oql.queryMany(&#39;product {id name price supplier.name} [price &lt; :max]&#39;, {max: 100.00})
+</code></pre>
+<p>gets the <em>id</em>, <em>name</em>, <em>price</em> and <code>supplier.name</code> for products that are less than $100.</p>
+<h3><a href="#raw-sql-values-" name="raw-sql-values-" class="anchor"><span class="anchor-link"></span></a><code>raw(sql, [values])</code></h3>
+<p>Perform the raw SQL query and return a promise for the results where <em>sql</em> is the query string and <em>values</em> are query parameter values.</p>
+<h2><a href="#the-querybuilder-class" name="the-querybuilder-class" class="anchor"><span class="anchor-link"></span></a>The <code>QueryBuilder</code> Class</h2>
+<p><code>QueryBuilder</code> is used to build up a query step by step. <code>QueryBuilder</code> instances are immutable so each method that returns a <code>QueryBuilder</code> object is returning a new instance.</p>
+<h3><a href="#cond-exp-" name="cond-exp-" class="anchor"><span class="anchor-link"></span></a><code>cond(exp)</code></h3>
+<p>Blocks the next method call in a chain of <code>QueryBuilder</code> calls if the condition expression <em>exp</em> is falsy.</p>
+<h3><a href="#getcount-" name="getcount-" class="anchor"><span class="anchor-link"></span></a><code>getCount()</code></h3>
+<p>Returns a promise for the number of objects that could be retrieved with <code>this</code> query builder.</p>
+<h3><a href="#getmany-" name="getmany-" class="anchor"><span class="anchor-link"></span></a><code>getMany()</code></h3>
+<p>Returns a promise for an array of object specified by <code>this</code> query builder.</p>
+<h3><a href="#getone-" name="getone-" class="anchor"><span class="anchor-link"></span></a><code>getOne()</code></h3>
+<p>Returns a promise for zero or one object specified by <code>this</code> query builder.</p>
+<h3><a href="#limit-a-" name="limit-a-" class="anchor"><span class="anchor-link"></span></a><code>limit(a)</code></h3>
+<p>Returns a new query builder with a query limit of <em>a</em>.</p>
+<h3><a href="#offset-a-" name="offset-a-" class="anchor"><span class="anchor-link"></span></a><code>offset(a)</code></h3>
+<p>Returns a new query builder with a query offset of <em>a</em>.</p>
+<h3><a href="#order-attribute-sorting-" name="order-attribute-sorting-" class="anchor"><span class="anchor-link"></span></a><code>order(attribute, sorting)</code></h3>
+<p>Returns a new query builder with a query ordering on <code>attribute</code> with <code>sorting</code> direction.</p>
+<h3><a href="#project-entity-attributes-" name="project-entity-attributes-" class="anchor"><span class="anchor-link"></span></a><code>project(entity, attributes)</code></h3>
+<p>Returns a new query builder to query <em>entiry</em> retrieving <em>attributes</em>. This method is a bit more efficient than using <code>query()</code> because it avoids parsing the query.</p>
+<h3><a href="#query-base-query-parameters-" name="query-base-query-parameters-" class="anchor"><span class="anchor-link"></span></a><code>query(base_query, [parameters])</code></h3>
+<p>Returns a new query builder with the given <em>base_query</em>, which must be a well-formed OQL query.</p>
+<h3><a href="#select-selection-parameters-" name="select-selection-parameters-" class="anchor"><span class="anchor-link"></span></a><code>select(selection, [parameters])</code></h3>
+<p>Returns a new query builder with the given <em>selection</em>. If a selection has been given, either using <code>query()</code> (with the selection within brackets) or using <code>select()</code>, then this selection will be logically AND&rsquo;ed with the previous one. There or no need to add parentheses to ensure correct order of operations if the selection contains a logical OR, this is done internally.</p>
+<h2><a href="#the-mutation-class" name="the-mutation-class" class="anchor"><span class="anchor-link"></span></a>The <code>Mutation</code> Class</h2>
+<p>These are methods that can be called on a resource object.</p>
+<h3><a href="#delete-id-" name="delete-id-" class="anchor"><span class="anchor-link"></span></a><code>delete(id)</code></h3>
+<p>Returns a promise to delete object with primary key <em>id</em>.</p>
+<h3><a href="#getmany-" name="getmany-" class="anchor"><span class="anchor-link"></span></a><code>getMany()</code></h3>
+<p>Returns a promise for all objects of <code>this</code> resource.</p>
+<h3><a href="#insert-obj-" name="insert-obj-" class="anchor"><span class="anchor-link"></span></a><code>insert(obj)</code></h3>
+<p>Returns a promise to insert <em>obj</em> into <code>this</code> resource. The promise resolves to an object with the primary key of the inserted object.</p>
+<h3><a href="#link-e1-attribute-e2-" name="link-e1-attribute-e2-" class="anchor"><span class="anchor-link"></span></a><code>link(e1, attribute, e2)</code></h3>
+<p>Returns a promise to link object <em>e1</em> of <code>this</code> resource to object <em>e2</em> of the type given for <em>attribute</em>.</p>
+<h3><a href="#unlink-e1-attribute-e2-" name="unlink-e1-attribute-e2-" class="anchor"><span class="anchor-link"></span></a><code>unlink(e1, attribute, e2)</code></h3>
+<p>Returns a promise to unlink object <em>e1</em> of <code>this</code> resource to object <em>e2</em> of the type given for <em>attribute</em>.</p>
+<h3><a href="#update-e-updates-" name="update-e-updates-" class="anchor"><span class="anchor-link"></span></a><code>update(e, updates)</code></h3>
+<p>Returns a promise to unlink object <em>e</em> of <code>this</code> resource according to <em>updates</em>.</p>
 </div>
 <div>
 <a href="https://github.com/vinctustech/oql/tree/v1.0.0-RC.3.23/src/main/paradox/api.md" title="Edit this page" class="md-source-file md-edit">

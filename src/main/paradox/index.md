@@ -5,7 +5,7 @@
 * [Usage](usage.md)
 * [API](api.md)
 * [Examples](examples.md)
-* [Datatypes](datatypes.md)
+* [Data Types](datatypes.md)
 * [Syntax](syntax.md)
 * [Supported Engines](supported-engines.md)
 * [Release Notes](release-notes.md)

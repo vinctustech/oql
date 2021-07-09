@@ -144,7 +144,7 @@ vinctustech/oql
   <li><a href="usage.html" class="page">Usage</a></li>
   <li><a href="api.html" class="page">API</a></li>
   <li><a href="examples.html" class="page">Examples</a></li>
-  <li><a href="datatypes.html" class="page">Datatypes</a></li>
+  <li><a href="datatypes.html" class="page">Data types</a></li>
   <li><a href="syntax.html" class="active page">Syntax</a></li>
   <li><a href="supported-engines.html" class="page">Supported Engines</a></li>
   <li><a href="release-notes.html" class="page">Release Notes</a></li>
@@ -192,7 +192,7 @@ vinctustech/oql
 <article class="md-content__inner md-typeset">
 <div class="md-content__searchable">
 <h1><a href="#syntax" name="syntax" class="anchor"><span class="anchor-link"></span></a>Syntax</h1>
-<p>The following syntax (or railroad) diagrams of both the data modeling and query language provide a clear description of those languages. The syntax for <code>json</code> (<a href="https://www.json.org/json-en.html">JSON syntax</a>) has been omitted.</p>
+<p>The following syntax (or railroad) diagrams of both the data modeling and query language provide a clear description of those languages. The syntax for <code>JSON</code> (<a href="https://www.json.org/json-en.html">JSON syntax</a>) has been omitted.</p>
 <h3><a href="#data-modeling-language" name="data-modeling-language" class="anchor"><span class="anchor-link"></span></a>Data Modeling Language</h3>
 <p>An &ldquo;Entity-Relationship&rdquo; style language is used to describe the database. Only the portions of the database for which OQL is being used need to be described.</p>
 <h4><a href="#data-modeling-grammar-rules" name="data-modeling-grammar-rules" class="anchor"><span class="anchor-link"></span></a>Data Modeling Grammar Rules</h4>
@@ -209,12 +209,12 @@ vinctustech/oql
   <dt><em>Alias</em></dt>
   <dd>Aliases are identifiers.</dd>
   <dt><em>Attribute</em></dt>
-  <dd>Attributes correspond to columns in a table, if they have a datatype, or a simple entity type (i.e., just the name of an entity). An attribute that begins with an asterisk is the primary key. The name of an attribute can be aliased. An attribute that ends with an exclamation mark can&rsquo;t be null or excluded when inserting.</dd>
+  <dd>Attributes correspond to columns in a table, if they have a data type, or a simple entity type (i.e., just the name of an entity). An attribute that begins with an asterisk is the primary key. The name of an attribute can be aliased. An attribute that ends with an exclamation mark can&rsquo;t be null or excluded when inserting.</dd>
   <dd><img src="assets/images/dml-diagram/Attribute.png" alt="Attribute" /></dd>
   <dt><em>Type</em></dt>
   <dd>There are several kinds of attribute types:
     <ul>
-      <li><code>DataType</code> corresponding to a database engine datatype. These attributes correspond to table columns that are not foreign keys.</li>
+      <li><code>DataType</code> corresponding to a database engine data type. These attributes correspond to table columns that are not foreign keys.</li>
       <li><code>EntityName</code> representing the many-to-one relationship (from the point of view of the current entity). This is the entity relationship type that corresponds to a table column that is a foreign key.</li>
       <li><code>[ EntityName ]</code> or <code>[ EntityName ] . AttributeName</code> representing the one-to-many relationship (from the point of view of the current entity). This is the array type that represents all the entities (rows) that are referencing the current entity.</li>
       <li><code>[ EntityName ] ( EntityName )</code> or <code>[ EntityName ] . AttributeName ( EntityName )</code> representing the many-to-many relationship. The second <code>EntityName</code> in parentheses refers to the junction or link entity (table).</li>
@@ -223,7 +223,7 @@ vinctustech/oql
   </dd>
   <dd><img src="assets/images/dml-diagram/Type.png" alt="Type" /></dd>
   <dt><em>DataType</em></dt>
-  <dd>Any one of the basic datatypes that are commonly support by database systems. Any group of datatypes that begin with the same spelling (beyond the first one or two letters) are synonymous (e.g., <code>bool</code> and <code>boolean</code> refer to the same datatype).</dd>
+  <dd>Any one of the basic data types that are commonly support by database systems. Any group of datatypes that begin with the same spelling (beyond the first one or two letters) are synonymous (e.g., <code>bool</code> and <code>boolean</code> refer to the same datatype).</dd>
   <dd>
   <p><img src="assets/images/dml-diagram/DataType.png" alt="DataType" /></p></dd>
   <dt><em>EntityName</em></dt>
@@ -318,7 +318,7 @@ Edit this page
 <footer class="md-footer">
 <div class="md-footer-nav">
 <nav class="md-footer-nav__inner md-grid">
-<a href="datatypes.html" title="Datatypes" class="md-flex md-footer-nav__link md-footer-nav__link--prev" rel="prev">
+<a href="datatypes.html" title="Data types" class="md-flex md-footer-nav__link md-footer-nav__link--prev" rel="prev">
 <div class="md-flex__cell md-flex__cell--shrink">
 <i class="md-icon md-icon--arrow-back md-footer-nav__button"></i>
 </div>
@@ -327,7 +327,7 @@ Edit this page
 <span class="md-footer-nav__direction">
 Previous
 </span>
-Datatypes
+Data types
 </span>
 </div>
 </a>
