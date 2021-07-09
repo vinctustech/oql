@@ -136,7 +136,7 @@ object OQLParser extends RegexParsers with PackratParsers {
   lazy val comparison: PackratParser[String] =
     "<=" | ">=" | "<" | ">" | "=" | "!=" | kw("LIKE") | kw("ILIKE") | (kw("NOT") ~ kw("LIKE") ^^^ "NOT LIKE") | (kw("NOT") ~ kw("ILIKE") ^^^ "NOT ILIKE")
 
-  lazy val booleanLiteral: PackratParser[OQLExpression] = (kw("TRUE") | kw("FALSE")) ^^ BooleanOQLExpression
+  lazy val booleanLiteral: PackratParser[OQLExpression] = (kw("TRUE") | kw("FALSE") | kw("NULL")) ^^ BooleanOQLExpression
 
   lazy val expression: PackratParser[OQLExpression] = additive
 

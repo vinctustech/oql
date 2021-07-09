@@ -66,7 +66,7 @@ booleanPrimary
     | expression "IS" "NOT"? "NULL"
     | expression "NOT"? "IN" ("(" (expression ("," expression)* | query) ")")
     | "EXISTS" "(" query ")"
-    | "TRUE" | "FALSE"
+    | "TRUE" | "FALSE" | "NULL"
     | qualifiedAttributeExpression
     | "(" booleanExpression ")"
 
@@ -82,7 +82,7 @@ multiplicative
     | primary
 
 primary
-  ::= float | integer | string | "TRUE" | "FALSE" | "*"
+  ::= float | integer | string | "TRUE" | "FALSE" | "NULL" | "*"
     | "CASE" ("WHEN" booleanExpression "THEN" expression)+ ("ELSE" expression)? "END"
     | applyExpression
     | qualifiedAttributeExpression

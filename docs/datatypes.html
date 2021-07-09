@@ -155,7 +155,10 @@ vinctustech/oql
   <li><a href="datatypes.html#datatypes" class="header">Datatypes</a>
   <ul>
     <li><a href="datatypes.html#text" class="header">Text</a></li>
-    <li><a href="datatypes.html#integer" class="header">Integer</a></li>
+    <li><a href="datatypes.html#numeric" class="header">Numeric</a></li>
+    <li><a href="datatypes.html#boolean" class="header">Boolean</a></li>
+    <li><a href="datatypes.html#uuid" class="header">UUID</a></li>
+    <li><a href="datatypes.html#time-and-date" class="header">Time and Date</a></li>
   </ul></li>
 </ul>
 </nav>
@@ -180,7 +183,10 @@ vinctustech/oql
   <li><a href="datatypes.html#datatypes" class="header">Datatypes</a>
   <ul>
     <li><a href="datatypes.html#text" class="header">Text</a></li>
-    <li><a href="datatypes.html#integer" class="header">Integer</a></li>
+    <li><a href="datatypes.html#numeric" class="header">Numeric</a></li>
+    <li><a href="datatypes.html#boolean" class="header">Boolean</a></li>
+    <li><a href="datatypes.html#uuid" class="header">UUID</a></li>
+    <li><a href="datatypes.html#time-and-date" class="header">Time and Date</a></li>
   </ul></li>
 </ul>
 </nav>
@@ -194,7 +200,25 @@ vinctustech/oql
 <h1><a href="#datatypes" name="datatypes" class="anchor"><span class="anchor-link"></span></a>Datatypes</h1>
 <p>A datatype, in OQL, is distinct from the notion of an attribute type. Specifically, datatypes are a subclass of attribute type. Any given OQL datatype is guaranteed to have the same meaning across supported engines that implement the given datatype in some way.</p>
 <h2><a href="#text" name="text" class="anchor"><span class="anchor-link"></span></a>Text</h2>
-<h2><a href="#integer" name="integer" class="anchor"><span class="anchor-link"></span></a>Integer</h2>
+<p>In OQL, there is currently a single datatype for representing character string or textual data: <code>text</code>.</p>
+<p>The <code>text</code> datatype corresponds to the PostgreSQL <code>TEXT</code> datatype and materializes as a TypeScript <code>string</code> primitive or a Scala <code>String</code> type object.</p>
+<h2><a href="#numeric" name="numeric" class="anchor"><span class="anchor-link"></span></a>Numeric</h2>
+<p>There are four different categories of numerical data currently in OQL.</p>
+<h3><a href="#small-integers" name="small-integers" class="anchor"><span class="anchor-link"></span></a>Small integers</h3>
+<p>These are integers in the range of approximately -2.1 billion to +2.1 billion. In OQL, this is the <code>integer</code> datatype, which has two synonyms: <code>int</code> and <code>int4</code>.</p>
+<p>The <code>integer</code> datatype corresponds to the PostgreSQL <code>INTEGER</code> datatype and materializes as a TypeScript <code>number</code> primitive or a Scala <code>Int</code> type object.</p>
+<h3><a href="#arbitrarily-large-integers" name="arbitrarily-large-integers" class="anchor"><span class="anchor-link"></span></a>Arbitrarily large integers</h3>
+<p>These are integers that can be of any size. In OQL, this is the <code>bigint</code> datatype.</p>
+<p>The <code>bigint</code> datatype corresponds to the PostgreSQL <code>BIGINT</code> datatype and materializes as a TypeScript <code>bigint</code> primitive or a Scala <code>BitInt</code> type object.</p>
+<h3><a href="#double-precision-floating-point" name="double-precision-floating-point" class="anchor"><span class="anchor-link"></span></a>Double precision floating point</h3>
+<p>These are floating point numbers in a standard (IEEE 754) double precision binary representation with 15 significant digits. In OQL, this is the <code>float</code> datatype, which has one synonym: <code>float8</code>.</p>
+<p>The <code>float</code> datatype corresponds to the PostgreSQL <code>DOUBLE PRECISION</code> datatype and materializes as a TypeScript <code>number</code> primitive or a Scala <code>Double</code> type object.</p>
+<h3><a href="#arbitrary-precision" name="arbitrary-precision" class="anchor"><span class="anchor-link"></span></a>Arbitrary precision</h3>
+<p>These are arbitrarily precise floating point numbers stored in a decimal representation. In OQL, this is the <code>decimal(p, s)</code> parametric datatype, where <em>p</em> is the precision giving the number of significant digits, and <em>s</em> is the scale giving the number of digits after the decimal point.</p>
+<p>The <code>decimal(p, s)</code> datatype corresponds to the PostgreSQL <code>NUMERIC(p, s)</code> parametric datatype and materializes as a <code>big.js</code> (JavaScript library) <code>Big</code> type object or a Scala <code>BigDecimal</code> type object.</p>
+<h2><a href="#boolean" name="boolean" class="anchor"><span class="anchor-link"></span></a>Boolean</h2>
+<h2><a href="#uuid" name="uuid" class="anchor"><span class="anchor-link"></span></a>UUID</h2>
+<h2><a href="#time-and-date" name="time-and-date" class="anchor"><span class="anchor-link"></span></a>Time and Date</h2>
 </div>
 <div>
 <a href="https://github.com/vinctustech/oql/tree/v1.0.0-RC.3.23/src/main/paradox/datatypes.md" title="Edit this page" class="md-source-file md-edit">

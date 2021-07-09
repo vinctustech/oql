@@ -14,9 +14,9 @@ trait PGDataSource extends SQLDataSource {
       case IntegerType           => "INTEGER"
       case BooleanType           => "BOOLEAN"
       case BigintType            => "BIGINT"
-      case DecimalType(p, s)     => s"DECIMAL($p, $s)"
+      case DecimalType(p, s)     => s"NUMERIC($p, $s)"
       case DateType              => "DATE"
-      case FloatType             => "FLOAT"
+      case FloatType             => "DOUBLE PRECISION"
       case UUIDType              => "UUID"
       case TimestampType         => "TIMESTAMP WITHOUT TIME ZONE"
       case ManyToOneType(entity) => mapType(entity.pk.get.typ)
