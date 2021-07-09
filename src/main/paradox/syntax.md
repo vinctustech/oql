@@ -25,12 +25,12 @@ An "Entity-Relationship" style language is used to describe the database.  Only 
 : Aliases are identifiers.
 
 *Attribute*
-: Attributes correspond to columns in a table, if they have a datatype, or a simple entity type (i.e., just the name of an entity).  An attribute that begins with an asterisk is the primary key.  The name of an attribute can be aliased.  An attribute that ends with an exclamation mark can't be null or excluded when inserting.
+: Attributes correspond to columns in a table, if they have a data type, or a simple entity type (i.e., just the name of an entity).  An attribute that begins with an asterisk is the primary key.  The name of an attribute can be aliased.  An attribute that ends with an exclamation mark can't be null or excluded when inserting.
 : ![Attribute](.../dml-diagram/Attribute.png)
 
 *Type*
 : There are several kinds of attribute types:
-    - `DataType` corresponding to a database engine datatype. These attributes correspond to table columns that are not foreign keys.
+    - `DataType` corresponding to a database engine data type. These attributes correspond to table columns that are not foreign keys.
     - `EntityName` representing the many-to-one relationship (from the point of view of the current entity). This is the entity relationship type that corresponds to a table column that is a foreign key.
     - `[ EntityName ]` or `[ EntityName ] . AttributeName` representing the one-to-many relationship (from the point of view of the current entity). This is the array type that represents all the entities (rows) that are referencing the current entity.
     - `[ EntityName ] ( EntityName )` or `[ EntityName ] . AttributeName ( EntityName )` representing the many-to-many relationship.  The second `EntityName` in parentheses refers to the junction or link entity (table).
@@ -38,7 +38,7 @@ An "Entity-Relationship" style language is used to describe the database.  Only 
 : ![Type](.../dml-diagram/Type.png)
 
 *DataType*
-: Any one of the basic datatypes that are commonly support by database systems. Any group of datatypes that begin with the same spelling (beyond the first one or two letters) are synonymous (e.g., `bool` and `boolean` refer to the same datatype).
+: Any one of the basic data types that are commonly support by database systems. Any group of datatypes that begin with the same spelling (beyond the first one or two letters) are synonymous (e.g., `bool` and `boolean` refer to the same datatype).
 
 : ![DataType](.../dml-diagram/DataType.png)
 
