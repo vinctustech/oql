@@ -2,7 +2,7 @@
 
 * [Overview](overview.md)
 * [Installation](installation.md)
-* [Usage](usage.md)
+* [Tutorial](tutorial.md)
 * [API](api.md)
 * [Examples](examples.md)
 * [Data Types](datatypes.md)

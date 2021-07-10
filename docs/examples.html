@@ -141,7 +141,7 @@ vinctustech/oql
 <ul>
   <li><a href="overview.html" class="page">Overview</a></li>
   <li><a href="installation.html" class="page">Installation</a></li>
-  <li><a href="usage.html" class="page">Usage</a></li>
+  <li><a href="tutorial.html" class="page">Tutorial</a></li>
   <li><a href="api.html" class="page">API</a></li>
   <li><a href="examples.html" class="active page">Examples</a></li>
   <li><a href="datatypes.html" class="page">Data types</a></li>
@@ -154,7 +154,6 @@ vinctustech/oql
 <ul>
   <li><a href="examples.html#examples" class="header">Examples</a>
   <ul>
-    <li><a href="examples.html#example-many-to-one" class="header">Example: many-to-one</a></li>
     <li><a href="examples.html#example-many-to-many-" class="header">Example (many-to-many)</a></li>
   </ul></li>
 </ul>
@@ -179,7 +178,6 @@ vinctustech/oql
 <ul>
   <li><a href="examples.html#examples" class="header">Examples</a>
   <ul>
-    <li><a href="examples.html#example-many-to-one" class="header">Example: many-to-one</a></li>
     <li><a href="examples.html#example-many-to-many-" class="header">Example (many-to-many)</a></li>
   </ul></li>
 </ul>
@@ -192,120 +190,6 @@ vinctustech/oql
 <article class="md-content__inner md-typeset">
 <div class="md-content__searchable">
 <h1><a href="#examples" name="examples" class="anchor"><span class="anchor-link"></span></a>Examples</h1>
-<p>Here we present several examples, where each one creates a different dockerized <a href="https://www.postgresql.org/">PostgreSQL</a> database. Therefore, you will need to have <a href="https://www.docker.com/">docker</a> installed.</p>
-<h3><a href="#example-many-to-one" name="example-many-to-one" class="anchor"><span class="anchor-link"></span></a>Example: many-to-one</h3>
-<p>This example creates a very simple employee database where employees have a manager and a department (among other things), so that the employees and their managers are in a <em>many-to-one</em> relationship. This example also demonstrates self-referential entities. Employees and departments are also in a <em>many-to-one</em> relationship.</p>
-<p>Get <a href="https://hub.docker.com/_/postgres">PostgreSQL</a> running in a <a href="https://www.docker.com/resources/what-container">docker container</a>:</p>
-<pre><code>docker pull postgres
-docker run --rm --name pg-docker -e POSTGRES_PASSWORD=docker -d -p 5432:5432 postgres
-</code></pre>
-<p>Run the <a href="https://www.postgresql.org/docs/9.3/app-psql.html">PostgreSQL terminal</a> to create a database:</p>
-<p><code>psql -h localhost -U postgres -d postgres</code></p>
-<p>which can be installed if necessary with the command</p>
-<p><code>sudo apt-get install postgresql-client</code></p>
-<p>Create a simple database by copy-pasting the following (yes, all in one shot) at the <code>psql</code> prompt:</p>
-<pre class="prettyprint"><code class="language-sql">CREATE DATABASE employees;
-
-CREATE TABLE department (
-  dep_id SERIAL PRIMARY KEY,
-  dep_name TEXT
-);
-
-CREATE TABLE employee (
-  emp_id SERIAL PRIMARY KEY,
-  emp_name TEXT,
-  job_title TEXT,
-  manager_id INTEGER REFERENCES employee,
-  dep_id INTEGER REFERENCES department
-);
-
-INSERT INTO department (dep_id, dep_name) VALUES
-  (1001, &#39;FINANCE&#39;),             
-  (2001, &#39;AUDIT&#39;),
-  (3001, &#39;MARKETING&#39;);
-
-INSERT INTO employee (emp_id, emp_name, job_title, manager_id, dep_id) VALUES
-  (68319, &#39;KAYLING&#39;, &#39;PRESIDENT&#39;, null, 1001),
-  (66928, &#39;BLAZE&#39;, &#39;MANAGER&#39;, 68319, 3001),
-  (67832, &#39;CLARE&#39;, &#39;MANAGER&#39;, 68319, 1001),
-  (65646, &#39;JONAS&#39;, &#39;MANAGER&#39;, 68319, 2001),
-  (67858, &#39;SCARLET&#39;, &#39;ANALYST&#39;, 65646, 2001),
-  (69062, &#39;FRANK&#39;, &#39;ANALYST&#39;, 65646, 2001),
-  (63679, &#39;SANDRINE&#39;, &#39;CLERK&#39;, 69062, 2001),
-  (64989, &#39;ADELYN&#39;, &#39;SALESREP&#39;, 66928, 3001),
-  (65271, &#39;WADE&#39;, &#39;SALESREP&#39;, 66928, 3001),
-  (66564, &#39;MADDEN&#39;, &#39;SALESREP&#39;, 66928, 3001),
-  (68454, &#39;TUCKER&#39;, &#39;SALESREP&#39;, 66928, 3001),
-  (68736, &#39;ADNRES&#39;, &#39;CLERK&#39;, 67858, 2001),
-  (69000, &#39;JULIUS&#39;, &#39;CLERK&#39;, 66928, 3001),
-  (69324, &#39;MARKER&#39;, &#39;CLERK&#39;, 67832, 1001);
-</code></pre>
-<p>Create a text file called <code>dm</code> (for &ldquo;data model&rdquo;) and copy the following text into it.</p>
-<pre><code>entity employee {
- *emp_id: integer
-  name (emp_name): text
-  job_title: text
-  manager (manager_id): employee
-  department (dep_id): department
-}
-
-entity department {
- *dep_id: integer
-  name (dep_name): text
-}
-</code></pre>
-<p>Run the following TypeScript program:</p>
-<pre class="prettyprint"><code class="language-typescript">import { OQL } from &#39;@vinctus/oql&#39;
-
-const conn = new OQL(&quot;localhost&quot;, 5432, &quot;postgres&quot;, &#39;postgres&#39;, &#39;docker&#39;, false)
-const oql = 
-  new OQL()
-
-oql
-  .query(&quot;employee { name manager.name department.name } [job_title = &#39;CLERK&#39;]&quot;, conn)
-  .then((res: any) =&gt; console.log(JSON.stringify(res, null, 2)))
-</code></pre>
-<p>Output:</p>
-<pre class="prettyprint"><code class="language-json">[
-  {
-    &quot;name&quot;: &quot;SANDRINE&quot;,
-    &quot;manager&quot;: {
-      &quot;name&quot;: &quot;FRANK&quot;
-    },
-    &quot;department&quot;: {
-      &quot;name&quot;: &quot;AUDIT&quot;
-    }
-  },
-  {
-    &quot;name&quot;: &quot;ADNRES&quot;,
-    &quot;manager&quot;: {
-      &quot;name&quot;: &quot;SCARLET&quot;
-    },
-    &quot;department&quot;: {
-      &quot;name&quot;: &quot;AUDIT&quot;
-    }
-  },
-  {
-    &quot;name&quot;: &quot;JULIUS&quot;,
-    &quot;manager&quot;: {
-      &quot;name&quot;: &quot;BLAZE&quot;
-    },
-    &quot;department&quot;: {
-      &quot;name&quot;: &quot;MARKETING&quot;
-    }
-  },
-  {
-    &quot;name&quot;: &quot;MARKER&quot;,
-    &quot;manager&quot;: {
-      &quot;name&quot;: &quot;CLARE&quot;
-    },
-    &quot;department&quot;: {
-      &quot;name&quot;: &quot;FINANCE&quot;
-    }
-  }
-]
-</code></pre>
-<p>The query <code>employee { name manager.name department.name } [job_title = &#39;CLERK&#39;]</code> in the above example program is asking for the names of employees with job title &ldquo;CLERK&rdquo; as well as the names of their manager and department. In standard GraphQL, the query would have been <code>{ employee(job_title: &#39;CLERK&#39;) { name manager { name } department { name } } }</code>, which we feel is more verbose than it needs to be. The use of dot notation as in <code>manager.name</code> is semantically equivalent to <code>manager { name }</code>.</p>
 <h3><a href="#example-many-to-many-" name="example-many-to-many-" class="anchor"><span class="anchor-link"></span></a>Example (many-to-many)</h3>
 <p>This example presents a very simple &ldquo;student&rdquo; database where students are enrolled in classes, so that the students and classes are in a <em>many-to-many</em> relationship. The example has tables and fields that are intentionally poorly named so as to demonstrate the aliasing features of the database modeling language.</p>
 <p>Get <a href="https://hub.docker.com/_/postgres">PostgreSQL</a> running in a <a href="https://www.docker.com/resources/what-container">docker container</a>:</p>
