@@ -156,7 +156,7 @@ vinctustech/oql
 <ul style="display: none">
 <li class="md-nav__item md-version" id="project.version">
 <label class="md-nav__link" for="__version">
-<i class="md-icon" title="Version">label_outline</i> 1.0.0-RC.3.23
+<i class="md-icon" title="Version">label_outline</i> 1.0.0-RC.3.24
 </label>
 </li>
 </ul>
@@ -167,15 +167,25 @@ vinctustech/oql
 <article class="md-content__inner md-typeset">
 <div class="md-content__searchable">
 <h1><a href="#usage" name="usage" class="anchor"><span class="anchor-link"></span></a>Usage</h1>
+<pre class="prettyprint"><code class="language-typescript">import { OQL } from &#39;@vinctus/oql&#39;
+
+const oql = new OQL(&lt;data model&gt;, &lt;host&gt;, &lt;port&gt;, &lt;database&gt;, &lt;user&gt;, &lt;password&gt;, &lt;ssl&gt;, &lt;idleTimeoutMillis&gt;, &lt;max&gt;)
+
+oql.queryMany(&lt;query&gt;).then((result: any) =&gt; &lt;handle result&gt; )
+</code></pre>
+<p><code>&lt;host&gt;</code>, <code>&lt;port&gt;</code>, <code>&lt;database&gt;</code>, <code>&lt;user&gt;</code>, <code>&lt;password&gt;</code>, <code>&lt;ssl&gt;</code>, <code>&lt;idleTimeoutMillis&gt;</code>, and <code>&lt;max&gt;</code> are the connection pool (<code>PoolConfig</code>) parameters for the Postgres database you are querying.</p>
+<p><code>&lt;data model&gt;</code> describes the parts of the database available for querying. It&rsquo;s not necessary to describe every field of every table in the database, only what is being retrieved with <em>OQL</em>. However, primary keys of tables that are being queried should always be included, even if you&rsquo;re not interested in retrieving the primary keys themselves.</p>
+<p><code>&lt;query&gt;</code> is the OQL query string.</p>
+<p><code>&lt;handle result&gt;</code> is your result array handling code. The <code>result</code> object will be predictably structured according to the query.</p>
 </div>
 <div>
-<a href="https://github.com/vinctustech/oql/tree/v1.0.0-RC.3.23/src/main/paradox/usage.md" title="Edit this page" class="md-source-file md-edit">
+<a href="https://github.com/vinctustech/oql/tree/v1.0.0-RC.3.24/src/main/paradox/usage.md" title="Edit this page" class="md-source-file md-edit">
 Edit this page
 </a>
 </div>
 <div class="print-only">
 <span class="md-source-file md-version">
-1.0.0-RC.3.23
+1.0.0-RC.3.24
 </span>
 </div>
 </article>
