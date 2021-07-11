@@ -303,6 +303,7 @@ entity department {
 <h3><a href="#querying-the-database" name="querying-the-database" class="anchor"><span class="anchor-link"></span></a>Querying the database</h3>
 <p>Run the following TypeScript program:</p>
 <pre class="prettyprint"><code class="language-typescript">import { OQL } from &#39;@vinctus/oql&#39;
+import fs from &#39;fs&#39;
 
 const oql = new OQL(
   fs.readFileSync(&#39;data-model&#39;).toString(),
@@ -359,7 +360,7 @@ oql
 ]
 </code></pre>
 <p>The query <code>employee { name manager: manager.name department { name } } [job_title = &#39;CLERK&#39;]</code> in the above example program is asking for the names of employees with job title &ldquo;CLERK&rdquo; as well as the names of their manager and department. The query is sort-of unnatural because we&rsquo;re asking for the names of the manager and department in two different ways in order to demonstrate different features of OQL.</p>
-<p>In the above query, <code>manager: manager.name</code> says that we want to get just the string value of the name of the employee&rsquo;s manager, and we want the associated property name in the result object to be <code>manager</code>. Whereas, <code>department { name }</code> says that we want a result object corresponding to the department, with implied property name <code>department</code> but we only want the <code>name</code> property, excluding the <code>dep_id</code> property.</p>
+<p>In the above query, <code>manager: manager.name</code> in the projection (i.e., what&rsquo;s between the <code>{</code> &hellip; <code>}</code> after the entity you&rsquo;re querying) says that we want to get just the string value of the name of the employee&rsquo;s manager, and we want the associated property name in the result object to be <code>manager</code>. Whereas, <code>department { name }</code> says that we want a result object corresponding to the department, with implied property name <code>department</code>, but we only want the <code>name</code> property, excluding the <code>dep_id</code> property, which we would also have gotten had we simply written <code>department</code> without the <code>{ name }</code> after it.</p>
 </div>
 <div>
 <a href="https://github.com/vinctustech/oql/tree/v1.0.0-RC.3.24/src/main/paradox/tutorial.md" title="Edit this page" class="md-source-file md-edit">
