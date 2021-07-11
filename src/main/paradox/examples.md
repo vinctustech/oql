@@ -12,7 +12,7 @@ sudo docker pull postgres
 sudo docker run --rm --name pg-docker -e POSTGRES_PASSWORD=docker -d -p 5432:5432 postgres
 ```
 
-Run the [PostgreSQL terminal](https://www.postgresql.org/docs/9.3/app-psql.html) to create a database:
+Run the [PostgreSQL terminal](https://www.postgresql.org/docs/13.3/app-psql.html) to create a database:
 
 `psql -h localhost -U postgres -d postgres`
 
