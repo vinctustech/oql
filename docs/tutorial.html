@@ -159,6 +159,7 @@ vinctustech/oql
     <li><a href="tutorial.html#create-the-data-model" class="header">Create the data model</a></li>
     <li><a href="tutorial.html#many-to-one-query" class="header">Many-to-one Query</a></li>
     <li><a href="tutorial.html#one-to-many-query" class="header">One-to-many Query</a></li>
+    <li><a href="tutorial.html#grouping-query" class="header">Grouping Query</a></li>
   </ul></li>
 </ul>
 </nav>
@@ -187,6 +188,7 @@ vinctustech/oql
     <li><a href="tutorial.html#create-the-data-model" class="header">Create the data model</a></li>
     <li><a href="tutorial.html#many-to-one-query" class="header">Many-to-one Query</a></li>
     <li><a href="tutorial.html#one-to-many-query" class="header">One-to-many Query</a></li>
+    <li><a href="tutorial.html#grouping-query" class="header">Grouping Query</a></li>
   </ul></li>
 </ul>
 </nav>
@@ -354,7 +356,12 @@ oql
   }
 ]
 </code></pre>
-<p>The query <code>employee { name manager: manager.name department { name } } [job_title = &#39;CLERK&#39;]</code> in the above example program is asking for the names of employees with job title &ldquo;CLERK&rdquo; as well as the names of their manager and department. The query is sort-of unnatural because we&rsquo;re asking for the names of the manager and department in two different ways in order to demonstrate different features of OQL.</p>
+<p>The query</p>
+<pre><code>employee { 
+  name manager: manager.name department { name }
+} [job_title = &#39;CLERK&#39;]
+</code></pre>
+<p>is asking for the names of employees with job title &ldquo;CLERK&rdquo; as well as the names of their manager and department. The query is sort-of unnatural because we&rsquo;re asking for the names of the manager and department in two different ways in order to demonstrate different features of OQL.</p>
 <p>In the above query, <code>manager: manager.name</code> in the projection (i.e., what&rsquo;s between the <code>{</code> &hellip; <code>}</code> after the entity you&rsquo;re querying) says that we want to get just the string value of the name of the employee&rsquo;s manager, and we want the associated property name in the result object to be <code>manager</code>. Whereas, <code>department { name }</code> says that we want a result object corresponding to the department, with implied property name <code>department</code>, but we only want the <code>name</code> property, excluding the <code>dep_id</code> property, which we would also have gotten had we simply written <code>department</code> without the <code>{ name }</code> after it.</p>
 <h2><a href="#one-to-many-query" name="one-to-many-query" class="anchor"><span class="anchor-link"></span></a>One-to-many Query</h2>
 <p>Run the following TypeScript program:</p>
@@ -469,7 +476,61 @@ oql
   }
 ]
 </code></pre>
-<p>In the query <code>employee { name subordinates { name dept: department.name } } [exists(subordinates)]</code>, we are asking for the name and list of immediate subordinates of every employee who has any subordinates.</p>
+<p>In the query</p>
+<pre><code>employee {
+  name subordinates { name dept: department.name }
+} [exists(subordinates)]
+</code></pre>
+<p>we are asking for the name and list of immediate subordinates of every employee who has any subordinates. For the subordinates, we want their name and the name or their department.</p>
+<h2><a href="#grouping-query" name="grouping-query" class="anchor"><span class="anchor-link"></span></a>Grouping Query</h2>
+<p>Run the following TypeScript program:</p>
+<pre class="prettyprint"><code class="language-typescript">import { OQL } from &#39;@vinctus/oql&#39;
+import fs from &#39;fs&#39;
+
+const oql = new OQL(
+  fs.readFileSync(&#39;data-model&#39;).toString(),
+  &#39;localhost&#39;,
+  5432,
+  &#39;postgres&#39;,
+  &#39;postgres&#39;,
+  &#39;docker&#39;,
+  false,
+  0,
+  10
+)
+
+oql
+  .queryMany(
+    `
+    employee { 
+      dept: department.name count(*)
+    } /department.dep_id/ &lt;department.name&gt;`,
+    oql
+  )
+  .then((res: any) =&gt; console.log(JSON.stringify(res, null, 2)))
+</code></pre>
+<p>Output:</p>
+<pre class="prettyprint"><code class="language-json">[
+  {
+    &quot;dept&quot;: &quot;AUDIT&quot;,
+    &quot;count&quot;: 5
+  },
+  {
+    &quot;dept&quot;: &quot;FINANCE&quot;,
+    &quot;count&quot;: 3
+  },
+  {
+    &quot;dept&quot;: &quot;MARKETING&quot;,
+    &quot;count&quot;: 6
+  }
+]
+</code></pre>
+<p>The query</p>
+<pre><code>employee { 
+  dept: department.name count(*)
+} /department.dep_id/ &lt;department.name&gt;
+</code></pre>
+<p>we are grouping employees by their department id (<code>/department.dep_id/</code>) to get the number of employees for each department. We also want the result to be sorted by department name (<code>&lt;department.name&gt;</code>).</p>
 </div>
 <div>
 <a href="https://github.com/vinctustech/oql/tree/v1.0.0-RC.3.24/src/main/paradox/tutorial.md" title="Edit this page" class="md-source-file md-edit">

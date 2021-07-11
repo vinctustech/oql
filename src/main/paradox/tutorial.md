@@ -221,7 +221,15 @@ Output:
 ]
 ```
 
-The query `employee { name manager: manager.name department { name } } [job_title = 'CLERK']` in the above example program is asking for the names of employees with job title "CLERK" as well as the names of their manager and department.  The query is sort-of unnatural because we're asking for the names of the manager and department in two different ways in order to demonstrate different features of OQL.
+The query
+
+```
+employee { 
+  name manager: manager.name department { name }
+} [job_title = 'CLERK']
+```
+
+is asking for the names of employees with job title "CLERK" as well as the names of their manager and department.  The query is sort-of unnatural because we're asking for the names of the manager and department in two different ways in order to demonstrate different features of OQL.
 
 In the above query, `manager: manager.name` in the projection (i.e., what's between the `{` ... `}` after the entity you're querying) says that we want to get just the string value of the name of the employee's manager, and we want the associated property name in the result object to be `manager`.  Whereas, `department { name }` says that we want a result object corresponding to the department, with implied property name `department`, but we only want the `name` property, excluding the `dep_id` property, which we would also have gotten had we simply written `department` without the `{ name }` after it.
 
@@ -346,4 +354,73 @@ Output:
 ]
 ```
 
-In the query `employee { name subordinates { name dept: department.name } } [exists(subordinates)]`, we are asking for the name and list of immediate subordinates of every employee who has any subordinates.
+In the query
+
+```
+employee {
+  name subordinates { name dept: department.name }
+} [exists(subordinates)]
+```
+
+we are asking for the name and list of immediate subordinates of every employee who has any subordinates.  For the subordinates, we want their name and the name or their department.
+
+Grouping Query
+--------------
+
+Run the following TypeScript program:
+
+```typescript
+import { OQL } from '@vinctus/oql'
+import fs from 'fs'
+
+const oql = new OQL(
+  fs.readFileSync('data-model').toString(),
+  'localhost',
+  5432,
+  'postgres',
+  'postgres',
+  'docker',
+  false,
+  0,
+  10
+)
+
+oql
+  .queryMany(
+    `
+    employee { 
+      dept: department.name count(*)
+    } /department.dep_id/ <department.name>`,
+    oql
+  )
+  .then((res: any) => console.log(JSON.stringify(res, null, 2)))
+```
+
+Output:
+
+```json
+[
+  {
+    "dept": "AUDIT",
+    "count": 5
+  },
+  {
+    "dept": "FINANCE",
+    "count": 3
+  },
+  {
+    "dept": "MARKETING",
+    "count": 6
+  }
+]
+```
+
+The query
+
+```
+employee { 
+  dept: department.name count(*)
+} /department.dep_id/ <department.name>
+```
+
+we are grouping employees by their department id (`/department.dep_id/ `) to get the number of employees for each department.  We also want the result to be sorted by department name (`<department.name>`).
