@@ -415,7 +415,7 @@ Output:
 ]
 ```
 
-The query
+In the query
 
 ```
 employee { 
@@ -423,4 +423,4 @@ employee {
 } /department.dep_id/ <department.name>
 ```
 
-we are grouping employees by their department id (`/department.dep_id/ `) to get the number of employees for each department.  We also want the result to be sorted by department name (`<department.name>`).
+we are grouping employees by their department id (`/department.dep_id/`) to get the number of employees for each department.  We also want the result to be sorted by department name (`<department.name>`).
