@@ -1,37 +1,14 @@
 Tutorial
 ========
 
-Usage
------
+We present a fully explained tutorial example that creates a dockerized [PostgreSQL](https://www.postgresql.org/) database.  Therefore, you will need to have [docker](https://www.docker.com/) installed.
 
-Generally, using OQL in a project has the following form:
-
-```typescript
-import { OQL } from '@vinctus/oql'
-
-const oql = new OQL(<data model>, <host>, <port>, <database>, <user>, <password>, <ssl>, <idleTimeoutMillis>, <max>)
-
-oql.queryMany(<query>).then((<result>: any) => <handle result>)
-```
-
-where *host*, *port*, *database*, *user*, *password*, *ssl*, *idleTimeoutMillis*, and *max* are the [connection pool](https://node-postgres.com/api/pool) (`PoolConfig`) parameters for the Postgres database you are querying.
-
-*data model* describes the parts of the database available for querying.  It's not necessary to describe every field of every table in the database, only what is being retrieved with OQL.  However, primary keys of tables that are being queried should always be included, even if you're not interested in retrieving the primary keys themselves.
-
-*query* is the OQL query string.
-
-*handle result* is your result array handling code.  The *result* object will be predictably structured according to the query.
-
-Example: many-to-one
---------------------
-
-We present a fully worked example that creates a dockerized [PostgreSQL](https://www.postgresql.org/) database.  Therefore, you will need to have [docker](https://www.docker.com/) installed.
-
-See @ref:[Examples](examples.md) for more examples.
+See @ref:[Examples](examples.md) for other examples.
 
 This example creates a very simple employee database where employees have a manager and a department (among other things), so that the employees and their managers are in a *many-to-one* relationship.  This example also demonstrates self-referential entities.  Employees and departments are also in a *many-to-one* relationship.  The database definition purposely contains a few oddities so that certain OQL features can be demonstrated.
 
-### Setup PostgreSQL
+Setup PostgreSQL
+----------------
 
 We need to get [PostgreSQL](https://hub.docker.com/_/postgres) running in a [docker container](https://www.docker.com/resources/what-container):
 
@@ -44,7 +21,8 @@ The [PostgreSQL client](https://www.postgresql.org/docs/13.3/app-psql.html) (`ps
 
 `sudo apt-get install postgresql-client`
 
-### Create the database
+Create the database
+-------------------
 
 Run `psql` with the command:
 
@@ -92,7 +70,8 @@ INSERT INTO employees (emp_id, emp_name, job_title, manager_id, dep_id) VALUES
   (69324, 'MARKER', 'CLERK', 67832, 1001);
 ```
 
-### Create the data model
+Create the data model
+---------------------
 
 Create a text file called `data-model` and copy the following text into it.
 
@@ -112,7 +91,9 @@ entity department {
 }
 ```
 
-We'd like to look at the data model in some detail to explain what's going on. If you'd rather skip ahead and get on with the tutorial, then go to @ref:[Querying the database](#querying-the-database).
+The data model describes the parts of the database available for querying. It’s not necessary to describe every field of every table in the database, only what is being retrieved with OQL. However, primary keys of tables that are being queried should always be included, even if you’re not interested in retrieving the primary keys themselves.
+
+We'd like to look at the data model in some detail to explain what's going on. If you'd rather skip ahead and get on with the tutorial, then go to @ref:[First Query](#first-query).
 
 The above data model describes to OQL the database that we just created. There's an entity definition corresponding to each table in the database.  Each entity has an attribute definition corresponding to each column in the corresponding table, and in OQL it's possible to have attributes that don't correspond to any declared column.
 
@@ -172,7 +153,8 @@ which defines an attribute called `employees` with the "entity array" type `[emp
 OQL checks the internal correctness of the entire data model. Specifically, whether entity array type attributes have a corresponding referencing entity type attribute.
 @@@
 
-### Querying the database
+First Query
+-----------
 
 Run the following TypeScript program:
 
