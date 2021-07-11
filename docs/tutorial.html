@@ -272,6 +272,7 @@ entity department {
   employees: [employee]
 }
 </code></pre>
+<p>We&rsquo;d like to look at the data model in some detail to explain what&rsquo;s going on. If you&rsquo;d rather skip ahead and get on with the tutorial, then go to <a href="tutorial.html#querying-the-database">Querying the database</a>.</p>
 <p>The above data model describes to OQL the database that we just created. There&rsquo;s an entity definition corresponding to each table in the database. Each entity has an attribute definition corresponding to each column in the corresponding table, and in OQL it&rsquo;s possible to have attributes that don&rsquo;t correspond to any declared column.</p>
 <p>The first line of the data model</p>
 <pre><code>entity employee (employees) {

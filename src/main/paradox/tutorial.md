@@ -112,6 +112,8 @@ entity department {
 }
 ```
 
+We'd like to look at the data model in some detail to explain what's going on. If you'd rather skip ahead and get on with the tutorial, then go to @ref:[Querying the database](#querying-the-database).
+
 The above data model describes to OQL the database that we just created. There's an entity definition corresponding to each table in the database.  Each entity has an attribute definition corresponding to each column in the corresponding table, and in OQL it's possible to have attributes that don't correspond to any declared column.
 
 The first line of the data model
