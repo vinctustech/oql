@@ -158,6 +158,7 @@ vinctustech/oql
     <li><a href="tutorial.html#create-the-database" class="header">Create the database</a></li>
     <li><a href="tutorial.html#create-the-data-model" class="header">Create the data model</a></li>
     <li><a href="tutorial.html#many-to-one-query" class="header">Many-to-one Query</a></li>
+    <li><a href="tutorial.html#one-to-many-query" class="header">One-to-many Query</a></li>
   </ul></li>
 </ul>
 </nav>
@@ -185,6 +186,7 @@ vinctustech/oql
     <li><a href="tutorial.html#create-the-database" class="header">Create the database</a></li>
     <li><a href="tutorial.html#create-the-data-model" class="header">Create the data model</a></li>
     <li><a href="tutorial.html#many-to-one-query" class="header">Many-to-one Query</a></li>
+    <li><a href="tutorial.html#one-to-many-query" class="header">One-to-many Query</a></li>
   </ul></li>
 </ul>
 </nav>
@@ -255,6 +257,7 @@ INSERT INTO employees (emp_id, emp_name, job_title, manager_id, dep_id) VALUES
   job_title: text
   manager (manager_id): employee
   department (dep_id): department
+  subordinates: [employee]
 }
 
 entity department {
@@ -287,7 +290,7 @@ entity department {
 </code></pre>
 <p>means that entity <code>employee</code> is also in a <em>many-to-one</em> relationship with entity <code>department</code> (since <code>dep_id</code> is a foreign key).</p><div class="callout note "><div class="callout-title">Note</div>
 <p>Entities can be defined in any order. In the above attribute definition, entity <code>department</code> is being referenced even thought its definition comes after.</p></div>
-<p>On line twelve within the <code>department</code> entity definition we find</p>
+<p>On line thirteen within the <code>department</code> entity definition we find</p>
 <pre><code>  employees: [employee]
 </code></pre>
 <p>which defines an attribute called <code>employees</code> with the &ldquo;entity array&rdquo; type <code>[employee]</code>. This attribute doesn&rsquo;t correspond to any column in the table, but rather asserts the <em>one-to-many</em> relationship that entity <code>department</code> has to entity <code>employee</code>, and facilitates queries to <code>department</code> that presuppose that the relationship exists.</p><div class="callout note "><div class="callout-title">Note</div>
@@ -353,6 +356,120 @@ oql
 </code></pre>
 <p>The query <code>employee { name manager: manager.name department { name } } [job_title = &#39;CLERK&#39;]</code> in the above example program is asking for the names of employees with job title &ldquo;CLERK&rdquo; as well as the names of their manager and department. The query is sort-of unnatural because we&rsquo;re asking for the names of the manager and department in two different ways in order to demonstrate different features of OQL.</p>
 <p>In the above query, <code>manager: manager.name</code> in the projection (i.e., what&rsquo;s between the <code>{</code> &hellip; <code>}</code> after the entity you&rsquo;re querying) says that we want to get just the string value of the name of the employee&rsquo;s manager, and we want the associated property name in the result object to be <code>manager</code>. Whereas, <code>department { name }</code> says that we want a result object corresponding to the department, with implied property name <code>department</code>, but we only want the <code>name</code> property, excluding the <code>dep_id</code> property, which we would also have gotten had we simply written <code>department</code> without the <code>{ name }</code> after it.</p>
+<h2><a href="#one-to-many-query" name="one-to-many-query" class="anchor"><span class="anchor-link"></span></a>One-to-many Query</h2>
+<p>Run the following TypeScript program:</p>
+<pre class="prettyprint"><code class="language-typescript">import { OQL } from &#39;@vinctus/oql&#39;
+import fs from &#39;fs&#39;
+
+const oql = new OQL(
+  fs.readFileSync(&#39;data-model&#39;).toString(),
+  &#39;localhost&#39;,
+  5432,
+  &#39;postgres&#39;,
+  &#39;postgres&#39;,
+  &#39;docker&#39;,
+  false,
+  0,
+  10
+)
+
+oql
+  .queryMany(
+    `
+    employee {
+      name subordinates { name dept: department.name }
+    } [exists(subordinates)]`,
+    oql
+  )
+  .then((res: any) =&gt; console.log(JSON.stringify(res, null, 2)))
+</code></pre>
+<p>Output:</p>
+<pre class="prettyprint"><code class="language-json">[
+  {
+    &quot;name&quot;: &quot;KAYLING&quot;,
+    &quot;subordinates&quot;: [
+      {
+        &quot;name&quot;: &quot;BLAZE&quot;,
+        &quot;dept&quot;: &quot;MARKETING&quot;
+      },
+      {
+        &quot;name&quot;: &quot;CLARE&quot;,
+        &quot;dept&quot;: &quot;FINANCE&quot;
+      },
+      {
+        &quot;name&quot;: &quot;JONAS&quot;,
+        &quot;dept&quot;: &quot;AUDIT&quot;
+      }
+    ]
+  },
+  {
+    &quot;name&quot;: &quot;BLAZE&quot;,
+    &quot;subordinates&quot;: [
+      {
+        &quot;name&quot;: &quot;ADELYN&quot;,
+        &quot;dept&quot;: &quot;MARKETING&quot;
+      },
+      {
+        &quot;name&quot;: &quot;WADE&quot;,
+        &quot;dept&quot;: &quot;MARKETING&quot;
+      },
+      {
+        &quot;name&quot;: &quot;MADDEN&quot;,
+        &quot;dept&quot;: &quot;MARKETING&quot;
+      },
+      {
+        &quot;name&quot;: &quot;TUCKER&quot;,
+        &quot;dept&quot;: &quot;MARKETING&quot;
+      },
+      {
+        &quot;name&quot;: &quot;JULIUS&quot;,
+        &quot;dept&quot;: &quot;MARKETING&quot;
+      }
+    ]
+  },
+  {
+    &quot;name&quot;: &quot;CLARE&quot;,
+    &quot;subordinates&quot;: [
+      {
+        &quot;name&quot;: &quot;MARKER&quot;,
+        &quot;dept&quot;: &quot;FINANCE&quot;
+      }
+    ]
+  },
+  {
+    &quot;name&quot;: &quot;JONAS&quot;,
+    &quot;subordinates&quot;: [
+      {
+        &quot;name&quot;: &quot;SCARLET&quot;,
+        &quot;dept&quot;: &quot;AUDIT&quot;
+      },
+      {
+        &quot;name&quot;: &quot;FRANK&quot;,
+        &quot;dept&quot;: &quot;AUDIT&quot;
+      }
+    ]
+  },
+  {
+    &quot;name&quot;: &quot;SCARLET&quot;,
+    &quot;subordinates&quot;: [
+      {
+        &quot;name&quot;: &quot;ANDRES&quot;,
+        &quot;dept&quot;: &quot;AUDIT&quot;
+      }
+    ]
+  },
+  {
+    &quot;name&quot;: &quot;FRANK&quot;,
+    &quot;subordinates&quot;: [
+      {
+        &quot;name&quot;: &quot;SANDRINE&quot;,
+        &quot;dept&quot;: &quot;AUDIT&quot;
+      }
+    ]
+  }
+]
+</code></pre>
+<p>In the query <code>employee { name subordinates { name dept: department.name } } [exists(subordinates)]</code>, we are asking for the name and list of immediate subordinates of every employee who has any subordinates.</p>
 </div>
 <div>
 <a href="https://github.com/vinctustech/oql/tree/v1.0.0-RC.3.24/src/main/paradox/tutorial.md" title="Edit this page" class="md-source-file md-edit">

@@ -82,6 +82,7 @@ entity employee (employees) {
   job_title: text
   manager (manager_id): employee
   department (dep_id): department
+  subordinates: [employee]
 }
 
 entity department {
@@ -141,7 +142,7 @@ means that entity `employee` is also in a *many-to-one* relationship with entity
 Entities can be defined in any order. In the above attribute definition, entity `department` is being referenced even thought its definition comes after.
 @@@
 
-On line twelve within the `department` entity definition we find
+On line thirteen within the `department` entity definition we find
 
 ```
   employees: [employee]
@@ -223,3 +224,126 @@ Output:
 The query `employee { name manager: manager.name department { name } } [job_title = 'CLERK']` in the above example program is asking for the names of employees with job title "CLERK" as well as the names of their manager and department.  The query is sort-of unnatural because we're asking for the names of the manager and department in two different ways in order to demonstrate different features of OQL.
 
 In the above query, `manager: manager.name` in the projection (i.e., what's between the `{` ... `}` after the entity you're querying) says that we want to get just the string value of the name of the employee's manager, and we want the associated property name in the result object to be `manager`.  Whereas, `department { name }` says that we want a result object corresponding to the department, with implied property name `department`, but we only want the `name` property, excluding the `dep_id` property, which we would also have gotten had we simply written `department` without the `{ name }` after it.
+
+One-to-many Query
+-----------------
+
+Run the following TypeScript program:
+
+```typescript
+import { OQL } from '@vinctus/oql'
+import fs from 'fs'
+
+const oql = new OQL(
+  fs.readFileSync('data-model').toString(),
+  'localhost',
+  5432,
+  'postgres',
+  'postgres',
+  'docker',
+  false,
+  0,
+  10
+)
+
+oql
+  .queryMany(
+    `
+    employee {
+      name subordinates { name dept: department.name }
+    } [exists(subordinates)]`,
+    oql
+  )
+  .then((res: any) => console.log(JSON.stringify(res, null, 2)))
+```
+
+Output:
+
+```json
+[
+  {
+    "name": "KAYLING",
+    "subordinates": [
+      {
+        "name": "BLAZE",
+        "dept": "MARKETING"
+      },
+      {
+        "name": "CLARE",
+        "dept": "FINANCE"
+      },
+      {
+        "name": "JONAS",
+        "dept": "AUDIT"
+      }
+    ]
+  },
+  {
+    "name": "BLAZE",
+    "subordinates": [
+      {
+        "name": "ADELYN",
+        "dept": "MARKETING"
+      },
+      {
+        "name": "WADE",
+        "dept": "MARKETING"
+      },
+      {
+        "name": "MADDEN",
+        "dept": "MARKETING"
+      },
+      {
+        "name": "TUCKER",
+        "dept": "MARKETING"
+      },
+      {
+        "name": "JULIUS",
+        "dept": "MARKETING"
+      }
+    ]
+  },
+  {
+    "name": "CLARE",
+    "subordinates": [
+      {
+        "name": "MARKER",
+        "dept": "FINANCE"
+      }
+    ]
+  },
+  {
+    "name": "JONAS",
+    "subordinates": [
+      {
+        "name": "SCARLET",
+        "dept": "AUDIT"
+      },
+      {
+        "name": "FRANK",
+        "dept": "AUDIT"
+      }
+    ]
+  },
+  {
+    "name": "SCARLET",
+    "subordinates": [
+      {
+        "name": "ANDRES",
+        "dept": "AUDIT"
+      }
+    ]
+  },
+  {
+    "name": "FRANK",
+    "subordinates": [
+      {
+        "name": "SANDRINE",
+        "dept": "AUDIT"
+      }
+    ]
+  }
+]
+```
+
+In the query `employee { name subordinates { name dept: department.name } } [exists(subordinates)]`, we are asking for the name and list of immediate subordinates of every employee who has any subordinates.
