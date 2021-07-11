@@ -157,7 +157,7 @@ vinctustech/oql
     <li><a href="tutorial.html#setup-postgresql" class="header">Setup PostgreSQL</a></li>
     <li><a href="tutorial.html#create-the-database" class="header">Create the database</a></li>
     <li><a href="tutorial.html#create-the-data-model" class="header">Create the data model</a></li>
-    <li><a href="tutorial.html#first-query" class="header">First Query</a></li>
+    <li><a href="tutorial.html#many-to-one-query" class="header">Many-to-one Query</a></li>
   </ul></li>
 </ul>
 </nav>
@@ -184,7 +184,7 @@ vinctustech/oql
     <li><a href="tutorial.html#setup-postgresql" class="header">Setup PostgreSQL</a></li>
     <li><a href="tutorial.html#create-the-database" class="header">Create the database</a></li>
     <li><a href="tutorial.html#create-the-data-model" class="header">Create the data model</a></li>
-    <li><a href="tutorial.html#first-query" class="header">First Query</a></li>
+    <li><a href="tutorial.html#many-to-one-query" class="header">Many-to-one Query</a></li>
   </ul></li>
 </ul>
 </nav>
@@ -264,7 +264,7 @@ entity department {
 }
 </code></pre>
 <p>The data model describes the parts of the database available for querying. It’s not necessary to describe every field of every table in the database, only what is being retrieved with OQL. However, primary keys of tables that are being queried should always be included, even if you’re not interested in retrieving the primary keys themselves.</p>
-<p>We&rsquo;d like to look at the data model in some detail to explain what&rsquo;s going on. If you&rsquo;d rather skip ahead and get on with the tutorial, then go to <a href="tutorial.html#first-query">First Query</a>.</p>
+<p>We&rsquo;d like to look at the data model in some detail to explain what&rsquo;s going on. If you&rsquo;d rather skip ahead and get on with the tutorial, then go to <a href="tutorial.html#many-to-one-query">Many-to-one Query</a>.</p>
 <p>The above data model describes to OQL the database that we just created. There&rsquo;s an entity definition corresponding to each table in the database. Each entity has an attribute definition corresponding to each column in the corresponding table, and in OQL it&rsquo;s possible to have attributes that don&rsquo;t correspond to any declared column.</p>
 <p>The first line of the data model</p>
 <pre><code>entity employee (employees) {
@@ -292,7 +292,7 @@ entity department {
 </code></pre>
 <p>which defines an attribute called <code>employees</code> with the &ldquo;entity array&rdquo; type <code>[employee]</code>. This attribute doesn&rsquo;t correspond to any column in the table, but rather asserts the <em>one-to-many</em> relationship that entity <code>department</code> has to entity <code>employee</code>, and facilitates queries to <code>department</code> that presuppose that the relationship exists.</p><div class="callout note "><div class="callout-title">Note</div>
 <p>OQL checks the internal correctness of the entire data model. Specifically, whether entity array type attributes have a corresponding referencing entity type attribute.</p></div>
-<h2><a href="#first-query" name="first-query" class="anchor"><span class="anchor-link"></span></a>First Query</h2>
+<h2><a href="#many-to-one-query" name="many-to-one-query" class="anchor"><span class="anchor-link"></span></a>Many-to-one Query</h2>
 <p>Run the following TypeScript program:</p>
 <pre class="prettyprint"><code class="language-typescript">import { OQL } from &#39;@vinctus/oql&#39;
 import fs from &#39;fs&#39;

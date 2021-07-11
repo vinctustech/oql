@@ -93,7 +93,7 @@ entity department {
 
 The data model describes the parts of the database available for querying. It’s not necessary to describe every field of every table in the database, only what is being retrieved with OQL. However, primary keys of tables that are being queried should always be included, even if you’re not interested in retrieving the primary keys themselves.
 
-We'd like to look at the data model in some detail to explain what's going on. If you'd rather skip ahead and get on with the tutorial, then go to @ref:[First Query](#first-query).
+We'd like to look at the data model in some detail to explain what's going on. If you'd rather skip ahead and get on with the tutorial, then go to @ref:[Many-to-one Query](#many-to-one-query).
 
 The above data model describes to OQL the database that we just created. There's an entity definition corresponding to each table in the database.  Each entity has an attribute definition corresponding to each column in the corresponding table, and in OQL it's possible to have attributes that don't correspond to any declared column.
 
@@ -153,8 +153,8 @@ which defines an attribute called `employees` with the "entity array" type `[emp
 OQL checks the internal correctness of the entire data model. Specifically, whether entity array type attributes have a corresponding referencing entity type attribute.
 @@@
 
-First Query
------------
+Many-to-one Query
+-----------------
 
 Run the following TypeScript program:
 
