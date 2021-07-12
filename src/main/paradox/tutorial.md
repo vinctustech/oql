@@ -71,11 +71,13 @@ INSERT INTO employees (emp_id, emp_name, job_title, manager_id, dep_id) VALUES
 ```
 
 Entity-Relationship (ER) Model
--------------------------
+------------------------------
 
-The SQL database that we just created could be modeled using the following ER diagrams.
+The SQL database that we just created could be modeled using the following ER diagram.
 
 ![Employee ER Diagram](.../er/employee-er.png)
+
+We must now create a data model that OQL can understand which captures all the relationships (including the two relationships that the employee entity has to itself).
 
 Create the Data Model
 ---------------------
