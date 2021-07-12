@@ -236,7 +236,7 @@ The query
 
 ```
 enrollment {
-  name: student.name count(*)
+  name: student.name classes: count(*)
 } /student.id/
 ```
 

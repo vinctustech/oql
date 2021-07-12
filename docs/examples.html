@@ -389,7 +389,7 @@ oql
 </code></pre>
 <p>The query</p>
 <pre><code>enrollment {
-  name: student.name count(*)
+  name: student.name classes: count(*)
 } /student.id/
 </code></pre>
 <p>says, &ldquo;group all the students who are enrolled and show the name of each enrolled student and how many classes they are enrolled in&rdquo;.</p>
