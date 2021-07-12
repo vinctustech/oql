@@ -180,8 +180,7 @@ oql
     `
     employee { 
       name manager: manager.name department { name }
-    } [job_title = 'CLERK']`,
-    oql
+    } [job_title = 'CLERK']`
   )
   .then((res: any) => console.log(JSON.stringify(res, null, 2)))
 ```
@@ -259,8 +258,7 @@ oql
     `
     employee {
       name subordinates { name dept: department.name }
-    } [exists(subordinates)]`,
-    oql
+    } [exists(subordinates)]`
   )
   .then((res: any) => console.log(JSON.stringify(res, null, 2)))
 ```
@@ -390,8 +388,7 @@ oql
     `
     employee { 
       dept: department.name count(*)
-    } /department.dep_id/ <department.name>`,
-    oql
+    } /department.dep_id/ <department.name>`
   )
   .then((res: any) => console.log(JSON.stringify(res, null, 2)))
 ```

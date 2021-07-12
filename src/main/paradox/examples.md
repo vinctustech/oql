@@ -8,11 +8,11 @@ This example presents a very simple "student" database where students are enroll
 Get [PostgreSQL](https://hub.docker.com/_/postgres) running in a [docker container](https://www.docker.com/resources/what-container):
 
 ```
-sudo docker pull postgres
-sudo docker run --rm --name pg-docker -e POSTGRES_PASSWORD=docker -d -p 5432:5432 postgres
+docker pull postgres
+docker run --rm --name pg-docker -e POSTGRES_PASSWORD=docker -d -p 5432:5432 postgres
 ```
 
-Run the [PostgreSQL terminal](https://www.postgresql.org/docs/13.3/app-psql.html) to create a database:
+Run the [PostgreSQL terminal](https://www.postgresql.org/docs/13.3/app-psql.html) to create a database (with password "docker"):
 
 `psql -h localhost -U postgres -d postgres`
 
@@ -68,37 +68,56 @@ INSERT INTO student_class (studentid, classid, year, semester, grade) VALUES
   (2, 9, 2019, 'fall', 'B+');
 ```
 
+Crete a file called `student-data-model` and copy-paste the following text into it:
+
+```
+entity class {
+ *id: integer
+  name: text
+  students: [student] (enrollment)
+}
+
+entity student (students) {
+ *id: integer
+  name (stu_name): text
+  classes: [class] (enrollment)
+}
+
+entity enrollment (student_class) {
+  student (studentid): student
+  class (classid): class
+  year: integer
+  semester: text
+  grade: text
+}
+```
+
 Run the following TypeScript program:
 
 ```typescript
-import { OQL, PostgresConnection } from '@vinctus/oql'
+import { OQL } from '@vinctus/oql'
+import fs from 'fs'
 
-const conn = new PostgresConnection("localhost", 5432, "postgres", 'postgres', 'docker', false)
-const oql = 
-  new OQL(`
-    entity class {
-     *id: integer
-      name: text
-      students: [student] (enrollment)
-    }
-    
-    entity student (students) {
-     *id: integer
-      name (stu_name): text
-      classes: [class] (enrollment)
-    }
-    
-    entity enrollment (student_class) {
-      student (studentid): student
-      class (classid): class
-      year: integer
-      semester: text
-      grade: text
-    }
-  `)
+const oql = new OQL(
+  fs.readFileSync('student-data-model').toString(),
+  'localhost',
+  5432,
+  'postgres',
+  'postgres',
+  'docker',
+  false,
+  0,
+  10
+)
 
 oql
-  .query("student { * classes { * students <name> } <name> } [name = 'John']", conn)
+  .queryMany(
+    `
+    student {
+      * classes { * students <name> } <name>
+    } [name = 'John']
+    `
+  )
   .then((res: any) => console.log(JSON.stringify(res, null, 2)))
 ```
 
@@ -153,4 +172,12 @@ Output:
 ]
 ```
 
-The query `student { * classes { * students <name> } <name> } [name = 'John']` in the above example program is asking for the names of the students enrolled only in the classes in which John is enrolled.  Also, the query is asking for the classes and the students in each class to be ordered by class name and student name, respectively.  The `*` operator is a wildcard that stands for all attributes that do not result in an array value. 
+The query
+
+```
+student {
+  * classes { * students <name> } <name>
+} [name = 'John']
+```
+
+in the above example is asking for the names of the students enrolled only in the classes in which John is enrolled.  Also, the query is asking for the classes and the students in each class to be ordered by class name and student name, respectively.  The `*` operator is a wildcard that stands for all attributes that do not result in an array value. 
