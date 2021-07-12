@@ -28,37 +28,37 @@ class OQL_NodePG_JS(dm: String,
   def entity(name: String): JSMutation = new JSMutation(this, model.entities(name))
 
   @JSExport("showQuery")
-  def jsshowQuery(): Unit = showQuery()
+  def jsShowQuery(): Unit = showQuery()
 
   @JSExport("count")
-  def jscount(oql: String, parameters: js.UndefOr[js.Any] = js.undefined): js.Promise[Int] = count(substitute(oql, parameters)).toJSPromise
+  def jsCount(oql: String, parameters: js.UndefOr[js.Any] = js.undefined): js.Promise[Int] = count(substitute(oql, parameters)).toJSPromise
 
   @JSExport("queryOne")
-  def jsqueryOne(oql: String, parameters: js.UndefOr[js.Any] = js.undefined): js.Promise[js.UndefOr[Any]] = {
+  def jsQueryOne(oql: String, parameters: js.UndefOr[js.Any] = js.undefined): js.Promise[js.UndefOr[Any]] = {
     val subst = substitute(oql, parameters)
 
-    jsqueryOne(parseQuery(subst), subst)
+    jsQueryOne(parseQuery(subst), subst)
   }
 
-  def jsqueryOne(query: OQLQuery, oql: String): js.Promise[js.UndefOr[Any]] =
-    jsqueryMany(query, oql).toFuture map {
+  def jsQueryOne(query: OQLQuery, oql: String): js.Promise[js.UndefOr[Any]] =
+    jsQueryMany(query, oql).toFuture map {
       case a if a.length == 0 => js.undefined
       case a if a.length == 1 => a.head
       case _                  => sys.error(s"queryOne: more than one row was found")
     } toJSPromise
 
   @JSExport("queryMany")
-  def jsqueryMany(oql: String, parameters: js.UndefOr[js.Any] = js.undefined): js.Promise[js.Array[js.Any]] = {
+  def jsQueryMany(oql: String, parameters: js.UndefOr[js.Any] = js.undefined): js.Promise[js.Array[js.Any]] = {
     val subst = substitute(oql, parameters)
 
-    jsqueryMany(parseQuery(subst), subst)
+    jsQueryMany(parseQuery(subst), subst)
   }
 
-  def jsqueryMany(query: OQLQuery, oql: String): js.Promise[js.Array[js.Any]] =
+  def jsQueryMany(query: OQLQuery, oql: String): js.Promise[js.Array[js.Any]] =
     queryMany(query, oql, () => new JSResultBuilder).map(_.arrayResult.asInstanceOf[js.Array[js.Any]]).toJSPromise
 
   @JSExport("queryBuilder")
-  def jsqueryBuilder() = new JSQueryBuilder(this, OQLQuery(null, null, null, List(StarOQLProject), None, None, None, None, None))
+  def jsQueryBuilder() = new JSQueryBuilder(this, OQLQuery(null, null, null, List(StarOQLProject), None, None, None, None, None))
 
   @JSExport
   def raw(sql: String, values: js.UndefOr[js.Array[js.Any]]): js.Promise[js.Array[js.Any]] =

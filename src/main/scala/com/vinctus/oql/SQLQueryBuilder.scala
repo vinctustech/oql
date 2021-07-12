@@ -134,7 +134,7 @@ class SQLQueryBuilder(oql: String, ds: SQLDataSource, val margin: Int = 0, subqu
         s"CASE ${whens map {
           case OQLWhen(cond, expr) =>
             s"WHEN ${expression(cond, table)} THEN ${expression(expr, table)}"
-        } mkString}${if (els.isDefined) s" ELSE ${expression(els.get, table)}" else ""} END"
+        } mkString " "}${if (els.isDefined) s" ELSE ${expression(els.get, table)}" else ""} END"
     }
   }
 

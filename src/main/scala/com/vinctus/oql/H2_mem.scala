@@ -35,7 +35,13 @@ class H2_mem extends JDBCDataSource("org.h2.Driver") {
   val rowSequenceFunctionEnd: String = " NULL ON NULL)"
   val typeFunction: Option[String] = None
   val convertFunction: Option[String] = Some("CONVERT(?, VARCHAR)")
-  val functionReturnType = Map("count" -> BigintType)
+  val functionReturnType: Map[(String, Int), List[DataType] => DataType] =
+    Map[(String, Int), List[DataType] => DataType](
+      ("count", 1) -> (_ => BigintType),
+      ("min", 1) -> (_.head),
+      ("max", 1) -> (_.head),
+      ("avg", 1) -> (_ => FloatType)
+    )
   val builtinVariables = Map("CURRENT_DATE" -> DateType, "CURRENT_TIMESTAMP" -> TimestampType, "CURRENT_TIME" -> TimeType)
 
   def reverseMapType(typ: String): DataType = null

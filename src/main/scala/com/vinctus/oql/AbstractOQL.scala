@@ -271,14 +271,14 @@ object AbstractOQL {
       case e @ ApplyOQLExpression(f, args) =>
         args foreach _decorate
 
-        ds.functionReturnType get f.s.toLowerCase match {
+        ds.functionReturnType get (f.s.toLowerCase, args.length) match {
           case None =>
             val n = f.s.toLowerCase
 
             if ((n == "sum" || n == "avg" || n == "min" || n == "max") && args.length == 1)
               e.typ = args.head.typ
 
-          case Some(t) => e.typ = t
+          case Some(t) => e.typ = t(args map (_.typ))
         }
       case BetweenOQLExpression(expr, op, lower, upper) =>
         _decorate(expr)

@@ -1,0 +1,6 @@
+CREATE TABLE t (
+  id SERIAL PRIMARY KEY,
+  n INTEGER
+  );
+
+INSERT INTO t (n) VALUES (1), (3), (4), (7);

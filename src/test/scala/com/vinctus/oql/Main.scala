@@ -45,6 +45,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.scalajs.js
 import js.Dynamic.{global => g}
 import scala.util.{Failure, Success}
+import scala.async.Async.{async, await}
 
 object Main extends App {
 
@@ -52,39 +53,54 @@ object Main extends App {
 
   val dm: String =
     """
-      |entity t {
-      | *id: int
-      |  s: text
-      |}
-      |""".stripMargin
+        |entity t {
+        | *id: int
+        |  n: int
+        |}
+        |""".stripMargin
   val db = new OQL_NodePG_JS(dm, "localhost", 5432, "postgres", "postgres", "docker", false, 1000, 5)
 
   db.showQuery()
-  db.entity("t").jsInsert(js.Dictionary("s" -> "asdf'zxcv")).toFuture onComplete {
-    case Success(value) =>
-      console.log(value)
 
-      val id = value.asInstanceOf[js.Dictionary[Int]]("id")
-
-      db.jsqueryMany("t").toFuture onComplete {
-        case Success(value) =>
-          console.log(value)
-
-          db.showQuery()
-          db.entity("t").jsUpdate(id, js.Dictionary("s" -> "this is\nanother test")).toFuture onComplete {
-            case Success(value) =>
-              console.log(value)
-
-              db.jsqueryMany("t").toFuture onComplete {
-                case Success(value)     => console.log(value)
-                case Failure(exception) => exception.printStackTrace()
-              }
-            case Failure(exception) => exception.printStackTrace()
-          }
-        case Failure(exception) => exception.printStackTrace()
-      }
-    case Failure(exception) => exception.printStackTrace()
+  async {
+    console.log(await(db.jsQueryMany("""t { average: avg(n) }""").toFuture))
   }
+
+//  val dm: String =
+//    """
+//      |entity t {
+//      | *id: int
+//      |  s: text
+//      |}
+//      |""".stripMargin
+//  val db = new OQL_NodePG_JS(dm, "localhost", 5432, "postgres", "postgres", "docker", false, 1000, 5)
+//
+//  db.showQuery()
+//  db.entity("t").jsInsert(js.Dictionary("s" -> "asdf'zxcv")).toFuture onComplete {
+//    case Success(value) =>
+//      console.log(value)
+//
+//      val id = value.asInstanceOf[js.Dictionary[Int]]("id")
+//
+//      db.jsqueryMany("t").toFuture onComplete {
+//        case Success(value) =>
+//          console.log(value)
+//
+//          db.showQuery()
+//          db.entity("t").jsUpdate(id, js.Dictionary("s" -> "this is\nanother test")).toFuture onComplete {
+//            case Success(value) =>
+//              console.log(value)
+//
+//              db.jsqueryMany("t").toFuture onComplete {
+//                case Success(value)     => console.log(value)
+//                case Failure(exception) => exception.printStackTrace()
+//              }
+//            case Failure(exception) => exception.printStackTrace()
+//          }
+//        case Failure(exception) => exception.printStackTrace()
+//      }
+//    case Failure(exception) => exception.printStackTrace()
+//  }
 
 }
 

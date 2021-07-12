@@ -40,7 +40,7 @@ trait SQLDataSource extends OQLDataSource {
   val resultArrayFunctionEnd: String
   val rowSequenceFunctionStart: String
   val rowSequenceFunctionEnd: String
-  val functionReturnType: Map[String, DataType]
+  val functionReturnType: Map[(String, Int), List[DataType] => DataType]
 
   def reverseMapType(typ: String): DataType
 
