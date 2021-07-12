@@ -186,3 +186,58 @@ student {
 
 in the above example is asking for the names of the students enrolled only in the classes in which John is enrolled.  Also, the query is asking for the classes and the students in each class to be ordered by class name and student name, respectively.  The `*` operator is a wildcard that stands for all attributes that do not result in an array value. 
 
+With entities that are in a many-to-many relationship, it is possible to query the junction entity that is between them.
+
+Run the following TypeScript program:
+
+```typescript
+import { OQL } from '@vinctus/oql'
+import fs from 'fs'
+
+const oql = new OQL(
+  fs.readFileSync('student-data-model').toString(),
+  'localhost',
+  5432,
+  'postgres',
+  'postgres',
+  'docker',
+  false,
+  0,
+  10
+)
+
+oql
+  .queryMany(
+    `
+    enrollment {
+      name: student.name count(*)
+    } /student.id/
+    `
+  )
+  .then((res: any) => console.log(JSON.stringify(res, null, 2)))
+```
+
+Output:
+
+```json
+[
+  {
+    "name": "Debbie",
+    "classes": 4
+  },
+  {
+    "name": "John",
+    "classes": 3
+  }
+]
+```
+
+The query
+
+```
+enrollment {
+  name: student.name count(*)
+} /student.id/
+```
+
+says, "group all the students who are enrolled and show the name of each enrolled student and how many classes they are enrolled in".

@@ -348,6 +348,51 @@ oql
 } [name = &#39;John&#39;]
 </code></pre>
 <p>in the above example is asking for the names of the students enrolled only in the classes in which John is enrolled. Also, the query is asking for the classes and the students in each class to be ordered by class name and student name, respectively. The <code>*</code> operator is a wildcard that stands for all attributes that do not result in an array value. </p>
+<p>With entities that are in a many-to-many relationship, it is possible to query the junction entity that is between them.</p>
+<p>Run the following TypeScript program:</p>
+<pre class="prettyprint"><code class="language-typescript">import { OQL } from &#39;@vinctus/oql&#39;
+import fs from &#39;fs&#39;
+
+const oql = new OQL(
+  fs.readFileSync(&#39;student-data-model&#39;).toString(),
+  &#39;localhost&#39;,
+  5432,
+  &#39;postgres&#39;,
+  &#39;postgres&#39;,
+  &#39;docker&#39;,
+  false,
+  0,
+  10
+)
+
+oql
+  .queryMany(
+    `
+    enrollment {
+      name: student.name count(*)
+    } /student.id/
+    `
+  )
+  .then((res: any) =&gt; console.log(JSON.stringify(res, null, 2)))
+</code></pre>
+<p>Output:</p>
+<pre class="prettyprint"><code class="language-json">[
+  {
+    &quot;name&quot;: &quot;Debbie&quot;,
+    &quot;classes&quot;: 4
+  },
+  {
+    &quot;name&quot;: &quot;John&quot;,
+    &quot;classes&quot;: 3
+  }
+]
+</code></pre>
+<p>The query</p>
+<pre><code>enrollment {
+  name: student.name count(*)
+} /student.id/
+</code></pre>
+<p>says, &ldquo;group all the students who are enrolled and show the name of each enrolled student and how many classes they are enrolled in&rdquo;.</p>
 </div>
 <div>
 <a href="https://github.com/vinctustech/oql/tree/v1.0.0-RC.3.24/src/main/paradox/examples.md" title="Edit this page" class="md-source-file md-edit">
