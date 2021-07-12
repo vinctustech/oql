@@ -156,7 +156,8 @@ vinctustech/oql
   <ul>
     <li><a href="tutorial.html#setup-postgresql" class="header">Setup PostgreSQL</a></li>
     <li><a href="tutorial.html#create-the-database" class="header">Create the database</a></li>
-    <li><a href="tutorial.html#create-the-data-model" class="header">Create the data model</a></li>
+    <li><a href="tutorial.html#entity-relationship-er-model" class="header">Entity-Relationship (ER) Model</a></li>
+    <li><a href="tutorial.html#create-the-data-model" class="header">Create the Data Model</a></li>
     <li><a href="tutorial.html#many-to-one-query" class="header">Many-to-one Query</a></li>
     <li><a href="tutorial.html#one-to-many-query" class="header">One-to-many Query</a></li>
     <li><a href="tutorial.html#grouping-query" class="header">Grouping Query</a></li>
@@ -185,7 +186,8 @@ vinctustech/oql
   <ul>
     <li><a href="tutorial.html#setup-postgresql" class="header">Setup PostgreSQL</a></li>
     <li><a href="tutorial.html#create-the-database" class="header">Create the database</a></li>
-    <li><a href="tutorial.html#create-the-data-model" class="header">Create the data model</a></li>
+    <li><a href="tutorial.html#entity-relationship-er-model" class="header">Entity-Relationship (ER) Model</a></li>
+    <li><a href="tutorial.html#create-the-data-model" class="header">Create the Data Model</a></li>
     <li><a href="tutorial.html#many-to-one-query" class="header">Many-to-one Query</a></li>
     <li><a href="tutorial.html#one-to-many-query" class="header">One-to-many Query</a></li>
     <li><a href="tutorial.html#grouping-query" class="header">Grouping Query</a></li>
@@ -251,7 +253,10 @@ INSERT INTO employees (emp_id, emp_name, job_title, manager_id, dep_id) VALUES
   (69000, &#39;JULIUS&#39;, &#39;CLERK&#39;, 66928, 3001),
   (69324, &#39;MARKER&#39;, &#39;CLERK&#39;, 67832, 1001);
 </code></pre>
-<h2><a href="#create-the-data-model" name="create-the-data-model" class="anchor"><span class="anchor-link"></span></a>Create the data model</h2>
+<h2><a href="#entity-relationship-er-model" name="entity-relationship-er-model" class="anchor"><span class="anchor-link"></span></a>Entity-Relationship (ER) Model</h2>
+<p>The SQL database that we just created could be modeled using the following ER diagrams.</p>
+<p><img src="assets/images/er/employee-er.png" alt="Employee ER Diagram" /></p>
+<h2><a href="#create-the-data-model" name="create-the-data-model" class="anchor"><span class="anchor-link"></span></a>Create the Data Model</h2>
 <p>Create a text file called <code>data-model</code> and copy the following text into it.</p>
 <pre><code>entity employee (employees) {
  *emp_id: integer

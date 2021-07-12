@@ -70,7 +70,14 @@ INSERT INTO employees (emp_id, emp_name, job_title, manager_id, dep_id) VALUES
   (69324, 'MARKER', 'CLERK', 67832, 1001);
 ```
 
-Create the data model
+Entity-Relationship (ER) Model
+-------------------------
+
+The SQL database that we just created could be modeled using the following ER diagrams.
+
+![Employee ER Diagram](.../er/employee-er.png)
+
+Create the Data Model
 ---------------------
 
 Create a text file called `data-model` and copy the following text into it.
