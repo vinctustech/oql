@@ -163,7 +163,7 @@ vinctustech/oql
 <ul style="display: none">
 <li class="md-nav__item md-version" id="project.version">
 <label class="md-nav__link" for="__version">
-<i class="md-icon" title="Version">label_outline</i> 1.0.0-RC.3.24
+<i class="md-icon" title="Version">label_outline</i> 1.0.0-RC.3.25
 </label>
 </li>
 </ul>
@@ -369,7 +369,19 @@ oql
   .queryMany(
     `
     enrollment {
-      name: student.name classes: count(*)
+      name: student.name
+      classes: count(*)
+      GPA: avg(
+        case
+          when grade = &#39;A-&#39; then 3.7
+          when grade = &#39;A&#39; then 4
+          when grade = &#39;A+&#39; then 4.3
+          when grade = &#39;B-&#39; then 2.7
+          when grade = &#39;B&#39; then 3
+          when grade = &#39;B+&#39; then 3.3
+          when grade = &#39;F&#39; then 0
+        end
+        )
     } /student.id/
     `
   )
@@ -379,29 +391,43 @@ oql
 <pre class="prettyprint"><code class="language-json">[
   {
     &quot;name&quot;: &quot;Debbie&quot;,
-    &quot;classes&quot;: 4
+    &quot;classes&quot;: 4,
+    &quot;GPA&quot;: 3.5
   },
   {
     &quot;name&quot;: &quot;John&quot;,
-    &quot;classes&quot;: 3
+    &quot;classes&quot;: 3,
+    &quot;GPA&quot;: 2.433333333333333
   }
 ]
 </code></pre>
 <p>The query</p>
 <pre><code>enrollment {
-  name: student.name classes: count(*)
+  name: student.name
+  classes: count(*)
+  GPA: avg(
+    case
+      when grade = &#39;A-&#39; then 3.7
+      when grade = &#39;A&#39; then 4
+      when grade = &#39;A+&#39; then 4.3
+      when grade = &#39;B-&#39; then 2.7
+      when grade = &#39;B&#39; then 3
+      when grade = &#39;B+&#39; then 3.3
+      when grade = &#39;F&#39; then 0
+    end
+    )
 } /student.id/
 </code></pre>
-<p>says, &ldquo;group all the students who are enrolled and show the name of each enrolled student and how many classes they are enrolled in&rdquo;.</p>
+<p>says, &ldquo;group all the students who are enrolled and show the name of each enrolled student, how many classes they are enrolled in, and their grade point average&rdquo;.</p>
 </div>
 <div>
-<a href="https://github.com/vinctustech/oql/tree/v1.0.0-RC.3.24/src/main/paradox/examples.md" title="Edit this page" class="md-source-file md-edit">
+<a href="https://github.com/vinctustech/oql/tree/v1.0.0-RC.3.25/src/main/paradox/examples.md" title="Edit this page" class="md-source-file md-edit">
 Edit this page
 </a>
 </div>
 <div class="print-only">
 <span class="md-source-file md-version">
-1.0.0-RC.3.24
+1.0.0-RC.3.25
 </span>
 </div>
 </article>

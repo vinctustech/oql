@@ -1,6 +1,12 @@
 Release Notes
 =============
 
+1.0.0-RC.3.25
+-------------
+
+- fix `CASE` construction rendering to SQL
+- fix function type resolution
+
 1.0.0-RC.3.24
 -------------
 
@@ -15,7 +21,7 @@ Changes include:
 1.0.0-RC.3.23
 -------------
 
-- second feature-complete release candidate with no known bugs
+- second feature-complete release candidate
 - fixed a regression: escaping an apostrophe
 
 1.0.0-RC.3.22

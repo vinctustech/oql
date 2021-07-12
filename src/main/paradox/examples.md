@@ -210,7 +210,19 @@ oql
   .queryMany(
     `
     enrollment {
-      name: student.name classes: count(*)
+      name: student.name
+      classes: count(*)
+      GPA: avg(
+        case
+          when grade = 'A-' then 3.7
+          when grade = 'A' then 4
+          when grade = 'A+' then 4.3
+          when grade = 'B-' then 2.7
+          when grade = 'B' then 3
+          when grade = 'B+' then 3.3
+          when grade = 'F' then 0
+        end
+        )
     } /student.id/
     `
   )
@@ -223,11 +235,13 @@ Output:
 [
   {
     "name": "Debbie",
-    "classes": 4
+    "classes": 4,
+    "GPA": 3.5
   },
   {
     "name": "John",
-    "classes": 3
+    "classes": 3,
+    "GPA": 2.433333333333333
   }
 ]
 ```
@@ -236,8 +250,20 @@ The query
 
 ```
 enrollment {
-  name: student.name classes: count(*)
+  name: student.name
+  classes: count(*)
+  GPA: avg(
+    case
+      when grade = 'A-' then 3.7
+      when grade = 'A' then 4
+      when grade = 'A+' then 4.3
+      when grade = 'B-' then 2.7
+      when grade = 'B' then 3
+      when grade = 'B+' then 3.3
+      when grade = 'F' then 0
+    end
+    )
 } /student.id/
 ```
 
-says, "group all the students who are enrolled and show the name of each enrolled student and how many classes they are enrolled in".
+says, "group all the students who are enrolled and show the name of each enrolled student, how many classes they are enrolled in, and their grade point average".
