@@ -193,10 +193,10 @@ vinctustech/oql
 <h3><a href="#example-many-to-many-" name="example-many-to-many-" class="anchor"><span class="anchor-link"></span></a>Example (many-to-many)</h3>
 <p>This example presents a very simple &ldquo;student&rdquo; database where students are enrolled in classes, so that the students and classes are in a <em>many-to-many</em> relationship. The example has tables and fields that are intentionally poorly named so as to demonstrate the aliasing features of the database modeling language.</p>
 <p>Get <a href="https://hub.docker.com/_/postgres">PostgreSQL</a> running in a <a href="https://www.docker.com/resources/what-container">docker container</a>:</p>
-<pre><code>sudo docker pull postgres
-sudo docker run --rm --name pg-docker -e POSTGRES_PASSWORD=docker -d -p 5432:5432 postgres
+<pre><code>docker pull postgres
+docker run --rm --name pg-docker -e POSTGRES_PASSWORD=docker -d -p 5432:5432 postgres
 </code></pre>
-<p>Run the <a href="https://www.postgresql.org/docs/13.3/app-psql.html">PostgreSQL terminal</a> to create a database:</p>
+<p>Run the <a href="https://www.postgresql.org/docs/13.3/app-psql.html">PostgreSQL terminal</a> to create a database (with password &ldquo;docker&rdquo;):</p>
 <p><code>psql -h localhost -U postgres -d postgres</code></p>
 <p>which can be installed if necessary with the command</p>
 <p><code>sudo apt-get install postgresql-client</code></p>
@@ -245,35 +245,51 @@ INSERT INTO student_class (studentid, classid, year, semester, grade) VALUES
   (2, 5, 2018, &#39;summer&#39;, &#39;A-&#39;),
   (2, 9, 2019, &#39;fall&#39;, &#39;B+&#39;);
 </code></pre>
-<p>Run the following TypeScript program:</p>
-<pre class="prettyprint"><code class="language-typescript">import { OQL, PostgresConnection } from &#39;@vinctus/oql&#39;
+<p>Crete a file called <code>student-data-model</code> and copy-paste the following text into it:</p>
+<pre><code>entity class {
+ *id: integer
+  name: text
+  students: [student] (enrollment)
+}
 
-const conn = new PostgresConnection(&quot;localhost&quot;, 5432, &quot;postgres&quot;, &#39;postgres&#39;, &#39;docker&#39;, false)
-const oql = 
-  new OQL(`
-    entity class {
-     *id: integer
-      name: text
-      students: [student] (enrollment)
-    }
-    
-    entity student (students) {
-     *id: integer
-      name (stu_name): text
-      classes: [class] (enrollment)
-    }
-    
-    entity enrollment (student_class) {
-      student (studentid): student
-      class (classid): class
-      year: integer
-      semester: text
-      grade: text
-    }
-  `)
+entity student (students) {
+ *id: integer
+  name (stu_name): text
+  classes: [class] (enrollment)
+}
+
+entity enrollment (student_class) {
+  student (studentid): student
+  class (classid): class
+  year: integer
+  semester: text
+  grade: text
+}
+</code></pre>
+<p>Run the following TypeScript program:</p>
+<pre class="prettyprint"><code class="language-typescript">import { OQL } from &#39;@vinctus/oql&#39;
+import fs from &#39;fs&#39;
+
+const oql = new OQL(
+  fs.readFileSync(&#39;student-data-model&#39;).toString(),
+  &#39;localhost&#39;,
+  5432,
+  &#39;postgres&#39;,
+  &#39;postgres&#39;,
+  &#39;docker&#39;,
+  false,
+  0,
+  10
+)
 
 oql
-  .query(&quot;student { * classes { * students &lt;name&gt; } &lt;name&gt; } [name = &#39;John&#39;]&quot;, conn)
+  .queryMany(
+    `
+    student {
+      * classes { * students &lt;name&gt; } &lt;name&gt;
+    } [name = &#39;John&#39;]
+    `
+  )
   .then((res: any) =&gt; console.log(JSON.stringify(res, null, 2)))
 </code></pre>
 <p>Output:</p>
@@ -324,7 +340,12 @@ oql
   }
 ]
 </code></pre>
-<p>The query <code>student { * classes { * students &lt;name&gt; } &lt;name&gt; } [name = &#39;John&#39;]</code> in the above example program is asking for the names of the students enrolled only in the classes in which John is enrolled. Also, the query is asking for the classes and the students in each class to be ordered by class name and student name, respectively. The <code>*</code> operator is a wildcard that stands for all attributes that do not result in an array value. </p>
+<p>The query</p>
+<pre><code>student {
+  * classes { * students &lt;name&gt; } &lt;name&gt;
+} [name = &#39;John&#39;]
+</code></pre>
+<p>in the above example is asking for the names of the students enrolled only in the classes in which John is enrolled. Also, the query is asking for the classes and the students in each class to be ordered by class name and student name, respectively. The <code>*</code> operator is a wildcard that stands for all attributes that do not result in an array value. </p>
 </div>
 <div>
 <a href="https://github.com/vinctustech/oql/tree/v1.0.0-RC.3.24/src/main/paradox/examples.md" title="Edit this page" class="md-source-file md-edit">

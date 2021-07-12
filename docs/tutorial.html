@@ -319,8 +319,7 @@ oql
     `
     employee { 
       name manager: manager.name department { name }
-    } [job_title = &#39;CLERK&#39;]`,
-    oql
+    } [job_title = &#39;CLERK&#39;]`
   )
   .then((res: any) =&gt; console.log(JSON.stringify(res, null, 2)))
 </code></pre>
@@ -385,8 +384,7 @@ oql
     `
     employee {
       name subordinates { name dept: department.name }
-    } [exists(subordinates)]`,
-    oql
+    } [exists(subordinates)]`
   )
   .then((res: any) =&gt; console.log(JSON.stringify(res, null, 2)))
 </code></pre>
@@ -504,8 +502,7 @@ oql
     `
     employee { 
       dept: department.name count(*)
-    } /department.dep_id/ &lt;department.name&gt;`,
-    oql
+    } /department.dep_id/ &lt;department.name&gt;`
   )
   .then((res: any) =&gt; console.log(JSON.stringify(res, null, 2)))
 </code></pre>
