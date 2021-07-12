@@ -245,7 +245,9 @@ INSERT INTO student_class (studentid, classid, year, semester, grade) VALUES
   (2, 5, 2018, &#39;summer&#39;, &#39;A-&#39;),
   (2, 9, 2019, &#39;fall&#39;, &#39;B+&#39;);
 </code></pre>
-<p>Crete a file called <code>student-data-model</code> and copy-paste the following text into it:</p>
+<p>The above database can be modelled using the following diagram:</p>
+<p><img src="assets/images/er/student-er.png" alt="Student ER Diagram" /></p>
+<p>Create a file called <code>student-data-model</code> and copy-paste the following text into it:</p>
 <pre><code>entity class {
  *id: integer
   name: text

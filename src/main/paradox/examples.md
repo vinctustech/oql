@@ -68,7 +68,11 @@ INSERT INTO student_class (studentid, classid, year, semester, grade) VALUES
   (2, 9, 2019, 'fall', 'B+');
 ```
 
-Crete a file called `student-data-model` and copy-paste the following text into it:
+The above database can be modelled using the following diagram:
+
+![Student ER Diagram](.../er/student-er.png)
+
+Create a file called `student-data-model` and copy-paste the following text into it:
 
 ```
 entity class {
