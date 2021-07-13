@@ -13,7 +13,7 @@ trait Test {
     DB values:
 
     "h2": H2 in memory database
-    "pg": PostgreSQL in a docker container called "pg-docker" listening on port 5432 (password: "docker")
+    "pg": PostgreSQL in a docker container called "start" listening on port 5432 (password: "docker")
           terminal command: `psql -h localhost -U postgres -d postgres`
    */
   val DB = "pg"
@@ -21,9 +21,9 @@ trait Test {
   val ds: SQLDataSource =
     DB match {
       case "pg" =>
-        "docker container stop pg-docker" !
+        "docker container stop start" !
 
-        "docker run --rm --name pg-docker -e POSTGRES_PASSWORD=docker -d -p 5432:5432 postgres" !
+        "docker run --rm --name start -e POSTGRES_PASSWORD=docker -d -p 5432:5432 postgres" !
 
         Thread.sleep(2000)
 
