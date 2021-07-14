@@ -256,7 +256,7 @@ class Mutation private[oql] (oql: AbstractOQL, entity: Entity) {
     } mkString ", "}\n"
     command append s"  FROM  (VALUES ${updates map {
       case (id, update) => s"(${oql.render(id)}, ${keys map (update andThen oql.render _) mkString ", "})"
-    } mkString ", "}) AS __data__ (${keys mkString ", "})\n"
+    } mkString ", "}) AS __data__ (${entity.pk.get.column}, ${keys mkString ", "})\n"
     command append s"  WHERE ${entity.table}.${entity.pk.get.column} = __data__.${entity.pk.get.column}\n"
     oql.show(command.toString)
 

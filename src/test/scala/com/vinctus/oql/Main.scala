@@ -17,10 +17,12 @@ object Main extends App {
     new OQL_NodePG(g.require("fs").readFileSync("test/int.dm").toString, "localhost", 5432, "postgres", "postgres", "docker", false, 1000, 5)
 
   async {
-//    db.showQuery()
-//    await(db.entity("t").insert(Map("s" -> "asdf'zxcv")))
     db.showQuery()
-    println(await(db.queryMany("""account""")))
+    await(db.entity("t").bulkUpdate(List(1 -> Map("n" -> 101), 2 -> Map("n" -> 102))))
+    db.showQuery()
+    println(await(db.queryMany("""t""")))
+  } recover {
+    case e: Exception => println(e)
   }
 
 }
