@@ -25,9 +25,7 @@ CREATE TABLE users_stores (
 CREATE TABLE vehicle (
   id SERIAL PRIMARY KEY,
   driver INTEGER,
-  type TEXT,
   make TEXT,
-  model TEXT,
   store INTEGER
   );
 
@@ -66,4 +64,8 @@ INSERT INTO account (name) VALUES
 INSERT INTO store (name, account) VALUES
   ('sto1acc1', 1),
   ('sto1acc2', 2);
+
+INSERT INTO vehicle (make, store) VALUES
+  ('veh1sto1acc1', 1),
+  ('veh1sto1acc2', 2);
 

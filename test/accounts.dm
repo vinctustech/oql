@@ -32,9 +32,7 @@ entity users_stores {
 entity vehicle {
  *id: int
   driver: user
-  type: text!
   make: text!
-  model: text!
   store: store!
   trips: [trip]
 }
