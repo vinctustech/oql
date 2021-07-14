@@ -35,4 +35,10 @@ class JSMutation private[oql] (oql: OQL_NodePG_JS, entity: Entity) extends Mutat
   def jsUpdate(e: js.Any, updates: js.Any): js.Promise[Unit] =
     update(if (jsObject(e)) e.asInstanceOf[js.Dictionary[Any]](entity.pk.get.name) else e, toMap(updates)).toJSPromise
 
+  @JSExport("bulkUpdate")
+  def jsBulkUpdate(updates: js.Array[js.Array[js.Any]]): js.Promise[Unit] =
+    bulkUpdate(updates.toList map { (u: js.Array[js.Any]) =>
+      (if (jsObject(u.head)) u.head.asInstanceOf[js.Dictionary[Any]](entity.pk.get.name) else u.head) -> toMap(u.tail.head)
+    }).toJSPromise
+
 }

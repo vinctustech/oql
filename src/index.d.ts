@@ -36,6 +36,8 @@ export class Mutation {
 
   update(id: any, updates: any): Promise<void>
 
+  bulkUpdate(updates: [any, any][]): Promise<void>
+
   delete(id: any): Promise<void>
 
 }
