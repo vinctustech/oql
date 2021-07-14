@@ -64,7 +64,7 @@ abstract class AbstractOQL(dm: String, val ds: SQLDataSource, conv: Conversions)
     query.select foreach (decorate(query.entity, _, model, ds, oql))
     query.group foreach (_ foreach (decorate(query.entity, _, model, ds, oql)))
 
-    queryMany(query.copy(order = None), oql, () => new ScalaResultBuilder) map {
+    queryMany(query.copy(order = None), oql, () => new ScalaResultBuilder, null) map {
       _.arrayResult match {
         case Nil       => sys.error("count: zero rows were found")
         case List(row) => row.asInstanceOf[Map[String, Number]]("count").intValue()
@@ -87,7 +87,7 @@ abstract class AbstractOQL(dm: String, val ds: SQLDataSource, conv: Conversions)
   private[oql] def exec: Boolean = !_transpileOnly
 
   def queryOne(q: OQLQuery, oql: String): Future[Option[DynamicMap]] =
-    queryMany(q, oql, () => new SJSResultBuilder) map {
+    queryMany(q, oql, () => new SJSResultBuilder, null) map {
       _.arrayResult match {
         case Nil       => None
         case List(row) => Some(row.asInstanceOf[DynamicMap])
@@ -95,15 +95,19 @@ abstract class AbstractOQL(dm: String, val ds: SQLDataSource, conv: Conversions)
       }
     }
 
-  def queryMany(oql: String, newResultBuilder: () => ResultBuilder): Future[ResultBuilder] =
-    queryMany(parseQuery(oql), oql, newResultBuilder)
+  protected def fixedEntity(entity: String, value: Any): Fixed =
+    if (entity ne null) Fixed(operative = true, model.entities(entity), value)
+    else Fixed(operative = false)
 
-  def queryMany(query: OQLQuery, oql: String, newResultBuilder: () => ResultBuilder): Future[ResultBuilder] = {
+  def queryMany(oql: String, newResultBuilder: () => ResultBuilder, fixed: Fixed): Future[ResultBuilder] =
+    queryMany(parseQuery(oql), oql, newResultBuilder, fixed)
+
+  def queryMany(query: OQLQuery, oql: String, newResultBuilder: () => ResultBuilder, fixed: Fixed): Future[ResultBuilder] = {
     val root: ResultNode = ResultNode(query, objectNode(query.project))
-    val sqlBuilder = new SQLQueryBuilder(oql, ds)
+    val sqlBuilder = new SQLQueryBuilder(oql, ds, fixed)
 
 //    println(prettyPrint(root))
-    writeQuery(root, null, Left(sqlBuilder), oql, ds)
+    writeQuery(root, null, Left(sqlBuilder), oql, ds, fixed)
 
     val sql = sqlBuilder.toString
 
@@ -356,7 +360,7 @@ object AbstractOQL {
     query.project foreach {
       case proj @ QueryOQLProject(label, query) =>
         map(label.s) = entity.attributes get query.source.s match {
-          case Some(Attribute(name, column, pk, required, typ: DataType)) =>
+          case Some(Attribute(_, _, _, _, _: DataType)) => // an attribute with a DataType
             val attr = AttributeOQLExpression(List(query.source), null)
 
             decorate(entity, attr, model, ds, oql) // todo: should be done without call to 'decorate' because we have the attribute instance
@@ -426,16 +430,26 @@ object AbstractOQL {
     query
   }
 
-  private[oql] def writeQuery(node: Node, table: String, builder: Either[SQLQueryBuilder, Int], oql: String, ds: SQLDataSource): SQLQueryBuilder =
+  private[oql] def writeQuery(node: Node,
+                              table: String,
+                              builder: Either[SQLQueryBuilder, Int],
+                              oql: String,
+                              ds: SQLDataSource,
+                              fixed: Fixed): SQLQueryBuilder =
     node match {
       case ResultNode(query, element) =>
         builder.left.toOption.get.table(query.entity.table, None)
         query.select foreach (builder.left.toOption.get.select(_, query.entity.table))
+
+        // generate condition for fixed entity if necessary
+        if (fixed.operative && fixed.entity == query.entity)
+          builder.left.toOption.get.select(RawOQLExpression(s""""${query.entity.table}"."${query.entity.pk.get.column}" = ${fixed.at}"""), null)
+
         query.group foreach (builder.left.toOption.get.group(_, query.entity.table))
         query.order foreach (builder.left.toOption.get.order(_, query.entity.table))
         query.limit foreach builder.left.toOption.get.limit
         query.offset foreach builder.left.toOption.get.offset
-        writeQuery(element, query.entity.table, builder, oql, ds)
+        writeQuery(element, query.entity.table, builder, oql, ds, fixed: Fixed)
         builder.left.toOption.get
       case e @ ValueNode(expr) =>
         val (idx, typed) = builder.left.toOption.get.projectValue(expr, table)
@@ -444,7 +458,7 @@ object AbstractOQL {
         e.typed = typed
         builder.left.toOption.get
       case ObjectNode(properties) =>
-        properties foreach { case (_, e) => writeQuery(e, table, builder, oql, ds) }
+        properties foreach { case (_, e) => writeQuery(e, table, builder, oql, ds, fixed: Fixed) }
         builder.left.toOption.get
       case n @ ManyToOneNode(OQLQuery(_, entity, attr @ Attribute(name, column, pk, required, ManyToOneType(mtoEntity)), _, _, _, _, _, _),
                              element) =>
@@ -460,7 +474,7 @@ object AbstractOQL {
         }
 
         builder.left.toOption.get.leftJoin(table, column, entity.table, alias, entity.pk.get.column)
-        writeQuery(element, alias, builder, oql, ds)
+        writeQuery(element, alias, builder, oql, ds, fixed: Fixed)
         // todo: check query sections (i.e. order) that don't apply to many-to-one
         builder.left.toOption.get
       case n @ ManyToManyNode(OQLQuery(_,
@@ -476,15 +490,15 @@ object AbstractOQL {
         val alias = s"$table$$$name"
         val subquery =
           if (builder.isLeft)
-            new SQLQueryBuilder(oql, ds, builder.left.toOption.get.margin + 2 * SQLQueryBuilder.INDENT)
-          else new SQLQueryBuilder(oql, ds, builder.toOption.get, true)
+            new SQLQueryBuilder(oql, ds, fixed, builder.left.toOption.get.margin + 2 * SQLQueryBuilder.INDENT)
+          else new SQLQueryBuilder(oql, ds, fixed, builder.toOption.get, true)
         val joinAlias = s"$alias$$${targetAttr.name}"
 
         if (builder.isLeft)
           n.idx = builder.left.toOption.get.projectQuery(subquery)
 
         subquery.table(linkEntity.table, Some(alias))
-        writeQuery(element, joinAlias, Left(subquery), oql, ds)
+        writeQuery(element, joinAlias, Left(subquery), oql, ds, fixed: Fixed)
         subquery.select(RawOQLExpression(s""""$alias"."${selfAttr.column}" = "$table"."${entity.pk.get.column}""""), null)
         select foreach (subquery.select(_, joinAlias))
         group foreach (subquery.group(_, joinAlias))
@@ -499,14 +513,14 @@ object AbstractOQL {
         val alias = s"$table$$$name"
         val subquery =
           if (builder.isLeft)
-            new SQLQueryBuilder(oql, ds, builder.left.toOption.get.margin + 2 * SQLQueryBuilder.INDENT)
-          else new SQLQueryBuilder(oql, ds, builder.toOption.get, true)
+            new SQLQueryBuilder(oql, ds, fixed, builder.left.toOption.get.margin + 2 * SQLQueryBuilder.INDENT)
+          else new SQLQueryBuilder(oql, ds, fixed, builder.toOption.get, true)
 
         if (builder.isLeft)
           n.idx = builder.left.toOption.get.projectQuery(subquery)
 
         subquery.table(mtoEntity.table, Some(alias))
-        writeQuery(element, alias, Left(subquery), oql, ds)
+        writeQuery(element, alias, Left(subquery), oql, ds, fixed: Fixed)
         subquery.select(RawOQLExpression(s""""$alias"."${otmAttr.column}" = "$table"."${entity.pk.get.column}""""), null)
 //        select foreach (subquery.select(_, alias))  // todo: selection, ordering don't apply to one-to-one: error?
 //        order foreach (subquery.ordering(_, alias))
@@ -524,14 +538,14 @@ object AbstractOQL {
         val alias = s"$table$$$name"
         val subquery =
           if (builder.isLeft)
-            new SQLQueryBuilder(oql, ds, builder.left.toOption.get.margin + 2 * SQLQueryBuilder.INDENT)
-          else new SQLQueryBuilder(oql, ds, builder.toOption.get, true)
+            new SQLQueryBuilder(oql, ds, fixed, builder.left.toOption.get.margin + 2 * SQLQueryBuilder.INDENT)
+          else new SQLQueryBuilder(oql, ds, fixed, builder.toOption.get, true)
 
         if (builder.isLeft)
           n.idx = builder.left.toOption.get.projectQuery(subquery)
 
         subquery.table(otmEntity.table, Some(alias))
-        writeQuery(element, alias, Left(subquery), oql, ds)
+        writeQuery(element, alias, Left(subquery), oql, ds, fixed: Fixed)
         subquery.select(
           RawOQLExpression(s""""$alias"."${otmAttr.column}" = "$table"."${otmAttr.typ.asInstanceOf[ManyToOneType].entity.pk.get.column}""""),
           null)
@@ -543,14 +557,16 @@ object AbstractOQL {
         subquery
     }
 
+  trait Node
+  case class ResultNode(query: OQLQuery, element: Node) extends Node
+  case class ManyToOneNode(query: OQLQuery, element: Node) extends Node { var idx: Option[Int] = _ }
+  case class OneToOneNode(query: OQLQuery, element: Node) extends Node { var idx: Int = _ }
+  case class OneToManyNode(query: OQLQuery, element: Node) extends Node { var idx: Int = _ }
+  case class ManyToManyNode(query: OQLQuery, element: Node) extends Node { var idx: Int = _ }
+  case class ObjectNode(props: Seq[(String, Node)]) extends Node // todo: objects as a way of grouping expressions
+  case class TupleNode(elems: Seq[Node]) extends Node // todo: tuples as a way of grouping expressions
+  case class ValueNode(value: OQLExpression) extends Node { var idx: Int = _; var typed: Boolean = _ }
+
 }
 
-trait Node
-case class ResultNode(query: OQLQuery, element: Node) extends Node
-case class ManyToOneNode(query: OQLQuery, element: Node) extends Node { var idx: Option[Int] = _ }
-case class OneToOneNode(query: OQLQuery, element: Node) extends Node { var idx: Int = _ }
-case class OneToManyNode(query: OQLQuery, element: Node) extends Node { var idx: Int = _ }
-case class ManyToManyNode(query: OQLQuery, element: Node) extends Node { var idx: Int = _ }
-case class ObjectNode(props: Seq[(String, Node)]) extends Node // todo: objects as a way of grouping expressions
-case class TupleNode(elems: Seq[Node]) extends Node // todo: tuples as a way of grouping expressions
-case class ValueNode(value: OQLExpression) extends Node { var idx: Int = _; var typed: Boolean = _ }
+case class Fixed(operative: Boolean, entity: Entity = null, at: Any = null)

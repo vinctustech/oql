@@ -18,9 +18,9 @@ object Main extends App {
 
   async {
     db.showQuery()
-    await(db.entity("t").insert(Map("s" -> "asdf'zxcv")))
-    db.showQuery()
-    println(await(db.queryMany("""t""")))
+    println(await(db.queryMany("""account""", "account", 2)))
+  } recover {
+    case e: Exception => println(e)
   }
 
 }

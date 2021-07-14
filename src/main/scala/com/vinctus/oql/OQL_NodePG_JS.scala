@@ -55,7 +55,7 @@ class OQL_NodePG_JS(dm: String,
   }
 
   def jsQueryMany(query: OQLQuery, oql: String): js.Promise[js.Array[js.Any]] =
-    queryMany(query, oql, () => new JSResultBuilder).map(_.arrayResult.asInstanceOf[js.Array[js.Any]]).toJSPromise
+    queryMany(query, oql, () => new JSResultBuilder, Fixed(operative = false)).map(_.arrayResult.asInstanceOf[js.Array[js.Any]]).toJSPromise
 
   @JSExport("queryBuilder")
   def jsQueryBuilder() = new JSQueryBuilder(this, OQLQuery(null, null, null, List(StarOQLProject), None, None, None, None, None))
