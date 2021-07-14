@@ -441,9 +441,17 @@ object AbstractOQL {
         builder.left.toOption.get.table(query.entity.table, None)
         query.select foreach (builder.left.toOption.get.select(_, query.entity.table))
 
-        // generate condition for fixed entity if necessary
-        if (fixed.operative && fixed.entity == query.entity)
-          builder.left.toOption.get.select(RawOQLExpression(s""""${query.entity.table}"."${query.entity.pk.get.column}" = ${fixed.at}"""), null)
+        // generate conditions for fixed entity if necessary
+        if (fixed.operative) {
+          if (fixed.entity == query.entity)
+            builder.left.toOption.get.select(RawOQLExpression(s""""${query.entity.table}"."${query.entity.pk.get.column}" = ${fixed.at}"""), null)
+          else
+            query.entity.attributes.values foreach {
+              case Attribute(name, column, pk, required, typ: ManyToOneType) if typ.entity == fixed.entity =>
+                builder.left.toOption.get.select(RawOQLExpression(s""""${query.entity.table}"."$column" = ${fixed.at}"""), null)
+              case _ =>
+            }
+        }
 
         query.group foreach (builder.left.toOption.get.group(_, query.entity.table))
         query.order foreach (builder.left.toOption.get.order(_, query.entity.table))
