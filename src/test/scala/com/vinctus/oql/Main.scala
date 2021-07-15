@@ -18,7 +18,7 @@ object Main extends App {
 
   async {
     db.showQuery()
-    println(await(db.queryMany("""vehicle""", "account", 2)))
+    println(await(db.queryMany("""vehicle { * store { * account } } [store.account.id = 2]""", "account", 2)))
   } recover {
     case e: Exception => println(e)
   }

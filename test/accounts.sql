@@ -62,10 +62,10 @@ INSERT INTO account (name) VALUES
   ('acc2');
 
 INSERT INTO store (name, account) VALUES
-  ('sto1acc1', 1),
-  ('sto1acc2', 2);
+  ('sto1.acc1', 1),
+  ('sto1.acc2', 2);
 
 INSERT INTO vehicle (make, store) VALUES
-  ('veh1sto1acc1', 1),
-  ('veh1sto1acc2', 2);
+  ('veh1.sto1.acc1', 1),
+  ('veh1.sto1.acc2', 2);
 
