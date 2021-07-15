@@ -92,6 +92,8 @@ object Main extends App {
 //  async {
 //    console.log(await(db.jsQueryMany("""t { average: avg(n) }""").toFuture))
 //  }
+//
+//}
 
 //  val dm: String =
 //    """

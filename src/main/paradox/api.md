@@ -128,4 +128,8 @@ Returns a promise to unlink object *e1* of `this` resource to object *e2* of the
 
 ### `update(e, updates)`
 
-Returns a promise to unlink object *e* of `this` resource according to *updates*.
+Returns a promise to update object *e* of `this` resource according to *updates*.
+
+### `bulkUpdate(updates)`
+
+Returns a promise to apply *updates* to the table where *updates* is an array of tuples (arrays with two elements). The first element of each tuple is an id or object containing an id, and the second is an object specifying the updated fields.

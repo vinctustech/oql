@@ -1,6 +1,11 @@
 Release Notes
 =============
 
+1.0.0-RC.4
+----------
+
+- added mutator method `bulkUpdate()` to use PostgreSQL's extended `UPDATE` command for doing bulk updates.
+
 1.0.0-RC.3.25
 -------------
 

@@ -129,11 +129,15 @@ class Mutation private[oql] (oql: AbstractOQL, entity: Entity) {
     }
 
   def update(id: Any, updates: collection.Map[String, Any]): Future[Unit] = {
+    // check if updates is empty
+    if (updates.isEmpty)
+      sys.error(s"update: empty update: $id")
+
     // check if updates has a primary key
     entity.pk foreach (pk =>
       // object being updated should not have it's primary key changed
       if (updates.contains(pk.name))
-        sys.error(s"update: primary key can not be changed: $pk"))
+        sys.error(s"update: primary key ('$pk') value cannot be changed: $id"))
 
     // get sub-map of all column attributes
     val attrs =
@@ -181,5 +185,85 @@ class Mutation private[oql] (oql: AbstractOQL, entity: Entity) {
     // execute update command (to get a future)
     oql.connect.command(command.toString) map (_ => ())
   }
+
+  // update account set name = __data__.name from (values (1, 'a'), (2, 'b')) as __data__ (id, name) where account.id = __data__.id
+
+  def bulkUpdate(updates: List[(Any, collection.Map[String, Any])]): Future[Unit] = {
+    if (updates.isEmpty)
+      sys.error(s"update: empty updates list")
+
+    // get updates key set
+    val keyset = updates.head._2.keySet
+
+    // check if keys in update objects are all the same
+    for ((_, u) <- updates drop 1)
+      if (u.keySet != keyset)
+        sys.error(s"update: key set mismatch: ${u.mkString("{", ", ", "}")}")
+
+    // check if updates is empty
+    if (updates.head._2.isEmpty)
+      sys.error(s"update: empty updates")
+
+    // check if updates has a primary key
+    entity.pk foreach (pk =>
+      // object being updated should not have it's primary key changed
+      if (updates.head._2.contains(pk.name))
+        sys.error(s"update: primary key ('$pk') value cannot be changed"))
+
+    // get sub-map of all column attributes
+    val attrs =
+      entity.attributes
+        .filter {
+          case (_, Attribute(name, column, pk, required, typ)) if typ.isColumnType => true
+          case _                                                                   => false
+        }
+
+    // get sub-map of column attributes excluding primary key
+    val attrsNoPK = entity.pk.fold(attrs)(attrs - _.name)
+
+    // get key set of column attributes excluding primary key
+    val attrsNoPKKeys = attrsNoPK.keySet
+
+    // check if object contains extrinsic attributes
+    if ((keyset diff attrsNoPKKeys).nonEmpty)
+      sys.error(s"extrinsic properties not found in entity '${entity.name}': ${(keyset diff attrsNoPKKeys) map (p => s"'$p'") mkString ", "}")
+
+    // build list of attributes to update
+    val pairs =
+      updates map {
+        case (_, u) =>
+          u map {
+            case (k, v) =>
+              val v1 =
+                if (v.isInstanceOf[Map[_, _]])
+                  entity.attributes(k) match {
+                    case Attribute(_, _, _, _, ManyToOneType(mtoEntity)) => v.asInstanceOf[Map[String, Any]](mtoEntity.pk.get.name)
+                    case _                                               => sys.error(s"attribute '$k' of entity '${entity.name}' is not an entity attribute")
+                  } else v
+
+              attrs(k).column -> oql.render(v1)
+          }
+      }
+
+    val command = new StringBuilder
+
+    // build update command
+    val keys = updates.head._2.keys
+
+    command append s"UPDATE  ${entity.table}\n"
+    command append s"  SET   ${keys map { k =>
+      s"$k = __data__.$k"
+    } mkString ", "}\n"
+    command append s"  FROM  (VALUES ${updates map {
+      case (id, update) => s"(${oql.render(id)}, ${keys map (update andThen oql.render _) mkString ", "})"
+    } mkString ", "}) AS __data__ (${entity.pk.get.column}, ${keys mkString ", "})\n"
+    command append s"  WHERE ${entity.table}.${entity.pk.get.column} = __data__.${entity.pk.get.column}\n"
+    oql.show(command.toString)
+
+    // execute update command (to get a future)
+    oql.connect.command(command.toString) map (_ => ())
+  }
+
+  // (values (1, 'a'), (2, 'b')) as __data__ (id, name)
 
 }
