@@ -1,6 +1,11 @@
 Release Notes
 =============
 
+1.0.0-RC.4.1
+------------
+
+- fixed bulk update to work with primary keys that have type UUID.
+
 1.0.0-RC.4
 ----------
 

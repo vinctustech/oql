@@ -18,7 +18,9 @@ object Main extends App {
 
   async {
     db.showQuery()
-    await(db.entity("t").bulkUpdate(List(1 -> Map("n" -> 101), 2 -> Map("n" -> 102))))
+    await(
+      db.entity("t")
+        .bulkUpdate(List("843c15e8-1c6c-4148-b453-73a07cce1884" -> Map("n" -> 101), "fbc3b34b-15bd-4c70-8e5a-6f268c45161a" -> Map("n" -> 102))))
     db.showQuery()
     println(await(db.queryMany("""t""")))
   } recover {
