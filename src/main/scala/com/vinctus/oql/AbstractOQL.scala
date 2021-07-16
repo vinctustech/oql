@@ -104,10 +104,10 @@ abstract class AbstractOQL(dm: String, val ds: SQLDataSource, conv: Conversions)
 
   def queryMany(query: OQLQuery, oql: String, newResultBuilder: () => ResultBuilder, fixed: Fixed): Future[ResultBuilder] = {
     val root: ResultNode = ResultNode(query, objectNode(query.project))
-    val sqlBuilder = new SQLQueryBuilder(oql, ds, fixed)
+    val sqlBuilder = new SQLQueryBuilder(oql, ds, fixed, model)
 
 //    println(prettyPrint(root))
-    writeQuery(root, null, Left(sqlBuilder), oql, ds, fixed)
+    writeQuery(root, null, Left(sqlBuilder), oql, ds, fixed, model)
 
     val sql = sqlBuilder.toString
 
@@ -435,7 +435,8 @@ object AbstractOQL {
                               builder: Either[SQLQueryBuilder, Int],
                               oql: String,
                               ds: SQLDataSource,
-                              fixed: Fixed): SQLQueryBuilder =
+                              fixed: Fixed,
+                              model: DataModel): SQLQueryBuilder =
     node match {
       case ResultNode(query, element) =>
         builder.left.toOption.get.table(query.entity.table, None)
@@ -443,8 +444,18 @@ object AbstractOQL {
 
         // generate conditions for fixed entity if necessary
         if (fixed.operative) {
-          if (fixed.entity == query.entity)
-            builder.left.toOption.get.select(RawOQLExpression(s""""${query.entity.table}"."${query.entity.pk.get.column}" = ${fixed.at}"""), null)
+          if (fixed.entity == query.entity) {
+            val attr = AttributeOQLExpression(List(Ident(query.entity.pk.get.name)))
+            val value =
+              fixed.at match {
+                case n: Int    => IntegerOQLExpression(n)
+                case n: Double => FloatOQLExpression(n)
+                case _         => LiteralOQLExpression(fixed.at.toString)
+              }
+
+            decorate(query.entity, attr, model, ds, oql)
+            builder.left.toOption.get.select(InfixOQLExpression(attr, "=", value), query.entity.table)
+          } //            builder.left.toOption.get.select(RawOQLExpression(s""""${query.entity.table}"."${query.entity.pk.get.column}" = ${fixed.at}"""), null)
           else
             query.entity.attributes.values foreach {
               case Attribute(name, column, pk, required, typ: ManyToOneType) if typ.entity == fixed.entity =>
@@ -457,7 +468,7 @@ object AbstractOQL {
         query.order foreach (builder.left.toOption.get.order(_, query.entity.table))
         query.limit foreach builder.left.toOption.get.limit
         query.offset foreach builder.left.toOption.get.offset
-        writeQuery(element, query.entity.table, builder, oql, ds, fixed: Fixed)
+        writeQuery(element, query.entity.table, builder, oql, ds, fixed, model)
         builder.left.toOption.get
       case e @ ValueNode(expr) =>
         val (idx, typed) = builder.left.toOption.get.projectValue(expr, table)
@@ -466,7 +477,7 @@ object AbstractOQL {
         e.typed = typed
         builder.left.toOption.get
       case ObjectNode(properties) =>
-        properties foreach { case (_, e) => writeQuery(e, table, builder, oql, ds, fixed: Fixed) }
+        properties foreach { case (_, e) => writeQuery(e, table, builder, oql, ds, fixed, model) }
         builder.left.toOption.get
       case n @ ManyToOneNode(OQLQuery(_, entity, attr @ Attribute(name, column, pk, required, ManyToOneType(mtoEntity)), _, _, _, _, _, _),
                              element) =>
@@ -482,7 +493,7 @@ object AbstractOQL {
         }
 
         builder.left.toOption.get.leftJoin(table, column, entity.table, alias, entity.pk.get.column)
-        writeQuery(element, alias, builder, oql, ds, fixed: Fixed)
+        writeQuery(element, alias, builder, oql, ds, fixed, model)
         // todo: check query sections (i.e. order) that don't apply to many-to-one
         builder.left.toOption.get
       case n @ ManyToManyNode(OQLQuery(_,
@@ -498,15 +509,15 @@ object AbstractOQL {
         val alias = s"$table$$$name"
         val subquery =
           if (builder.isLeft)
-            new SQLQueryBuilder(oql, ds, fixed, builder.left.toOption.get.margin + 2 * SQLQueryBuilder.INDENT)
-          else new SQLQueryBuilder(oql, ds, fixed, builder.toOption.get, true)
+            new SQLQueryBuilder(oql, ds, fixed, model, builder.left.toOption.get.margin + 2 * SQLQueryBuilder.INDENT)
+          else new SQLQueryBuilder(oql, ds, fixed, model, builder.toOption.get, true)
         val joinAlias = s"$alias$$${targetAttr.name}"
 
         if (builder.isLeft)
           n.idx = builder.left.toOption.get.projectQuery(subquery)
 
         subquery.table(linkEntity.table, Some(alias))
-        writeQuery(element, joinAlias, Left(subquery), oql, ds, fixed: Fixed)
+        writeQuery(element, joinAlias, Left(subquery), oql, ds, fixed, model)
         subquery.select(RawOQLExpression(s""""$alias"."${selfAttr.column}" = "$table"."${entity.pk.get.column}""""), null)
         select foreach (subquery.select(_, joinAlias))
         group foreach (subquery.group(_, joinAlias))
@@ -521,14 +532,14 @@ object AbstractOQL {
         val alias = s"$table$$$name"
         val subquery =
           if (builder.isLeft)
-            new SQLQueryBuilder(oql, ds, fixed, builder.left.toOption.get.margin + 2 * SQLQueryBuilder.INDENT)
-          else new SQLQueryBuilder(oql, ds, fixed, builder.toOption.get, true)
+            new SQLQueryBuilder(oql, ds, fixed, model, builder.left.toOption.get.margin + 2 * SQLQueryBuilder.INDENT)
+          else new SQLQueryBuilder(oql, ds, fixed, model, builder.toOption.get, true)
 
         if (builder.isLeft)
           n.idx = builder.left.toOption.get.projectQuery(subquery)
 
         subquery.table(mtoEntity.table, Some(alias))
-        writeQuery(element, alias, Left(subquery), oql, ds, fixed: Fixed)
+        writeQuery(element, alias, Left(subquery), oql, ds, fixed, model)
         subquery.select(RawOQLExpression(s""""$alias"."${otmAttr.column}" = "$table"."${entity.pk.get.column}""""), null)
 //        select foreach (subquery.select(_, alias))  // todo: selection, ordering don't apply to one-to-one: error?
 //        order foreach (subquery.ordering(_, alias))
@@ -546,14 +557,14 @@ object AbstractOQL {
         val alias = s"$table$$$name"
         val subquery =
           if (builder.isLeft)
-            new SQLQueryBuilder(oql, ds, fixed, builder.left.toOption.get.margin + 2 * SQLQueryBuilder.INDENT)
-          else new SQLQueryBuilder(oql, ds, fixed, builder.toOption.get, true)
+            new SQLQueryBuilder(oql, ds, fixed, model, builder.left.toOption.get.margin + 2 * SQLQueryBuilder.INDENT)
+          else new SQLQueryBuilder(oql, ds, fixed, model, builder.toOption.get, true)
 
         if (builder.isLeft)
           n.idx = builder.left.toOption.get.projectQuery(subquery)
 
         subquery.table(otmEntity.table, Some(alias))
-        writeQuery(element, alias, Left(subquery), oql, ds, fixed: Fixed)
+        writeQuery(element, alias, Left(subquery), oql, ds, fixed, model)
         subquery.select(
           RawOQLExpression(s""""$alias"."${otmAttr.column}" = "$table"."${otmAttr.typ.asInstanceOf[ManyToOneType].entity.pk.get.column}""""),
           null)

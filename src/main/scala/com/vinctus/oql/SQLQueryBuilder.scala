@@ -12,7 +12,7 @@ object SQLQueryBuilder {
 
 }
 
-class SQLQueryBuilder(oql: String, ds: SQLDataSource, fixed: Fixed, val margin: Int = 0, subquery: Boolean = false) {
+class SQLQueryBuilder(oql: String, ds: SQLDataSource, fixed: Fixed, model: DataModel, val margin: Int = 0, subquery: Boolean = false) {
 
   import SQLQueryBuilder._
 
@@ -97,17 +97,17 @@ class SQLQueryBuilder(oql: String, ds: SQLDataSource, fixed: Fixed, val margin: 
 
     expr match {
       case ExistsOQLExpression(query) =>
-        val subquery = writeQuery(innerQuery(query), table, Right(margin + 2 * SQLQueryBuilder.INDENT), oql, ds, fixed)
+        val subquery = writeQuery(innerQuery(query), table, Right(margin + 2 * SQLQueryBuilder.INDENT), oql, ds, fixed, model)
         val sql = subquery.toString
 
         s"EXISTS (\n$sql${" " * (margin + 2 * SQLQueryBuilder.INDENT)})"
       case QueryOQLExpression(query) =>
-        val subquery = writeQuery(innerQuery(query), table, Right(margin + 2 * SQLQueryBuilder.INDENT), oql, ds, fixed)
+        val subquery = writeQuery(innerQuery(query), table, Right(margin + 2 * SQLQueryBuilder.INDENT), oql, ds, fixed, model)
         val sql = subquery.toString
 
         s"(\n$sql${" " * (margin + 2 * SQLQueryBuilder.INDENT)})"
       case InQueryOQLExpression(left, op, query) =>
-        val subquery = writeQuery(innerQuery(query), table, Right(margin + 2 * SQLQueryBuilder.INDENT), oql, ds, fixed)
+        val subquery = writeQuery(innerQuery(query), table, Right(margin + 2 * SQLQueryBuilder.INDENT), oql, ds, fixed, model)
         val sql = subquery.toString
 
         s"${expression(left, table)} $op (\n$sql${" " * (margin + 2 * SQLQueryBuilder.INDENT)})"

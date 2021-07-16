@@ -25,6 +25,8 @@ class DataModel(model: DMLModel, dml: String) {
     duplicates(model.entities.map(e => e.actualName getOrElse e.name), "actual table")
     duplicates(model.entities.map(_.name), "entity")
 
+    var first: EntityInfo = null
+
     for (entity <- model.entities) {
       duplicates(entity.attributes.map(a => a.actualName getOrElse a.name), " actual column")
       duplicates(model.entities.map(_.name), "attribute")
@@ -34,7 +36,12 @@ class DataModel(model: DMLModel, dml: String) {
         case _                   =>
       }
 
-      entities(entity.name.s) = EntityInfo(Entity(entity.name.s, (entity.actualName getOrElse entity.name).s), entity.attributes)
+      val info = EntityInfo(Entity(entity.name.s, (entity.actualName getOrElse entity.name).s), entity.attributes)
+
+      if (first eq null)
+        first = info
+
+      entities(entity.name.s) = info
     }
 
     for (EntityInfo(e, dmlas, as) <- entities.values) {
@@ -195,6 +202,8 @@ class DataModel(model: DMLModel, dml: String) {
 
     entities.view.mapValues(_.entity) to VectorMap
   }
+
+  for (e <- entities)
 
 }
 
