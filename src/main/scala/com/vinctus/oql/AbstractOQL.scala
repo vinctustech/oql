@@ -440,8 +440,8 @@ object AbstractOQL {
 
         // generate conditions for fixed entity if necessary
         if (fixed.operative) {
-          if (fixed.entity == query.entity) {
-            val attr = AttributeOQLExpression(List(Ident(query.entity.pk.get.name)))
+//          if (fixed.entity == query.entity) {
+          for (attr <- query.entity.fixing(fixed.entity)) {
             val value =
               fixed.at match {
                 case n: Int    => IntegerOQLExpression(n)
@@ -449,15 +449,15 @@ object AbstractOQL {
                 case _         => LiteralOQLExpression(fixed.at.toString)
               }
 
-            decorate(query.entity, attr, model, ds, oql)
             builder.left.toOption.get.select(InfixOQLExpression(attr, "=", value), query.entity.table)
-          } //            builder.left.toOption.get.select(RawOQLExpression(s""""${query.entity.table}"."${query.entity.pk.get.column}" = ${fixed.at}"""), null)
-          else
-            query.entity.attributes.values foreach {
-              case Attribute(name, column, pk, required, typ: ManyToOneType) if typ.entity == fixed.entity =>
-                builder.left.toOption.get.select(RawOQLExpression(s""""${query.entity.table}"."$column" = ${fixed.at}"""), null)
-              case _ =>
-            }
+          }
+//          } //            builder.left.toOption.get.select(RawOQLExpression(s""""${query.entity.table}"."${query.entity.pk.get.column}" = ${fixed.at}"""), null)
+//          else
+//            query.entity.attributes.values foreach {
+//              case Attribute(name, column, pk, required, typ: ManyToOneType) if typ.entity == fixed.entity =>
+//                builder.left.toOption.get.select(RawOQLExpression(s""""${query.entity.table}"."$column" = ${fixed.at}"""), null)
+//              case _ =>
+//            }
         }
 
         query.group foreach (builder.left.toOption.get.group(_, query.entity.table))

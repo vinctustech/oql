@@ -9,7 +9,7 @@ CREATE TABLE store (
   name TEXT
   );
 
-CREATE TABLE user (
+CREATE TABLE "user" (
   id SERIAL PRIMARY KEY,
   account INTEGER,
   email TEXT,
@@ -47,9 +47,9 @@ CREATE TABLE trip (
 
 ALTER TABLE store ADD FOREIGN KEY (account) REFERENCES account;
 
-ALTER TABLE user ADD FOREIGN KEY (account) REFERENCES account;
+ALTER TABLE "user" ADD FOREIGN KEY (account) REFERENCES account;
 
-ALTER TABLE vehicle ADD FOREIGN KEY (driver) REFERENCES user;
+ALTER TABLE vehicle ADD FOREIGN KEY (driver) REFERENCES "user";
 
 ALTER TABLE vehicle ADD FOREIGN KEY (store) REFERENCES store;
 
@@ -68,4 +68,3 @@ INSERT INTO store (name, account) VALUES
 INSERT INTO vehicle (make, store) VALUES
   ('veh1.sto1.acc1', 1),
   ('veh1.sto1.acc2', 2);
-
