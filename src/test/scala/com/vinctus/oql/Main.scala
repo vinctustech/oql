@@ -16,13 +16,15 @@ object Main extends App {
   val db =
     new OQL_NodePG(g.require("fs").readFileSync("test/accounts.dm").toString, "localhost", 5432, "postgres", "postgres", "docker", false, 1000, 5)
 
-  async {
-    db.showQuery()
-    println(await(db.queryMany("""account""", "account", 2)))
-//    println(await(db.queryMany("""vehicle [store.account.id = 2]""", "account", 2)))
-  } recover {
-    case e: Exception => println(e)
-  }
+  println(db.model.entities.view.mapValues(e => e.fixing).toMap)
+
+//  async {
+//    db.showQuery()
+//    println(await(db.queryMany("""account""", "account", 2)))
+////    println(await(db.queryMany("""vehicle [store.account.id = 2]""", "account", 2)))
+//  } recover {
+//    case e: Exception => println(e)
+//  }
 
 }
 
@@ -139,3 +141,40 @@ object Main extends App {
 // todo: add a unit test that has a deep (more than one) many-to-one reference in the select condition
 // todo: unit test: "author { name } [EXISTS (books [author.name = 'Charles Dickens'])]" ~~> "Charles Dickens"
 // todo: unit test: "book.dm { author ref: &author }" (reference)
+
+/*
+
+HashMap(
+  vehicle ->
+    Map(Entity(account,account) ->
+      List(
+        AttributeOQLExpression(List(Ident(driver,null), Ident(account,null), Ident(id,null)),List((Entity(user,user),Attribute(driver,driver,false,false,ManyToOneType(Entity(user,user)))), (Entity(account,account),Attribute(account,account,false,true,ManyToOneType(Entity(account,account)))), (Entity(account,account),Attribute(id,id,true,false,IntegerType)))), AttributeOQLExpression(List(Ident(store,null), Ident(account,null), Ident(id,null)),List((Entity(store,store),Attribute(store,store,false,true,ManyToOneType(Entity(store,store)))), (Entity(account,account),Attribute(account,account,false,true,ManyToOneType(Entity(account,account)))), (Entity(account,account),Attribute(id,id,true,false,IntegerType)))))),
+  trip ->
+    Map(Entity(account,account) ->
+      List(
+        AttributeOQLExpression(List(Ident(customer,null), Ident(store,null), Ident(account,null), Ident(id,null)),List((Entity(customer,customer),Attribute(customer,customer,false,false,ManyToOneType(Entity(customer,customer)))), (Entity(store,store),Attribute(store,store,false,true,ManyToOneType(Entity(store,store)))), (Entity(account,account),Attribute(account,account,false,true,ManyToOneType(Entity(account,account)))), (Entity(account,account),Attribute(id,id,true,false,IntegerType)))),
+        AttributeOQLExpression(List(Ident(store,null), Ident(account,null), Ident(id,null)),List((Entity(store,store),Attribute(store,store,false,true,ManyToOneType(Entity(store,store)))), (Entity(account,account),Attribute(account,account,false,true,ManyToOneType(Entity(account,account)))), (Entity(account,account),Attribute(id,id,true,false,IntegerType)))), AttributeOQLExpression(List(Ident(vehicle,null), Ident(driver,null), Ident(account,null), Ident(id,null)),List((Entity(vehicle,vehicle),Attribute(vehicle,vehicle,false,false,ManyToOneType(Entity(vehicle,vehicle)))), (Entity(user,user),Attribute(driver,driver,false,false,ManyToOneType(Entity(user,user)))), (Entity(account,account),Attribute(account,account,false,true,ManyToOneType(Entity(account,account)))), (Entity(account,account),Attribute(id,id,true,false,IntegerType)))),
+        AttributeOQLExpression(List(Ident(vehicle,null), Ident(store,null), Ident(account,null), Ident(id,null)),List((Entity(vehicle,vehicle),Attribute(vehicle,vehicle,false,false,ManyToOneType(Entity(vehicle,vehicle)))), (Entity(store,store),Attribute(store,store,false,true,ManyToOneType(Entity(store,store)))), (Entity(account,account),Attribute(account,account,false,true,ManyToOneType(Entity(account,account)))), (Entity(account,account),Attribute(id,id,true,false,IntegerType)))))),
+  store ->
+    Map(Entity(account,account) ->
+      List(
+        AttributeOQLExpression(List(Ident(account,null), Ident(id,null)),List((Entity(account,account),Attribute(account,account,false,true,ManyToOneType(Entity(account,account)))), (Entity(account,account),Attribute(id,id,true,false,IntegerType)))))),
+  customer ->
+    Map(Entity(account,account) ->
+      List(
+        AttributeOQLExpression(List(Ident(store,null), Ident(account,null), Ident(id,null)),List((Entity(store,store),Attribute(store,store,false,true,ManyToOneType(Entity(store,store)))), (Entity(account,account),Attribute(account,account,false,true,ManyToOneType(Entity(account,account)))), (Entity(account,account),Attribute(id,id,true,false,IntegerType)))))),
+  users_stores ->
+    Map(Entity(account,account) ->
+      List(
+        AttributeOQLExpression(List(Ident(user,null), Ident(account,null), Ident(id,null)),List((Entity(user,user),Attribute(user,user,false,false,ManyToOneType(Entity(user,user)))), (Entity(account,account),Attribute(account,account,false,true,ManyToOneType(Entity(account,account)))), (Entity(account,account),Attribute(id,id,true,false,IntegerType)))),
+        AttributeOQLExpression(List(Ident(store,null), Ident(account,null), Ident(id,null)),List((Entity(store,store),Attribute(store,store,false,false,ManyToOneType(Entity(store,store)))), (Entity(account,account),Attribute(account,account,false,true,ManyToOneType(Entity(account,account)))), (Entity(account,account),Attribute(id,id,true,false,IntegerType)))))),
+  account ->
+    Map(Entity(account,account) ->
+      List(
+        AttributeOQLExpression(List(Ident(id,null)),List((Entity(account,account),Attribute(id,id,true,false,IntegerType)))))),
+  user ->
+    Map(Entity(account,account) ->
+      List(
+        AttributeOQLExpression(List(Ident(account,null), Ident(id,null)),List((Entity(account,account),Attribute(account,account,false,true,ManyToOneType(Entity(account,account)))), (Entity(account,account),Attribute(id,id,true,false,IntegerType)))))))
+
+ */

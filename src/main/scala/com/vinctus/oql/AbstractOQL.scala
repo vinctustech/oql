@@ -15,11 +15,7 @@ abstract class AbstractOQL(dm: String, val ds: SQLDataSource, conv: Conversions)
   private var _transpileOnly = false
   private var _showQuery = false
 
-  val model: DataModel = {
-    val p = new DMLParser()
-
-    new DataModel(p.parseModel(dm), dm)
-  }
+  val model: DataModel = new DataModel(new DMLParser().parseModel(dm), dm)
 //    DMLParse(dm) match {
 //      case None              => sys.error("error building data model")
 //      case Some(m: DMLModel) => new DataModel(m, dm)
@@ -216,43 +212,43 @@ object AbstractOQL {
   private[oql] def decorate(entity: Entity, expr: OQLExpression, model: DataModel, ds: SQLDataSource, oql: String): Unit = {
     def _decorate(expr: OQLExpression): Unit = decorate(entity, expr, model, ds, oql)
 
-    def lookup(expr: OQLExpression, ids: List[Ident], ref: Boolean): List[(Entity, Attribute)] = {
-      val dmrefs = new ListBuffer[(Entity, Attribute)]
-
-      @tailrec
-      def lookup(ids: List[Ident], entity: Entity): Unit =
-        ids match {
-          case List(id) =>
-            entity.attributes get id.s match {
-              case Some(attr) =>
-                dmrefs += (entity -> attr)
-
-                if (ref) {
-                  if (!attr.typ.isInstanceOf[ManyToOneType])
-                    problem(id.pos, s"attribute '${id.s}' is not many-to-one", oql)
-
-                  expr.typ = attr.typ.asInstanceOf[ManyToOneType].entity.pk.get.typ.asInstanceOf[DataType]
-                } else {
-                  if (!attr.typ.isDataType)
-                    problem(id.pos, s"attribute '${id.s}' is not a DBMS data type", oql)
-
-                  expr.typ = attr.typ.asInstanceOf[DataType]
-                }
-              case None => problem(id.pos, s"entity '${entity.name}' does not have attribute '${id.s}'", oql)
-            }
-          case head :: tail =>
-            entity.attributes get head.s match {
-              case Some(attr @ Attribute(name, column, pk, required, ManyToOneType(mtoEntity))) =>
-                dmrefs += (mtoEntity -> attr)
-                lookup(tail, mtoEntity)
-              case Some(_) => problem(head.pos, s"attribute '${head.s}' of entity '${entity.name}' does not have an entity type", oql)
-              case None    => problem(head.pos, s"entity '${entity.name}' does not have attribute '${head.s}'", oql)
-            }
-        }
-
-      lookup(ids, entity)
-      dmrefs.toList
-    }
+//    def lookup(expr: OQLExpression, ids: List[Ident], ref: Boolean): List[(Entity, Attribute)] = {
+//      val dmrefs = new ListBuffer[(Entity, Attribute)]
+//
+//      @tailrec
+//      def lookup(ids: List[Ident], entity: Entity): Unit =
+//        ids match {
+//          case List(id) =>
+//            entity.attributes get id.s match {
+//              case Some(attr) =>
+//                dmrefs += (entity -> attr)
+//
+//                if (ref) {
+//                  if (!attr.typ.isInstanceOf[ManyToOneType])
+//                    problem(id.pos, s"attribute '${id.s}' is not many-to-one", oql)
+//
+//                  expr.typ = attr.typ.asInstanceOf[ManyToOneType].entity.pk.get.typ.asInstanceOf[DataType]
+//                } else {
+//                  if (!attr.typ.isDataType)
+//                    problem(id.pos, s"attribute '${id.s}' is not a DBMS data type", oql)
+//
+//                  expr.typ = attr.typ.asInstanceOf[DataType]
+//                }
+//              case None => problem(id.pos, s"entity '${entity.name}' does not have attribute '${id.s}'", oql)
+//            }
+//          case head :: tail =>
+//            entity.attributes get head.s match {
+//              case Some(attr @ Attribute(name, column, pk, required, ManyToOneType(mtoEntity))) =>
+//                dmrefs += (mtoEntity -> attr)
+//                lookup(tail, mtoEntity)
+//              case Some(_) => problem(head.pos, s"attribute '${head.s}' of entity '${entity.name}' does not have an entity type", oql)
+//              case None    => problem(head.pos, s"entity '${entity.name}' does not have attribute '${head.s}'", oql)
+//            }
+//        }
+//
+//      lookup(ids, entity)
+//      dmrefs.toList
+//    }
 
     expr match {
       case ExistsOQLExpression(query) =>
@@ -312,10 +308,10 @@ object AbstractOQL {
 
         if (left.typ == right.typ)
           e.typ = left.typ
-      case attrexp @ ReferenceOQLExpression(ids, _) => attrexp.dmrefs = lookup(attrexp, ids, ref = true)
+      case attrexp @ ReferenceOQLExpression(ids, _) => attrexp.dmrefs = model.lookup(attrexp, ids, ref = true, entity, oql)
       case AttributeOQLExpression(List(id), _) if ds.builtinVariables contains id.s =>
         expr.typ = ds.builtinVariables(id.s) // it's a built-in variable so assign type from `builtinVariables` map but leave dmrefs null
-      case attrexp @ AttributeOQLExpression(ids, _) => attrexp.dmrefs = lookup(attrexp, ids, ref = false)
+      case attrexp @ AttributeOQLExpression(ids, _) => attrexp.dmrefs = model.lookup(attrexp, ids, ref = false, entity, oql)
       case InQueryOQLExpression(left, op, query) =>
         _decorate(left)
         preprocessQuery(Some(entity), query, model, ds, oql)
