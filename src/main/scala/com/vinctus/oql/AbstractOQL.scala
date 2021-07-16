@@ -27,7 +27,7 @@ abstract class AbstractOQL(dm: String, val ds: SQLDataSource, conv: Conversions)
 
   def connect: OQLConnection = ds.connect
 
-  def render(a: Any): String
+  def render(a: Any, typ: Option[DataType] = None): String
 
   def execute[R](action: OQLConnection => Future[R]): Future[R]
 //    val conn = connect
