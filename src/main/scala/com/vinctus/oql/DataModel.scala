@@ -2,12 +2,15 @@ package com.vinctus.oql
 
 import scala.collection.immutable.VectorMap
 import scala.collection.mutable
+import scala.collection.mutable.ListBuffer
 
 class DataModel(model: DMLModel, dml: String) {
 
   private case class EntityInfo(entity: Entity,
                                 dmlattrs: Seq[DMLAttribute],
                                 attrs: mutable.LinkedHashMap[String, Attribute] = new mutable.LinkedHashMap)
+
+  private var first: Entity = _
 
   val entities: Map[String, Entity] = {
     parsingError = false
@@ -25,8 +28,6 @@ class DataModel(model: DMLModel, dml: String) {
     duplicates(model.entities.map(e => e.actualName getOrElse e.name), "actual table")
     duplicates(model.entities.map(_.name), "entity")
 
-    var first: EntityInfo = null
-
     for (entity <- model.entities) {
       duplicates(entity.attributes.map(a => a.actualName getOrElse a.name), " actual column")
       duplicates(model.entities.map(_.name), "attribute")
@@ -38,8 +39,8 @@ class DataModel(model: DMLModel, dml: String) {
 
       val info = EntityInfo(Entity(entity.name.s, (entity.actualName getOrElse entity.name).s), entity.attributes)
 
-      if (first eq null)
-        first = info
+      if (first eq null) // todo: all fixable entities must have a declared primary key
+        first = info.entity
 
       entities(entity.name.s) = info
     }
@@ -203,7 +204,27 @@ class DataModel(model: DMLModel, dml: String) {
     entities.view.mapValues(_.entity) to VectorMap
   }
 
-  for (e <- entities)
+  for (e <- entities.values) {
+    val buf = new ListBuffer[List[String]]
+
+    def scan(attrs: List[String], ents: List[Entity], entity: Entity): Unit = {
+      if (entity == first)
+        buf += (entity.pk.get.name :: attrs).reverse
+      else
+        for (Attribute(name, _, pk, _, typ) <- entity.attributes.values if !pk)
+          typ match {
+            case ManyToOneType(mtoEntity) =>
+              val newents = entity :: ents
+
+              if (!(newents contains mtoEntity)) // avoid circularity
+                scan(name :: attrs, newents, mtoEntity)
+            case _ =>
+          }
+    }
+
+    scan(Nil, Nil, e)
+
+  }
 
 }
 
