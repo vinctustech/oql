@@ -265,6 +265,4 @@ class Mutation private[oql] (oql: AbstractOQL, entity: Entity) {
     oql.connect.command(command.toString) map (_ => ())
   }
 
-  // (values (1, 'a'), (2, 'b')) as __data__ (id, name)
-
 }

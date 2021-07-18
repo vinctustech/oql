@@ -443,7 +443,7 @@ object AbstractOQL {
 //          if (fixed.entity == query.entity) {
           for (attr <- query.entity.fixing(fixed.entity)) {
             val value =
-              fixed.at match {
+              fixed.at match { // todo: create TypedOQLExpression() that will be rendered according to type of fixed.entity.pk
                 case n: Int    => IntegerOQLExpression(n)
                 case n: Double => FloatOQLExpression(n)
                 case _         => LiteralOQLExpression(fixed.at.toString)
