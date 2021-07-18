@@ -252,12 +252,12 @@ class DataModel(model: DMLModel, dml: String) {
                 if (!attr.typ.isInstanceOf[ManyToOneType])
                   problem(id.pos, s"attribute '${id.s}' is not many-to-one", input)
 
-                expr.typ = attr.typ.asInstanceOf[ManyToOneType].entity.pk.get.typ.asInstanceOf[DataType]
+                expr.typ = attr.typ.asInstanceOf[ManyToOneType].entity.pk.get.typ.asDatatype
               } else {
                 if (!attr.typ.isDataType)
                   problem(id.pos, s"attribute '${id.s}' is not a DBMS data type", input)
 
-                expr.typ = attr.typ.asInstanceOf[DataType]
+                expr.typ = attr.typ.asDatatype
               }
             case None => problem(id.pos, s"entity '${entity.name}' does not have attribute '${id.s}'", input)
           }

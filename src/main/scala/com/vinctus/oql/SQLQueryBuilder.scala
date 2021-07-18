@@ -123,6 +123,7 @@ class SQLQueryBuilder(oql: String, ds: SQLDataSource, fixed: Fixed, model: DataM
       case BetweenOQLExpression(expr, op, lower, upper) =>
         s"${expression(expr, table)} $op ${expression(lower, table)} AND ${expression(upper, table)}"
       case GroupedOQLExpression(expr)             => s"(${expression(expr, table)})"
+      case TypedOQLExpression(v, typ) =>
       case FloatOQLExpression(n)                  => n.toString
       case IntegerOQLExpression(n)                => n.toString
       case LiteralOQLExpression(s)                => ds.literal(unescape(s))  // this may seem unnecessary but it allows a data source to represent special characters differently than OQL

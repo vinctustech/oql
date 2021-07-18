@@ -375,7 +375,7 @@ object AbstractOQL {
           case attr @ Attribute(name, column, pk, required, typ) if typ.isDataType =>
             val expr = AttributeOQLExpression(List(Ident(name)), List((entity, attr)))
 
-            expr.typ = typ.asInstanceOf[DataType]
+            expr.typ = typ.asDatatype
             map(name) = ExpressionOQLProject(Ident(name), expr)
           case _ => // non-datatype attributes don't get included with '*'
         }
@@ -449,7 +449,8 @@ object AbstractOQL {
                 case _         => LiteralOQLExpression(fixed.at.toString)
               }
 
-            builder.left.toOption.get.select(InfixOQLExpression(attr, "=", value), query.entity.table)
+            builder.left.toOption.get
+              .select(InfixOQLExpression(attr, "=", TypedOQLExpression(fixed.at, fixed.entity.pk.get.typ.asDatatype)), query.entity.table)
           }
 //          } //            builder.left.toOption.get.select(RawOQLExpression(s""""${query.entity.table}"."${query.entity.pk.get.column}" = ${fixed.at}"""), null)
 //          else
@@ -484,7 +485,7 @@ object AbstractOQL {
         else {
           val mtoAttr = AttributeOQLExpression(List(Ident(name)), List((entity, attr)))
 
-          mtoAttr.typ = mtoEntity.pk.get.typ.asInstanceOf[DataType] // add type because we don't want SQLQueryBuilder to generate "typeof" function call
+          mtoAttr.typ = mtoEntity.pk.get.typ.asDatatype // add type because we don't want SQLQueryBuilder to generate "typeof" function call
           n.idx = Some(builder.left.toOption.get.projectValue(mtoAttr, table)._1)
         }
 
