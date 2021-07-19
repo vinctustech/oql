@@ -20,6 +20,8 @@ object Main extends App {
 
   async {
     db.showQuery()
+    println(await(db.queryMany("""vehicle""")))
+    db.showQuery()
 //    println(await(db.queryMany("""account""", "account", 2)))
     println(await(db.queryMany("""vehicle""", "account", 2)))
 //    println(await(db.queryMany("""store""", "account", 2)))
