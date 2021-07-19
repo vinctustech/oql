@@ -57,6 +57,6 @@ class RDBDataSource(data: String) extends SQLDataSource {
     )
   val builtinVariables = Map("CURRENT_DATE" -> DateType, "CURRENT_TIMESTAMP" -> TimestampType, "CURRENT_TIME" -> TimeType)
 
-  override def literal(s: String): String = super.literal(s).substring(1) // we don't want the 'E' prefix for RDB's version of SQL
+  override def string(s: String): String = super.string(s).substring(1) // we don't want the 'E' prefix for RDB's version of SQL
 
 }

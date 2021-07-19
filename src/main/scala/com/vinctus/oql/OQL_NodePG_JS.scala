@@ -94,13 +94,15 @@ class OQL_NodePG_JS(dm: String,
     }
 
   def render(a: Any, typ: Option[DataType] = None): String =
-    (a, typ) match {
-      case (s: String, Some(UUIDType)) => s"UUID'$s'"
-      case (s: String, _)              => ds.literal(s)
-      case (d: js.Date, _)             => s"'${d.toISOString()}'"
-      case (a: js.Array[_], _)         => s"(${a map (e => render(e, typ)) mkString ","})"
-      case _                           => String.valueOf(a)
-    }
+    if (typ.isDefined)
+      ds.typed(a, typ.get)
+    else
+      a match {
+        case s: String      => ds.string(s)
+        case d: js.Date     => s"'${d.toISOString()}'"
+        case a: js.Array[_] => s"(${a map (e => render(e, typ)) mkString ","})"
+        case _              => String.valueOf(a)
+      }
 
 }
 

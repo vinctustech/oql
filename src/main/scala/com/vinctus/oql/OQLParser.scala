@@ -155,7 +155,7 @@ object OQLParser extends RegexParsers with PackratParsers {
   lazy val literalExpression: PackratParser[OQLExpression] =
     float ^^ FloatOQLExpression |
       integer ^^ IntegerOQLExpression |
-      string ^^ LiteralOQLExpression |
+      string ^^ (unescape _ andThen StringOQLExpression) |
       booleanLiteral
 
   lazy val primary: PackratParser[OQLExpression] =

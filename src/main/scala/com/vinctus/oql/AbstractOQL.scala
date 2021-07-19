@@ -321,10 +321,11 @@ object AbstractOQL {
 
         query.select foreach (decorate(query.entity, _, model, ds, oql))
         query.order foreach (_ foreach { case OQLOrdering(expr, _) => decorate(query.entity, expr, model, ds, oql) })
-      case e: LiteralOQLExpression                 => e.typ = TextType
+      case e: StringOQLExpression                  => e.typ = TextType
       case e: FloatOQLExpression                   => e.typ = FloatType
       case e: IntegerOQLExpression                 => e.typ = IntegerType
       case e: BooleanOQLExpression                 => e.typ = BooleanType
+      case e @ TypedOQLExpression(_, t)            => e.typ = t
       case StarOQLExpression | _: RawOQLExpression =>
     }
   }
@@ -440,25 +441,10 @@ object AbstractOQL {
 
         // generate conditions for fixed entity if necessary
         if (fixed.operative) {
-//          if (fixed.entity == query.entity) {
           for (attr <- query.entity.fixing(fixed.entity)) {
-            val value =
-              fixed.at match { // todo: create TypedOQLExpression() that will be rendered according to type of fixed.entity.pk
-                case n: Int    => IntegerOQLExpression(n)
-                case n: Double => FloatOQLExpression(n)
-                case _         => LiteralOQLExpression(fixed.at.toString)
-              }
-
             builder.left.toOption.get
               .select(InfixOQLExpression(attr, "=", TypedOQLExpression(fixed.at, fixed.entity.pk.get.typ.asDatatype)), query.entity.table)
           }
-//          } //            builder.left.toOption.get.select(RawOQLExpression(s""""${query.entity.table}"."${query.entity.pk.get.column}" = ${fixed.at}"""), null)
-//          else
-//            query.entity.attributes.values foreach {
-//              case Attribute(name, column, pk, required, typ: ManyToOneType) if typ.entity == fixed.entity =>
-//                builder.left.toOption.get.select(RawOQLExpression(s""""${query.entity.table}"."$column" = ${fixed.at}"""), null)
-//              case _ =>
-//            }
         }
 
         query.group foreach (builder.left.toOption.get.group(_, query.entity.table))

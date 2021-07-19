@@ -120,13 +120,12 @@ class SQLQueryBuilder(oql: String, ds: SQLDataSource, fixed: Fixed, model: DataM
       case PrefixOQLExpression("-", expr)                    => s"-${expression(expr, table)}"
       case PrefixOQLExpression(op, expr)                     => s"$op ${expression(expr, table)}"
       case PostfixOQLExpression(expr, op)                    => s"${expression(expr, table)} $op"
-      case BetweenOQLExpression(expr, op, lower, upper) =>
-        s"${expression(expr, table)} $op ${expression(lower, table)} AND ${expression(upper, table)}"
+      case BetweenOQLExpression(expr, op, lower, upper)      => s"${expression(expr, table)} $op ${expression(lower, table)} AND ${expression(upper, table)}"
       case GroupedOQLExpression(expr)             => s"(${expression(expr, table)})"
-      case TypedOQLExpression(v, typ) =>
+      case TypedOQLExpression(v, typ)             => ds.typed(v, typ)
       case FloatOQLExpression(n)                  => n.toString
       case IntegerOQLExpression(n)                => n.toString
-      case LiteralOQLExpression(s)                => ds.literal(unescape(s))  // this may seem unnecessary but it allows a data source to represent special characters differently than OQL
+      case StringOQLExpression(s)                 => ds.string(s)
       case ReferenceOQLExpression(_, dmrefs)      => attribute(dmrefs)
       case AttributeOQLExpression(List(id), null) => id.s // it's a built-in variable if dmrefs is null
       case AttributeOQLExpression(_, dmrefs)      => attribute(dmrefs)
