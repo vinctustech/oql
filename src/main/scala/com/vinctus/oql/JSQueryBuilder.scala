@@ -102,13 +102,13 @@ class JSQueryBuilder private[oql] (private val oql: OQL_NodePG_JS, private[oql] 
   @JSExport
   def offset(a: Int): JSQueryBuilder = new JSQueryBuilder(oql, q.copy(offset = Some(a)))
 
-  @JSExport
-  def getMany(): js.Promise[js.Array[js.Any]] = check.oql.jsQueryMany(q, null)
+  @JSExport //empty parentheses aren't redundant: Scala.js compiler needs them
+  def getMany(): js.Promise[js.Array[js.Any]] = check.oql.jsQueryMany(q, null, Fixed(operative = false))
 
-  @JSExport
+  @JSExport //empty parentheses aren't redundant: Scala.js compiler needs them
   def getOne(): js.Promise[js.UndefOr[Any]] = check.oql.jsQueryOne(q, null)
 
-  @JSExport
+  @JSExport //empty parentheses aren't redundant: Scala.js compiler needs them
   def getCount(): js.Promise[Int] = check.oql.count(q, null).toJSPromise
 
 }
