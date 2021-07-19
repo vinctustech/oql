@@ -16,13 +16,13 @@ object Main extends App {
   val db =
     new OQL_NodePG(g.require("fs").readFileSync("test/accounts.dm").toString, "localhost", 5432, "postgres", "postgres", "docker", false, 1000, 5)
 
-//  println(db.model.entities.view.mapValues(e => e.fixing).toMap)
+  println(db.model.entities.view.mapValues(e => e.fixing).toMap)
 
   async {
     db.showQuery()
 //    println(await(db.queryMany("""account""", "account", 2)))
-//    println(await(db.queryMany("""vehicle""", "account", 2)))
-    println(await(db.queryMany("""store""", "account", 2)))
+    println(await(db.queryMany("""vehicle""", "account", 2)))
+//    println(await(db.queryMany("""store""", "account", 2)))
   } recover {
     case e: Exception => println(e)
   }

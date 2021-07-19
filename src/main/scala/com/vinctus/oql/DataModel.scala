@@ -206,19 +206,24 @@ class DataModel(model: DMLModel, dml: String) {
   }
 
   for (e <- entities.values) {
-    val buf = new ListBuffer[List[String]]
+    val idsbuf = new ListBuffer[List[String]]
+    val nullablesbuf = new ListBuffer[List[String]]
 
     def scan(attrs: List[String], ents: List[Entity], entity: Entity): Unit = {
       if (entity == first)
-        buf += (entity.pk.get.name :: attrs).reverse
+        idsbuf += (entity.pk.get.name :: attrs).reverse
       else
-        for (Attribute(name, _, pk, _, typ) <- entity.attributes.values if !pk)
+        for (Attribute(name, _, pk, required, typ) <- entity.attributes.values if !pk)
           typ match {
             case ManyToOneType(mtoEntity) =>
               val newents = entity :: ents
 
-              if (!(newents contains mtoEntity)) // avoid circularity
+              if (!(newents contains mtoEntity)) { // avoid circularity
+                if (!required)
+                  nullablesbuf += (name :: attrs).reverse
+
                 scan(name :: attrs, newents, mtoEntity)
+              }
             case _ =>
           }
     }
@@ -226,12 +231,22 @@ class DataModel(model: DMLModel, dml: String) {
     scan(Nil, Nil, e)
 
     val attrs =
-      buf.toList map { ids =>
-        val idents = ids map (id => Ident(id))
-        val attr = AttributeOQLExpression(idents)
+      idsbuf.toList map { ids =>
+        val attridents = ids map (id => Ident(id))
+        val attr = AttributeOQLExpression(attridents)
 
-        attr.dmrefs = lookup(attr, idents, ref = false, e, null)
-        attr
+        attr.dmrefs = lookup(attr, attridents, ref = false, e, null)
+
+        val nullables =
+          nullablesbuf.toList filter (ids startsWith _) map { ids =>
+            val nullidents = ids map (id => Ident(id))
+            val nullable = ReferenceOQLExpression(nullidents)
+
+            nullable.dmrefs = lookup(nullable, nullidents, ref = true, e, null)
+            nullable
+          }
+
+        (attr, nullables)
       }
 
     e._fixing = Map(first -> attrs)

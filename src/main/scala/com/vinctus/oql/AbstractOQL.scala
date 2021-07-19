@@ -427,6 +427,12 @@ object AbstractOQL {
     query
   }
 
+  private[oql] def orList(exprs: List[OQLExpression]): OQLExpression =
+    exprs match {
+      case List(expr)   => expr
+      case head :: tail => InfixOQLExpression(head, "OR", orList(tail))
+    }
+
   private[oql] def writeQuery(node: Node,
                               table: String,
                               builder: Either[SQLQueryBuilder, Int],
@@ -441,9 +447,15 @@ object AbstractOQL {
 
         // generate conditions for fixed entity if necessary
         if (fixed.operative) {
-          for (attr <- query.entity.fixing(fixed.entity)) {
-            builder.left.toOption.get
-              .select(InfixOQLExpression(attr, "=", TypedOQLExpression(fixed.at, fixed.entity.pk.get.typ.asDatatype)), query.entity.table)
+          for ((attr, nullables) <- query.entity.fixing(fixed.entity)) {
+            val cond =
+              orList(
+                nullables.map(n => PostfixOQLExpression(n, "IS NULL")) :+ InfixOQLExpression(attr,
+                                                                                             "=",
+                                                                                             TypedOQLExpression(fixed.at,
+                                                                                                                fixed.entity.pk.get.typ.asDatatype)))
+
+            builder.left.toOption.get.select(cond, query.entity.table)
           }
         }
 
