@@ -57,44 +57,46 @@ class BookDBTests extends AsyncFreeSpec with Matchers {
     }
   }
 
-//  "simplest query with select" in {
-//    test("book.dm [year > 1880]") shouldBe
-//      """
-//        |[
-//        |  {
-//        |    "id": 1,
-//        |    "title": "Treasure Island",
-//        |    "year": 1883
-//        |  },
-//        |  {
-//        |    "id": 6,
-//        |    "title": "Adventures of Huckleberry Finn",
-//        |    "year": 1884
-//        |  }
-//        |]
-//        |""".trim.stripMargin
-//  }
-//
-//  "simplest query with select using parameter" in {
-//    test("book.dm [year > :year]", Map("year" -> 1880)) shouldBe
-//      """
-//        |[
-//        |  {
-//        |    "id": 1,
-//        |    "title": "Treasure Island",
-//        |    "year": 1883
-//        |  },
-//        |  {
-//        |    "id": 6,
-//        |    "title": "Adventures of Huckleberry Finn",
-//        |    "year": 1884
-//        |  }
-//        |]
-//        |""".trim.stripMargin
-//  }
-//
+  "simplest query with select" in {
+    test("book [year > 1880]") map { result =>
+      result shouldBe
+        """
+        |[
+        |  {
+        |    "id": 1,
+        |    "title": "Treasure Island",
+        |    "year": 1883
+        |  },
+        |  {
+        |    "id": 6,
+        |    "title": "Adventures of Huckleberry Finn",
+        |    "year": 1884
+        |  }
+        |]
+        |""".trim.stripMargin
+    }
+  }
+
+  "simplest query with select using parameter" in {
+    test("book [year > :year]", Map("year" -> 1880)) shouldBe
+      """
+        |[
+        |  {
+        |    "id": 1,
+        |    "title": "Treasure Island",
+        |    "year": 1883
+        |  },
+        |  {
+        |    "id": 6,
+        |    "title": "Adventures of Huckleberry Finn",
+        |    "year": 1884
+        |  }
+        |]
+        |""".trim.stripMargin
+  }
+
 //  "simplest many-to-one query" in {
-//    test("book.dm { * author }") shouldBe
+//    test("book { * author }") shouldBe
 //      """
 //        |[
 //        |  {
@@ -156,7 +158,7 @@ class BookDBTests extends AsyncFreeSpec with Matchers {
 //  }
 //
 //  "many-to-one query with select" in {
-//    test("book.dm { title year author { name } } [year > 1880]") shouldBe
+//    test("book { title year author { name } } [year > 1880]") shouldBe
 //      """
 //        |[
 //        |  {
@@ -236,7 +238,7 @@ class BookDBTests extends AsyncFreeSpec with Matchers {
 //  }
 //
 //  "query with select using IN" in {
-//    test("book.dm [year IN (1883, 1884)]") shouldBe
+//    test("book [year IN (1883, 1884)]") shouldBe
 //      """
 //        |[
 //        |  {
@@ -254,7 +256,7 @@ class BookDBTests extends AsyncFreeSpec with Matchers {
 //  }
 //
 //  "query with select using IN with parameter" in {
-//    test("book.dm [year IN :years]", Map("years" -> List(1883, 1884))) shouldBe
+//    test("book [year IN :years]", Map("years" -> List(1883, 1884))) shouldBe
 //      """
 //        |[
 //        |  {
