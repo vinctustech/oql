@@ -2,29 +2,28 @@ package com.vinctus.oql
 
 import com.vinctus.sjs_utils.Mappable
 import typings.node.global.console
+import typings.pg.mod.types
+import typings.pgTypes.mod.TypeId
 
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 import scala.async.Async.{async, await}
-
 import scala.scalajs.js
 import js.Dynamic.{global => g}
 
 object Main extends App {
 
   g.require("source-map-support").install()
+  types.setTypeParser(114.asInstanceOf[TypeId], (s: String) => s) // tell node-pg not to parse JSON
 
   val db =
-    new OQL_NodePG(g.require("fs").readFileSync("test/int.dm").toString, "localhost", 5432, "postgres", "postgres", "docker", false, 1000, 5)
+    new OQL_NodePG(g.require("fs").readFileSync("test/employee.dm").toString, "localhost", 5432, "postgres", "postgres", "docker", false, 1000, 5)
 
   async {
     db.showQuery()
-    await(
-      db.entity("t")
-        .bulkUpdate(List("843c15e8-1c6c-4148-b453-73a07cce1884" -> Map("n" -> 101), "fbc3b34b-15bd-4c70-8e5a-6f268c45161a" -> Map("n" -> 102))))
-    db.showQuery()
-    println(await(db.queryMany("""t""")))
+//    println(await(db.queryMany("job { jobTitle employees { firstName } }")))
+    println(await(db.json("job { jobTitle employees }")))
   } recover {
-    case e: Exception => println(e)
+    case e: Exception => e.printStackTrace()
   }
 
 }

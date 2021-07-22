@@ -2,14 +2,16 @@ package com.vinctus.oql
 
 import org.scalatest.freespec.AsyncFreeSpec
 import org.scalatest.matchers.should.Matchers
+import typings.pg.mod.types
+import typings.pgTypes.mod.TypeId
 
 import scala.concurrent.Future
-
 import scala.scalajs.js.Dynamic.{global => g}
 
 class EmployeeDBTests extends AsyncFreeSpec with Matchers {
 
   g.require("source-map-support").install()
+  types.setTypeParser(114.asInstanceOf[TypeId], (s: String) => s) // tell node-pg not to parse JSON
 
   implicit override def executionContext = scala.concurrent.ExecutionContext.Implicits.global
 
