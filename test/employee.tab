@@ -1,0 +1,19 @@
+job
+ id: integer, pk         jobTitle: text         
+ 4                President                     
+ 5                Administration Vice President 
+ 9                Programmer                    
+ 20               IT Manager                    
+
+department
+ id: integer, pk  departmentName: text 
+ 9                Executive            
+ 6                IT                   
+
+employee
+ id: integer, pk  firstName: text  lastName: text  manager: integer, fk, employee, id  job: integer, fk, job, id  department: integer, fk, department, id 
+ 100              Steven           King            null                                4                          9                                       
+ 101              Neena            Kochhar         100                                 5                          9                                       
+ 102              Lex              De Haan         100                                 5                          9                                       
+ 103              Alexander        Hunold          102                                 20                         6                                       
+ 104              Bruce            Ernst           103                                 9                          6                                       

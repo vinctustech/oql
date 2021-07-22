@@ -4,7 +4,6 @@ import org.scalatest.freespec.AsyncFreeSpec
 import org.scalatest.matchers.should.Matchers
 
 import scala.concurrent.{ExecutionContext, Future}
-import scala.scalajs.js
 import scala.scalajs.js.Dynamic.{global => g}
 
 class BookDBTests extends AsyncFreeSpec with Matchers {

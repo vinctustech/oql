@@ -21,3 +21,36 @@ INSERT INTO "book" ("pk_book_id", "title", "year", "author_id") VALUES
   (4, 'A Tale of Two Cities', 1859, 3),
   (5, 'The Adventures of Tom Sawyer', 1876, 4),
   (6, 'Adventures of Huckleberry Finn', 1884, 4);
+CREATE TABLE "job" (
+  "id" INTEGER PRIMARY KEY,
+  "jobTitle" TEXT
+);
+CREATE TABLE "department" (
+  "id" INTEGER PRIMARY KEY,
+  "departmentName" TEXT
+);
+CREATE TABLE "employee" (
+  "id" INTEGER PRIMARY KEY,
+  "firstName" TEXT,
+  "lastName" TEXT,
+  "manager" INTEGER,
+  "job" INTEGER,
+  "department" INTEGER
+);
+ALTER TABLE "employee" ADD FOREIGN KEY ("manager") REFERENCES "employee";
+ALTER TABLE "employee" ADD FOREIGN KEY ("job") REFERENCES "job";
+ALTER TABLE "employee" ADD FOREIGN KEY ("department") REFERENCES "department";
+INSERT INTO "job" ("id", "jobTitle") VALUES
+  (4, 'President'),
+  (5, 'Administration Vice President'),
+  (9, 'Programmer'),
+  (20, 'IT Manager');
+INSERT INTO "department" ("id", "departmentName") VALUES
+  (9, 'Executive'),
+  (6, 'IT');
+INSERT INTO "employee" ("id", "firstName", "lastName", "manager", "job", "department") VALUES
+  (100, 'Steven', 'King', null, 4, 9),
+  (101, 'Neena', 'Kochhar', 100, 5, 9),
+  (102, 'Lex', 'De Haan', 100, 5, 9),
+  (103, 'Alexander', 'Hunold', 102, 20, 6),
+  (104, 'Bruce', 'Ernst', 103, 9, 6);

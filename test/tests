@@ -1,1 +1,2 @@
 /home/ed/dev-sn/createdb/target/scala-2.13/createdb-out book.tab >tests.sql
+/home/ed/dev-sn/createdb/target/scala-2.13/createdb-out employee.tab >>tests.sql
