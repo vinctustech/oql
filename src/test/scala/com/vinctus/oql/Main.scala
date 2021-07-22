@@ -3,7 +3,7 @@ package com.vinctus.oql
 import com.vinctus.sjs_utils.Mappable
 import typings.node.global.console
 
-import scala.concurrent.ExecutionContext.Implicits.global
+import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 import scala.async.Async.{async, await}
 
 import scala.scalajs.js
@@ -34,7 +34,7 @@ object Main extends App {
 //import com.vinctus.sjs_utils.Mappable
 //import typings.node.global.console
 //
-//import scala.concurrent.ExecutionContext.Implicits.global
+//import *$1*
 //import scala.async.Async.{async, await}
 //
 //import scala.scalajs.js
@@ -72,7 +72,7 @@ object Main extends App {
 //import com.vinctus.sjs_utils.Mappable
 //import typings.node.global.console
 //
-//import scala.concurrent.ExecutionContext.Implicits.global
+//import *$1*
 //import scala.scalajs.js
 //import js.Dynamic.{global => g}
 //import scala.util.{Failure, Success}

@@ -12,7 +12,7 @@ class NodePG(val host: String,
              val password: String,
              val ssl: Boolean | ConnectionOptions,
              val idleTimeoutMillis: Int,
-             val max: Int)
+             val max: Int)(implicit ec: scala.concurrent.ExecutionContext)
     extends PGDataSource {
 
   val name: String = "PostgreSQL (node-pg)"

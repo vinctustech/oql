@@ -1,6 +1,6 @@
 package com.vinctus.oql
 
-class H2_mem extends JDBCDataSource("org.h2.Driver") {
+class H2_mem(implicit ec: scala.concurrent.ExecutionContext) extends JDBCDataSource("org.h2.Driver") {
 
   val name = "H2 (in memory)"
   val url = s"jdbc:h2:mem:test;DB_CLOSE_DELAY=-1"

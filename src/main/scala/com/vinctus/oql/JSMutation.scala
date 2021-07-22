@@ -2,7 +2,7 @@ package com.vinctus.oql
 
 import com.vinctus.sjs_utils.{jsObject, toJS, toMap}
 
-import scala.concurrent.ExecutionContext.Implicits.global
+import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 import scala.scalajs.js
 import scala.scalajs.js.JSConverters._
 import scala.scalajs.js.annotation.JSExport

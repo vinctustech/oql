@@ -1,11 +1,12 @@
 entity book {
- *id: bigint
+ *id (pk_book_id): bigint
   title: text
   year: int
-  author: author
+  author (author_id): author
 }
 
 entity author {
- *id: bigint
+ *id (pk_author_id): bigint
   name: text
+  books: [book]
 }

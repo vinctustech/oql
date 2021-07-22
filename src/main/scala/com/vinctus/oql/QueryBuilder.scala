@@ -2,10 +2,9 @@ package com.vinctus.oql
 
 import com.vinctus.sjs_utils.{Mappable, map2cc}
 
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class QueryBuilder private[oql] (private val oql: AbstractOQL, private[oql] val q: OQLQuery) {
+class QueryBuilder private[oql] (private val oql: AbstractOQL, private[oql] val q: OQLQuery)(implicit ec: scala.concurrent.ExecutionContext) {
   private def check = if (q.source eq null) sys.error("QueryBuilder: no source was given") else this
 
   private class DoNothingQueryBuilder extends QueryBuilder(oql, q) {

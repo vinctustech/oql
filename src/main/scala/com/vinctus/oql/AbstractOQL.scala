@@ -5,10 +5,9 @@ import com.vinctus.sjs_utils.DynamicMap
 import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
 import scala.annotation.tailrec
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-abstract class AbstractOQL(dm: String, val ds: SQLDataSource, conv: Conversions) {
+abstract class AbstractOQL(dm: String, val ds: SQLDataSource, conv: Conversions)(implicit ec: scala.concurrent.ExecutionContext) {
 
   import AbstractOQL._
 
@@ -98,7 +97,8 @@ abstract class AbstractOQL(dm: String, val ds: SQLDataSource, conv: Conversions)
   def queryMany(oql: String, newResultBuilder: () => ResultBuilder): Future[ResultBuilder] =
     queryMany(parseQuery(oql), oql, newResultBuilder)
 
-  def queryMany(query: OQLQuery, oql: String, newResultBuilder: () => ResultBuilder): Future[ResultBuilder] = {
+  def queryMany(query: OQLQuery, oql: String, newResultBuilder: () => ResultBuilder)(
+      implicit ec: scala.concurrent.ExecutionContext): Future[ResultBuilder] = {
     val root: ResultNode = ResultNode(query, objectNode(query.project))
     val sqlBuilder = new SQLQueryBuilder(oql, ds)
 

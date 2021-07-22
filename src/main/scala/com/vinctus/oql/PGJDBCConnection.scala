@@ -1,12 +1,12 @@
 package com.vinctus.oql
 
 import java.sql.Statement
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class PGJDBCConnection(dataSource: JDBCDataSource) extends JDBCConnection(dataSource) {
+class PGJDBCConnection(dataSource: JDBCDataSource)(implicit ec: scala.concurrent.ExecutionContext) extends JDBCConnection(dataSource) {
 
-  override def command(query: String): Future[OQLResultSet] = Future(new JDBCJSONResultSet(stmt.executeQuery(query)))
+  override def command(query: String): Future[OQLResultSet] =
+    Future(new JDBCJSONResultSet(stmt.executeQuery(query)))
 
   def insert(command: String): Future[JDBCResultSet] =
     Future {

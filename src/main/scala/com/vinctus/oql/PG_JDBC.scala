@@ -1,6 +1,7 @@
 package com.vinctus.oql
 
-class PG_JDBC(val host: String, val port: Int, val database: String, val user: String, val password: String)
+class PG_JDBC(val host: String, val port: Int, val database: String, val user: String, val password: String)(
+    implicit ec: scala.concurrent.ExecutionContext)
     extends JDBCDataSource("org.postgresql.Driver")
     with PGDataSource {
 

@@ -4,7 +4,6 @@ import com.vinctus.sjs_utils.{DynamicMap, toJS}
 import com.vinctus.mappable.{Mappable, map2cc}
 import typings.node.tlsMod.ConnectionOptions
 
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.scalajs.js
 import scala.scalajs.js.|
@@ -17,7 +16,7 @@ class OQL_NodePG(dm: String,
                  password: String,
                  ssl: Boolean | ConnectionOptions,
                  idleTimeoutMillis: Int,
-                 max: Int)
+                 max: Int)(implicit ec: scala.concurrent.ExecutionContext)
     extends AbstractOQL(dm, new NodePG(host, port, database, user, password, ssl, idleTimeoutMillis, max), JSConversions)
     with Dynamic {
 
@@ -33,18 +32,22 @@ class OQL_NodePG(dm: String,
   def jsQueryOne[T <: js.Object](q: OQLQuery): Future[Option[T]] =
     queryOne(q, "") map (_.map(toJS(_).asInstanceOf[T]))
 
-  def ccQueryOne[T <: Product: Mappable](oql: String): Future[Option[T]] = queryOne(oql) map (_.map(m => map2cc[T](m.asInstanceOf[Map[String, Any]])))
+  def ccQueryOne[T <: Product: Mappable](oql: String): Future[Option[T]] =
+    queryOne(oql) map (_.map(m => map2cc[T](m.asInstanceOf[Map[String, Any]])))
 
   def queryOne(oql: String): Future[Option[DynamicMap]] = queryOne(parseQuery(oql), oql)
 
-  def jsQueryMany[T <: js.Object](oql: String): Future[T] = (queryMany(oql) map (toJS(_))).asInstanceOf[Future[T]]
+  def jsQueryMany[T <: js.Object](oql: String): Future[T] =
+    (queryMany(oql) map (toJS(_))).asInstanceOf[Future[T]]
 
   def jsQueryMany[T <: js.Object](q: OQLQuery): Future[T] =
     (queryMany(q, "", () => new ScalaResultBuilder) map (toJS(_))).asInstanceOf[Future[T]]
 
-  def ccQueryMany[T <: Product: Mappable](oql: String): Future[List[T]] = queryMany(oql) map (_.map(m => map2cc[T](m.asInstanceOf[Map[String, Any]])))
+  def ccQueryMany[T <: Product: Mappable](oql: String): Future[List[T]] =
+    queryMany(oql) map (_.map(m => map2cc[T](m.asInstanceOf[Map[String, Any]])))
 
-  def queryMany(oql: String): Future[List[DynamicMap]] = queryMany(oql, () => new SJSResultBuilder) map (_.arrayResult.asInstanceOf[List[DynamicMap]])
+  def queryMany(oql: String): Future[List[DynamicMap]] =
+    queryMany(oql, () => new SJSResultBuilder) map (_.arrayResult.asInstanceOf[List[DynamicMap]])
 
   def queryBuilder() = new SJSQueryBuilder(this, OQLQuery(null, null, null, List(StarOQLProject), None, None, None, None, None))
 

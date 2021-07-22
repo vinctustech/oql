@@ -2,13 +2,12 @@ package com.vinctus.oql
 
 import typings.pg.mod.{Pool, PoolClient, PoolConfig, QueryArrayConfig}
 
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 import scala.scalajs.js
 import scala.scalajs.js.JSConverters._
 
-class NodePGConnection(val dataSource: NodePG) extends OQLConnection {
+class NodePGConnection(val dataSource: NodePG)(implicit ec: scala.concurrent.ExecutionContext) extends OQLConnection {
 
   private val pool = new Pool(
     PoolConfig()

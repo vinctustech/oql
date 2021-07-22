@@ -2,7 +2,7 @@ package com.vinctus.oql
 
 import com.vinctus.mappable.{Mappable, map2cc}
 
-import scala.concurrent.ExecutionContext.Implicits.global
+import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 import scala.concurrent.Future
 import scala.scalajs.js
 

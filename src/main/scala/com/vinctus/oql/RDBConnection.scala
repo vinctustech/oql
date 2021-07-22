@@ -4,9 +4,8 @@ import xyz.hyperreal.rdb_sjs
 import xyz.hyperreal.rdb_sjs.{CreateResult, InsertResult, RelationResult, UpdateResult}
 
 import scala.concurrent.Future
-import scala.concurrent.ExecutionContext.Implicits.global
 
-class RDBConnection(val dataSource: RDBDataSource, data: String) extends OQLConnection {
+class RDBConnection(val dataSource: RDBDataSource, data: String)(implicit ec: scala.concurrent.ExecutionContext) extends OQLConnection {
 
   private val client =
     new rdb_sjs.Connection {

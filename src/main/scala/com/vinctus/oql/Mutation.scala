@@ -4,11 +4,10 @@ import com.vinctus.mappable.{Mappable, map2cc}
 import com.vinctus.sjs_utils.DynamicMap
 
 import scala.collection.immutable.VectorMap
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.language.postfixOps
 
-class Mutation private[oql] (oql: AbstractOQL, entity: Entity) {
+class Mutation private[oql] (oql: AbstractOQL, entity: Entity)(implicit ec: scala.concurrent.ExecutionContext) {
 
   def insert[T <: Product: Mappable](obj: T): Future[T] =
     insert(implicitly[Mappable[T]].toMap(obj)) map map2cc[T] //implicitly[Mappable[T]].fromMap(m))

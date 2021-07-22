@@ -60,9 +60,9 @@ Compile / paradoxProperties ++=
 
 scalaJSUseMainModuleInitializer := true
 
-Test / scalaJSUseMainModuleInitializer := true
+Test / scalaJSUseMainModuleInitializer := false
 
-Test / scalaJSUseTestModuleInitializer := false
+Test / scalaJSUseTestModuleInitializer := true
 
 Compile / npmDependencies ++= Seq(
   "pg" -> "8.5.1",
@@ -71,7 +71,7 @@ Compile / npmDependencies ++= Seq(
 )
 
 libraryDependencies ++= Seq(
-  "org.scalatest" %%% "scalatest" % "3.2.5" % "test",
+  "org.scalatest" %%% "scalatest" % "3.2.9" % "test",
   "xyz.hyperreal" %%% "rdb-sjs" % "0.1.0-snapshot.10",
   "com.vinctus" %%% "sjs-utils" % "0.1.0-snapshot.25",
   "com.vinctus" %%% "mappable" % "0.1.2"

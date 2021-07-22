@@ -2,7 +2,7 @@ package com.vinctus.oql
 
 import scala.scalajs.js
 
-class RDBDataSource(data: String) extends SQLDataSource {
+class RDBDataSource(data: String)(implicit ec: scala.concurrent.ExecutionContext) extends SQLDataSource {
 
   val name: String = "RDB"
 
