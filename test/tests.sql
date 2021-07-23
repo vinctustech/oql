@@ -49,8 +49,32 @@ INSERT INTO "department" ("id", "departmentName") VALUES
   (9, 'Executive'),
   (6, 'IT');
 INSERT INTO "employee" ("id", "firstName", "lastName", "manager", "job", "department") VALUES
-  (100, 'Steven', 'King', null, 4, 9),
+  (100, 'Steven', 'King', NULL, 4, 9),
   (101, 'Neena', 'Kochhar', 100, 5, 9),
   (102, 'Lex', 'De Haan', 100, 5, 9),
   (103, 'Alexander', 'Hunold', 102, 20, 6),
   (104, 'Bruce', 'Ernst', 103, 9, 6);
+CREATE TABLE "event" (
+  "id" UUID PRIMARY KEY,
+  "what" TEXT,
+  "when" TIMESTAMP WITHOUT TIME ZONE,
+  "duration" DOUBLE PRECISION
+);
+CREATE TABLE "attendee" (
+  "id" UUID PRIMARY KEY,
+  "name" TEXT
+);
+CREATE TABLE "attendance" (
+  "event" UUID,
+  "attendee" UUID
+);
+ALTER TABLE "attendance" ADD FOREIGN KEY ("event") REFERENCES "event";
+ALTER TABLE "attendance" ADD FOREIGN KEY ("attendee") REFERENCES "attendee";
+INSERT INTO "event" ("id", "what", "when", "duration") VALUES
+  ('797f15ab-56ba-4389-aca1-5c3c661fc9fb', 'start testing timestamps', '2021-04-21T17:42:49.943Z', 300),
+  ('8aef4c68-7977-48cb-ba38-2764881d0843', 'woke up this morning', '2021-04-21T06:30:00.000Z', NULL);
+INSERT INTO "attendee" ("id", "name") VALUES
+  ('e8d982cd-dd19-4766-a627-ab33009bc259', 'me');
+INSERT INTO "attendance" ("event", "attendee") VALUES
+  ('797f15ab-56ba-4389-aca1-5c3c661fc9fb', 'e8d982cd-dd19-4766-a627-ab33009bc259'),
+  ('8aef4c68-7977-48cb-ba38-2764881d0843', 'e8d982cd-dd19-4766-a627-ab33009bc259');

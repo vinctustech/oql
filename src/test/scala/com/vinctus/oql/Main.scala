@@ -14,14 +14,15 @@ object Main extends App {
 
   g.require("source-map-support").install()
   types.setTypeParser(114.asInstanceOf[TypeId], (s: String) => s) // tell node-pg not to parse JSON
+  types.setTypeParser(1114.asInstanceOf[TypeId], (s: String) => new js.Date(s"$s GMT+00:00"))
 
   val db =
-    new OQL_NodePG(g.require("fs").readFileSync("test/employee.dm").toString, "localhost", 5432, "postgres", "postgres", "docker", false, 1000, 5)
+    new OQL_NodePG(g.require("fs").readFileSync("test/event.dm").toString, "localhost", 5432, "postgres", "postgres", "docker", false, 1000, 5)
 
   async {
     db.showQuery()
 //    println(await(db.queryMany("job { jobTitle employees { firstName } }")))
-    println(await(db.json("job { jobTitle employees }")))
+    println(await(db.json("attendee { * events <when> } <name>")))
   } recover {
     case e: Exception => e.printStackTrace()
   }

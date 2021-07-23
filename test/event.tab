@@ -1,0 +1,13 @@
+event
+             id: uuid, pk                     what: text             when: timestamp       duration: float 
+ 797f15ab-56ba-4389-aca1-5c3c661fc9fb  start testing timestamps  2021-04-21T17:42:49.943Z  300             
+ 8aef4c68-7977-48cb-ba38-2764881d0843  woke up this morning      2021-04-21T06:30:00.000Z  null            
+
+attendee
+             id: uuid, pk              name: text 
+ e8d982cd-dd19-4766-a627-ab33009bc259  me         
+
+attendance
+      event: uuid, fk, event, id         attendee: uuid, fk, attendee, id   
+ 797f15ab-56ba-4389-aca1-5c3c661fc9fb  e8d982cd-dd19-4766-a627-ab33009bc259 
+ 8aef4c68-7977-48cb-ba38-2764881d0843  e8d982cd-dd19-4766-a627-ab33009bc259 

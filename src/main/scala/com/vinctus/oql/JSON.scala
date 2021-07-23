@@ -4,6 +4,7 @@ import scala.annotation.tailrec
 import scala.collection.immutable.ArraySeq
 import scala.collection.mutable.ArrayBuffer
 import scala.language.postfixOps
+import scala.scalajs.js
 
 object JSON {
 
@@ -186,7 +187,7 @@ object JSON {
 
     def jsonValue(value: Any): Unit =
       value match {
-        case p if platformSpecific isDefinedAt p => platformSpecific(p)
+        case p if platformSpecific isDefinedAt p => buf ++= platformSpecific(p)
         case _: Double | _: Int | _: Long | _: Boolean | _: BigDecimal | _: java.math.BigDecimal | null =>
           buf ++= String.valueOf(value)
         case m: collection.Map[_, _]           => jsonObject(m.toSeq.asInstanceOf[Seq[(String, Any)]])
