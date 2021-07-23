@@ -1,6 +1,11 @@
 Release Notes
 =============
 
+1.0.0-RC.4.2
+------------
+
+- fixed the handling of timestamp values in inner query array results
+
 1.0.0-RC.4.1
 ------------
 
