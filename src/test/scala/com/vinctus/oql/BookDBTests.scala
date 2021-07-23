@@ -15,7 +15,7 @@ class BookDBTests extends AsyncFreeSpec with Matchers {
   val db =
     new OQL_NodePG(g.require("fs").readFileSync("test/book.dm").toString, "localhost", 5432, "postgres", "postgres", "docker", false, 1000, 5)
 
-  def test(oql: String): Future[String] = db.json(oql)
+  def test(oql: String, parameters: (String, Any)*): Future[String] = db.json(oql, parameters: _*)
 
   "simplest query" in {
     test("book") map { result =>
@@ -78,8 +78,9 @@ class BookDBTests extends AsyncFreeSpec with Matchers {
   }
 
   "simplest query with select using parameter" in {
-    test("book [year > :year]", Map("year" -> 1880)) shouldBe
-      """
+    test("book [year > :year]", "year" -> 1880) map { result =>
+      result shouldBe
+        """
         |[
         |  {
         |    "id": 1,
@@ -93,6 +94,7 @@ class BookDBTests extends AsyncFreeSpec with Matchers {
         |  }
         |]
         |""".trim.stripMargin
+    }
   }
 
 //  "simplest many-to-one query" in {
