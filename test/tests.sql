@@ -78,3 +78,42 @@ INSERT INTO "attendee" ("id", "name") VALUES
 INSERT INTO "attendance" ("event", "attendee") VALUES
   ('797f15ab-56ba-4389-aca1-5c3c661fc9fb', 'e8d982cd-dd19-4766-a627-ab33009bc259'),
   ('8aef4c68-7977-48cb-ba38-2764881d0843', 'e8d982cd-dd19-4766-a627-ab33009bc259');
+CREATE TABLE "planet" (
+  "plan_id" INTEGER PRIMARY KEY,
+  "name" TEXT,
+  "climate" TEXT
+);
+CREATE TABLE "species" (
+  "spec_id" INTEGER PRIMARY KEY,
+  "name" TEXT,
+  "lifespan" INTEGER,
+  "origin" INTEGER
+);
+CREATE TABLE "character" (
+  "char_id" INTEGER PRIMARY KEY,
+  "name" TEXT,
+  "home" INTEGER,
+  "species" INTEGER
+);
+ALTER TABLE "species" ADD FOREIGN KEY ("origin") REFERENCES "planet";
+ALTER TABLE "character" ADD FOREIGN KEY ("home") REFERENCES "planet";
+ALTER TABLE "character" ADD FOREIGN KEY ("species") REFERENCES "species";
+INSERT INTO "planet" ("plan_id", "name", "climate") VALUES
+  (1, 'Earth', 'not too bad'),
+  (2, 'Vulcan', 'pretty hot'),
+  (3, 'Betazed', 'awesome weather'),
+  (4, 'Qo''noS', 'turbulent'),
+  (5, 'Turkana IV', NULL);
+INSERT INTO "species" ("spec_id", "name", "lifespan", "origin") VALUES
+  (1, 'Human', 71, 1),
+  (2, 'Vulcan', 220, 2),
+  (3, 'Betazoid', 120, 3),
+  (4, 'Klingon', 150, 4);
+INSERT INTO "character" ("char_id", "name", "home", "species") VALUES
+  (1, 'James Tiberius Kirk', 1, 1),
+  (2, 'Spock', 1, 2),
+  (3, 'Deanna Troi', 1, 3),
+  (4, 'Worf, Son of Mogh', NULL, 4),
+  (5, 'Kurn, Son of Mogh', 4, 4),
+  (6, 'Lwaxana Troi', 3, 3),
+  (7, 'Natasha Yar', 5, 1);
