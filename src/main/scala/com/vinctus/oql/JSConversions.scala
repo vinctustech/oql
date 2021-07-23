@@ -4,7 +4,7 @@ import scala.scalajs.js
 
 object JSConversions extends Conversions {
 
-  def timestamp(t: String): Any = new js.Date(t)
+  def timestamp(t: String): Any = new js.Date(s"$t+00:00")
 
   def uuid(id: String): Any = id
 
