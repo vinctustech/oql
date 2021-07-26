@@ -173,6 +173,20 @@ class StudentDBTests extends AsyncFreeSpec with Matchers {
     }
   }
 
+  "exists (many-to-many)" in {
+    test("student [EXISTS (classes [name = 'Spanish'])]") map { result =>
+      result shouldBe
+        """
+          |[
+          |  {
+          |    "id": 1,
+          |    "name": "John"
+          |  }
+          |]
+          |""".trim.stripMargin
+    }
+  }
+
   "not/or" in {
     test("enrollment { class { name } } [NOT (semester = 'fall' OR semester = 'winter')] <class.name>") map { result =>
       result shouldBe

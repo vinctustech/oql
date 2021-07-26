@@ -318,7 +318,10 @@ class StarTrekDBTests extends AsyncFreeSpec with Matchers {
   "query builder ordered resource selection" in {
     db.queryBuilder()
       .query("character { * home species { * origin } }")
+      .cond(true)
       .select("char_id < 4")
+      .cond(false)
+      .select("char_id < 2")
       .order("name", "ASC")
       .json map { result =>
       result shouldBe

@@ -58,4 +58,52 @@ class UNDBTests extends AsyncFreeSpec with Matchers {
     }
   }
 
+  "is null" in {
+    test("rep [&country IS NULL]") map { result =>
+      result shouldBe
+        """
+          |[
+          |  {
+          |    "id": 4,
+          |    "name": "Batman"
+          |  }
+          |]
+          |""".trim.stripMargin
+    }
+    test("rep { * country } [&country IS NULL]") map { result =>
+      result shouldBe
+        """
+          |[
+          |  {
+          |    "id": 4,
+          |    "name": "Batman",
+          |    "country": null
+          |  }
+          |]
+          |""".trim.stripMargin
+    }
+  }
+
+  "is not null" in {
+    test("rep [&country IS NOT NULL]") map { result =>
+      result shouldBe
+        """
+          |[
+          |  {
+          |    "id": 1,
+          |    "name": "Abubakar Ahmad"
+          |  },
+          |  {
+          |    "id": 2,
+          |    "name": "Joseph Nkrumah"
+          |  },
+          |  {
+          |    "id": 3,
+          |    "name": "Lauren Zuma"
+          |  }
+          |]
+          |""".trim.stripMargin
+    }
+  }
+
 }
