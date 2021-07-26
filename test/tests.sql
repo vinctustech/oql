@@ -211,3 +211,41 @@ INSERT INTO "order" ("ord_num", "ord_amount", "advance_amount", "ord_date", "cus
   (200112, 2000, 400, '30-MAY-08', 'C00016', 'A007'),
   (200113, 4000, 600, '10-JUN-08', 'C00022', 'A002'),
   (200102, 2000, 300, '25-MAY-08', 'C00012', 'A012');
+CREATE TABLE "students" (
+  "id" INTEGER PRIMARY KEY,
+  "student_name" TEXT
+);
+CREATE TABLE "class" (
+  "id" INTEGER PRIMARY KEY,
+  "name" TEXT
+);
+CREATE TABLE "student_class" (
+  "studentid" INTEGER,
+  "classid" INTEGER,
+  "year" INTEGER,
+  "semester" TEXT,
+  "grade" TEXT
+);
+ALTER TABLE "student_class" ADD FOREIGN KEY ("studentid") REFERENCES "students";
+ALTER TABLE "student_class" ADD FOREIGN KEY ("classid") REFERENCES "class";
+INSERT INTO "students" ("id", "student_name") VALUES
+  (1, 'John'),
+  (2, 'Debbie');
+INSERT INTO "class" ("id", "name") VALUES
+  (1, 'English'),
+  (2, 'Maths'),
+  (3, 'Spanish'),
+  (4, 'Biology'),
+  (5, 'Science'),
+  (6, 'Programming'),
+  (7, 'Law'),
+  (8, 'Commerce'),
+  (9, 'Physical Education');
+INSERT INTO "student_class" ("studentid", "classid", "year", "semester", "grade") VALUES
+  (1, 3, 2019, 'fall', 'B+'),
+  (1, 5, 2018, 'winter', 'A'),
+  (1, 9, 2019, 'summer', 'F'),
+  (2, 1, 2018, 'fall', 'A+'),
+  (2, 4, 2019, 'winter', 'B-'),
+  (2, 5, 2018, 'summer', 'A-'),
+  (2, 9, 2019, 'fall', 'B+');

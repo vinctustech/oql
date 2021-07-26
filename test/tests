@@ -3,3 +3,4 @@
 /home/ed/dev-sn/createdb/target/scala-2.13/createdb-out event.tab >>tests.sql
 /home/ed/dev-sn/createdb/target/scala-2.13/createdb-out star-trek.tab >>tests.sql
 /home/ed/dev-sn/createdb/target/scala-2.13/createdb-out orders.tab >>tests.sql
+/home/ed/dev-sn/createdb/target/scala-2.13/createdb-out student.tab >>tests.sql
