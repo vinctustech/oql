@@ -53,7 +53,7 @@ class DMLParser extends RegexParsers {
       kw("decimal") ~ "(" ~ integer ~ "," ~ integer ~ ")" ^^ {
         case _ ~ _ ~ p ~ _ ~ s ~ _ => DMLParametricDataType("decimal", List(p, s))
       } |
-      ident ^^ DMLManyToOneType |
+      ident ^^ DMLNameType |
       "[" ~ ident ~ "]" ~ "(" ~ ident ~ ")" ^^ {
         case _ ~ n ~ _ ~ _ ~ l ~ _ => DMLManyToManyType(n, l)
       } |
