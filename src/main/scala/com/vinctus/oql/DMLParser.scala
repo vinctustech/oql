@@ -11,7 +11,7 @@ class DMLParser extends RegexParsers {
 
   def pos: Parser[Position] = positioned(success(new Positional {})) ^^ (_.pos)
 
-  def kw(s: String): Regex = (s"(?i)$s\\b").r
+  def kw(s: String): Regex = s"(?i)$s\\b".r
 
   def integer: Parser[String] = "[0-9]+".r
 
@@ -20,12 +20,19 @@ class DMLParser extends RegexParsers {
       case p ~ s => Ident(s, p)
     }
 
-  def model: Parser[DMLModel] = rep1(entity) ^^ DMLModel
+  def label: Parser[Ident] = pos ~ """'[^']+'""".r ^^ {
+    case p ~ l => Ident(l drop 1 dropRight 1, p)
+  }
+
+  def model: Parser[DMLModel] = rep1(entity | enumType) ^^ DMLModel
+
+  def enumType: Parser[DMLEnum] = kw("enum") ~ ident ~ "{" ~ rep1(label) ~ "}" ^^ {
+    case _ ~ n ~ _ ~ ls ~ _ => DMLEnum(n, ls)
+  }
 
   def entity: Parser[DMLEntity] =
     kw("entity") ~ ident ~ opt("(" ~> ident <~ ")") ~ "{" ~ rep1(attribute) ~ "}" ^^ {
-      case _ ~ n ~ a ~ _ ~ as ~ _ =>
-        DMLEntity(n, a, as)
+      case _ ~ n ~ a ~ _ ~ as ~ _ => DMLEntity(n, a, as)
     }
 
   def attribute: Parser[DMLAttribute] =

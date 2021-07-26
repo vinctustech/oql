@@ -22,12 +22,21 @@ class DataModel(model: DMLModel, dml: String) {
 
     def unknownEntity(typ: Ident) = printError(typ.pos, s"unknown entity: '${typ.s}'", dml)
 
-    duplicates(model.entities.map(e => e.actualName getOrElse e.name), "actual table")
-    duplicates(model.entities.map(_.name), "entity")
+    def entityDecls = model.decls.filter(_.isInstanceOf[DMLEntity]).asInstanceOf[Seq[DMLEntity]]
 
-    for (entity <- model.entities) {
-      duplicates(entity.attributes.map(a => a.actualName getOrElse a.name), " actual column")
-      duplicates(model.entities.map(_.name), "attribute")
+    def enumDecls = model.decls.filter(_.isInstanceOf[DMLEnum]).asInstanceOf[Seq[DMLEnum]]
+
+    duplicates(enumDecls.map(_.name), "enum")
+
+    for (e <- enumDecls)
+      duplicates(e.labels, "label")
+
+    duplicates(entityDecls.map(e => e.actualName getOrElse e.name), "actual table")
+    duplicates(entityDecls.map(_.name), "entity")
+
+    for (entity <- entityDecls) {
+      duplicates(entity.attributes.map(a => a.actualName getOrElse a.name), "actual column")
+      duplicates(entityDecls.map(_.name), "attribute")
 
       entity.attributes.filter(_.pk) match {
         case as if as.length > 1 => as foreach (a => printError(a.name.pos, s"extraneous primary key", dml))
