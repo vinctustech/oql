@@ -249,3 +249,23 @@ INSERT INTO "student_class" ("studentid", "classid", "year", "semester", "grade"
   (2, 4, 2019, 'winter', 'B-'),
   (2, 5, 2018, 'summer', 'A-'),
   (2, 9, 2019, 'fall', 'B+');
+CREATE TABLE "country" (
+  "id" INTEGER PRIMARY KEY,
+  "name" TEXT
+);
+CREATE TABLE "rep" (
+  "id" INTEGER PRIMARY KEY,
+  "name" TEXT,
+  "country" INTEGER
+);
+ALTER TABLE "rep" ADD FOREIGN KEY ("country") REFERENCES "country";
+INSERT INTO "country" ("id", "name") VALUES
+  (1, 'Nigeria'),
+  (2, 'Ghana'),
+  (3, 'South Africa'),
+  (4, 'Republic of China (Taiwan)');
+INSERT INTO "rep" ("id", "name", "country") VALUES
+  (1, 'Abubakar Ahmad', 1),
+  (2, 'Joseph Nkrumah', 2),
+  (3, 'Lauren Zuma', 3),
+  (4, 'Batman', NULL);

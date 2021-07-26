@@ -1,0 +1,13 @@
+country
+ id: integer, pk          name: text         
+ 1                Nigeria                    
+ 2                Ghana                      
+ 3                South Africa               
+ 4                Republic of China (Taiwan) 
+
+rep
+ id: integer, pk    name: text    country: integer, fk, country, id 
+ 1                Abubakar Ahmad  1                                 
+ 2                Joseph Nkrumah  2                                 
+ 3                Lauren Zuma     3                                 
+ 4                Batman          null                              
