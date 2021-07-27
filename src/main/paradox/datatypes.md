@@ -62,4 +62,7 @@ There are two data types relating to time and date:
 
 Timestamps are denoted `timestamp` which corresponds to the PostgreSQL `TIMESTAMP WITHOUT TIME ZONE` data type and materializes as a TypeScript `Date` type object or a Scala `Instant` type object.
 
-### Dates
+Enumerated Types
+----------------
+
+OQL provides support for PostgreSQL enumerated (enum) types.  The enum needs to be declared (not necessarily before it is used).  The syntax for declaring an enum is given @ref:[here](syntax.md#data-modeling-grammar-rules).  Other than declaring the enum and then using its name as a type name for attribute types, there's nothing special that needs to be done to use enums. You can treat them as strings in queries and mutations.

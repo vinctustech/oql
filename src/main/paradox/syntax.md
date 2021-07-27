@@ -10,8 +10,16 @@ An "Entity-Relationship" style language is used to describe the database.  Only 
 #### Data Modeling Grammar Rules
 
 *Model*
-: The complete data model is a series of entities.
+: The complete data model is a series of declarations. Currently, only `entity` and `enum` (enumeration) declarations are supported.
 : ![Model](.../dml-diagram/Model.png)
+
+*Enum*
+: Enums (enumerations) correspond to enum types in the database. An enum comprises an identifier matching the name of the corresponding enum type, and an ordered list of text values (not command separated) known as labels.
+: ![Entity](.../dml-diagram/Enum.png)
+
+*Label*
+: Enum labels look like single quoted strings (so that you can have spaces in them).
+: ![Entity](.../dml-diagram/Label.png)
 
 *Entity*
 : Entities correspond to tables in the database. An entity comprises an identifier matching the name of the corresponding table, which can be given an alias, and a series of attributes.
@@ -30,7 +38,8 @@ An "Entity-Relationship" style language is used to describe the database.  Only 
 
 *Type*
 : There are several kinds of attribute types:
-    - `DataType` corresponding to a database engine data type. These attributes correspond to table columns that are not foreign keys.
+    - `DataType` corresponding to a database data type. These attributes correspond to table columns that are not foreign keys.
+    - `EnumName` corresponding to a database enum type.
     - `EntityName` representing the many-to-one relationship (from the point of view of the current entity). This is the entity relationship type that corresponds to a table column that is a foreign key.
     - `[ EntityName ]` or `[ EntityName ] . AttributeName` representing the one-to-many relationship (from the point of view of the current entity). This is the array type that represents all the entities (rows) that are referencing the current entity.
     - `[ EntityName ] ( EntityName )` or `[ EntityName ] . AttributeName ( EntityName )` representing the many-to-many relationship.  The second `EntityName` in parentheses refers to the junction or link entity (table).
@@ -41,6 +50,9 @@ An "Entity-Relationship" style language is used to describe the database.  Only 
 : Any one of the basic data types that are commonly support by database systems. Any group of datatypes that begin with the same spelling (beyond the first one or two letters) are synonymous (e.g., `bool` and `boolean` refer to the same datatype).
 
 : ![DataType](.../dml-diagram/DataType.png)
+
+*EnumName*
+: An EnumName is an identifier that corresponds to the identifier given as the enum name.
 
 *EntityName*
 : An EntityName is an identifier that corresponds either to the identifier given as the entity name if it wasn't aliased, or to the alias if it was.
