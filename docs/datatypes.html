@@ -208,15 +208,9 @@ vinctustech/oql
 <h3><a href="#small-integers" name="small-integers" class="anchor"><span class="anchor-link"></span></a>Small integers</h3>
 <p>These are integers in the range of approximately -2.1 billion to +2.1 billion. In OQL, this is the <code>integer</code> data type, which has two synonyms: <code>int</code> and <code>int4</code>.</p>
 <p>The <code>integer</code> data type corresponds to the PostgreSQL <code>INTEGER</code> data type and materializes as a TypeScript <code>number</code> primitive or a Scala <code>Int</code> type object.</p>
-<h3><a href="#arbitrarily-large-integers" name="arbitrarily-large-integers" class="anchor"><span class="anchor-link"></span></a>Arbitrarily large integers</h3>
-<p>These are integers that can be of any size. In OQL, this is the <code>bigint</code> data type.</p>
-<p>The <code>bigint</code> data type corresponds to the PostgreSQL <code>BIGINT</code> data type and materializes as a TypeScript <code>bigint</code> primitive or a Scala <code>BitInt</code> type object.</p>
 <h3><a href="#double-precision-floating-point" name="double-precision-floating-point" class="anchor"><span class="anchor-link"></span></a>Double precision floating point</h3>
 <p>These are floating point numbers in a standard (IEEE 754) double precision binary representation with 15 significant digits. In OQL, this is the <code>float</code> data type, which has one synonym: <code>float8</code>.</p>
 <p>The <code>float</code> data type corresponds to the PostgreSQL <code>DOUBLE PRECISION</code> data type and materializes as a TypeScript <code>number</code> primitive or a Scala <code>Double</code> type object.</p>
-<h3><a href="#arbitrary-precision" name="arbitrary-precision" class="anchor"><span class="anchor-link"></span></a>Arbitrary precision</h3>
-<p>These are arbitrarily precise floating point numbers stored in a decimal representation. In OQL, this is the <code>decimal(p, s)</code> parametric data type, where <em>p</em> is the precision giving the number of significant digits, and <em>s</em> is the scale giving the number of digits after the decimal point.</p>
-<p>The <code>decimal(p, s)</code> data type corresponds to the PostgreSQL <code>NUMERIC(p, s)</code> parametric data type and materializes as a <code>big.js</code> (JavaScript library) <code>Big</code> type object or a Scala <code>BigDecimal</code> type object.</p>
 <h2><a href="#boolean" name="boolean" class="anchor"><span class="anchor-link"></span></a>Boolean</h2>
 <p>The boolean type has three values: <code>TRUE</code>, <code>FALSE</code>, and <code>NULL</code> (representing the unknown state). </p>
 <p>In OQL, this is the <code>boolean</code> data type, which has one synonym: <code>bool</code>.</p>
@@ -227,7 +221,6 @@ vinctustech/oql
 <p>There are two data types relating to time and date:</p>
 <h3><a href="#timestamps" name="timestamps" class="anchor"><span class="anchor-link"></span></a>Timestamps</h3>
 <p>Timestamps are denoted <code>timestamp</code> which corresponds to the PostgreSQL <code>TIMESTAMP WITHOUT TIME ZONE</code> data type and materializes as a TypeScript <code>Date</code> type object or a Scala <code>Instant</code> type object.</p>
-<h3><a href="#dates" name="dates" class="anchor"><span class="anchor-link"></span></a>Dates</h3>
 </div>
 <div>
 <a href="https://github.com/vinctustech/oql/tree/v1.0.0-RC.4.2/src/main/paradox/datatypes.md" title="Edit this page" class="md-source-file md-edit">
