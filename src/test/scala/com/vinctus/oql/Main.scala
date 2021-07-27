@@ -17,12 +17,13 @@ object Main extends App {
   types.setTypeParser(1114.asInstanceOf[TypeId], (s: String) => new js.Date(s"$s+00:00"))
 
   val db =
-    new OQL_NodePG(g.require("fs").readFileSync("test/event.dm").toString, "localhost", 5432, "postgres", "postgres", "docker", false, 1000, 5)
+    new OQL_NodePG(g.require("fs").readFileSync("test/cars.dm").toString, "localhost", 5432, "postgres", "postgres", "docker", false, 1000, 5)
 
   async {
     db.showQuery()
-//    println(await(db.queryMany("job { jobTitle employees { firstName } }")))
-    println(await(db.json("attendee { * events <when> } <name>")))
+    await(db.entity("car").insert(Map("make" -> "klunker", "color" -> "blue")))
+    db.showQuery()
+    println(await(db.json("car [color = 'blue']")))
   } recover {
     case e: Exception => e.printStackTrace()
   }
