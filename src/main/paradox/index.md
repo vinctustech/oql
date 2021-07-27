@@ -8,6 +8,7 @@
 * [Data Types](datatypes.md)
 * [Syntax](syntax.md)
 * [Supported Engines](supported-engines.md)
+* [Tests](tests.md)
 * [Release Notes](release-notes.md)
 
 @@@

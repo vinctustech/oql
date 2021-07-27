@@ -20,7 +20,7 @@
 
 <meta name="description" content="Object Query Language">
 <link rel="shortcut icon" href="assets/images/favicon.ico">
-<title>Introduction · OQL</title>
+<title>Tests · OQL</title>
 <link rel="stylesheet" href="assets/stylesheets/application.451f80e5.css">
 <link rel="stylesheet" href="assets/stylesheets/application-palette.22915126.css">
 <meta name="theme-color" content="#009688" />
@@ -60,7 +60,7 @@ data-md-color-accent="indigo"
 OQL
 </span>
 <span class="md-header-nav__topic">
-Introduction
+Tests
 </span>
 </div>
 </div>
@@ -139,7 +139,7 @@ vinctustech/oql
 
 </div>
 <ul>
-  <li><a href="introduction.html" class="active page">Introduction</a></li>
+  <li><a href="introduction.html" class="page">Introduction</a></li>
   <li><a href="installation.html" class="page">Installation</a></li>
   <li><a href="tutorial.html" class="page">Tutorial</a></li>
   <li><a href="api.html" class="page">API</a></li>
@@ -147,16 +147,19 @@ vinctustech/oql
   <li><a href="datatypes.html" class="page">Data types</a></li>
   <li><a href="syntax.html" class="page">Syntax</a></li>
   <li><a href="supported-engines.html" class="page">Supported Engines</a></li>
-  <li><a href="tests.html" class="page">Tests</a></li>
+  <li><a href="tests.html" class="active page">Tests</a></li>
   <li><a href="release-notes.html" class="page">Release Notes</a></li>
 </ul>
 <nav class="md-nav md-nav--secondary">
 <label class="md-nav__title" for="__toc">Table of contents</label>
 <ul>
-  <li><a href="introduction.html#introduction" class="header">Introduction</a>
+  <li><a href="tests.html#tests" class="header">Tests</a>
   <ul>
-    <li><a href="introduction.html#overview" class="header">Overview</a></li>
-    <li><a href="introduction.html#relationships" class="header">Relationships</a></li>
+    <li><a href="tests.html#requirements" class="header">Requirements</a></li>
+    <li><a href="tests.html#setup-postgresql" class="header">Setup PostgreSQL</a></li>
+    <li><a href="tests.html#clone-the-repository" class="header">Clone the repository</a></li>
+    <li><a href="tests.html#build-the-test-database" class="header">Build the test database</a></li>
+    <li><a href="tests.html#run-tests" class="header">Run tests</a></li>
   </ul></li>
 </ul>
 </nav>
@@ -178,10 +181,13 @@ vinctustech/oql
 <nav class="md-nav md-nav--secondary">
 <label class="md-nav__title" for="__toc">Table of contents</label>
 <ul>
-  <li><a href="introduction.html#introduction" class="header">Introduction</a>
+  <li><a href="tests.html#tests" class="header">Tests</a>
   <ul>
-    <li><a href="introduction.html#overview" class="header">Overview</a></li>
-    <li><a href="introduction.html#relationships" class="header">Relationships</a></li>
+    <li><a href="tests.html#requirements" class="header">Requirements</a></li>
+    <li><a href="tests.html#setup-postgresql" class="header">Setup PostgreSQL</a></li>
+    <li><a href="tests.html#clone-the-repository" class="header">Clone the repository</a></li>
+    <li><a href="tests.html#build-the-test-database" class="header">Build the test database</a></li>
+    <li><a href="tests.html#run-tests" class="header">Run tests</a></li>
   </ul></li>
 </ul>
 </nav>
@@ -192,36 +198,52 @@ vinctustech/oql
 <div class="md-content">
 <article class="md-content__inner md-typeset">
 <div class="md-content__searchable">
-<h1><a href="#introduction" name="introduction" class="anchor"><span class="anchor-link"></span></a>Introduction</h1>
-<h2><a href="#overview" name="overview" class="anchor"><span class="anchor-link"></span></a>Overview</h2>
-<p><em>OQL</em> is a language for querying a relational database. The query syntax draws inspiration from GraphQL and is similar, but with many differences. Some capabilities missing from GraphQL have been added, and some capabilities found in GraphQL have a different syntax. We believe that much of conventional SQL syntax is still preferable to creating a completely new syntax for every single feature of the query language (i.e., conventional syntax wherever possible). However, whereas SQL can be seen as a &ldquo;low level&rdquo; relational query language, OQL takes a higher level Entity-Relationship (ER) Model view of the database.</p>
-<p>The name &ldquo;OQL&rdquo; refers to both a software library, and a query language implemented within that library. The OQL library provides support for data retrieval (via the OQL query language) as well as a query builder for constructing queries in programmatically. There are also class methods for performing all kinds of mutations, including mutations that support the ER view of the database. Furthermore, query and mutation operations all abide by the supplied ER data model.</p>
-<p>Some features of OQL include:</p>
+<h1><a href="#tests" name="tests" class="anchor"><span class="anchor-link"></span></a>Tests</h1>
+<h2><a href="#requirements" name="requirements" class="anchor"><span class="anchor-link"></span></a>Requirements</h2>
 <ul>
-  <li>the query language is similar to <a href="https://graphql.org/">GraphQL</a> in that query results have exactly the structure requested in the query (i.e., you get what you ask for)</li>
-  <li>uses a very simple <a href="https://en.wikipedia.org/wiki/Entity%E2%80%93relationship_model">Entity-Relationship Model</a> description of the database</li>
-  <li>works with the <a href="https://www.postgresql.org/">PostgreSQL</a> database system</li>
-  <li>designed to work with existing databases without having to change the database at all</li>
+  <li>Git (for cloning)</li>
+  <li>Java 11+</li>
+  <li><a href="https://www.scala-sbt.org/1.x/docs/Setup.html">sbt</a> (for building and running tests)</li>
 </ul>
-<h2><a href="#relationships" name="relationships" class="anchor"><span class="anchor-link"></span></a>Relationships</h2>
-<p>OQL recognizes all the various kinds of entity relationships, and provides a way to explicitly define them:</p>
-<dl>
-  <dt>One-to-Many
-  </dt>
-  <dd>The <em>one-to-many</em> relationship means that an object of some entity <em>A</em> can relate to any number of objects of some entity <em>B</em>. It is possible for <em>A</em> and <em>B</em> to be the same entity: entities can be in a self relationship. Furthermore, that self relationship can be indirect with intermediate entities. The one-to-many relationship is just the flip version of many-to-one: if <em>A</em> is one-to-many in how it relates to <em>B</em>, then <em>B</em> is many-to-one in how it relates to <em>A</em>.</dd>
-  <dt>Many-to-one
-  </dt>
-  <dd>The <em>many-to-one</em> relationship means that any number of objects of some entity <em>A</em> can relate to a single object of some entity <em>B</em>.</dd>
-  <dt>Many-to-many
-  </dt>
-  <dd>The <em>many-to-many</em> relationship means that any number of objects of some entity <em>A</em> can relate to any number of objects of some entity <em>B</em>. In OQL, this is accomplished by both defining that the relationship exists and defining a junction or link entity to facilitate the links between <em>A</em> and <em>B</em>.</dd>
-  <dt>One-to-one
-  </dt>
-  <dd>The <em>one-to-one</em> relationship that an object of some entity <em>A</em> can relate to a single object of some entity <em>B</em> and no more.</dd>
-</dl>
+<h2><a href="#setup-postgresql" name="setup-postgresql" class="anchor"><span class="anchor-link"></span></a>Setup PostgreSQL</h2>
+<p>To run the unit test, you will need to get <a href="https://hub.docker.com/_/postgres">PostgreSQL</a> running in a <a href="https://www.docker.com/resources/what-container">docker container</a>:</p>
+<pre><code>docker pull postgres
+docker run --rm --name pg-docker -e POSTGRES_PASSWORD=docker -d -p 5432:5432 postgres
+</code></pre>
+<p>The <a href="https://www.postgresql.org/docs/13.3/app-psql.html">PostgreSQL client</a> (<code>psql</code>) should be installed. If necessary, it can be installed with the command</p>
+<p><code>sudo apt-get install postgresql-client</code></p>
+<h2><a href="#clone-the-repository" name="clone-the-repository" class="anchor"><span class="anchor-link"></span></a>Clone the repository</h2>
+<p>At the shell terminal go to the folder where the sources will be downloaded, referred to as <code>dev-path/</code>, and type</p>
+<pre><code>git git@github.com:vinctustech/oql.git
+</code></pre>
+<p>This will create folder <code>dev-path/oql</code>.</p>
+<h2><a href="#build-the-test-database" name="build-the-test-database" class="anchor"><span class="anchor-link"></span></a>Build the test database</h2>
+<p>Type</p>
+<pre class="prettyprint"><code class="language-shell">cd oql/test
+
+sh start
+
+sh tests
+
+sh build
+</code></pre>
+<p>The last few lines of output should be</p>
+<pre><code>CREATE TABLE
+ALTER TABLE
+INSERT 0 4
+INSERT 0 4
+</code></pre>
+<h2><a href="#run-tests" name="run-tests" class="anchor"><span class="anchor-link"></span></a>Run tests</h2>
+<p>Type</p>
+<pre><code>cd ..
+sbt test
+</code></pre>
+<p>You should see</p>
+<pre><code>[info] All tests passed.
+</code></pre>
 </div>
 <div>
-<a href="https://github.com/vinctustech/oql/tree/v1.0.0-RC.4.2/src/main/paradox/introduction.md" title="Edit this page" class="md-source-file md-edit">
+<a href="https://github.com/vinctustech/oql/tree/v1.0.0-RC.4.2/src/main/paradox/tests.md" title="Edit this page" class="md-source-file md-edit">
 Edit this page
 </a>
 </div>
@@ -237,7 +259,7 @@ Edit this page
 <footer class="md-footer">
 <div class="md-footer-nav">
 <nav class="md-footer-nav__inner md-grid">
-<a href="index.html" title="OQL" class="md-flex md-footer-nav__link md-footer-nav__link--prev" rel="prev">
+<a href="supported-engines.html" title="Supported Engines" class="md-flex md-footer-nav__link md-footer-nav__link--prev" rel="prev">
 <div class="md-flex__cell md-flex__cell--shrink">
 <i class="md-icon md-icon--arrow-back md-footer-nav__button"></i>
 </div>
@@ -246,17 +268,17 @@ Edit this page
 <span class="md-footer-nav__direction">
 Previous
 </span>
-OQL
+Supported Engines
 </span>
 </div>
 </a>
-<a href="installation.html" title="Installation" class="md-flex md-footer-nav__link md-footer-nav__link--next" rel="next">
+<a href="release-notes.html" title="Release Notes" class="md-flex md-footer-nav__link md-footer-nav__link--next" rel="next">
 <div class="md-flex__cell md-flex__cell--stretch md-footer-nav__title">
 <span class="md-flex__ellipsis">
 <span class="md-footer-nav__direction">
 Next
 </span>
-Installation
+Release Notes
 </span>
 </div>
 <div class="md-flex__cell md-flex__cell--shrink">

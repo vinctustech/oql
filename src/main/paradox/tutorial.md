@@ -1,7 +1,7 @@
 Tutorial
 ========
 
-We present a fully explained tutorial example that creates a dockerized [PostgreSQL](https://www.postgresql.org/) database.  Therefore, you will need to have [docker](https://www.docker.com/) installed.
+We present a fully explained tutorial example showing how to apply OQL to an SQL database.  To begin, we need to create a dockerized [PostgreSQL](https://www.postgresql.org/) database.  Therefore, you will need to have [docker](https://www.docker.com/) installed.
 
 See @ref:[Examples](examples.md) for other examples.
 
