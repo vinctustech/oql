@@ -67,7 +67,9 @@ Test / scalaJSUseTestModuleInitializer := true
 Compile / npmDependencies ++= Seq(
   "pg" -> "8.5.1",
   "@types/pg" -> "7.14.9",
-  "source-map-support" -> "0.5.19"
+  "source-map-support" -> "0.5.19",
+  "big.js" -> "6.1.1",
+  "@types/big.js" -> "6.1.1"
 )
 
 libraryDependencies ++= Seq(

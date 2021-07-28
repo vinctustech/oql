@@ -1,11 +1,11 @@
 entity country {
- *id: bigint
+ *id: integer
   name: text
   rep: <rep>
 }
 
 entity rep {
- *id: bigint
+ *id: integer
   name: text
   country: country
 }

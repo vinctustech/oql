@@ -156,7 +156,7 @@ abstract class AbstractOQL(dm: String, val ds: SQLDataSource, conv: Conversions)
               (v, typ) match {
                 case (s: String, IntegerType)   => s.toInt
                 case (s: String, FloatType)     => s.toDouble
-                case (s: String, BigintType)    => conv.long(s)
+                case (s: String, BigintType)    => conv.bigint(s)
                 case (s: String, UUIDType)      => conv.uuid(s)
                 case (t: String, TimestampType) => conv.timestamp(t)
 //                  Instant.parse {

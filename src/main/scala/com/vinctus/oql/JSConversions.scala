@@ -8,7 +8,7 @@ object JSConversions extends Conversions {
 
   def uuid(id: String): Any = id
 
-  def long(n: String): Any = n.toDouble
+  def bigint(n: String): Any = js.BigInt(n)
 
   def decimal(n: String, precision: Int, scale: Int): Any = n.toDouble
 

@@ -6,7 +6,7 @@ abstract class Conversions {
 
   def uuid(id: String): Any
 
-  def long(n: String): Any
+  def bigint(n: String): Any
 
   def decimal(n: String, precision: Int, scale: Int): Any
 

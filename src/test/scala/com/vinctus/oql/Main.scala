@@ -1,7 +1,5 @@
 package com.vinctus.oql
 
-import com.vinctus.sjs_utils.Mappable
-import typings.node.global.console
 import typings.pg.mod.types
 import typings.pgTypes.mod.TypeId
 
