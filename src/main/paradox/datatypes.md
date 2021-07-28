@@ -25,7 +25,7 @@ The `integer` data type corresponds to the PostgreSQL `INTEGER` data type and ma
 
 These are integers that can be of any size.  In OQL, this is the `bigint` data type.
 
-The `bigint` data type corresponds to the PostgreSQL `BIGINT` data type and materializes as a TypeScript `bigint` primitive or a Scala `BitInt` type object.
+The `bigint` data type corresponds to the PostgreSQL `BIGINT` data type and materializes as a TypeScript `bigint` primitive or a Scala `BigInt` type object.
 
 ### Double precision floating point
 
