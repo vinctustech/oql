@@ -20,9 +20,9 @@ object Main extends App {
     new OQL_NodePG(g.require("fs").readFileSync("test/cars.dm").toString, "localhost", 5432, "postgres", "postgres", "docker", false, 1000, 5)
 
   async {
-    db.showQuery()
-    await(db.entity("car").insert(Map("make" -> "klunker", "color" -> "blue")))
-    db.showQuery()
+//    db.showQuery()
+//    await(db.entity("car").insert(Map("make" -> "klunker", "color" -> "blue")))
+//    db.showQuery()
     println(await(db.json("car [color = 'blue']")))
   } recover {
     case e: Exception => e.printStackTrace()

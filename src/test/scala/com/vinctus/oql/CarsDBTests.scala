@@ -18,88 +18,18 @@ class CarsDBTests extends AsyncFreeSpec with Matchers {
   implicit override def executionContext = scala.concurrent.ExecutionContext.Implicits.global
 
   val db =
-    new OQL_NodePG(g.require("fs").readFileSync("test/un.dm").toString, "localhost", 5432, "postgres", "postgres", "docker", false, 1000, 5)
+    new OQL_NodePG(g.require("fs").readFileSync("test/cars.dm").toString, "localhost", 5432, "postgres", "postgres", "docker", false, 1000, 5)
 
   def test(oql: String, parameters: (String, Any)*): Future[String] = db.json(oql, parameters: _*)
 
-  "simple one-to-one query" in {
-    test("country { * rep { name } }") map { result =>
+  "simple enum query" in {
+    test("car [color = 'blue']") map { result =>
       result shouldBe
         """
           |[
           |  {
-          |    "id": 1,
-          |    "name": "Nigeria",
-          |    "rep": {
-          |      "name": "Abubakar Ahmad"
-          |    }
-          |  },
-          |  {
-          |    "id": 2,
-          |    "name": "Ghana",
-          |    "rep": {
-          |      "name": "Joseph Nkrumah"
-          |    }
-          |  },
-          |  {
-          |    "id": 3,
-          |    "name": "South Africa",
-          |    "rep": {
-          |      "name": "Lauren Zuma"
-          |    }
-          |  },
-          |  {
-          |    "id": 4,
-          |    "name": "Republic of China (Taiwan)",
-          |    "rep": null
-          |  }
-          |]
-          |""".trim.stripMargin
-    }
-  }
-
-  "is null" in {
-    test("rep [&country IS NULL]") map { result =>
-      result shouldBe
-        """
-          |[
-          |  {
-          |    "id": 4,
-          |    "name": "Batman"
-          |  }
-          |]
-          |""".trim.stripMargin
-    }
-    test("rep { * country } [&country IS NULL]") map { result =>
-      result shouldBe
-        """
-          |[
-          |  {
-          |    "id": 4,
-          |    "name": "Batman",
-          |    "country": null
-          |  }
-          |]
-          |""".trim.stripMargin
-    }
-  }
-
-  "is not null" in {
-    test("rep [&country IS NOT NULL]") map { result =>
-      result shouldBe
-        """
-          |[
-          |  {
-          |    "id": 1,
-          |    "name": "Abubakar Ahmad"
-          |  },
-          |  {
-          |    "id": 2,
-          |    "name": "Joseph Nkrumah"
-          |  },
-          |  {
-          |    "id": 3,
-          |    "name": "Lauren Zuma"
+          |    "make": "aston martin",
+          |    "color": "blue"
           |  }
           |]
           |""".trim.stripMargin
