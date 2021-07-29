@@ -1,6 +1,17 @@
 Release Notes
 =============
 
+1.0.0
+-----
+
+This is the first official release of OQL.  While the previous release candidate was feature complete for our present purposes, there were some basic features that were missing.
+
+Features added:
+
+- support for PostgreSQL `BIGINT`, which includes support for JavaScript `bigint` primitives and Scala `BigInt` numbers
+- support for PostgreSQL `ENUM` types
+- support for a way for queries to be "fixed" to a particular entity
+
 1.0.0-RC.4.2
 ------------
 
