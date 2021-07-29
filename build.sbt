@@ -64,6 +64,10 @@ Test / scalaJSUseMainModuleInitializer := false
 
 Test / scalaJSUseTestModuleInitializer := true
 
+//Test / scalaJSUseMainModuleInitializer := true
+//
+//Test / scalaJSUseTestModuleInitializer := false
+
 Compile / npmDependencies ++= Seq(
   "pg" -> "8.5.1",
   "@types/pg" -> "7.14.9",
@@ -85,7 +89,7 @@ libraryDependencies ++= Seq(
 )
 
 libraryDependencies ++= Seq(
-  "io.github.cquiroz" %%% "scala-java-time" % "2.0.0"
+  "io.github.cquiroz" %%% "scala-java-time" % "2.3.0"
 )
 
 mainClass := Some( "com.vinctus." + "oql" + ".Main" )

@@ -3,7 +3,7 @@ CREATE TABLE "author" (
   "name" TEXT
 );
 CREATE TABLE "book" (
-  "pk_book_id" INTEGER PRIMARY KEY,
+  "pk_book_id" BIGINT PRIMARY KEY,
   "title" TEXT,
   "year" INTEGER,
   "author_id" INTEGER

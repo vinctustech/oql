@@ -18,7 +18,7 @@ class OQL_NodePG(dm: String,
                  ssl: Boolean | ConnectionOptions,
                  idleTimeoutMillis: Int,
                  max: Int)(implicit ec: scala.concurrent.ExecutionContext)
-    extends AbstractOQL(dm, new NodePG(host, port, database, user, password, ssl, idleTimeoutMillis, max), JSConversions)
+    extends AbstractOQL(dm, new NodePG(host, port, database, user, password, ssl, idleTimeoutMillis, max), ScalaConversions)
     with Dynamic {
 
   def execute[R](action: OQLConnection => Future[R]): Future[R] = action(connect)

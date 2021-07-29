@@ -4,7 +4,9 @@ import java.time.Instant
 
 object ScalaConversions extends Conversions {
 
-  def timestamp(t: String): Any = Instant.parse(t)
+  def timestamp(t: String): Any = {
+    Instant.parse(if (t endsWith "Z") t else t :+ 'Z')
+  }
 
   def uuid(id: String): Any = id
 

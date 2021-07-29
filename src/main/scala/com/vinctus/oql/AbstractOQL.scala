@@ -5,6 +5,7 @@ import com.vinctus.sjs_utils.DynamicMap
 import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
 import scala.annotation.tailrec
+import scala.collection.immutable.VectorMap
 import scala.concurrent.Future
 
 abstract class AbstractOQL(dm: String, val ds: SQLDataSource, conv: Conversions)(implicit ec: scala.concurrent.ExecutionContext) {
@@ -154,19 +155,11 @@ abstract class AbstractOQL(dm: String, val ds: SQLDataSource, conv: Conversions)
                 else expr.typ
 
               (v, typ) match {
-                case (s: String, IntegerType)   => s.toInt
-                case (s: String, FloatType)     => s.toDouble
-                case (s: String, BigintType)    => conv.bigint(s)
-                case (s: String, UUIDType)      => conv.uuid(s)
-                case (t: String, TimestampType) => conv.timestamp(t)
-//                  Instant.parse {
-//                    val z =
-//                      if (t.endsWith("Z")) t
-//                      else if (t.endsWith("+00")) t.replace("+00", "Z")
-//                      else s"${t}Z"
-//
-//                    if (z.charAt(10) != 'T') s"${z.substring(0, 10)}T${z.substring(11)}" else z
-//                  }
+                case (s: String, IntegerType)                   => s.toInt
+                case (s: String, FloatType)                     => s.toDouble
+                case (s: String, BigintType)                    => conv.bigint(s)
+                case (s: String, UUIDType)                      => conv.uuid(s)
+                case (t: String, TimestampType)                 => conv.timestamp(t)
                 case (d: String, DecimalType(precision, scale)) => conv.decimal(d, precision, scale)
                 case _                                          => v
               }

@@ -1,5 +1,7 @@
 package com.vinctus.oql
 
+import java.time.{Instant, ZoneId, ZoneOffset}
+import java.time.format.DateTimeFormatter
 import scala.annotation.tailrec
 import scala.collection.immutable.ArraySeq
 import scala.collection.mutable.ArrayBuffer
@@ -9,6 +11,7 @@ import scala.scalajs.js
 object JSON {
 
   private val EOI = '\uE000'
+  private val ISO = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
 
   def readArray(json: String): IndexedSeq[Any] = {
     var idx: Int = 0
@@ -188,13 +191,17 @@ object JSON {
     def jsonValue(value: Any): Unit =
       value match {
         case p if platformSpecific isDefinedAt p => buf ++= platformSpecific(p)
-        case _: Double | _: Int | _: Long | _: Boolean | _: BigDecimal | _: java.math.BigDecimal | null =>
+        case _: Double | _: Int | _: Long | _: Boolean | _: BigInt | _: BigDecimal | _: java.math.BigDecimal | null =>
           buf ++= String.valueOf(value)
         case m: collection.Map[_, _]           => jsonObject(m.toSeq.asInstanceOf[Seq[(String, Any)]])
         case s: collection.Seq[_] if s.isEmpty => buf ++= "[]"
         case s: collection.Seq[_]              => aggregate('[', s, ']')(jsonValue)
         case a: Array[_]                       => jsonValue(a.toList)
         case p: Product                        => jsonObject(p.productElementNames zip p.productIterator toList)
+        case t: Instant =>
+          buf += '"'
+          buf ++= ISO.format(t.atOffset(ZoneOffset.UTC))
+          buf += '"'
 //        case t: Timestamp                      => jsonValue(t.toInstant.toString) //  | _: Instant  _: java.util.UUID
         case _: String =>
           buf += '"'
