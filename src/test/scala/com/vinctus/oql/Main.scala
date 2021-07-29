@@ -1,5 +1,6 @@
 package com.vinctus.oql
 
+import typings.node.global.console
 import typings.pg.mod.types
 import typings.pgTypes.mod.TypeId
 
@@ -15,12 +16,14 @@ object Main extends App {
   types.setTypeParser(1114.asInstanceOf[TypeId], (s: String) => new js.Date(s"$s+00:00"))
 
   val db =
-    new OQL_NodePG(g.require("fs").readFileSync("test/book.dm").toString, "localhost", 5432, "postgres", "postgres", "docker", false, 1000, 5)
+//    new OQL_NodePG(g.require("fs").readFileSync("test/book.dm").toString, "localhost", 5432, "postgres", "postgres", "docker", false, 1000, 5)
+    new OQL_NodePG_JS(g.require("fs").readFileSync("test/book.dm").toString, "localhost", 5432, "postgres", "postgres", "docker", false, 1000, 5)
 
   async {
     db.showQuery()
 //    println(await(db.queryMany("job { jobTitle employees { firstName } }")))
-    println(await(db.json("book")))
+//    println(await(db.json("book")))
+    console.log(await(db.jsQueryMany("book").toFuture))
   } recover {
     case e => e.printStackTrace()
   }
