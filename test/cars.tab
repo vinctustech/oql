@@ -1,0 +1,8 @@
+color: red, blue, black, white, gray, silver, green, yellow
+
+cars
+  make: text   color: color 
+ ferrari       red          
+ aston martin  blue         
+ bentley       gray         
+ ford          black        

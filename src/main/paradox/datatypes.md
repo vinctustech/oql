@@ -33,12 +33,6 @@ These are floating point numbers in a standard (IEEE 754) double precision binar
 
 The `float` data type corresponds to the PostgreSQL `DOUBLE PRECISION` data type and materializes as a TypeScript `number` primitive or a Scala `Double` type object.
 
-### Arbitrary precision
-
-These are arbitrarily precise floating point numbers stored in a decimal representation.  In OQL, this is the `decimal(p, s)` parametric data type, where *p* is the precision giving the number of significant digits, and *s* is the scale giving the number of digits after the decimal point.
-
-The `decimal(p, s)` data type corresponds to the PostgreSQL `NUMERIC(p, s)` parametric data type and materializes as a `big.js` (JavaScript library) `Big` type object or a Scala `BigDecimal` type object.
-
 Boolean
 -------
 

@@ -1,10 +1,13 @@
-Model ::= Entity+
+Model ::= (Enum | Entity)+
+Enum ::= "enum" Identifier "{" Label+ "}"
+Label ::= "'" any_character+ "'"
 Entity ::= "entity" Identifier ("(" Alias ")")? "{" Attribute+ "}"
 Identifier ::= letter | "_" | "$" (letter | "_" | "$" | digit)*
 Alias ::= Identifier
 Attribute ::= "*"? Identifier ("(" Alias ")")? ":" Type "!"? | Identifier "=" JSON
 Type ::= DataType
      | EntityName
+     | EnumName
      | "[" EntityName "]" ("." AttributeName)?
      | "<" EntityName ">" ("." AttributeName)?
      | "[" EntityName "]" ("." AttributeName)? "(" EntityName ")"
@@ -18,6 +21,7 @@ DataType ::= "text"
               | "uuid"
               | "timestamp"
 EntityName ::= Identifier
+EnumName ::= Identifier
 AttributeName ::= Identifier
 
 /* color: #009688 (teal) */

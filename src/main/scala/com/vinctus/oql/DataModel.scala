@@ -12,6 +12,7 @@ class DataModel(model: DMLModel, dml: String) {
   val entities: Map[String, Entity] = {
     parsingError = false
 
+    val enums = new mutable.HashMap[String, EnumType]
     val entities = new mutable.LinkedHashMap[String, EntityInfo]
 
     def duplicates(ids: Seq[Ident], typ: String): Unit =
@@ -22,12 +23,23 @@ class DataModel(model: DMLModel, dml: String) {
 
     def unknownEntity(typ: Ident) = printError(typ.pos, s"unknown entity: '${typ.s}'", dml)
 
-    duplicates(model.entities.map(e => e.actualName getOrElse e.name), "actual table")
-    duplicates(model.entities.map(_.name), "entity")
+    def entityDecls = model.decls.filter(_.isInstanceOf[DMLEntity]).asInstanceOf[Seq[DMLEntity]]
 
-    for (entity <- model.entities) {
-      duplicates(entity.attributes.map(a => a.actualName getOrElse a.name), " actual column")
-      duplicates(model.entities.map(_.name), "attribute")
+    def enumDecls = model.decls.filter(_.isInstanceOf[DMLEnum]).asInstanceOf[Seq[DMLEnum]]
+
+    duplicates(enumDecls.map(_.name), "enum")
+
+    for (e <- enumDecls) {
+      duplicates(e.labels, "label")
+      enums(e.name.s) = EnumType(e.name.s, e.labels map (_.s))
+    }
+
+    duplicates(entityDecls.map(e => e.actualName getOrElse e.name), "actual table")
+    duplicates(entityDecls.map(_.name), "entity")
+
+    for (entity <- entityDecls) {
+      duplicates(entity.attributes.map(a => a.actualName getOrElse a.name), "actual column")
+      duplicates(entityDecls.map(_.name), "attribute")
 
       entity.attributes.filter(_.pk) match {
         case as if as.length > 1 => as foreach (a => printError(a.name.pos, s"extraneous primary key", dml))
@@ -52,10 +64,14 @@ class DataModel(model: DMLModel, dml: String) {
             case DMLSimpleDataType("float" | "float8")         => FloatType
             case DMLSimpleDataType("uuid")                     => UUIDType
             case DMLSimpleDataType("timestamp")                => TimestampType
-            case DMLManyToOneType(typ) =>
+            case DMLNameType(typ) =>
               entities get typ.s match {
                 case Some(EntityInfo(entity, _, _)) => ManyToOneType(entity)
-                case None                           => unknownEntity(typ)
+                case None =>
+                  enums get typ.s match {
+                    case Some(e) => e
+                    case None    => unknownEntity(typ)
+                  }
               }
             case DMLOneToOneType(typ, attr) =>
               entities get typ.s match {
@@ -127,8 +143,8 @@ class DataModel(model: DMLModel, dml: String) {
             printError(link.pos, s"junction entity '${linkinfo.entity.name}' has no attributes of type '${link.s}'", dml)
 
           as(a.name.s) = as(a.name.s).copy(typ = ManyToManyType(targetentity, linkinfo.entity, self.head, target.head))
-        case DMLAttribute(_, _, DMLManyToOneType(entity), _, _) =>
-          if (entities(entity.s).entity.pk.isEmpty)
+        case DMLAttribute(_, _, DMLNameType(entity), _, _) =>
+          if (entities.contains(entity.s) && entities(entity.s).entity.pk.isEmpty)
             printError(entity.pos, s"target entity '${entity.s}' has no declared primary key", dml)
         case a @ DMLAttribute(_, _, DMLOneToOneType(typ, attr), _, _) =>
           val entityinfo = entities(typ.s)

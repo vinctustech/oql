@@ -160,6 +160,7 @@ vinctustech/oql
     <li><a href="datatypes.html#boolean" class="header">Boolean</a></li>
     <li><a href="datatypes.html#uuid" class="header">UUID</a></li>
     <li><a href="datatypes.html#time-and-date" class="header">Time and Date</a></li>
+    <li><a href="datatypes.html#enumerated-types" class="header">Enumerated Types</a></li>
   </ul></li>
 </ul>
 </nav>
@@ -188,6 +189,7 @@ vinctustech/oql
     <li><a href="datatypes.html#boolean" class="header">Boolean</a></li>
     <li><a href="datatypes.html#uuid" class="header">UUID</a></li>
     <li><a href="datatypes.html#time-and-date" class="header">Time and Date</a></li>
+    <li><a href="datatypes.html#enumerated-types" class="header">Enumerated Types</a></li>
   </ul></li>
 </ul>
 </nav>
@@ -208,11 +210,14 @@ vinctustech/oql
 <h3><a href="#small-integers" name="small-integers" class="anchor"><span class="anchor-link"></span></a>Small integers</h3>
 <p>These are integers in the range of approximately -2.1 billion to +2.1 billion. In OQL, this is the <code>integer</code> data type, which has two synonyms: <code>int</code> and <code>int4</code>.</p>
 <p>The <code>integer</code> data type corresponds to the PostgreSQL <code>INTEGER</code> data type and materializes as a TypeScript <code>number</code> primitive or a Scala <code>Int</code> type object.</p>
+<h3><a href="#arbitrarily-large-integers" name="arbitrarily-large-integers" class="anchor"><span class="anchor-link"></span></a>Arbitrarily large integers</h3>
+<p>These are integers that can be of any size. In OQL, this is the <code>bigint</code> data type.</p>
+<p>The <code>bigint</code> data type corresponds to the PostgreSQL <code>BIGINT</code> data type and materializes as a TypeScript <code>bigint</code> primitive or a Scala <code>BigInt</code> type object.</p>
 <h3><a href="#double-precision-floating-point" name="double-precision-floating-point" class="anchor"><span class="anchor-link"></span></a>Double precision floating point</h3>
 <p>These are floating point numbers in a standard (IEEE 754) double precision binary representation with 15 significant digits. In OQL, this is the <code>float</code> data type, which has one synonym: <code>float8</code>.</p>
 <p>The <code>float</code> data type corresponds to the PostgreSQL <code>DOUBLE PRECISION</code> data type and materializes as a TypeScript <code>number</code> primitive or a Scala <code>Double</code> type object.</p>
 <h2><a href="#boolean" name="boolean" class="anchor"><span class="anchor-link"></span></a>Boolean</h2>
-<p>The boolean type has three values: <code>TRUE</code>, <code>FALSE</code>, and <code>NULL</code> (representing the unknown state). </p>
+<p>The boolean type has three values: <code>TRUE</code>, <code>FALSE</code>, and <code>NULL</code> (representing the unknown state).</p>
 <p>In OQL, this is the <code>boolean</code> data type, which has one synonym: <code>bool</code>.</p>
 <p>The <code>boolean</code> data type corresponds to the PostgreSQL <code>BOOLEAN</code> data type and materializes as a TypeScript <code>boolean</code> primitive or a Scala <code>Boolean</code> type object.</p>
 <h2><a href="#uuid" name="uuid" class="anchor"><span class="anchor-link"></span></a>UUID</h2>
@@ -221,6 +226,8 @@ vinctustech/oql
 <p>There are two data types relating to time and date:</p>
 <h3><a href="#timestamps" name="timestamps" class="anchor"><span class="anchor-link"></span></a>Timestamps</h3>
 <p>Timestamps are denoted <code>timestamp</code> which corresponds to the PostgreSQL <code>TIMESTAMP WITHOUT TIME ZONE</code> data type and materializes as a TypeScript <code>Date</code> type object or a Scala <code>Instant</code> type object.</p>
+<h2><a href="#enumerated-types" name="enumerated-types" class="anchor"><span class="anchor-link"></span></a>Enumerated Types</h2>
+<p>OQL provides support for PostgreSQL enumerated (enum) types. The enum needs to be declared (not necessarily before it is used). The syntax for declaring an enum is given <a href="syntax.html#data-modeling-grammar-rules">here</a>. Other than declaring the enum and then using its name as a type name for attribute types, there&rsquo;s nothing special that needs to be done to use enums. You can treat them as strings in queries and mutations.</p>
 </div>
 <div>
 <a href="https://github.com/vinctustech/oql/tree/v1.0.0-RC.4.2/src/main/paradox/datatypes.md" title="Edit this page" class="md-source-file md-edit">
