@@ -6,5 +6,7 @@ case class Entity(name: String, table: String) {
   lazy val attributes: Map[String, Attribute] = _attributes
   private[oql] var _pk: Option[Attribute] = _
   lazy val pk: Option[Attribute] = _pk
+  private[oql] var _fixing: Map[Entity, List[(AttributeOQLExpression, List[ReferenceOQLExpression])]] = _
+  lazy val fixing: Map[Entity, List[(AttributeOQLExpression, List[ReferenceOQLExpression])]] = _fixing
 
 }

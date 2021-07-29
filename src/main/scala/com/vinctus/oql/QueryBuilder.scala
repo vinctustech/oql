@@ -89,7 +89,8 @@ class QueryBuilder private[oql] (private val oql: AbstractOQL, private[oql] val 
 
   def offset(a: Int): QueryBuilder = new QueryBuilder(oql, q.copy(offset = Some(a)))
 
-  def getMany: Future[List[Any]] = check.oql.queryMany(q, null, () => new ScalaResultBuilder) map (_.arrayResult.asInstanceOf[List[Any]])
+  def getMany: Future[List[Any]] =
+    check.oql.queryMany(q, null, () => new ScalaResultBuilder, Fixed(operative = false)) map (_.arrayResult.asInstanceOf[List[Any]])
 
   def ccGetMany[T <: Product: Mappable]: Future[List[T]] = getMany map (_.map(m => map2cc[T](m.asInstanceOf[Map[String, Any]])))
 
@@ -100,6 +101,7 @@ class QueryBuilder private[oql] (private val oql: AbstractOQL, private[oql] val 
   def getCount: Future[Int] = oql.count(q, "")
 
   def json: Future[String] =
-    check.oql.queryMany(q, null, () => new ScalaResultBuilder) map (r => JSON(r.arrayResult, oql.ds.platformSpecific, format = true))
+    check.oql.queryMany(q, null, () => new ScalaResultBuilder, Fixed(operative = false)) map (r =>
+      JSON(r.arrayResult, oql.ds.platformSpecific, format = true))
 
 }

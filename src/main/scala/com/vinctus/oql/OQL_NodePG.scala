@@ -38,40 +38,37 @@ class OQL_NodePG(dm: String,
 
   def queryOne(oql: String): Future[Option[DynamicMap]] = queryOne(parseQuery(oql), oql)
 
-  def jsQueryMany[T <: js.Object](oql: String): Future[T] =
-    (queryMany(oql) map (toJS(_))).asInstanceOf[Future[T]]
+  def jsQueryMany[T <: js.Object](oql: String): Future[T] = (queryMany(oql) map (toJS(_))).asInstanceOf[Future[T]]
 
   def jsQueryMany[T <: js.Object](q: OQLQuery): Future[T] =
-    (queryMany(q, "", () => new ScalaResultBuilder) map (toJS(_))).asInstanceOf[Future[T]]
+    (queryMany(q, "", () => new ScalaResultBuilder, Fixed(operative = false)) map (toJS(_))).asInstanceOf[Future[T]]
 
   def ccQueryMany[T <: Product: Mappable](oql: String): Future[List[T]] =
     queryMany(oql) map (_.map(m => map2cc[T](m.asInstanceOf[Map[String, Any]])))
 
-  def queryMany(oql: String, parameters: (String, Any)*): Future[List[DynamicMap]] = {
+  def queryMany(oql: String, fixed: String = null, at: Any = null, parameters: Map[String, Any] = Map()): Future[List[DynamicMap]] = {
     val subst = substitute(oql, parameters)
 
-    queryMany(subst, () => new SJSResultBuilder) map (_.arrayResult.asInstanceOf[List[DynamicMap]])
+    queryMany(subst, () => new SJSResultBuilder, fixedEntity(fixed, at)) map (_.arrayResult.asInstanceOf[List[DynamicMap]])
   }
 
   def queryBuilder() = new SJSQueryBuilder(this, OQLQuery(null, null, null, List(StarOQLProject), None, None, None, None, None))
 
-  def json(oql: String, parameters: (String, Any)*): Future[String] = {
+  def json(oql: String, fixed: String = null, at: Any = null, parameters: Map[String, Any] = Map()): Future[String] = {
     val subst = substitute(oql, parameters)
 
-    queryMany(subst, () => new ScalaResultBuilder) map (r => JSON(r.arrayResult, ds.platformSpecific, 2, format = true))
+    queryMany(subst, () => new ScalaResultBuilder, fixedEntity(fixed, at)) map (r => JSON(r.arrayResult, ds.platformSpecific, 2, format = true))
   }
 
   private val varRegex = ":([a-zA-Z_][a-zA-Z0-9_]*)" r
 
-  def substitute(s: String, parameters: Seq[(String, Any)]): String = { // todo: unit tests for parameters
-    val map = parameters.toMap
-
+  def substitute(s: String, parameters: Map[String, Any]): String = { // todo: unit tests for parameters
     if (parameters.isEmpty) s
     else
       varRegex.replaceAllIn(
         s,
         m =>
-          map get m.group(1) match {
+          parameters get m.group(1) match {
             case None        => sys.error(s"template: parameter '${m.group(1)}' not found")
             case Some(value) => Regex.quoteReplacement(subsrender(value))
         }
@@ -92,12 +89,14 @@ class OQL_NodePG(dm: String,
     }
 
   def render(a: Any, typ: Option[DataType] = None): String =
-    (a, typ) match {
-      case (s: String, Some(UUIDType)) => s"UUID'$s'"
-      case (s: String, _)              => ds.literal(s)
-      case (d: js.Date, _)             => s"'${d.toISOString()}'"
-      case (a: collection.Seq[_], _)   => s"(${a map (e => render(e, typ)) mkString ","})"
-      case _                           => String.valueOf(a)
-    }
+    if (typ.isDefined)
+      ds.typed(a, typ.get)
+    else
+      a match {
+        case s: String            => ds.string(s)
+        case d: js.Date           => s"'${d.toISOString()}'"
+        case s: collection.Seq[_] => s"(${s map (e => render(e, typ)) mkString ","})"
+        case _                    => String.valueOf(a)
+      }
 
 }

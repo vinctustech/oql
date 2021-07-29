@@ -1,6 +1,6 @@
 package com.vinctus.oql
 
-import com.vinctus.oql.AbstractOQL._
+import AbstractOQL._
 
 import scala.collection.mutable.ArrayBuffer
 import scala.language.postfixOps
@@ -12,7 +12,7 @@ object SQLQueryBuilder {
 
 }
 
-class SQLQueryBuilder(oql: String, ds: SQLDataSource, val margin: Int = 0, subquery: Boolean = false) {
+class SQLQueryBuilder(oql: String, ds: SQLDataSource, fixed: Fixed, model: DataModel, val margin: Int = 0, subquery: Boolean = false) {
 
   import SQLQueryBuilder._
 
@@ -97,17 +97,17 @@ class SQLQueryBuilder(oql: String, ds: SQLDataSource, val margin: Int = 0, subqu
 
     expr match {
       case ExistsOQLExpression(query) =>
-        val subquery = writeQuery(innerQuery(query), table, Right(margin + 2 * SQLQueryBuilder.INDENT), oql, ds)
+        val subquery = writeQuery(innerQuery(query), table, Right(margin + 2 * SQLQueryBuilder.INDENT), oql, ds, fixed, model)
         val sql = subquery.toString
 
         s"EXISTS (\n$sql${" " * (margin + 2 * SQLQueryBuilder.INDENT)})"
       case QueryOQLExpression(query) =>
-        val subquery = writeQuery(innerQuery(query), table, Right(margin + 2 * SQLQueryBuilder.INDENT), oql, ds)
+        val subquery = writeQuery(innerQuery(query), table, Right(margin + 2 * SQLQueryBuilder.INDENT), oql, ds, fixed, model)
         val sql = subquery.toString
 
         s"(\n$sql${" " * (margin + 2 * SQLQueryBuilder.INDENT)})"
       case InQueryOQLExpression(left, op, query) =>
-        val subquery = writeQuery(innerQuery(query), table, Right(margin + 2 * SQLQueryBuilder.INDENT), oql, ds)
+        val subquery = writeQuery(innerQuery(query), table, Right(margin + 2 * SQLQueryBuilder.INDENT), oql, ds, fixed, model)
         val sql = subquery.toString
 
         s"${expression(left, table)} $op (\n$sql${" " * (margin + 2 * SQLQueryBuilder.INDENT)})"
@@ -120,12 +120,12 @@ class SQLQueryBuilder(oql: String, ds: SQLDataSource, val margin: Int = 0, subqu
       case PrefixOQLExpression("-", expr)                    => s"-${expression(expr, table)}"
       case PrefixOQLExpression(op, expr)                     => s"$op ${expression(expr, table)}"
       case PostfixOQLExpression(expr, op)                    => s"${expression(expr, table)} $op"
-      case BetweenOQLExpression(expr, op, lower, upper) =>
-        s"${expression(expr, table)} $op ${expression(lower, table)} AND ${expression(upper, table)}"
+      case BetweenOQLExpression(expr, op, lower, upper)      => s"${expression(expr, table)} $op ${expression(lower, table)} AND ${expression(upper, table)}"
       case GroupedOQLExpression(expr)             => s"(${expression(expr, table)})"
+      case TypedOQLExpression(v, typ)             => ds.typed(v, typ)
       case FloatOQLExpression(n)                  => n.toString
       case IntegerOQLExpression(n)                => n.toString
-      case LiteralOQLExpression(s)                => ds.literal(unescape(s))  // this may seem unnecessary but it allows a data source to represent special characters differently than OQL
+      case StringOQLExpression(s)                 => ds.string(s)
       case ReferenceOQLExpression(_, dmrefs)      => attribute(dmrefs)
       case AttributeOQLExpression(List(id), null) => id.s // it's a built-in variable if dmrefs is null
       case AttributeOQLExpression(_, dmrefs)      => attribute(dmrefs)

@@ -255,7 +255,7 @@ class Mutation private[oql] (oql: AbstractOQL, entity: Entity)(implicit ec: scal
     } mkString ", "}\n"
     command append s"  FROM  (VALUES ${updates map {
       case (id, update) =>
-        s"(${oql.render(id, Some(entity.pk.get.typ.asInstanceOf[DataType]))}, ${keys map (update andThen (x => oql.render(x))) mkString ", "})"
+        s"(${oql.render(id, Some(entity.pk.get.typ.asDatatype))}, ${keys map (update andThen (x => oql.render(x))) mkString ", "})"
     } mkString ", "}) AS __data__ (${entity.pk.get.column}, ${keys mkString ", "})\n"
     command append s"  WHERE ${entity.table}.${entity.pk.get.column} = __data__.${entity.pk.get.column}\n"
     oql.show(command.toString)
@@ -263,7 +263,5 @@ class Mutation private[oql] (oql: AbstractOQL, entity: Entity)(implicit ec: scal
     // execute update command (to get a future)
     oql.connect.command(command.toString) map (_ => ())
   }
-
-  // (values (1, 'a'), (2, 'b')) as __data__ (id, name)
 
 }

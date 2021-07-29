@@ -18,7 +18,7 @@ class BookDBTests extends AsyncFreeSpec with Matchers {
   val db =
     new OQL_NodePG(g.require("fs").readFileSync("test/book.dm").toString, "localhost", 5432, "postgres", "postgres", "docker", false, 1000, 5)
 
-  def test(oql: String, parameters: (String, Any)*): Future[String] = db.json(oql, parameters: _*)
+  def test(oql: String, parameters: (String, Any)*): Future[String] = db.json(oql, parameters = parameters.toMap)
 
   "simplest query" in {
     test("book") map { result =>

@@ -24,7 +24,6 @@ case class QueryOQLProject(label: Ident, query: OQLQuery) extends OQLProject
 
 case class OQLOrdering(expr: OQLExpression, ordering: String)
 case class OQLRestrict(limit: Option[Int], offset: Option[Int])
-
 abstract class OQLExpression { var typ: DataType = _ }
 case class RawOQLExpression(s: String) extends OQLExpression
 case class InArrayOQLExpression(left: OQLExpression, op: String, right: List[OQLExpression]) extends OQLExpression
@@ -37,8 +36,9 @@ case class PostfixOQLExpression(expr: OQLExpression, op: String) extends OQLExpr
 case class BetweenOQLExpression(expr: OQLExpression, op: String, lower: OQLExpression, upper: OQLExpression) extends OQLExpression
 case class FloatOQLExpression(n: Double) extends OQLExpression
 case class IntegerOQLExpression(n: Int) extends OQLExpression
-case class LiteralOQLExpression(s: String) extends OQLExpression
+case class StringOQLExpression(s: String) extends OQLExpression
 case class BooleanOQLExpression(b: String) extends OQLExpression
+case class TypedOQLExpression(v: Any, t: DataType) extends OQLExpression
 case class AttributeOQLExpression(ids: List[Ident], var dmrefs: List[(Entity, Attribute)] = null) extends OQLExpression
 case class ReferenceOQLExpression(ids: List[Ident], var dmrefs: List[(Entity, Attribute)] = null) extends OQLExpression
 case class ApplyOQLExpression(f: Ident, args: List[OQLExpression]) extends OQLExpression

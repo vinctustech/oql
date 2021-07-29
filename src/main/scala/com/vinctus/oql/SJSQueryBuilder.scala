@@ -99,7 +99,8 @@ class SJSQueryBuilder private[oql] (private val oql: OQL_NodePG, private[oql] va
 
   def jsGetOne[T <: js.Object]: Future[Option[T]] = check.oql.jsQueryOne(q)
 
-  def getMany: Future[List[Any]] = check.oql.queryMany(q, null, () => new ScalaResultBuilder) map (_.arrayResult.asInstanceOf[List[Any]])
+  def getMany: Future[List[Any]] =
+    check.oql.queryMany(q, null, () => new ScalaResultBuilder, Fixed(operative = false)) map (_.arrayResult.asInstanceOf[List[Any]])
 
   def ccGetMany[T <: Product: Mappable]: Future[List[T]] = getMany map (_.map(m => map2cc[T](m.asInstanceOf[Map[String, Any]])))
 
@@ -110,6 +111,7 @@ class SJSQueryBuilder private[oql] (private val oql: OQL_NodePG, private[oql] va
   def getCount: Future[Int] = oql.count(q, "")
 
   def json: Future[String] =
-    check.oql.queryMany(q, null, () => new ScalaResultBuilder) map (r => JSON(r.arrayResult, oql.ds.platformSpecific, format = true))
+    check.oql.queryMany(q, null, () => new ScalaResultBuilder, Fixed(operative = false)) map (r =>
+      JSON(r.arrayResult, oql.ds.platformSpecific, format = true))
 
 }

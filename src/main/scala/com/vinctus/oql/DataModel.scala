@@ -1,13 +1,17 @@
 package com.vinctus.oql
 
+import scala.annotation.tailrec
 import scala.collection.immutable.VectorMap
 import scala.collection.mutable
+import scala.collection.mutable.ListBuffer
 
 class DataModel(model: DMLModel, dml: String) {
 
   private case class EntityInfo(entity: Entity,
                                 dmlattrs: Seq[DMLAttribute],
                                 attrs: mutable.LinkedHashMap[String, Attribute] = new mutable.LinkedHashMap)
+
+  private var first: Entity = _
 
   val entities: Map[String, Entity] = {
     parsingError = false
@@ -46,7 +50,12 @@ class DataModel(model: DMLModel, dml: String) {
         case _                   =>
       }
 
-      entities(entity.name.s) = EntityInfo(Entity(entity.name.s, (entity.actualName getOrElse entity.name).s), entity.attributes)
+      val info = EntityInfo(Entity(entity.name.s, (entity.actualName getOrElse entity.name).s), entity.attributes)
+
+      if (first eq null) // todo: all fixable entities must have a declared primary key
+        first = info.entity
+
+      entities(entity.name.s) = info
     }
 
     for (EntityInfo(e, dmlas, as) <- entities.values) {
@@ -210,6 +219,91 @@ class DataModel(model: DMLModel, dml: String) {
       sys.error("errors while creating data model")
 
     entities.view.mapValues(_.entity) to VectorMap
+  }
+
+  for (e <- entities.values) {
+    val idsbuf = new ListBuffer[List[String]]
+    val nullablesbuf = new ListBuffer[List[String]]
+
+    def scan(attrs: List[String], ents: List[Entity], entity: Entity): Unit = {
+      if (entity == first)
+        idsbuf += (entity.pk.get.name :: attrs).reverse
+      else
+        for (Attribute(name, _, pk, required, typ) <- entity.attributes.values if !pk)
+          typ match {
+            case ManyToOneType(mtoEntity) =>
+              val newents = entity :: ents
+
+              if (!(newents contains mtoEntity)) { // avoid circularity
+                if (!required)
+                  nullablesbuf += (name :: attrs).reverse
+
+                scan(name :: attrs, newents, mtoEntity)
+              }
+            case _ =>
+          }
+    }
+
+    scan(Nil, Nil, e)
+
+    val attrs =
+      idsbuf.toList map { ids =>
+        val attridents = ids map (id => Ident(id))
+        val attr = AttributeOQLExpression(attridents)
+
+        attr.dmrefs = lookup(attr, attridents, ref = false, e, null)
+
+        val nullables =
+          nullablesbuf.toList filter (ids startsWith _) map { ids =>
+            val nullidents = ids map (id => Ident(id))
+            val nullable = ReferenceOQLExpression(nullidents)
+
+            nullable.dmrefs = lookup(nullable, nullidents, ref = true, e, null)
+            nullable
+          }
+
+        (attr, nullables)
+      }
+
+    e._fixing = Map(first -> attrs)
+  }
+
+  def lookup(expr: OQLExpression, ids: List[Ident], ref: Boolean, entity: Entity, input: String): List[(Entity, Attribute)] = { // todo: code duplication
+    val dmrefs = new ListBuffer[(Entity, Attribute)]
+
+    @tailrec
+    def lookup(ids: List[Ident], entity: Entity): Unit =
+      ids match {
+        case List(id) =>
+          entity.attributes get id.s match {
+            case Some(attr) =>
+              dmrefs += (entity -> attr)
+
+              if (ref) {
+                if (!attr.typ.isInstanceOf[ManyToOneType])
+                  problem(id.pos, s"attribute '${id.s}' is not many-to-one", input)
+
+                expr.typ = attr.typ.asInstanceOf[ManyToOneType].entity.pk.get.typ.asDatatype
+              } else {
+                if (!attr.typ.isDataType)
+                  problem(id.pos, s"attribute '${id.s}' is not a DBMS data type", input)
+
+                expr.typ = attr.typ.asDatatype
+              }
+            case None => problem(id.pos, s"entity '${entity.name}' does not have attribute '${id.s}'", input)
+          }
+        case head :: tail =>
+          entity.attributes get head.s match {
+            case Some(attr @ Attribute(name, column, pk, required, ManyToOneType(mtoEntity))) =>
+              dmrefs += (mtoEntity -> attr)
+              lookup(tail, mtoEntity)
+            case Some(_) => problem(head.pos, s"attribute '${head.s}' of entity '${entity.name}' does not have an entity type", input)
+            case None    => problem(head.pos, s"entity '${entity.name}' does not have attribute '${head.s}'", input)
+          }
+      }
+
+    lookup(ids, entity)
+    dmrefs.toList
   }
 
 }

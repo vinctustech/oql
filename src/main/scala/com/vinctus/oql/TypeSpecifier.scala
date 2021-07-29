@@ -1,6 +1,8 @@
 package com.vinctus.oql
 
-trait TypeSpecifier { val isDataType: Boolean; val isColumnType: Boolean; val isArrayType: Boolean }
+trait TypeSpecifier {
+  val isDataType: Boolean; val isColumnType: Boolean; val isArrayType: Boolean; def asDatatype: DataType = asInstanceOf[DataType]
+}
 trait DataType extends TypeSpecifier { val isDataType = true; val isColumnType = true; val isArrayType = false }
 
 case class EnumType(name: String, labels: List[String]) extends DataType

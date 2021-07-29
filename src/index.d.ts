@@ -54,7 +54,7 @@ export class OQL {
 
   queryOne(oql: string, parameters?: any): Promise<any | undefined>
 
-  queryMany(oql: string, parameters?: any): Promise<any[]>
+  queryMany(oql: string, parameters?: any, fixed?: string, at?: any): Promise<any[]>
 
   count(oql: string, parameters?: any): Promise<number>
 

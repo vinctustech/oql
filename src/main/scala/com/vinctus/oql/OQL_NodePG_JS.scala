@@ -41,21 +41,24 @@ class OQL_NodePG_JS(dm: String,
   }
 
   def jsQueryOne(query: OQLQuery, oql: String): js.Promise[js.UndefOr[Any]] =
-    jsQueryMany(query, oql).toFuture map {
+    jsQueryMany(query, oql, Fixed(operative = false)).toFuture map {
       case a if a.length == 0 => js.undefined
       case a if a.length == 1 => a.head
       case _                  => sys.error(s"queryOne: more than one row was found")
     } toJSPromise
 
   @JSExport("queryMany")
-  def jsQueryMany(oql: String, parameters: js.UndefOr[js.Any] = js.undefined): js.Promise[js.Array[js.Any]] = {
+  def jsQueryMany(oql: String,
+                  parameters: js.UndefOr[js.Any] = js.undefined,
+                  fixed: String = null,
+                  at: js.Any = null): js.Promise[js.Array[js.Any]] = {
     val subst = substitute(oql, parameters)
 
-    jsQueryMany(parseQuery(subst), subst)
+    jsQueryMany(parseQuery(subst), subst, fixedEntity(fixed, at))
   }
 
-  def jsQueryMany(query: OQLQuery, oql: String): js.Promise[js.Array[js.Any]] =
-    queryMany(query, oql, () => new JSResultBuilder).map(_.arrayResult.asInstanceOf[js.Array[js.Any]]).toJSPromise
+  def jsQueryMany(query: OQLQuery, oql: String, fixed: Fixed): js.Promise[js.Array[js.Any]] =
+    queryMany(query, oql, () => new JSResultBuilder, fixed).map(_.arrayResult.asInstanceOf[js.Array[js.Any]]).toJSPromise
 
   @JSExport("queryBuilder")
   def jsQueryBuilder() = new JSQueryBuilder(this, OQLQuery(null, null, null, List(StarOQLProject), None, None, None, None, None))
@@ -94,13 +97,15 @@ class OQL_NodePG_JS(dm: String,
     }
 
   def render(a: Any, typ: Option[DataType] = None): String =
-    (a, typ) match {
-      case (s: String, Some(UUIDType)) => s"UUID'$s'"
-      case (s: String, _)              => ds.literal(s)
-      case (d: js.Date, _)             => s"'${d.toISOString()}'"
-      case (a: js.Array[_], _)         => s"(${a map (e => render(e, typ)) mkString ","})"
-      case _                           => String.valueOf(a)
-    }
+    if (typ.isDefined)
+      ds.typed(a, typ.get)
+    else
+      a match {
+        case s: String      => ds.string(s)
+        case d: js.Date     => s"'${d.toISOString()}'"
+        case a: js.Array[_] => s"(${a map (e => render(e, typ)) mkString ","})"
+        case _              => String.valueOf(a)
+      }
 
 }
 

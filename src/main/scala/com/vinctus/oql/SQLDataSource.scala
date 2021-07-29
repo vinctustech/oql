@@ -48,6 +48,16 @@ trait SQLDataSource extends OQLDataSource {
 
   val builtinVariables: Map[String, DataType]
 
-  def literal(s: String): String = s"E'${s.replace("\\", """\\""").replace("'", """\'""").replace("\r", """\r""").replace("\n", """\n""")}'"
+  def string(s: String): String = s"E'${s.replace("\\", """\\""").replace("'", """\'""").replace("\r", """\r""").replace("\n", """\n""")}'"
+
+  def typed(a: Any, typ: DataType): String =
+    (a, typ) match {
+      case (s: String, TextType) => string(s)
+      case (s: String, UUIDType) => s"UUID'$s'"
+      case (_, IntegerType|FloatType) => a.toString
+      case _ =>
+        Console.err.println(s"WARNING: SQLDataSource.typed(): don't know how to render '$a' as type $typ")
+        a.toString
+    }
 
 }
