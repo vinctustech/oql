@@ -13,7 +13,6 @@ class CarsDBTests extends AsyncFreeSpec with Matchers {
 
   g.require("source-map-support").install()
   types.setTypeParser(114.asInstanceOf[TypeId], (s: String) => s) // tell node-pg not to parse JSON
-  types.setTypeParser(1114.asInstanceOf[TypeId], (s: String) => new js.Date(s"$s+00:00"))
 
   implicit override def executionContext = scala.concurrent.ExecutionContext.Implicits.global
 
