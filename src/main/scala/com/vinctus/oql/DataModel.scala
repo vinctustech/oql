@@ -221,12 +221,14 @@ class DataModel(model: DMLModel, dml: String) {
     entities.view.mapValues(_.entity) to VectorMap
   }
 
+  // fixed entity processing
+
   for (e <- entities.values) {
     val idsbuf = new ListBuffer[List[String]]
     val nullablesbuf = new ListBuffer[List[String]]
 
-    def scan(attrs: List[String], ents: List[Entity], entity: Entity): Unit = {
-      if (entity == first)
+    def scan(attrs: List[String], ents: List[Entity], entity: Entity): Unit =
+      if (entity == first && entity.pk.isDefined)
         idsbuf += (entity.pk.get.name :: attrs).reverse
       else
         for (Attribute(name, _, pk, required, typ) <- entity.attributes.values if !pk)
@@ -242,7 +244,6 @@ class DataModel(model: DMLModel, dml: String) {
               }
             case _ =>
           }
-    }
 
     scan(Nil, Nil, e)
 
