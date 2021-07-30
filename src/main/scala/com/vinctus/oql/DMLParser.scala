@@ -45,7 +45,7 @@ class DMLParser extends RegexParsers {
     (kw("text") |
       kw("integer") | kw("int4") | kw("int") |
       kw("boolean") | kw("bool") |
-      kw("bigint") |
+      kw("bigint") | kw("int8") |
       kw("date") |
       kw("float8") | kw("float") |
       kw("uuid") |

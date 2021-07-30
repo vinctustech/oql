@@ -21,11 +21,17 @@ These are integers in the range of approximately -2.1 billion to +2.1 billion.  
 
 The `integer` data type corresponds to the PostgreSQL `INTEGER` data type and materializes as a TypeScript `number` primitive or a Scala `Int` type object.
 
+### Big integers
+
+These are integers in the range of approximately -9.2 million trillion to +9.2 million trillion.  In OQL, this is the `bigint` data type, which has synonym `int8`.
+
+The `bigint` data type corresponds to the PostgreSQL `BIGINT` data type and materializes as a TypeScript `bigint` primitive or a Scala `Long` type object.
+
 ### Arbitrarily large integers
 
-These are integers that can be of any size.  In OQL, this is the `bigint` data type.
+These are integers that can be of any size.  In OQL, this is the `decimal` data type.
 
-The `bigint` data type corresponds to the PostgreSQL `BIGINT` data type and materializes as a TypeScript `bigint` primitive or a Scala `BigInt` type object.
+The `decimal(p)` data type corresponds to the PostgreSQL `NUMERIC(p)` data type and materializes as a TypeScript `bigint` primitive or a Scala `BigInt` type object.
 
 ### Double precision floating point
 

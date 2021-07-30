@@ -210,9 +210,12 @@ vinctustech/oql
 <h3><a href="#small-integers" name="small-integers" class="anchor"><span class="anchor-link"></span></a>Small integers</h3>
 <p>These are integers in the range of approximately -2.1 billion to +2.1 billion. In OQL, this is the <code>integer</code> data type, which has two synonyms: <code>int</code> and <code>int4</code>.</p>
 <p>The <code>integer</code> data type corresponds to the PostgreSQL <code>INTEGER</code> data type and materializes as a TypeScript <code>number</code> primitive or a Scala <code>Int</code> type object.</p>
+<h3><a href="#big-integers" name="big-integers" class="anchor"><span class="anchor-link"></span></a>Big integers</h3>
+<p>These are integers in the range of approximately -9.2 million trillion to +9.2 million trillion. In OQL, this is the <code>bigint</code> data type, which has synonym <code>int8</code>.</p>
+<p>The <code>bigint</code> data type corresponds to the PostgreSQL <code>BIGINT</code> data type and materializes as a TypeScript <code>bigint</code> primitive or a Scala <code>Long</code> type object.</p>
 <h3><a href="#arbitrarily-large-integers" name="arbitrarily-large-integers" class="anchor"><span class="anchor-link"></span></a>Arbitrarily large integers</h3>
-<p>These are integers that can be of any size. In OQL, this is the <code>bigint</code> data type.</p>
-<p>The <code>bigint</code> data type corresponds to the PostgreSQL <code>BIGINT</code> data type and materializes as a TypeScript <code>bigint</code> primitive or a Scala <code>BigInt</code> type object.</p>
+<p>These are integers that can be of any size. In OQL, this is the <code>decimal</code> data type.</p>
+<p>The <code>decimal(p)</code> data type corresponds to the PostgreSQL <code>NUMERIC(p)</code> data type and materializes as a TypeScript <code>bigint</code> primitive or a Scala <code>BigInt</code> type object.</p>
 <h3><a href="#double-precision-floating-point" name="double-precision-floating-point" class="anchor"><span class="anchor-link"></span></a>Double precision floating point</h3>
 <p>These are floating point numbers in a standard (IEEE 754) double precision binary representation with 15 significant digits. In OQL, this is the <code>float</code> data type, which has one synonym: <code>float8</code>.</p>
 <p>The <code>float</code> data type corresponds to the PostgreSQL <code>DOUBLE PRECISION</code> data type and materializes as a TypeScript <code>number</code> primitive or a Scala <code>Double</code> type object.</p>

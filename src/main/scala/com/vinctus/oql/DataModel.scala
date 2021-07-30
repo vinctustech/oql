@@ -67,12 +67,12 @@ class DataModel(model: DMLModel, dml: String) {
             case DMLSimpleDataType("text")                     => TextType
             case DMLSimpleDataType("integer" | "int" | "int4") => IntegerType
             case DMLSimpleDataType("bool" | "boolean")         => BooleanType
-            case DMLSimpleDataType("bigint")                   => BigintType
+            case DMLSimpleDataType("bigint" | "int8")          => BigintType
             case DMLParametricDataType("decimal", parameters)  => DecimalType(parameters.head.toInt, parameters.tail.head.toInt)
-            case DMLSimpleDataType("date")                     => DateType
-            case DMLSimpleDataType("float" | "float8")         => FloatType
-            case DMLSimpleDataType("uuid")                     => UUIDType
-            case DMLSimpleDataType("timestamp")                => TimestampType
+//            case DMLSimpleDataType("date")                     => DateType
+            case DMLSimpleDataType("float" | "float8") => FloatType
+            case DMLSimpleDataType("uuid")             => UUIDType
+            case DMLSimpleDataType("timestamp")        => TimestampType
             case DMLNameType(typ) =>
               entities get typ.s match {
                 case Some(EntityInfo(entity, _, _)) => ManyToOneType(entity)
