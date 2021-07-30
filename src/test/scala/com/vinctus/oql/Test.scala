@@ -1,11 +1,11 @@
 package com.vinctus.oql
 
-import scala.scalajs.js
+import com.vinctus.sjs_utils.fromJS
 
+import scala.scalajs.js
 import scala.concurrent.Future
 import scala.language.postfixOps
 import scala.scalajs.js.Dynamic.{global => g}
-
 import scala.concurrent.ExecutionContext.Implicits.global
 
 trait Test {
@@ -20,5 +20,10 @@ trait Test {
 
   def testjs(oql: String, parameters: js.UndefOr[js.Any] = js.undefined): Future[String] =
     dbjs.jsQueryMany(oql, parameters = parameters).toFuture map (v => JSON(v, db.ds.platformSpecific, format = true))
+
+  def testmap(oql: String, parameters: (String, Any)*): Future[Any] = db.queryMany(oql, parameters = parameters.toMap)
+
+  def testmapjs(oql: String, parameters: js.UndefOr[js.Any] = js.undefined): Future[Any] =
+    dbjs.jsQueryMany(oql, parameters = parameters).toFuture map (r => fromJS(r))
 
 }
