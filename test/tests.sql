@@ -279,3 +279,8 @@ INSERT INTO "cars" ("make", "color") VALUES
   ('aston martin', 'blue'),
   ('bentley', 'gray'),
   ('ford', 'black');
+CREATE TABLE "escapes" (
+  "s" TEXT
+);
+INSERT INTO "escapes" ("s") VALUES
+  (E'as\ndf');

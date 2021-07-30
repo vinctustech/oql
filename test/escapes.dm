@@ -1,0 +1,3 @@
+entity escapes {
+  s: text
+}
