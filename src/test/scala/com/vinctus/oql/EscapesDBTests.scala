@@ -17,7 +17,7 @@ class EscapesDBTests extends AsyncFreeSpec with Matchers with Test {
   implicit override def executionContext = scala.concurrent.ExecutionContext.Implicits.global
 
   val dm = "escapes"
-  val `escape sequences` = List(Map("s" -> "\ba\ts\nd\rf\"'\\"))
+  val `escape sequences` = List(Map("s" -> "\ba\ts\nd\rf\"'\\\f"), Map("s" -> "\u03B8"))
 
   "escape sequences - scala" in {
     testmap("escapes") map (_ shouldBe `escape sequences`)
