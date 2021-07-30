@@ -5,7 +5,6 @@ import org.scalatest.matchers.should.Matchers
 import typings.pg.mod.types
 import typings.pgTypes.mod.TypeId
 
-import scala.concurrent.{ExecutionContext, Future}
 import scala.scalajs.js
 import scala.scalajs.js.Dynamic.{global => g}
 

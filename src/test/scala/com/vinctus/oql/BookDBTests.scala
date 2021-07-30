@@ -6,19 +6,17 @@ import typings.pg.mod.types
 import typings.pgTypes.mod.TypeId
 
 import scala.concurrent.{ExecutionContext, Future}
+import scala.scalajs.js
 import scala.scalajs.js.Dynamic.{global => g}
 
-class BookDBTests extends AsyncFreeSpec with Matchers {
+class BookDBTests extends AsyncFreeSpec with Matchers with Test {
 
   g.require("source-map-support").install()
   types.setTypeParser(114.asInstanceOf[TypeId], (s: String) => s) // tell node-pg not to parse JSON
 
   implicit override def executionContext = scala.concurrent.ExecutionContext.Implicits.global
 
-  val db =
-    new OQL_NodePG(g.require("fs").readFileSync("test/book.dm").toString, "localhost", 5432, "postgres", "postgres", "docker", false, 1000, 5)
-
-  def test(oql: String, parameters: (String, Any)*): Future[String] = db.json(oql, parameters = parameters.toMap)
+  val dm = "book"
 
   "simplest query" in {
     test("book") map { result =>
@@ -80,24 +78,28 @@ class BookDBTests extends AsyncFreeSpec with Matchers {
     }
   }
 
-  "simplest query with select using parameter" in {
-    test("book [year > :year]", "year" -> 1880) map { result =>
-      result shouldBe
-        """
-        |[
-        |  {
-        |    "id": 1,
-        |    "title": "Treasure Island",
-        |    "year": 1883
-        |  },
-        |  {
-        |    "id": 6,
-        |    "title": "Adventures of Huckleberry Finn",
-        |    "year": 1884
-        |  }
-        |]
-        |""".trim.stripMargin
-    }
+  val `simplest query with select using parameter` =
+    """
+      |[
+      |  {
+      |    "id": 1,
+      |    "title": "Treasure Island",
+      |    "year": 1883
+      |  },
+      |  {
+      |    "id": 6,
+      |    "title": "Adventures of Huckleberry Finn",
+      |    "year": 1884
+      |  }
+      |]
+      |""".trim.stripMargin
+
+  "simplest query with select using parameter - scala" in {
+    test("book [year > :year]", "year" -> 1880) map (_ shouldBe `simplest query with select using parameter`)
+  }
+
+  "simplest query with select using parameter - js" in {
+    testjs("book [year > :year]", js.Dictionary("year" -> 1880)) map (_ shouldBe `simplest query with select using parameter`)
   }
 
   "simplest many-to-one query" in {

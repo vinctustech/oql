@@ -26,8 +26,7 @@ object Main extends App {
 //    println(await(db.queryMany("""account""", "account", 2)))
 //    println(await(db.queryMany("""vehicle""", "account", 2)))
 //    println(await(db.queryMany("""store""", "account", 2)))
-    println(
-      await(db.jsQueryMany("attendee { * events <when> } <name>").toFuture map (v => js.JSON.stringify(v, null.asInstanceOf[js.Array[js.Any]], 2))))
+    println(await(db.jsQueryMany("attendee { * events <when> } <name>").toFuture map (v => JSON(v, db.ds.platformSpecific, 2, true))))
   } recover {
     case e => e.printStackTrace()
   }

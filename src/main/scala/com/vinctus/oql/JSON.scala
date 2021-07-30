@@ -190,18 +190,15 @@ object JSON {
 
     def jsonValue(value: Any): Unit =
       value match {
-        case p if platformSpecific isDefinedAt p => buf ++= platformSpecific(p)
-        case _: Double | _: Int | _: Long | _: Boolean | _: BigInt | _: BigDecimal | _: java.math.BigDecimal | null =>
-          buf ++= String.valueOf(value)
-        case m: collection.Map[_, _]           => jsonObject(m.toSeq.asInstanceOf[Seq[(String, Any)]])
-        case s: collection.Seq[_] if s.isEmpty => buf ++= "[]"
-        case s: collection.Seq[_]              => aggregate('[', s, ']')(jsonValue)
-        case a: Array[_]                       => jsonValue(a.toList)
-        case p: Product                        => jsonObject(p.productElementNames zip p.productIterator toList)
-        case t: Instant =>
-          buf += '"'
-          buf ++= ISO.format(t.atOffset(ZoneOffset.UTC))
-          buf += '"'
+        case p if platformSpecific isDefinedAt p        => buf ++= platformSpecific(p)
+        case _: Number | _: java.math.BigDecimal | null => buf ++= String.valueOf(value)
+        case m: collection.Map[_, _]                    => jsonObject(m.toSeq.asInstanceOf[Seq[(String, Any)]])
+        case s: collection.Seq[_] if s.isEmpty          => buf ++= "[]"
+        case s: collection.Seq[_]                       => aggregate('[', s, ']')(jsonValue)
+        case a: Array[_]                                => jsonValue(a.toList)
+        case a: js.Array[_]                             => jsonValue(a.toList)
+        case p: Product                                 => jsonObject(p.productElementNames zip p.productIterator toList)
+        case t: Instant                                 => buf ++= '"' +: ISO.format(t.atOffset(ZoneOffset.UTC)) :+ '"'
 //        case t: Timestamp                      => jsonValue(t.toInstant.toString) //  | _: Instant  _: java.util.UUID
         case _: String =>
           buf += '"'
@@ -210,6 +207,12 @@ object JSON {
               case (acc, (c, r)) => acc.replace(c, r)
             }
           buf += '"'
+        case _: js.Object => jsonObject(value.asInstanceOf[js.Dictionary[Any]].toList)
+        case _ =>
+          js.typeOf(value) match {
+            case "bigint" => buf ++= String.valueOf(value)
+            case _        => buf ++= '"' +: String.valueOf(value) :+ '"'
+          }
       }
 
     def jsonObject(pairs: Seq[(String, Any)]): Unit =

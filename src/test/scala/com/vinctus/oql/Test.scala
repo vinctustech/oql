@@ -19,6 +19,6 @@ trait Test {
   def test(oql: String, parameters: (String, Any)*): Future[String] = db.json(oql, parameters = parameters.toMap)
 
   def testjs(oql: String, parameters: js.UndefOr[js.Any] = js.undefined): Future[String] =
-    dbjs.jsQueryMany(oql, parameters = parameters).toFuture map (v => js.JSON.stringify(v, null.asInstanceOf[js.Array[js.Any]], 2) :+ '\n')
+    dbjs.jsQueryMany(oql, parameters = parameters).toFuture map (v => JSON(v, db.ds.platformSpecific, format = true))
 
 }
