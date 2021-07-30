@@ -9,7 +9,7 @@ import scala.concurrent.Future
 import scala.scalajs.js
 import scala.scalajs.js.Dynamic.{global => g}
 
-class UNDBTests extends AsyncFreeSpec with Matchers {
+class UNDBTests extends AsyncFreeSpec with Matchers with Test {
 
   g.require("source-map-support").install()
   types.setTypeParser(114.asInstanceOf[TypeId], (s: String) => s) // tell node-pg not to parse JSON
@@ -17,10 +17,7 @@ class UNDBTests extends AsyncFreeSpec with Matchers {
 
   implicit override def executionContext = scala.concurrent.ExecutionContext.Implicits.global
 
-  val db =
-    new OQL_NodePG(g.require("fs").readFileSync("test/un.dm").toString, "localhost", 5432, "postgres", "postgres", "docker", false, 1000, 5)
-
-  def test(oql: String, parameters: (String, Any)*): Future[String] = db.json(oql, parameters = parameters.toMap)
+  val dm = "un"
 
   "simple one-to-one query" in {
     test("country { * rep { name } }") map { result =>

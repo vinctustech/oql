@@ -5,11 +5,10 @@ import org.scalatest.matchers.should.Matchers
 import typings.pg.mod.types
 import typings.pgTypes.mod.TypeId
 
-import scala.concurrent.{ExecutionContext, Future}
 import scala.scalajs.js
 import scala.scalajs.js.Dynamic.{global => g}
 
-class StarTrekDBTests extends AsyncFreeSpec with Matchers {
+class StarTrekDBTests extends AsyncFreeSpec with Matchers with Test {
 
   g.require("source-map-support").install()
   types.setTypeParser(114.asInstanceOf[TypeId], (s: String) => s) // tell node-pg not to parse JSON
@@ -17,10 +16,7 @@ class StarTrekDBTests extends AsyncFreeSpec with Matchers {
 
   implicit override def executionContext = scala.concurrent.ExecutionContext.Implicits.global
 
-  val db =
-    new OQL_NodePG(g.require("fs").readFileSync("test/star-trek.dm").toString, "localhost", 5432, "postgres", "postgres", "docker", false, 1000, 5)
-
-  def test(oql: String, parameters: (String, Any)*): Future[String] = db.json(oql, parameters = parameters.toMap)
+  val dm = "star-trek"
 
   "query" in {
     test("character { name species { origin { name } } } [species.name = 'Betazoid'] <name>") map { result =>
