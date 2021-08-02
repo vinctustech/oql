@@ -12,7 +12,7 @@ trait Test {
 
   val dm: String
   lazy val db =
-    new OQL_NodePG(g.require("fs").readFileSync(s"test/$dm.dm").toString, "localhost", 5432, "postgres", "postgres", "docker", false, 1000, 5)
+    new OQL_NodePG_ScalaJS(g.require("fs").readFileSync(s"test/$dm.dm").toString, "localhost", 5432, "postgres", "postgres", "docker", false, 1000, 5)
   lazy val dbjs =
     new OQL_NodePG_JS(g.require("fs").readFileSync(s"test/$dm.dm").toString, "localhost", 5432, "postgres", "postgres", "docker", false, 1000, 5)
 

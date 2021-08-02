@@ -9,15 +9,15 @@ import scala.scalajs.js
 import scala.scalajs.js.|
 import scala.util.matching.Regex
 
-class OQL_NodePG(dm: String,
-                 host: String,
-                 port: Int,
-                 database: String,
-                 user: String,
-                 password: String,
-                 ssl: Boolean | ConnectionOptions,
-                 idleTimeoutMillis: Int,
-                 max: Int)(implicit ec: scala.concurrent.ExecutionContext)
+class OQL_NodePG_ScalaJS(dm: String,
+                         host: String,
+                         port: Int,
+                         database: String,
+                         user: String,
+                         password: String,
+                         ssl: Boolean | ConnectionOptions,
+                         idleTimeoutMillis: Int,
+                         max: Int)(implicit ec: scala.concurrent.ExecutionContext)
     extends AbstractOQL(dm, new NodePG(host, port, database, user, password, ssl, idleTimeoutMillis, max), ScalaConversions)
     with Dynamic {
 
@@ -27,37 +27,38 @@ class OQL_NodePG(dm: String,
 
   def selectDynamic(resource: String): Mutation = entity(resource)
 
-  def jsQueryOne[T <: js.Object](oql: String): Future[Option[T]] =
-    queryOne(oql) map (_.map(toJS(_).asInstanceOf[T]))
+  def jsQueryOne[T <: js.Object](oql: String, fixed: String = null, at: Any = null): Future[Option[T]] =
+    queryOne(oql, fixed, at) map (_.map(toJS(_).asInstanceOf[T]))
 
-  def jsQueryOne[T <: js.Object](q: OQLQuery): Future[Option[T]] =
-    queryOne(q, "") map (_.map(toJS(_).asInstanceOf[T]))
+  def jsQueryOne[T <: js.Object](q: OQLQuery, fixed: String = null, at: Any = null): Future[Option[T]] =
+    queryOne(q, "", fixedEntity(fixed, at)) map (_.map(toJS(_).asInstanceOf[T]))
 
-  def ccQueryOne[T <: Product: Mappable](oql: String): Future[Option[T]] =
-    queryOne(oql) map (_.map(m => map2cc[T](m.asInstanceOf[Map[String, Any]])))
+  def ccQueryOne[T <: Product: Mappable](oql: String, fixed: String = null, at: Any = null): Future[Option[T]] =
+    queryOne(oql, fixed, at) map (_.map(m => map2cc[T](m.asInstanceOf[Map[String, Any]])))
 
-  def queryOne(oql: String): Future[Option[DynamicMap]] = queryOne(parseQuery(oql), oql)
+  def queryOne(oql: String, fixed: String = null, at: Any = null): Future[Option[DynamicMap]] = queryOne(parseQuery(oql), oql, fixedEntity(fixed, at))
 
-  def jsQueryMany[T <: js.Object](oql: String): Future[T] = (queryMany(oql) map (toJS(_))).asInstanceOf[Future[T]]
+  def jsQueryMany[T <: js.Object](oql: String, fixed: String = null, at: Any = null): Future[T] =
+    (queryMany(oql, fixed, at) map (toJS(_))).asInstanceOf[Future[T]]
 
   def jsQueryMany[T <: js.Object](q: OQLQuery): Future[T] =
-    (queryMany(q, "", () => new ScalaResultBuilder, Fixed(operative = false)) map (toJS(_))).asInstanceOf[Future[T]]
+    (queryMany(q, "", () => new ScalaPlainResultBuilder, Fixed(operative = false)) map (toJS(_))).asInstanceOf[Future[T]]
 
-  def ccQueryMany[T <: Product: Mappable](oql: String): Future[List[T]] =
-    queryMany(oql) map (_.map(m => map2cc[T](m.asInstanceOf[Map[String, Any]])))
+  def ccQueryMany[T <: Product: Mappable](oql: String, fixed: String = null, at: Any = null): Future[List[T]] =
+    queryMany(oql, fixed, at) map (_.map(m => map2cc[T](m.asInstanceOf[Map[String, Any]])))
 
   def queryMany(oql: String, fixed: String = null, at: Any = null, parameters: Map[String, Any] = Map()): Future[List[DynamicMap]] = {
     val subst = substitute(oql, parameters)
 
-    queryMany(subst, () => new SJSResultBuilder, fixedEntity(fixed, at)) map (_.arrayResult.asInstanceOf[List[DynamicMap]])
+    queryMany(subst, () => new ScalaJSResultBuilder, fixedEntity(fixed, at)) map (_.arrayResult.asInstanceOf[List[DynamicMap]])
   }
 
-  def queryBuilder() = new SJSQueryBuilder(this, OQLQuery(null, null, null, List(StarOQLProject), None, None, None, None, None))
+  def queryBuilder() = new ScalaJSQueryBuilder(this, OQLQuery(null, null, null, List(StarOQLProject), None, None, None, None, None))
 
   def json(oql: String, fixed: String = null, at: Any = null, parameters: Map[String, Any] = Map()): Future[String] = {
     val subst = substitute(oql, parameters)
 
-    queryMany(subst, () => new ScalaResultBuilder, fixedEntity(fixed, at)) map (r => JSON(r.arrayResult, ds.platformSpecific, 2, format = true))
+    queryMany(subst, () => new ScalaPlainResultBuilder, fixedEntity(fixed, at)) map (r => JSON(r.arrayResult, ds.platformSpecific, 2, format = true))
   }
 
   private val varRegex = ":([a-zA-Z_][a-zA-Z0-9_]*)" r

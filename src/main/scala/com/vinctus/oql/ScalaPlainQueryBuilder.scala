@@ -4,13 +4,14 @@ import com.vinctus.sjs_utils.{Mappable, map2cc}
 
 import scala.concurrent.Future
 
-class QueryBuilder private[oql] (private val oql: AbstractOQL, private[oql] val q: OQLQuery)(implicit ec: scala.concurrent.ExecutionContext) {
+class ScalaPlainQueryBuilder private[oql] (private val oql: AbstractOQL, private[oql] val q: OQLQuery)(
+    implicit ec: scala.concurrent.ExecutionContext) {
   private def check = if (q.source eq null) sys.error("QueryBuilder: no source was given") else this
 
-  private class DoNothingQueryBuilder extends QueryBuilder(oql, q) {
+  private class DoNothingQueryBuilder extends ScalaPlainQueryBuilder(oql, q) {
     private def na = sys.error("not applicable")
 
-    override def cond(b: Boolean): QueryBuilder = na
+    override def cond(b: Boolean): ScalaPlainQueryBuilder = na
 
     override def getMany: Future[List[Any]] = na
 
@@ -22,22 +23,22 @@ class QueryBuilder private[oql] (private val oql: AbstractOQL, private[oql] val 
 
     override def getCount: Future[Int] = na
 
-    override def limit(a: Int): QueryBuilder = QueryBuilder.this
+    override def limit(a: Int): ScalaPlainQueryBuilder = ScalaPlainQueryBuilder.this
 
-    override def offset(a: Int): QueryBuilder = QueryBuilder.this
+    override def offset(a: Int): ScalaPlainQueryBuilder = ScalaPlainQueryBuilder.this
 
-    override def order(attribute: String, sorting: String): QueryBuilder = QueryBuilder.this
+    override def order(attribute: String, sorting: String): ScalaPlainQueryBuilder = ScalaPlainQueryBuilder.this
 
 //    override def project(source: String, attributes: String*): QueryBuilder = QueryBuilder.this
 //
 //    override def add(attribute: QueryBuilder): QueryBuilder = QueryBuilder.this
 
-    override def query(query: String): QueryBuilder = QueryBuilder.this
+    override def query(query: String): ScalaPlainQueryBuilder = ScalaPlainQueryBuilder.this
 
-    override def select(s: String): QueryBuilder = QueryBuilder.this
+    override def select(s: String): ScalaPlainQueryBuilder = ScalaPlainQueryBuilder.this
   }
 
-  def cond(b: Boolean): QueryBuilder = if (b) this else new DoNothingQueryBuilder
+  def cond(b: Boolean): ScalaPlainQueryBuilder = if (b) this else new DoNothingQueryBuilder
 
 //  def add(attribute: QueryBuilder) =
 //    new QueryBuilder(
@@ -64,12 +65,12 @@ class QueryBuilder private[oql] (private val oql: AbstractOQL, private[oql] val 
 //        q.copy(source = Ident(resource))
 //    )
 
-  def query(query: String): QueryBuilder = new QueryBuilder(oql, oql.parseQuery(query))
+  def query(query: String): ScalaPlainQueryBuilder = new ScalaPlainQueryBuilder(oql, oql.parseQuery(query))
 
-  def select(s: String): QueryBuilder = {
+  def select(s: String): ScalaPlainQueryBuilder = {
     val sel = oql.parseCondition(s, q.entity)
 
-    new QueryBuilder(
+    new ScalaPlainQueryBuilder(
       oql,
       q.copy(
         select =
@@ -78,19 +79,19 @@ class QueryBuilder private[oql] (private val oql: AbstractOQL, private[oql] val 
     )
   }
 
-  def order(attribute: String, sorting: String): QueryBuilder = {
+  def order(attribute: String, sorting: String): ScalaPlainQueryBuilder = {
     val attr = AttributeOQLExpression(List(Ident(attribute)), null)
 
     AbstractOQL.decorate(q.entity, attr, oql.model, oql.ds, null)
-    new QueryBuilder(oql, q.copy(order = Some(List(OQLOrdering(attr, sorting)))))
+    new ScalaPlainQueryBuilder(oql, q.copy(order = Some(List(OQLOrdering(attr, sorting)))))
   }
 
-  def limit(a: Int): QueryBuilder = new QueryBuilder(oql, q.copy(limit = Some(a)))
+  def limit(a: Int): ScalaPlainQueryBuilder = new ScalaPlainQueryBuilder(oql, q.copy(limit = Some(a)))
 
-  def offset(a: Int): QueryBuilder = new QueryBuilder(oql, q.copy(offset = Some(a)))
+  def offset(a: Int): ScalaPlainQueryBuilder = new ScalaPlainQueryBuilder(oql, q.copy(offset = Some(a)))
 
   def getMany: Future[List[Any]] =
-    check.oql.queryMany(q, null, () => new ScalaResultBuilder, Fixed(operative = false)) map (_.arrayResult.asInstanceOf[List[Any]])
+    check.oql.queryMany(q, null, () => new ScalaPlainResultBuilder, Fixed(operative = false)) map (_.arrayResult.asInstanceOf[List[Any]])
 
   def ccGetMany[T <: Product: Mappable]: Future[List[T]] = getMany map (_.map(m => map2cc[T](m.asInstanceOf[Map[String, Any]])))
 
@@ -101,7 +102,7 @@ class QueryBuilder private[oql] (private val oql: AbstractOQL, private[oql] val 
   def getCount: Future[Int] = oql.count(q, "")
 
   def json: Future[String] =
-    check.oql.queryMany(q, null, () => new ScalaResultBuilder, Fixed(operative = false)) map (r =>
+    check.oql.queryMany(q, null, () => new ScalaPlainResultBuilder, Fixed(operative = false)) map (r =>
       JSON(r.arrayResult, oql.ds.platformSpecific, format = true))
 
 }

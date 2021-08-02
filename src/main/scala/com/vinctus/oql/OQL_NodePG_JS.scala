@@ -31,17 +31,18 @@ class OQL_NodePG_JS(dm: String,
   def jsShowQuery(): Unit = showQuery()
 
   @JSExport("count")
-  def jsCount(oql: String, parameters: js.UndefOr[js.Any] = js.undefined): js.Promise[Int] = count(substitute(oql, parameters)).toJSPromise
+  def jsCount(oql: String, parameters: js.UndefOr[js.Any] = js.undefined, fixed: String = null, at: js.Any = null): js.Promise[Int] =
+    count(substitute(oql, parameters)).toJSPromise
 
   @JSExport("queryOne")
-  def jsQueryOne(oql: String, parameters: js.UndefOr[js.Any] = js.undefined): js.Promise[js.UndefOr[Any]] = {
+  def jsQueryOne(oql: String, parameters: js.UndefOr[js.Any] = js.undefined, fixed: String = null, at: js.Any = null): js.Promise[js.UndefOr[Any]] = {
     val subst = substitute(oql, parameters)
 
-    jsQueryOne(parseQuery(subst), subst)
+    jsQueryOne(parseQuery(subst), subst, fixedEntity(fixed, at))
   }
 
-  def jsQueryOne(query: OQLQuery, oql: String): js.Promise[js.UndefOr[Any]] =
-    jsQueryMany(query, oql, Fixed(operative = false)).toFuture map {
+  def jsQueryOne(query: OQLQuery, oql: String, fixed: Fixed): js.Promise[js.UndefOr[Any]] =
+    jsQueryMany(query, oql, fixed).toFuture map {
       case a if a.length == 0 => js.undefined
       case a if a.length == 1 => a.head
       case _                  => sys.error(s"queryOne: more than one row was found")
@@ -61,7 +62,8 @@ class OQL_NodePG_JS(dm: String,
     queryMany(query, oql, () => new JSResultBuilder, fixed).map(_.arrayResult.asInstanceOf[js.Array[js.Any]]).toJSPromise
 
   @JSExport("queryBuilder")
-  def jsQueryBuilder() = new JSQueryBuilder(this, OQLQuery(null, null, null, List(StarOQLProject), None, None, None, None, None))
+  def jsQueryBuilder(fixed: String = null, at: js.Any = null) =
+    new JSQueryBuilder(this, OQLQuery(null, null, null, List(StarOQLProject), None, None, None, None, None), fixedEntity(fixed, at))
 
   @JSExport
   def raw(sql: String, values: js.UndefOr[js.Array[js.Any]]): js.Promise[js.Array[js.Any]] =

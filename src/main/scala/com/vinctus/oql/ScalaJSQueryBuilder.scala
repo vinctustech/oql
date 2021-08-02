@@ -6,13 +6,13 @@ import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 import scala.concurrent.Future
 import scala.scalajs.js
 
-class SJSQueryBuilder private[oql] (private val oql: OQL_NodePG, private[oql] val q: OQLQuery) {
+class ScalaJSQueryBuilder private[oql] (private val oql: OQL_NodePG_ScalaJS, private[oql] val q: OQLQuery) {
   private def check = if (q.source eq null) sys.error("QueryBuilder: no source was given") else this
 
-  private class DoNothingQueryBuilder extends SJSQueryBuilder(oql, q) {
+  private class DoNothingQueryBuilder extends ScalaJSQueryBuilder(oql, q) {
     private def na = sys.error("not applicable")
 
-    override def cond(b: Boolean): SJSQueryBuilder = na
+    override def cond(b: Boolean): ScalaJSQueryBuilder = na
 
     override def getMany: Future[List[Any]] = na
 
@@ -28,22 +28,22 @@ class SJSQueryBuilder private[oql] (private val oql: OQL_NodePG, private[oql] va
 
     override def getCount: Future[Int] = na
 
-    override def limit(a: Int): SJSQueryBuilder = SJSQueryBuilder.this
+    override def limit(a: Int): ScalaJSQueryBuilder = ScalaJSQueryBuilder.this
 
-    override def offset(a: Int): SJSQueryBuilder = SJSQueryBuilder.this
+    override def offset(a: Int): ScalaJSQueryBuilder = ScalaJSQueryBuilder.this
 
-    override def order(attribute: String, sorting: String): SJSQueryBuilder = SJSQueryBuilder.this
+    override def order(attribute: String, sorting: String): ScalaJSQueryBuilder = ScalaJSQueryBuilder.this
 
 //    override def project(source: String, attributes: String*): QueryBuilder = SJSQueryBuilder.this
 //
 //    override def add(attribute: QueryBuilder): QueryBuilder = SJSQueryBuilder.this
 
-    override def query(query: String): SJSQueryBuilder = SJSQueryBuilder.this
+    override def query(query: String): ScalaJSQueryBuilder = ScalaJSQueryBuilder.this
 
-    override def select(s: String): SJSQueryBuilder = SJSQueryBuilder.this
+    override def select(s: String): ScalaJSQueryBuilder = ScalaJSQueryBuilder.this
   }
 
-  def cond(b: Boolean): SJSQueryBuilder = if (b) this else new DoNothingQueryBuilder
+  def cond(b: Boolean): ScalaJSQueryBuilder = if (b) this else new DoNothingQueryBuilder
 
 //  def add(attribute: QueryBuilder) =
 //    new QueryBuilder(
@@ -70,12 +70,12 @@ class SJSQueryBuilder private[oql] (private val oql: OQL_NodePG, private[oql] va
 //        q.copy(source = Ident(resource))
 //    )
 
-  def query(query: String): SJSQueryBuilder = new SJSQueryBuilder(oql, oql.parseQuery(query))
+  def query(query: String): ScalaJSQueryBuilder = new ScalaJSQueryBuilder(oql, oql.parseQuery(query))
 
-  def select(s: String): SJSQueryBuilder = {
+  def select(s: String): ScalaJSQueryBuilder = {
     val sel = oql.parseCondition(s, q.entity)
 
-    new SJSQueryBuilder(
+    new ScalaJSQueryBuilder(
       oql,
       q.copy(
         select =
@@ -84,23 +84,23 @@ class SJSQueryBuilder private[oql] (private val oql: OQL_NodePG, private[oql] va
     )
   }
 
-  def order(attribute: String, sorting: String): SJSQueryBuilder = {
+  def order(attribute: String, sorting: String): ScalaJSQueryBuilder = {
     val attr = AttributeOQLExpression(List(Ident(attribute)), null)
 
     AbstractOQL.decorate(q.entity, attr, oql.model, oql.ds, null)
-    new SJSQueryBuilder(oql, q.copy(order = Some(List(OQLOrdering(attr, sorting)))))
+    new ScalaJSQueryBuilder(oql, q.copy(order = Some(List(OQLOrdering(attr, sorting)))))
   }
 
-  def limit(a: Int): SJSQueryBuilder = new SJSQueryBuilder(oql, q.copy(limit = Some(a)))
+  def limit(a: Int): ScalaJSQueryBuilder = new ScalaJSQueryBuilder(oql, q.copy(limit = Some(a)))
 
-  def offset(a: Int): SJSQueryBuilder = new SJSQueryBuilder(oql, q.copy(offset = Some(a)))
+  def offset(a: Int): ScalaJSQueryBuilder = new ScalaJSQueryBuilder(oql, q.copy(offset = Some(a)))
 
   def jsGetMany[T <: js.Object]: Future[T] = check.oql.jsQueryMany(q)
 
   def jsGetOne[T <: js.Object]: Future[Option[T]] = check.oql.jsQueryOne(q)
 
   def getMany: Future[List[Any]] =
-    check.oql.queryMany(q, null, () => new ScalaResultBuilder, Fixed(operative = false)) map (_.arrayResult.asInstanceOf[List[Any]])
+    check.oql.queryMany(q, null, () => new ScalaPlainResultBuilder, Fixed(operative = false)) map (_.arrayResult.asInstanceOf[List[Any]])
 
   def ccGetMany[T <: Product: Mappable]: Future[List[T]] = getMany map (_.map(m => map2cc[T](m.asInstanceOf[Map[String, Any]])))
 
@@ -111,7 +111,7 @@ class SJSQueryBuilder private[oql] (private val oql: OQL_NodePG, private[oql] va
   def getCount: Future[Int] = oql.count(q, "")
 
   def json: Future[String] =
-    check.oql.queryMany(q, null, () => new ScalaResultBuilder, Fixed(operative = false)) map (r =>
+    check.oql.queryMany(q, null, () => new ScalaPlainResultBuilder, Fixed(operative = false)) map (r =>
       JSON(r.arrayResult, oql.ds.platformSpecific, format = true))
 
 }

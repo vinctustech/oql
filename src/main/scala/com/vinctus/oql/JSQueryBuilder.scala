@@ -5,10 +5,10 @@ import scala.scalajs.js
 import scala.scalajs.js.annotation.JSExport
 import scala.scalajs.js.JSConverters._
 
-class JSQueryBuilder private[oql] (private val oql: OQL_NodePG_JS, private[oql] val q: OQLQuery) {
+class JSQueryBuilder private[oql] (private val oql: OQL_NodePG_JS, private[oql] val q: OQLQuery, fixed: Fixed) {
   private def check = if (q.source eq null) sys.error("QueryBuilder: no source was given") else this
 
-  private class DoNothingQueryBuilder extends JSQueryBuilder(oql, q) {
+  private class DoNothingQueryBuilder extends JSQueryBuilder(oql, q, fixed) {
     private def na = sys.error("not applicable")
 
     @JSExport
@@ -73,7 +73,7 @@ class JSQueryBuilder private[oql] (private val oql: OQL_NodePG_JS, private[oql] 
 
   @JSExport
   def query(query: String, parameters: js.UndefOr[js.Any] = js.undefined): JSQueryBuilder =
-    new JSQueryBuilder(oql, oql.parseQuery(oql.substitute(query, parameters)))
+    new JSQueryBuilder(oql, oql.parseQuery(oql.substitute(query, parameters)), fixed)
 
   @JSExport
   def select(s: String, parameters: js.UndefOr[js.Any] = js.undefined): JSQueryBuilder = {
@@ -84,7 +84,8 @@ class JSQueryBuilder private[oql] (private val oql: OQL_NodePG_JS, private[oql] 
       q.copy(
         select =
           if (q.select.isDefined) Some(InfixOQLExpression(GroupedOQLExpression(q.select.get), "AND", GroupedOQLExpression(sel)))
-          else Some(sel))
+          else Some(sel)),
+      fixed
     )
   }
 
@@ -93,22 +94,22 @@ class JSQueryBuilder private[oql] (private val oql: OQL_NodePG_JS, private[oql] 
     val attr = AttributeOQLExpression(List(Ident(attribute)), null)
 
     AbstractOQL.decorate(q.entity, attr, oql.model, oql.ds, null)
-    new JSQueryBuilder(oql, q.copy(order = Some(List(OQLOrdering(attr, sorting)))))
+    new JSQueryBuilder(oql, q.copy(order = Some(List(OQLOrdering(attr, sorting)))), fixed)
   }
 
   @JSExport
-  def limit(a: Int): JSQueryBuilder = new JSQueryBuilder(oql, q.copy(limit = Some(a)))
+  def limit(a: Int): JSQueryBuilder = new JSQueryBuilder(oql, q.copy(limit = Some(a)), fixed)
 
   @JSExport
-  def offset(a: Int): JSQueryBuilder = new JSQueryBuilder(oql, q.copy(offset = Some(a)))
+  def offset(a: Int): JSQueryBuilder = new JSQueryBuilder(oql, q.copy(offset = Some(a)), fixed)
 
   @JSExport //empty parentheses aren't redundant: Scala.js compiler needs them
-  def getMany(): js.Promise[js.Array[js.Any]] = check.oql.jsQueryMany(q, null, Fixed(operative = false))
+  def getMany(): js.Promise[js.Array[js.Any]] = check.oql.jsQueryMany(q, null, fixed)
 
   @JSExport //empty parentheses aren't redundant: Scala.js compiler needs them
-  def getOne(): js.Promise[js.UndefOr[Any]] = check.oql.jsQueryOne(q, null)
+  def getOne(): js.Promise[js.UndefOr[Any]] = check.oql.jsQueryOne(q, null, fixed)
 
   @JSExport //empty parentheses aren't redundant: Scala.js compiler needs them
-  def getCount(): js.Promise[Int] = check.oql.count(q, null).toJSPromise
+  def getCount(): js.Promise[Int] = check.oql.count(q, null, fixed).toJSPromise
 
 }

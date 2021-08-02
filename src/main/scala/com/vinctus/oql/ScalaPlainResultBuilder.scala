@@ -1,11 +1,9 @@
 package com.vinctus.oql
 
-import com.vinctus.sjs_utils.DynamicMap
-
 import scala.collection.immutable.VectorMap
 import scala.collection.mutable.ListBuffer
 
-class SJSResultBuilder extends ResultBuilder {
+class ScalaPlainResultBuilder extends ResultBuilder {
 
   type Array = List[Any]
   type Object = VectorMap[String, Any]
@@ -35,6 +33,6 @@ class SJSResultBuilder extends ResultBuilder {
 
   def arrayResult: List[Any] = array.toList
 
-  def objectResult: DynamicMap = new DynamicMap(obj to VectorMap)
+  def objectResult: VectorMap[String, Any] = obj to VectorMap
 
 }

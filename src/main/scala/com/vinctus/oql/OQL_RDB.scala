@@ -27,17 +27,17 @@ class OQL_RDB(dm: String, data: String) extends AbstractOQL(dm, new RDBDataSourc
   def jsQueryMany[T <: js.Object](oql: String): Future[T] = (queryMany(oql) map (toJS(_))).asInstanceOf[Future[T]]
 
   def jsQueryMany[T <: js.Object](q: OQLQuery): Future[T] =
-    (queryMany(q, "", () => new ScalaResultBuilder, Fixed(operative = false)) map (toJS(_))).asInstanceOf[Future[T]]
+    (queryMany(q, "", () => new ScalaPlainResultBuilder, Fixed(operative = false)) map (toJS(_))).asInstanceOf[Future[T]]
 
   def ccQueryMany[T <: Product: Mappable](oql: String): Future[List[T]] = queryMany(oql) map (_.map(m => map2cc[T](m.asInstanceOf[Map[String, Any]])))
 
   def queryMany(oql: String): Future[List[DynamicMap]] =
-    queryMany(oql, () => new SJSResultBuilder, Fixed(operative = false)) map (_.arrayResult.asInstanceOf[List[DynamicMap]])
+    queryMany(oql, () => new ScalaJSResultBuilder, Fixed(operative = false)) map (_.arrayResult.asInstanceOf[List[DynamicMap]])
 
 //  def queryBuilder() = new SJSQueryBuilder(this, OQLQuery(null, null, null, List(StarOQLProject), None, None, None, None, None))
 
   def json(oql: String, tab: Int = 2, format: Boolean = true): Future[String] =
-    queryMany(oql, () => new ScalaResultBuilder, Fixed(operative = false)) map (r => JSON(r.arrayResult, ds.platformSpecific, tab, format))
+    queryMany(oql, () => new ScalaPlainResultBuilder, Fixed(operative = false)) map (r => JSON(r.arrayResult, ds.platformSpecific, tab, format))
 
   def render(a: Any, typ: Option[DataType] = None): String =
     if (typ.isDefined)

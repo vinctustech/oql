@@ -52,15 +52,15 @@ abstract class AbstractOQL(dm: String, val ds: SQLDataSource, conv: Conversions)
     expr
   }
 
-  def count(oql: String): Future[Int] = count(OQLParser.parseQuery(oql), oql)
+  def count(oql: String, fixed: Fixed): Future[Int] = count(OQLParser.parseQuery(oql), oql, fixed)
 
-  def count(query: OQLQuery, oql: String): Future[Int] = {
+  def count(query: OQLQuery, oql: String, fixed: Fixed): Future[Int] = {
     query.project = List(ExpressionOQLProject(Ident("count", null), ApplyOQLExpression(Ident("count", null), List(StarOQLExpression))))
     preprocessQuery(None, query, model, ds, oql)
     query.select foreach (decorate(query.entity, _, model, ds, oql))
     query.group foreach (_ foreach (decorate(query.entity, _, model, ds, oql)))
 
-    queryMany(query.copy(order = None), oql, () => new ScalaResultBuilder, Fixed(operative = false)) map {
+    queryMany(query.copy(order = None), oql, () => new ScalaPlainResultBuilder, fixed) map {
       _.arrayResult match {
         case Nil       => sys.error("count: zero rows were found")
         case List(row) => row.asInstanceOf[Map[String, Number]]("count").intValue()
@@ -82,8 +82,8 @@ abstract class AbstractOQL(dm: String, val ds: SQLDataSource, conv: Conversions)
 
   private[oql] def exec: Boolean = !_transpileOnly
 
-  def queryOne(q: OQLQuery, oql: String): Future[Option[DynamicMap]] =
-    queryMany(q, oql, () => new SJSResultBuilder, null) map {
+  def queryOne(q: OQLQuery, oql: String, fixed: Fixed): Future[Option[DynamicMap]] =
+    queryMany(q, oql, () => new ScalaJSResultBuilder, fixed) map {
       _.arrayResult match {
         case Nil       => None
         case List(row) => Some(row.asInstanceOf[DynamicMap])
