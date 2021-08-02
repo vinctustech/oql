@@ -2,14 +2,14 @@ package com.vinctus.oql
 
 import com.vinctus.mappable.{Mappable, map2cc}
 
-import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.scalajs.js
 
-class ScalaJSQueryBuilder private[oql] (private val oql: OQL_NodePG_ScalaJS, private[oql] val q: OQLQuery) {
+class ScalaJSQueryBuilder private[oql] (private val oql: OQL_NodePG_ScalaJS, private[oql] val q: OQLQuery, fixed: Fixed) {
   private def check = if (q.source eq null) sys.error("QueryBuilder: no source was given") else this
 
-  private class DoNothingQueryBuilder extends ScalaJSQueryBuilder(oql, q) {
+  private class DoNothingQueryBuilder extends ScalaJSQueryBuilder(oql, q, fixed) {
     private def na = sys.error("not applicable")
 
     override def cond(b: Boolean): ScalaJSQueryBuilder = na
@@ -70,7 +70,7 @@ class ScalaJSQueryBuilder private[oql] (private val oql: OQL_NodePG_ScalaJS, pri
 //        q.copy(source = Ident(resource))
 //    )
 
-  def query(query: String): ScalaJSQueryBuilder = new ScalaJSQueryBuilder(oql, oql.parseQuery(query))
+  def query(query: String): ScalaJSQueryBuilder = new ScalaJSQueryBuilder(oql, oql.parseQuery(query), fixed)
 
   def select(s: String): ScalaJSQueryBuilder = {
     val sel = oql.parseCondition(s, q.entity)
@@ -80,7 +80,8 @@ class ScalaJSQueryBuilder private[oql] (private val oql: OQL_NodePG_ScalaJS, pri
       q.copy(
         select =
           if (q.select.isDefined) Some(InfixOQLExpression(GroupedOQLExpression(q.select.get), "AND", GroupedOQLExpression(sel)))
-          else Some(sel))
+          else Some(sel)),
+      fixed
     )
   }
 
@@ -88,30 +89,29 @@ class ScalaJSQueryBuilder private[oql] (private val oql: OQL_NodePG_ScalaJS, pri
     val attr = AttributeOQLExpression(List(Ident(attribute)), null)
 
     AbstractOQL.decorate(q.entity, attr, oql.model, oql.ds, null)
-    new ScalaJSQueryBuilder(oql, q.copy(order = Some(List(OQLOrdering(attr, sorting)))))
+    new ScalaJSQueryBuilder(oql, q.copy(order = Some(List(OQLOrdering(attr, sorting)))), fixed)
   }
 
-  def limit(a: Int): ScalaJSQueryBuilder = new ScalaJSQueryBuilder(oql, q.copy(limit = Some(a)))
+  def limit(a: Int): ScalaJSQueryBuilder = new ScalaJSQueryBuilder(oql, q.copy(limit = Some(a)), fixed)
 
-  def offset(a: Int): ScalaJSQueryBuilder = new ScalaJSQueryBuilder(oql, q.copy(offset = Some(a)))
+  def offset(a: Int): ScalaJSQueryBuilder = new ScalaJSQueryBuilder(oql, q.copy(offset = Some(a)), fixed)
 
   def jsGetMany[T <: js.Object]: Future[T] = check.oql.jsQueryMany(q)
 
-  def jsGetOne[T <: js.Object]: Future[Option[T]] = check.oql.jsQueryOne(q)
+  def jsGetOne[T <: js.Object]: Future[Option[T]] = check.oql.jsQueryOne(q, fixed)
 
   def getMany: Future[List[Any]] =
-    check.oql.queryMany(q, null, () => new ScalaPlainResultBuilder, Fixed(operative = false)) map (_.arrayResult.asInstanceOf[List[Any]])
+    check.oql.queryMany(q, null, () => new ScalaPlainResultBuilder, fixed) map (_.arrayResult.asInstanceOf[List[Any]])
 
   def ccGetMany[T <: Product: Mappable]: Future[List[T]] = getMany map (_.map(m => map2cc[T](m.asInstanceOf[Map[String, Any]])))
 
-  def getOne: Future[Option[Any]] = check.oql.queryOne(q, "")
+  def getOne: Future[Option[Any]] = check.oql.queryOne(q, "", fixed)
 
   def ccGetOne[T <: Product: Mappable]: Future[Option[T]] = getOne map (_.map(m => map2cc[T](m.asInstanceOf[Map[String, Any]])))
 
-  def getCount: Future[Int] = oql.count(q, "")
+  def getCount: Future[Int] = oql.count(q, "", fixed)
 
   def json: Future[String] =
-    check.oql.queryMany(q, null, () => new ScalaPlainResultBuilder, Fixed(operative = false)) map (r =>
-      JSON(r.arrayResult, oql.ds.platformSpecific, format = true))
+    check.oql.queryMany(q, null, () => new ScalaPlainResultBuilder, fixed) map (r => JSON(r.arrayResult, oql.ds.platformSpecific, format = true))
 
 }

@@ -52,7 +52,7 @@ abstract class AbstractOQL(dm: String, val ds: SQLDataSource, conv: Conversions)
     expr
   }
 
-  def count(oql: String, fixed: Fixed): Future[Int] = count(OQLParser.parseQuery(oql), oql, fixed)
+  def count(oql: String, fixed: String = null, at: Any = null): Future[Int] = count(OQLParser.parseQuery(oql), oql, fixedEntity(fixed, at))
 
   def count(query: OQLQuery, oql: String, fixed: Fixed): Future[Int] = {
     query.project = List(ExpressionOQLProject(Ident("count", null), ApplyOQLExpression(Ident("count", null), List(StarOQLExpression))))

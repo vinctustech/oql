@@ -32,7 +32,7 @@ class OQL_NodePG_JS(dm: String,
 
   @JSExport("count")
   def jsCount(oql: String, parameters: js.UndefOr[js.Any] = js.undefined, fixed: String = null, at: js.Any = null): js.Promise[Int] =
-    count(substitute(oql, parameters)).toJSPromise
+    count(substitute(oql, parameters), fixed, at).toJSPromise
 
   @JSExport("queryOne")
   def jsQueryOne(oql: String, parameters: js.UndefOr[js.Any] = js.undefined, fixed: String = null, at: js.Any = null): js.Promise[js.UndefOr[Any]] = {

@@ -18,11 +18,12 @@ class OQL_RDB(dm: String, data: String) extends AbstractOQL(dm, new RDBDataSourc
 
   def jsQueryOne[T <: js.Object](oql: String): Future[Option[T]] = queryOne(oql) map (_.map(toJS(_).asInstanceOf[T]))
 
-  def jsQueryOne[T <: js.Object](q: OQLQuery): Future[Option[T]] = queryOne(q, "") map (_.map(toJS(_).asInstanceOf[T]))
+  def jsQueryOne[T <: js.Object](q: OQLQuery, fixed: String = null, at: Any = null): Future[Option[T]] =
+    queryOne(q, "", fixedEntity(fixed, at)) map (_.map(toJS(_).asInstanceOf[T]))
 
   def ccQueryOne[T <: Product: Mappable](oql: String): Future[Option[T]] = queryOne(oql) map (_.map(m => map2cc[T](m.asInstanceOf[Map[String, Any]])))
 
-  def queryOne(oql: String): Future[Option[DynamicMap]] = queryOne(parseQuery(oql), oql)
+  def queryOne(oql: String, fixed: String = null, at: Any = null): Future[Option[DynamicMap]] = queryOne(parseQuery(oql), oql, fixedEntity(fixed, at))
 
   def jsQueryMany[T <: js.Object](oql: String): Future[T] = (queryMany(oql) map (toJS(_))).asInstanceOf[Future[T]]
 

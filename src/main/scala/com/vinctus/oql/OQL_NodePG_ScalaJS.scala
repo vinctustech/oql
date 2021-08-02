@@ -28,10 +28,10 @@ class OQL_NodePG_ScalaJS(dm: String,
   def selectDynamic(resource: String): Mutation = entity(resource)
 
   def jsQueryOne[T <: js.Object](oql: String, fixed: String = null, at: Any = null): Future[Option[T]] =
-    queryOne(oql, fixed, at) map (_.map(toJS(_).asInstanceOf[T]))
+    jsQueryOne(parseQuery(oql), fixedEntity(fixed, at)) map (_.map(toJS(_).asInstanceOf[T]))
 
-  def jsQueryOne[T <: js.Object](q: OQLQuery, fixed: String = null, at: Any = null): Future[Option[T]] =
-    queryOne(q, "", fixedEntity(fixed, at)) map (_.map(toJS(_).asInstanceOf[T]))
+  def jsQueryOne[T <: js.Object](q: OQLQuery, fixed: Fixed): Future[Option[T]] =
+    queryOne(q, "", fixed) map (_.map(toJS(_).asInstanceOf[T]))
 
   def ccQueryOne[T <: Product: Mappable](oql: String, fixed: String = null, at: Any = null): Future[Option[T]] =
     queryOne(oql, fixed, at) map (_.map(m => map2cc[T](m.asInstanceOf[Map[String, Any]])))
@@ -53,7 +53,8 @@ class OQL_NodePG_ScalaJS(dm: String,
     queryMany(subst, () => new ScalaJSResultBuilder, fixedEntity(fixed, at)) map (_.arrayResult.asInstanceOf[List[DynamicMap]])
   }
 
-  def queryBuilder() = new ScalaJSQueryBuilder(this, OQLQuery(null, null, null, List(StarOQLProject), None, None, None, None, None))
+  def queryBuilder(fixed: String = null, at: js.Any = null) =
+    new ScalaJSQueryBuilder(this, OQLQuery(null, null, null, List(StarOQLProject), None, None, None, None, None), fixedEntity(fixed, at))
 
   def json(oql: String, fixed: String = null, at: Any = null, parameters: Map[String, Any] = Map()): Future[String] = {
     val subst = substitute(oql, parameters)
