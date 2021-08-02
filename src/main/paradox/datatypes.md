@@ -15,7 +15,7 @@ Numeric
 
 There are four different categories of numerical data currently in OQL.
 
-### Small integers
+### Integers
 
 These are integers in the range of approximately -2.1 billion to +2.1 billion.  In OQL, this is the `integer` data type, which has two synonyms: `int` and `int4`.
 
