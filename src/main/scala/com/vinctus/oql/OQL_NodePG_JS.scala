@@ -31,14 +31,17 @@ class OQL_NodePG_JS(dm: String,
   def jsShowQuery(): Unit = showQuery()
 
   @JSExport("count")
-  def jsCount(oql: String, parameters: js.UndefOr[js.Any] = js.undefined, fixed: String = null, at: js.Any = null): js.Promise[Int] =
-    count(substitute(oql, parameters), fixed, at).toJSPromise
+  def jsCount(oql: String, parameters: js.UndefOr[js.Any] = js.undefined, fixed: js.UndefOr[String] = null, at: js.Any = null): js.Promise[Int] =
+    count(substitute(oql, parameters), fixed.orNull, at).toJSPromise
 
   @JSExport("queryOne")
-  def jsQueryOne(oql: String, parameters: js.UndefOr[js.Any] = js.undefined, fixed: String = null, at: js.Any = null): js.Promise[js.UndefOr[Any]] = {
+  def jsQueryOne(oql: String,
+                 parameters: js.UndefOr[js.Any] = js.undefined,
+                 fixed: js.UndefOr[String] = null,
+                 at: js.Any = null): js.Promise[js.UndefOr[Any]] = {
     val subst = substitute(oql, parameters)
 
-    jsQueryOne(parseQuery(subst), subst, fixedEntity(fixed, at))
+    jsQueryOne(parseQuery(subst), subst, fixedEntity(fixed.orNull, at))
   }
 
   def jsQueryOne(query: OQLQuery, oql: String, fixed: Fixed): js.Promise[js.UndefOr[Any]] =
@@ -51,19 +54,19 @@ class OQL_NodePG_JS(dm: String,
   @JSExport("queryMany")
   def jsQueryMany(oql: String,
                   parameters: js.UndefOr[js.Any] = js.undefined,
-                  fixed: String = null,
+                  fixed: js.UndefOr[String] = null,
                   at: js.Any = null): js.Promise[js.Array[js.Any]] = {
     val subst = substitute(oql, parameters)
 
-    jsQueryMany(parseQuery(subst), subst, fixedEntity(fixed, at))
+    jsQueryMany(parseQuery(subst), subst, fixedEntity(fixed.orNull, at))
   }
 
   def jsQueryMany(query: OQLQuery, oql: String, fixed: Fixed): js.Promise[js.Array[js.Any]] =
     queryMany(query, oql, () => new JSResultBuilder, fixed).map(_.arrayResult.asInstanceOf[js.Array[js.Any]]).toJSPromise
 
   @JSExport("queryBuilder")
-  def jsQueryBuilder(fixed: String = null, at: js.Any = null) =
-    new JSQueryBuilder(this, OQLQuery(null, null, null, List(StarOQLProject), None, None, None, None, None), fixedEntity(fixed, at))
+  def jsQueryBuilder(fixed: js.UndefOr[String], at: js.Any) =
+    new JSQueryBuilder(this, OQLQuery(null, null, null, List(StarOQLProject), None, None, None, None, None), fixedEntity(fixed.orNull, at))
 
   @JSExport
   def raw(sql: String, values: js.UndefOr[js.Array[js.Any]]): js.Promise[js.Array[js.Any]] =
