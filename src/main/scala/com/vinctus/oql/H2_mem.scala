@@ -24,7 +24,7 @@ class H2_mem(implicit ec: scala.concurrent.ExecutionContext) extends JDBCDataSou
   def mapPKType(typ: TypeSpecifier): String =
     typ match {
       case BigintType  => "IDENTITY"
-      case _: DataType => mapType(typ)
+      case _: Datatype => mapType(typ)
     }
 
   def connect: OQLConnection = new H2Connection(this)
@@ -35,16 +35,17 @@ class H2_mem(implicit ec: scala.concurrent.ExecutionContext) extends JDBCDataSou
   val rowSequenceFunctionEnd: String = " NULL ON NULL)"
   val typeFunction: Option[String] = None
   val convertFunction: Option[String] = Some("CONVERT(?, VARCHAR)")
-  val functionReturnType: Map[(String, Int), List[DataType] => DataType] =
-    Map[(String, Int), List[DataType] => DataType](
+  val caseSensitive: Boolean = false
+  val functionReturnType: Map[(String, Int), List[Datatype] => Datatype] =
+    Map[(String, Int), List[Datatype] => Datatype](
       ("count", 1) -> (_ => BigintType),
       ("min", 1) -> (_.head),
       ("max", 1) -> (_.head),
       ("avg", 1) -> (_ => FloatType)
     )
-  val builtinVariables = Map("CURRENT_DATE" -> DateType, "CURRENT_TIMESTAMP" -> TimestampType, "CURRENT_TIME" -> TimeType)
+  val builtinVariables = Map("current_date" -> DateType, "current_timestamp" -> TimestampType, "current_time" -> TimeType)
 
-  def reverseMapType(typ: String): DataType = null
+  def reverseMapType(typ: String): Datatype = null
 
   private val specialRegex = """(['\\\r\n])""".r
 

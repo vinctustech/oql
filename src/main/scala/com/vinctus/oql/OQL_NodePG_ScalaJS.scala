@@ -90,7 +90,7 @@ class OQL_NodePG_ScalaJS(dm: String,
       case _                    => String.valueOf(a)
     }
 
-  def render(a: Any, typ: Option[DataType] = None): String =
+  def render(a: Any, typ: Option[Datatype] = None): String =
     if (typ.isDefined)
       ds.typed(a, typ.get)
     else

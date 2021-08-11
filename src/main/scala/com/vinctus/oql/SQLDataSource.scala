@@ -40,17 +40,18 @@ trait SQLDataSource extends OQLDataSource {
   val resultArrayFunctionEnd: String
   val rowSequenceFunctionStart: String
   val rowSequenceFunctionEnd: String
-  val functionReturnType: Map[(String, Int), List[DataType] => DataType]
+  val functionReturnType: Map[(String, Int), List[Datatype] => Datatype]
+  val caseSensitive: Boolean
 
-  def reverseMapType(typ: String): DataType
+  def reverseMapType(typ: String): Datatype
 
   val platformSpecific: PartialFunction[Any, String]
 
-  val builtinVariables: Map[String, DataType]
+  val builtinVariables: Map[String, Datatype]
 
   def string(s: String): String = s"E'${s.replace("\\", """\\""").replace("'", """\'""").replace("\r", """\r""").replace("\n", """\n""")}'"
 
-  def typed(a: Any, typ: DataType): String =
+  def typed(a: Any, typ: Datatype): String =
     (a, typ) match {
       case (s: String, TextType) => string(s)
       case (s: String, UUIDType) => s"UUID'$s'"

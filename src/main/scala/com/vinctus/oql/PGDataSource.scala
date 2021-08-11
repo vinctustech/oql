@@ -26,10 +26,10 @@ trait PGDataSource extends SQLDataSource {
     typ match {
       case IntegerType => "SERIAL"
       case BigintType  => "BIGSERIAL"
-      case _: DataType => mapType(typ)
+      case _: Datatype => mapType(typ)
     }
 
-  def reverseMapType(typ: String): DataType =
+  def reverseMapType(typ: String): Datatype =
     typ match {
       case "timestamp without time zone" => TimestampType
       case "uuid"                        => UUIDType
@@ -44,13 +44,14 @@ trait PGDataSource extends SQLDataSource {
   val rowSequenceFunctionEnd: String = ")"
   val typeFunction: Option[String] = Some("pg_typeof(?)")
   val convertFunction: Option[String] = None
-  val functionReturnType: Map[(String, Int), List[DataType] => DataType] =
-    Map[(String, Int), List[DataType] => DataType](
+  val caseSensitive: Boolean = false
+  val functionReturnType: Map[(String, Int), List[Datatype] => Datatype] =
+    Map[(String, Int), List[Datatype] => Datatype](
       ("count", 1) -> (_ => BigintType),
       ("min", 1) -> (_.head),
       ("max", 1) -> (_.head),
       ("avg", 1) -> (_ => FloatType)
     )
-  val builtinVariables = Map("CURRENT_DATE" -> DateType, "CURRENT_TIMESTAMP" -> TimestampType, "CURRENT_TIME" -> TimeType)
+  val builtinVariables = Map("current_date" -> DateType, "current_timestamp" -> TimestampType, "current_time" -> TimeType)
 
 }

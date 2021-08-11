@@ -40,7 +40,7 @@ class OQL_RDB(dm: String, data: String) extends AbstractOQL(dm, new RDBDataSourc
   def json(oql: String, tab: Int = 2, format: Boolean = true): Future[String] =
     queryMany(oql, () => new ScalaPlainResultBuilder, Fixed(operative = false)) map (r => JSON(r.arrayResult, ds.platformSpecific, tab, format))
 
-  def render(a: Any, typ: Option[DataType] = None): String =
+  def render(a: Any, typ: Option[Datatype] = None): String =
     if (typ.isDefined)
       ds.typed(a, typ.get)
     else

@@ -21,7 +21,7 @@ abstract class AbstractOQL(dm: String, val ds: SQLDataSource, conv: Conversions)
 //      case Some(m: DMLModel) => new DataModel(m, dm)
 //    }
 
-  def render(a: Any, typ: Option[DataType] = None): String
+  def render(a: Any, typ: Option[Datatype] = None): String
 
   def execute[R](action: OQLConnection => Future[R]): Future[R]
 //    val conn = connect
@@ -263,11 +263,11 @@ object AbstractOQL {
       case e @ ApplyOQLExpression(f, args) =>
         args foreach _decorate
 
-        ds.functionReturnType get (f.s.toLowerCase, args.length) match {
-          case None =>
-            val n = f.s.toLowerCase
+        val fname = if (ds.caseSensitive) f.s else f.s.toLowerCase
 
-            if ((n == "sum" || n == "avg" || n == "min" || n == "max") && args.length == 1)
+        ds.functionReturnType get (fname, args.length) match {
+          case None =>
+            if ((fname == "sum" || fname == "avg" || fname == "min" || fname == "max") && args.length == 1)
               e.typ = args.head.typ
 
           case Some(t) => e.typ = t(args map (_.typ))
@@ -301,8 +301,8 @@ object AbstractOQL {
         if (left.typ == right.typ)
           e.typ = left.typ
       case attrexp @ ReferenceOQLExpression(ids, _) => attrexp.dmrefs = model.lookup(attrexp, ids, ref = true, entity, oql)
-      case AttributeOQLExpression(List(id), _) if ds.builtinVariables contains id.s =>
-        expr.typ = ds.builtinVariables(id.s) // it's a built-in variable so assign type from `builtinVariables` map but leave dmrefs null
+      case AttributeOQLExpression(List(id), _) if ds.builtinVariables contains (if (ds.caseSensitive) id.s else id.s.toLowerCase) =>
+        expr.typ = ds.builtinVariables(if (ds.caseSensitive) id.s else id.s.toLowerCase) // it's a built-in variable so assign type from `builtinVariables` map but leave dmrefs null
       case attrexp @ AttributeOQLExpression(ids, _) => attrexp.dmrefs = model.lookup(attrexp, ids, ref = false, entity, oql)
       case InQueryOQLExpression(left, op, query) =>
         _decorate(left)
@@ -349,7 +349,7 @@ object AbstractOQL {
     query.project foreach {
       case proj @ QueryOQLProject(label, query) =>
         map(label.s) = entity.attributes get query.source.s match {
-          case Some(Attribute(_, _, _, _, _: DataType)) => // an attribute with a DataType
+          case Some(Attribute(_, _, _, _, _: Datatype)) => // an attribute with a DataType
             val attr = AttributeOQLExpression(List(query.source), null)
 
             decorate(entity, attr, model, ds, oql) // todo: should be done without call to 'decorate' because we have the attribute instance
@@ -359,7 +359,7 @@ object AbstractOQL {
             query.select foreach (decorate(query.entity, _, model, ds, oql))
             query.order foreach (_ foreach { case OQLOrdering(expr, _) => decorate(query.entity, expr, model, ds, oql) })
             proj
-          case None if ds.builtinVariables contains query.source.s =>
+          case None if ds.builtinVariables contains (if (ds.caseSensitive) query.source.s else query.source.s.toLowerCase) =>
             ExpressionOQLProject(label, RawOQLExpression(query.source.s)) // it's a built-in variable so sent it through raw
           case None => problem(query.source.pos, s"entity '${entity.name}' does not have attribute '${query.source.s}'", oql)
         }
@@ -389,7 +389,7 @@ object AbstractOQL {
         map(label.s) = expr match {
           case a @ AttributeOQLExpression(List(id), _) =>
             entity.attributes get id.s match {
-              case Some(attr @ Attribute(_, _, _, _, _: DataType)) =>
+              case Some(attr @ Attribute(_, _, _, _, _: Datatype)) =>
                 a.dmrefs = List((entity, attr))
                 decorate(entity, a, model, ds, oql) // todo: shouldn't have to call `decorate` because we have the Attribute object
                 expProj
@@ -405,8 +405,9 @@ object AbstractOQL {
                 QueryOQLProject(
                   label,
                   preprocessQuery(Some(entity), OQLQuery(id, otmEntity, attr, List(StarOQLProject), None, None, None, None, None), model, ds, oql))
-              case None if ds.builtinVariables contains id.s => expProj // it's a built-in variable so leave dmrefs null and let it go through
-              case None                                      => problem(id.pos, s"entity '${entity.name}' does not have attribute '${id.s}'", oql)
+              case None if ds.builtinVariables contains (if (ds.caseSensitive) id.s else id.s.toLowerCase) =>
+                expProj // it's a built-in variable so leave dmrefs null and let it go through
+              case None => problem(id.pos, s"entity '${entity.name}' does not have attribute '${id.s}'", oql)
             }
           case _ =>
             decorate(entity, expr, model, ds, oql)
