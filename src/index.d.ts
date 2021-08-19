@@ -1,6 +1,6 @@
-export class QueryBuilder<T> {
+export class QueryBuilder {
 
-  cond(v: any): QueryBuilder<T>
+  cond(v: any): QueryBuilder
 
 //   add(attribute: QueryBuilder): QueryBuilder
 //
@@ -8,19 +8,19 @@ export class QueryBuilder<T> {
 //
 //   project(resource: string, ...attributes: string[]): QueryBuilder
 
-  query(oql: string, parameters?: any): QueryBuilder<T>
+  query(oql: string, parameters?: any): QueryBuilder
 
-  select(oql: string, parameters?: any): QueryBuilder<T>
+  select(oql: string, parameters?: any): QueryBuilder
 
-  order(attribute: string, sorting: string): QueryBuilder<T>
+  order(attribute: string, sorting: string): QueryBuilder
 
-  limit(a: number): QueryBuilder<T>
+  limit(a: number): QueryBuilder
 
-  offset(a: number): QueryBuilder<T>
+  offset(a: number): QueryBuilder
 
-  getOne(): Promise<T | undefined>
+  getOne(): Promise<any | undefined>
 
-  getMany(): Promise<T[]>
+  getMany(): Promise<any[]>
 
   getCount(): Promise<number>
 
@@ -28,7 +28,7 @@ export class QueryBuilder<T> {
 
 export class Mutation {
 
-  insert<T>(obj: any): Promise<T>
+  insert(obj: any): Promise<any>
 
   link(id1: any, resource: string, id2: any): Promise<void>
 
@@ -50,14 +50,14 @@ export class OQL {
 
   entity(name: string): Mutation
 
-  queryBuilder<T>(fixed?: string, at?: any): QueryBuilder<T>
+  queryBuilder(fixed?: string, at?: any): QueryBuilder
 
-  queryOne<T>(oql: string, parameters?: any, fixed?: string, at?: any): Promise<T | undefined>
+  queryOne(oql: string, parameters?: any, fixed?: string, at?: any): Promise<any | undefined>
 
-  queryMany<T>(oql: string, parameters?: any, fixed?: string, at?: any): Promise<T[]>
+  queryMany(oql: string, parameters?: any, fixed?: string, at?: any): Promise<any[]>
 
   count(oql: string, parameters?: any, fixed?: string, at?: any): Promise<number>
 
-  raw<T>(sql: string, values?: any[]): Promise<T[]>
+  raw(sql: string, values?: any[]): Promise<any[]>
 
 }
