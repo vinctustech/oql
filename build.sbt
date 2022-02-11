@@ -1,10 +1,10 @@
 name := "@vinctus/oql" //@vinctus/
 
-version := "1.0.0-pre.13"
+version := "1.1.0-alpha.1"
 
 description := "Object Query Language"
 
-scalaVersion := "2.13.6"
+scalaVersion := "2.13.8"
 
 scalacOptions ++= Seq("-deprecation",
                       "-feature",
