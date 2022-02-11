@@ -47,7 +47,7 @@ trait PGDataSource extends SQLDataSource {
   val caseSensitive: Boolean = false
   val functionReturnType: Map[(String, Int), List[Datatype] => Datatype] =
     Map[(String, Int), List[Datatype] => Datatype](
-      ("count", 1) -> (_ => BigintType),
+      ("count", 1) -> (_ => IntegerType), // todo: this should really be 'BigintType'
       ("min", 1) -> (_.head),
       ("max", 1) -> (_.head),
       ("avg", 1) -> (_ => FloatType)

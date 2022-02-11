@@ -40,13 +40,13 @@ object OQLParser extends RegexParsers with PackratParsers {
       case Some(l) ~ f ~ _ ~ StarOQLExpression ~ _                    => ExpressionOQLProject(l, ApplyOQLExpression(f, List(StarOQLExpression)))
       case Some(l) ~ f ~ _ ~ (a @ AttributeOQLExpression(ids, _)) ~ _ => ExpressionOQLProject(l, ApplyOQLExpression(f, List(a)))
     } |
-      label ~ applyExpression ^^ { case l ~ e              => ExpressionOQLProject(l, e) } |
-      label ~ qualifiedAttributeExpression ^^ { case l ~ e => ExpressionOQLProject(l, e) } |
-      label ~ ("(" ~> expression <~ ")") ^^ { case l ~ e   => ExpressionOQLProject(l, e) } |
+      label ~ applyExpression ^^ { case l ~ e => ExpressionOQLProject(l, e) } |
       opt(label) ~ query ^^ {
         case None ~ q    => QueryOQLProject(q.source, q)
         case Some(l) ~ q => QueryOQLProject(l, q)
       } |
+      label ~ qualifiedAttributeExpression ^^ { case l ~ e => ExpressionOQLProject(l, e) } |
+      label ~ ("(" ~> expression <~ ")") ^^ { case l ~ e   => ExpressionOQLProject(l, e) } |
       opt(label) ~ attributeExpression ^^ {
         case None ~ a    => ExpressionOQLProject(a.ids.head, a)
         case Some(l) ~ a => ExpressionOQLProject(l, a)

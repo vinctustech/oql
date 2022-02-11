@@ -1,12 +1,18 @@
-name := "@vinctus/oql"//@vinctus/
+name := "@vinctus/oql" //@vinctus/
 
-version := "1.0.0-pre.6"
+version := "1.0.0-pre.13"
 
 description := "Object Query Language"
 
 scalaVersion := "2.13.6"
 
-scalacOptions ++= Seq("-deprecation", "-feature", "-unchecked", "-language:postfixOps", "-language:implicitConversions", "-language:existentials", "-language:dynamics")
+scalacOptions ++= Seq("-deprecation",
+                      "-feature",
+                      "-unchecked",
+                      "-language:postfixOps",
+                      "-language:implicitConversions",
+                      "-language:existentials",
+                      "-language:dynamics")
 
 organization := "com.vinctus"
 
@@ -78,7 +84,7 @@ Compile / npmDependencies ++= Seq(
 
 libraryDependencies ++= Seq(
   "org.scalatest" %%% "scalatest" % "3.2.9" % "test",
-  "xyz.hyperreal" %%% "rdb-sjs" % "0.1.0-snapshot.10",
+  //"xyz.hyperreal" %%% "rdb-sjs" % "0.1.0-snapshot.10",
   "com.vinctus" %%% "sjs-utils" % "0.1.0-snapshot.26",
   "com.vinctus" %%% "mappable" % "0.1.2"
 )
@@ -92,7 +98,7 @@ libraryDependencies ++= Seq(
   "io.github.cquiroz" %%% "scala-java-time" % "2.3.0"
 )
 
-mainClass := Some( "com.vinctus." + "oql" + ".Main" )
+mainClass := Some("com.vinctus." + "oql" + ".Main")
 
 lazy val packageName = SettingKey[String]("packageName", "package name")
 
@@ -102,7 +108,9 @@ publishMavenStyle := true
 
 Test / publishArtifact := false
 
-pomIncludeRepository := { _ => false }
+pomIncludeRepository := { _ =>
+  false
+}
 
 licenses := Seq("ISC" -> url("https://opensource.org/licenses/ISC"))
 
