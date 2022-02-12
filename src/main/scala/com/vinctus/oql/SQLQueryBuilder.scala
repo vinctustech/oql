@@ -125,6 +125,9 @@ class SQLQueryBuilder(oql: String, ds: SQLDataSource, fixed: Fixed, model: DataM
       case TypedOQLExpression(v, typ)             => ds.typed(v, typ)
       case FloatOQLExpression(n)                  => n.toString
       case IntegerOQLExpression(n)                => n.toString
+      case JSONOQLExpression(e)                   => s"'${expression(e, table)}'"
+      case ArrayOQLExpression(elems)              => s"[${elems.map(e => expression(e, table)).mkString(", ")}]"
+      case ObjectOQLExpression(pairs)             => s"{${pairs.map({case (k, v) => s"\"$k\": ${expression(v, table)}"}).mkString(", ")}}"
       case StringOQLExpression(s)                 => ds.string(s)
       case ReferenceOQLExpression(_, dmrefs)      => attribute(dmrefs)
       case AttributeOQLExpression(List(id), null) => id.s // it's a built-in variable if dmrefs is null

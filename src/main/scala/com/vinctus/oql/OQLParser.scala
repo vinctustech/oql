@@ -155,11 +155,29 @@ object OQLParser extends RegexParsers with PackratParsers {
   lazy val literalExpression: PackratParser[OQLExpression] =
     float ^^ FloatOQLExpression |
       integer ^^ IntegerOQLExpression |
-      string ^^ (unescape _ andThen StringOQLExpression) |
+      stringLiteral |
       booleanLiteral
+
+  lazy val stringLiteral: PackratParser[OQLExpression] =
+    string ^^ (unescape _ andThen StringOQLExpression)
+
+  lazy val pair: PackratParser[(String, OQLExpression)] =
+    doubleQuoteString ~ ":" ~ (arrayExpression | objectExpression | literalExpression) ^^ {
+      case k ~ _ ~ v => (k, v)
+    }
+
+  lazy val arrayExpression: PackratParser[OQLExpression] =
+    "[" ~> repsep(arrayExpression | objectExpression | literalExpression, ",") <~ "]" ^^ ArrayOQLExpression
+
+  lazy val objectExpression: PackratParser[OQLExpression] =
+    "{" ~> repsep(pair, ",") <~ "}" ^^ ObjectOQLExpression
+
+  lazy val jsonExpression: PackratParser[OQLExpression] =
+    (arrayExpression | objectExpression) ^^ JSONOQLExpression
 
   lazy val primary: PackratParser[OQLExpression] =
     literalExpression |
+      jsonExpression |
       starExpression |
       caseExpression |
       applyExpression |

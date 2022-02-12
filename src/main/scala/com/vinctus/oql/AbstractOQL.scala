@@ -317,6 +317,7 @@ object AbstractOQL {
       case e: FloatOQLExpression                   => e.typ = FloatType
       case e: IntegerOQLExpression                 => e.typ = IntegerType
       case e: BooleanOQLExpression                 => e.typ = BooleanType
+      case e: JSONOQLExpression                    => e.typ = JSONType
       case e @ TypedOQLExpression(_, t)            => e.typ = t
       case StarOQLExpression | _: RawOQLExpression =>
     }

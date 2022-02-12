@@ -34,6 +34,9 @@ case class InfixOQLExpression(left: OQLExpression, op: String, right: OQLExpress
 case class PrefixOQLExpression(op: String, expr: OQLExpression) extends OQLExpression
 case class PostfixOQLExpression(expr: OQLExpression, op: String) extends OQLExpression
 case class BetweenOQLExpression(expr: OQLExpression, op: String, lower: OQLExpression, upper: OQLExpression) extends OQLExpression
+case class JSONOQLExpression(expr: OQLExpression) extends OQLExpression
+case class ObjectOQLExpression(pairs: List[(String, OQLExpression)]) extends OQLExpression
+case class ArrayOQLExpression(elems: List[OQLExpression]) extends OQLExpression
 case class FloatOQLExpression(n: Double) extends OQLExpression
 case class IntegerOQLExpression(n: Int) extends OQLExpression
 case class StringOQLExpression(s: String) extends OQLExpression

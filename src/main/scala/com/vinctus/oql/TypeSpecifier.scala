@@ -16,6 +16,7 @@ case object TimeType extends Datatype
 case object FloatType extends Datatype
 case object UUIDType extends Datatype
 case object TimestampType extends Datatype
+case object JSONType extends Datatype
 
 trait RelationalType extends TypeSpecifier { val entity: Entity; val isDataType = false; val isColumnType = false; val isArrayType = false }
 case class ManyToOneType(entity: Entity) extends RelationalType { override val isColumnType = true }
