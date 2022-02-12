@@ -65,12 +65,36 @@ object JSON {
       buf to ArraySeq
     }
 
+    def readObject: Seq[(String, Any)] = {
+      val buf = new ArrayBuffer[(String, Any)]
+
+      delim('{')
+
+      @tailrec
+      def elem(): Unit = {
+        buf += readValue
+
+        if (next == ',') {
+          advance()
+          space()
+          elem()
+        }
+      }
+
+      if (next != '}')
+        elem()
+
+      delim('}')
+      buf to ArraySeq
+    }
+
     def error(str: String) = sys.error(str)
 
     def readValue: Any =
       next match {
         case `EOI`                      => error("unexpected end of JSON string")
         case '['                        => readArray
+        case '{'                        => readObject
         case '"'                        => readString
         case d if d.isDigit || d == '-' => readNumber
         case 'n'                        => value("null", null)

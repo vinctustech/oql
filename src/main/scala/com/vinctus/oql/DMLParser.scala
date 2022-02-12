@@ -43,6 +43,7 @@ class DMLParser extends RegexParsers {
 
   def typeSpecifier: Parser[DMLTypeSpecifier] =
     (kw("text") |
+      kw("json") |
       kw("integer") | kw("int4") | kw("int") |
       kw("boolean") | kw("bool") |
       kw("bigint") | kw("int8") |
