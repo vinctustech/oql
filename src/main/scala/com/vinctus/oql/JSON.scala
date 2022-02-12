@@ -4,7 +4,7 @@ import java.time.{Instant, ZoneId, ZoneOffset}
 import java.time.format.DateTimeFormatter
 import scala.annotation.tailrec
 import scala.collection.immutable.ArraySeq
-import scala.collection.mutable.ArrayBuffer
+import scala.collection.mutable.{ArrayBuffer, ListBuffer}
 import scala.language.postfixOps
 import scala.scalajs.js
 
@@ -66,13 +66,17 @@ object JSON {
     }
 
     def readObject: Seq[(String, Any)] = {
-      val buf = new ArrayBuffer[(String, Any)]
+      val buf = new ListBuffer[(String, Any)]
 
       delim('{')
 
       @tailrec
       def elem(): Unit = {
-        buf += readValue
+        val key = readString
+
+        delim(':')
+
+        buf += ((key, readValue))
 
         if (next == ',') {
           advance()
@@ -85,7 +89,7 @@ object JSON {
         elem()
 
       delim('}')
-      buf to ArraySeq
+      buf toList
     }
 
     def error(str: String) = sys.error(str)
