@@ -19,8 +19,8 @@ object OQLParser extends RegexParsers with PackratParsers {
 //  lazy val pair: PackratParser[OQLKeyValue] = identifier ~ ":" ~ literalExpression ^^ { case k ~ _ ~ v => OQLKeyValue(k, v) }
 
   lazy val query: PackratParser[OQLQuery] =
-    entityName ~ project ~ opt(select) ~ opt(group) ~ opt(order) ~ restrict ^^ {
-      case e ~ p ~ s ~ g ~ o ~ Seq(lim, off) => OQLQuery(e, null, null, p, s, g, o, lim, off)
+    entityName ~ not(".") ~ project ~ opt(select) ~ opt(group) ~ opt(order) ~ restrict ^^ {
+      case e ~ _ ~ p ~ s ~ g ~ o ~ Seq(lim, off) => OQLQuery(e, null, null, p, s, g, o, lim, off)
     }
 
   lazy val project: PackratParser[List[OQLProject]] =

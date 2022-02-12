@@ -66,13 +66,13 @@ Compile / paradoxProperties ++=
 
 scalaJSUseMainModuleInitializer := true
 
-//Test / scalaJSUseMainModuleInitializer := false
+Test / scalaJSUseMainModuleInitializer := false
+
+Test / scalaJSUseTestModuleInitializer := true
+
+//Test / scalaJSUseMainModuleInitializer := true
 //
-//Test / scalaJSUseTestModuleInitializer := true
-
-Test / scalaJSUseMainModuleInitializer := true
-
-Test / scalaJSUseTestModuleInitializer := false
+//Test / scalaJSUseTestModuleInitializer := false
 
 Compile / npmDependencies ++= Seq(
   "pg" -> "8.5.1",

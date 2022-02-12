@@ -77,7 +77,7 @@ class BookDBTests extends AsyncFreeSpec with Matchers with Test {
     }
   }
 
-  val `simplest query with select using parameter` =
+  val `simplest query with select using parameter`: String =
     """
       |[
       |  {
@@ -99,6 +99,52 @@ class BookDBTests extends AsyncFreeSpec with Matchers with Test {
 
   "simplest query with select using parameter - js" in {
     testjs("book [year > :year]", js.Dictionary("year" -> 1880)) map (_ shouldBe `simplest query with select using parameter`)
+  }
+
+  "many-to-one query with dot notation" in {
+    test("book { * author: author.name }") map { result =>
+      result shouldBe
+        """
+          |[
+          |  {
+          |    "id": 1,
+          |    "title": "Treasure Island",
+          |    "year": 1883,
+          |    "author": "Robert Louis Stevenson"
+          |  },
+          |  {
+          |    "id": 2,
+          |    "title": "Alice's Adventures in Wonderland",
+          |    "year": 1865,
+          |    "author": "Lewis Carroll"
+          |  },
+          |  {
+          |    "id": 3,
+          |    "title": "Oliver Twist",
+          |    "year": 1838,
+          |    "author": "Charles Dickens"
+          |  },
+          |  {
+          |    "id": 4,
+          |    "title": "A Tale of Two Cities",
+          |    "year": 1859,
+          |    "author": "Charles Dickens"
+          |  },
+          |  {
+          |    "id": 5,
+          |    "title": "The Adventures of Tom Sawyer",
+          |    "year": 1876,
+          |    "author": "Mark Twain"
+          |  },
+          |  {
+          |    "id": 6,
+          |    "title": "Adventures of Huckleberry Finn",
+          |    "year": 1884,
+          |    "author": "Mark Twain"
+          |  }
+          |]
+          |""".trim.stripMargin
+    }
   }
 
   "simplest many-to-one query" in {
@@ -246,6 +292,48 @@ class BookDBTests extends AsyncFreeSpec with Matchers with Test {
         |  }
         |]
         |""".trim.stripMargin
+    }
+  }
+
+  "one to many query with count() in subquery" in {
+    test("author { name books: books {count(*)} }") map { result =>
+      result shouldBe
+        """
+          |[
+          |  {
+          |    "name": "Robert Louis Stevenson",
+          |    "books": [
+          |      {
+          |        "count": 1
+          |      }
+          |    ]
+          |  },
+          |  {
+          |    "name": "Lewis Carroll",
+          |    "books": [
+          |      {
+          |        "count": 1
+          |      }
+          |    ]
+          |  },
+          |  {
+          |    "name": "Charles Dickens",
+          |    "books": [
+          |      {
+          |        "count": 2
+          |      }
+          |    ]
+          |  },
+          |  {
+          |    "name": "Mark Twain",
+          |    "books": [
+          |      {
+          |        "count": 2
+          |      }
+          |    ]
+          |  }
+          |]
+          |""".trim.stripMargin
     }
   }
 
