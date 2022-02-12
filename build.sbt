@@ -75,22 +75,22 @@ Test / scalaJSUseTestModuleInitializer := true
 //Test / scalaJSUseTestModuleInitializer := false
 
 Compile / npmDependencies ++= Seq(
-  "pg" -> "8.5.1",
-  "@types/pg" -> "7.14.9",
-  "source-map-support" -> "0.5.19",
+  "pg" -> "8.7.3",
+  "@types/pg" -> "8.6.4",
+  "source-map-support" -> "0.5.21",
   "big.js" -> "6.1.1",
-  "@types/big.js" -> "6.1.1"
+  "@types/big.js" -> "6.1.3"
 )
 
 libraryDependencies ++= Seq(
-  "org.scalatest" %%% "scalatest" % "3.2.9" % "test",
+  "org.scalatest" %%% "scalatest" % "3.2.11" % "test",
   //"xyz.hyperreal" %%% "rdb-sjs" % "0.1.0-snapshot.10",
   "com.vinctus" %%% "sjs-utils" % "0.1.0-snapshot.26",
   "com.vinctus" %%% "mappable" % "0.1.2"
 )
 
 libraryDependencies ++= Seq(
-  "org.scala-lang.modules" %%% "scala-parser-combinators" % "2.0.0",
+  "org.scala-lang.modules" %%% "scala-parser-combinators" % "2.1.0",
   //  "org.scala-lang.modules" %%% "scala-async" % "1.0.0-M1"
 )
 
