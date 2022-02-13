@@ -12,4 +12,7 @@ object JSConversions extends Conversions {
 
   def decimal(n: String, precision: Int, scale: Int): Any = n.toDouble
 
+  def jsonBinary(v: js.Any): Any = v
+
+  def jsonString(v: js.Any): Any = ???
 }

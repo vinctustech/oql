@@ -1,5 +1,7 @@
 package com.vinctus.oql
 
+import scala.scalajs.js
+
 abstract class OQLResultSet {
 
   def next: Boolean

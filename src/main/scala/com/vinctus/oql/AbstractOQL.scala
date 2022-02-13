@@ -7,6 +7,7 @@ import scala.collection.mutable.ListBuffer
 import scala.annotation.tailrec
 import scala.collection.immutable.VectorMap
 import scala.concurrent.Future
+import scala.scalajs.js
 
 abstract class AbstractOQL(dm: String, val ds: SQLDataSource, conv: Conversions)(implicit ec: scala.concurrent.ExecutionContext) {
 
@@ -160,7 +161,11 @@ abstract class AbstractOQL(dm: String, val ds: SQLDataSource, conv: Conversions)
                 case (s: String, UUIDType)                      => conv.uuid(s)
                 case (t: String, TimestampType)                 => conv.timestamp(t)
                 case (d: String, DecimalType(precision, scale)) => conv.decimal(d, precision, scale)
-                case _                                          => v
+                case (v: String, JSONType)                      => sys.error("NOT DONE YET")
+                case (v, JSONType)                              =>
+//                  println(v, conv, js.JSON.stringify(v.asInstanceOf[js.Any], null.asInstanceOf[js.Array[js.Any]]))
+                  conv.jsonBinary(v.asInstanceOf[js.Any])
+                case _ => v
               }
             case ObjectNode(properties) =>
               val result = newResultBuilder().newObject
