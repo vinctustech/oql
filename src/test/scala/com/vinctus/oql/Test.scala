@@ -27,3 +27,4 @@ trait Test {
     dbjs.jsQueryMany(oql, parameters = parameters).toFuture map (r => fromJS(r))
 
 }
+// todo: add JSON unit tests
