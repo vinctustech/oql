@@ -27,10 +27,12 @@ class SequenceResultSet(list: IndexedSeq[IndexedSeq[Any]]) extends OQLResultSet 
     }
   }
 
-  def get(idx: Int): Any = row(idx)
+  def get(idx: Int): SequenceResultSetValue = SequenceResultSetValue(row(idx))
 
   def getString(idx: Int): String = row(idx).toString
 
   def getResultSet(idx: Int): OQLResultSet = new SequenceResultSet(row(idx).asInstanceOf[IndexedSeq[IndexedSeq[Any]]])
 
 }
+
+case class SequenceResultSetValue(v: Any) extends OQLResultSetValue

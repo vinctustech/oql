@@ -22,7 +22,8 @@ object Main extends App {
 //  new OQL_NodePG(g.require("fs").readFileSync("test/accounts.dm").toString, "localhost", 5432, "postgres", "postgres", "docker", false, 1000, 5)
   async {
     db.showQuery()
-    println(await(db.queryMany("json")))
+    println(await(db.queryMany("main {* infos}")))
+    //println(await(db.queryMany("info")))
 //    println(await(db.queryMany("job { jobTitle employees { firstName } }")))
 //    println(await(db.queryMany("author {* books: books {count(*)}}")))
     //println(await(db.queryMany("book {* author: author.name} <id>")))

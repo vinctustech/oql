@@ -25,8 +25,10 @@ class NodePGResultSet(rs: QueryArrayResult[js.Array[js.Any]]) extends OQLResultS
     }
   }
 
-  def get(idx: Int): Any = row(idx)
+  def get(idx: Int): NodePGResultSetValue = NodePGResultSetValue(row(idx))
 
   def getString(idx: Int): String = row(idx).toString
 
 }
+
+case class NodePGResultSetValue(v: Any) extends OQLResultSetValue

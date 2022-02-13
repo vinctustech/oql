@@ -1,7 +1,5 @@
 package com.vinctus.oql
 
-import scala.scalajs.js
-
 abstract class OQLResultSet {
 
   def next: Boolean
@@ -12,10 +10,12 @@ abstract class OQLResultSet {
     * @param idx zero-based column index
     * @return value of designated column
     */
-  def get(idx: Int): Any
+  def get(idx: Int): OQLResultSetValue
 
   def getString(idx: Int): String
 
   def getResultSet(idx: Int): OQLResultSet
 
 }
+
+abstract class OQLResultSetValue { val v: Any }

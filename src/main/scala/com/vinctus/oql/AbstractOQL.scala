@@ -121,7 +121,7 @@ abstract class AbstractOQL(dm: String, val ds: SQLDataSource, conv: Conversions)
 
               result
             case n @ ManyToOneNode(_, element) =>
-              if (n.idx.isDefined && resultSet.get(n.idx.get) == null) null
+              if (n.idx.isDefined && resultSet.get(n.idx.get).v == null) null
               else buildResult(element, resultSet)
             case n @ OneToOneNode(query, element) =>
               val sequenceResultSet = resultSet.getResultSet(n.idx)
@@ -149,7 +149,7 @@ abstract class AbstractOQL(dm: String, val ds: SQLDataSource, conv: Conversions)
 
               result.arrayResult
             case n @ ValueNode(expr) =>
-              val v = resultSet get n.idx
+              val v = resultSet.get(n.idx).v
               val typ =
                 if (n.typed) ds.reverseMapType(resultSet getString (n.idx + 1))
                 else expr.typ
@@ -162,8 +162,9 @@ abstract class AbstractOQL(dm: String, val ds: SQLDataSource, conv: Conversions)
                 case (t: String, TimestampType)                 => conv.timestamp(t)
                 case (d: String, DecimalType(precision, scale)) => conv.decimal(d, precision, scale)
                 case (v: String, JSONType)                      => sys.error("NOT DONE YET")
-                case (v, JSONType)                              =>
-//                  println(v, conv, js.JSON.stringify(v.asInstanceOf[js.Any], null.asInstanceOf[js.Array[js.Any]]))
+                case (v, JSONType) =>
+                  println(v)
+                  //println(v, conv, js.JSON.stringify(v.asInstanceOf[js.Any], null.asInstanceOf[js.Array[js.Any]]))
                   conv.jsonBinary(v.asInstanceOf[js.Any])
                 case _ => v
               }
