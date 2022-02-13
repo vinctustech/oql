@@ -149,24 +149,28 @@ abstract class AbstractOQL(dm: String, val ds: SQLDataSource, conv: Conversions)
 
               result.arrayResult
             case n @ ValueNode(expr) =>
-              val v = resultSet.get(n.idx).v
+              val v = resultSet.get(n.idx)
               val typ =
                 if (n.typed) ds.reverseMapType(resultSet getString (n.idx + 1))
                 else expr.typ
 
-              (v, typ) match {
-                case (s: String, IntegerType)                   => s.toInt
-                case (s: String, FloatType)                     => s.toDouble
-                case (s: String, BigintType)                    => conv.bigint(s)
-                case (s: String, UUIDType)                      => conv.uuid(s)
-                case (t: String, TimestampType)                 => conv.timestamp(t)
-                case (d: String, DecimalType(precision, scale)) => conv.decimal(d, precision, scale)
-                case (v: String, JSONType)                      => sys.error("NOT DONE YET")
-                case (v, JSONType) =>
-                  println(v)
+              (v, v.v, typ) match {
+                case (_, s: String, IntegerType)                   => s.toInt
+                case (_, s: String, FloatType)                     => s.toDouble
+                case (_, s: String, BigintType)                    => conv.bigint(s)
+                case (_, s: String, UUIDType)                      => conv.uuid(s)
+                case (_, t: String, TimestampType)                 => conv.timestamp(t)
+                case (_, d: String, DecimalType(precision, scale)) => conv.decimal(d, precision, scale)
+                case (NodePGResultSetValue(v), _, JSONType) =>
+                  println("NodePGResultSetValue", v)
                   //println(v, conv, js.JSON.stringify(v.asInstanceOf[js.Any], null.asInstanceOf[js.Array[js.Any]]))
-                  conv.jsonBinary(v.asInstanceOf[js.Any])
-                case _ => v
+                  conv.jsonNodePG(v.asInstanceOf[js.Any])
+                case (SequenceResultSetValue(v), _, JSONType) =>
+                  println("SequenceResultSetValue", v)
+                  conv.jsonSequence(v)
+                case _ =>
+                  println("_", typ, v)
+                  v.v
               }
             case ObjectNode(properties) =>
               val result = newResultBuilder().newObject

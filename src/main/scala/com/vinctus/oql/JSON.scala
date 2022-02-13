@@ -3,7 +3,7 @@ package com.vinctus.oql
 import java.time.{Instant, ZoneId, ZoneOffset}
 import java.time.format.DateTimeFormatter
 import scala.annotation.tailrec
-import scala.collection.immutable.ArraySeq
+import scala.collection.immutable.{ArraySeq, ListMap}
 import scala.collection.mutable.{ArrayBuffer, ListBuffer}
 import scala.language.postfixOps
 import scala.scalajs.js
@@ -65,7 +65,7 @@ object JSON {
       buf to ArraySeq
     }
 
-    def readObject: Seq[(String, Any)] = {
+    def readObject: ListMap[String, Any] = {
       val buf = new ListBuffer[(String, Any)]
 
       delim('{')
@@ -89,7 +89,7 @@ object JSON {
         elem()
 
       delim('}')
-      buf toList
+      buf to ListMap
     }
 
     def error(str: String) = sys.error(str)

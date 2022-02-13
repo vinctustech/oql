@@ -12,8 +12,8 @@ abstract class Conversions {
 
   def decimal(n: String, precision: Int, scale: Int): Any
 
-  def jsonBinary(v: js.Any): Any
+  def jsonNodePG(v: js.Any): Any
 
-  def jsonString(v: js.Any): Any
+  def jsonSequence(v: Any): Any
 
 }

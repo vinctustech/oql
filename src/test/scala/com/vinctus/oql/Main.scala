@@ -17,13 +17,17 @@ object Main extends App {
 
   val db =
     new OQL_NodePG_ScalaJS(g.require("fs").readFileSync("test/json.dm").toString, "localhost", 5432, "postgres", "postgres", "docker", false, 1000, 5)
+  // new OQL_NodePG_JS(g.require("fs").readFileSync("test/json.dm").toString, "localhost", 5432, "postgres", "postgres", "docker", false, 1000, 5)
 //    new OQL_NodePG_ScalaJS(g.require("fs").readFileSync("test/book.dm").toString, "localhost", 5432, "postgres", "postgres", "docker", false, 1000, 5)
 //    new OQL_NodePG_JS(g.require("fs").readFileSync("test/event.dm").toString, "localhost", 5432, "postgres", "postgres", "docker", false, 1000, 5)
 //  new OQL_NodePG(g.require("fs").readFileSync("test/accounts.dm").toString, "localhost", 5432, "postgres", "postgres", "docker", false, 1000, 5)
   async {
     db.showQuery()
     println(await(db.queryMany("main {* infos}")))
-    //println(await(db.queryMany("info")))
+//    println(stringify(await(db.jsQueryMany("main {* infos}").toFuture)))
+    db.showQuery()
+    println(await(db.queryMany("info [data = {\"d\": [1, 2, 3]}]")))
+//    println(stringify(await(db.jsQueryMany("info").toFuture)))
 //    println(await(db.queryMany("job { jobTitle employees { firstName } }")))
 //    println(await(db.queryMany("author {* books: books {count(*)}}")))
     //println(await(db.queryMany("book {* author: author.name} <id>")))
@@ -35,6 +39,8 @@ object Main extends App {
   } recover {
     case e => e.printStackTrace()
   }
+
+  def stringify(x: Any) = js.JSON.stringify(x.asInstanceOf[js.Any], null.asInstanceOf[js.Array[js.Any]], 2)
 
 }
 
