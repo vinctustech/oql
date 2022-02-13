@@ -73,6 +73,7 @@ class DataModel(model: DMLModel, dml: String) {
             case DMLSimpleDataType("float" | "float8") => FloatType
             case DMLSimpleDataType("uuid")             => UUIDType
             case DMLSimpleDataType("timestamp")        => TimestampType
+            case DMLSimpleDataType("json")             => JSONType
             case DMLNameType(typ) =>
               entities get typ.s match {
                 case Some(EntityInfo(entity, _, _)) => ManyToOneType(entity)

@@ -16,13 +16,15 @@ object Main extends App {
   types.setTypeParser(1114.asInstanceOf[TypeId], (s: String) => new js.Date(s"$s+00:00"))
 
   val db =
-    new OQL_NodePG_ScalaJS(g.require("fs").readFileSync("test/book.dm").toString, "localhost", 5432, "postgres", "postgres", "docker", false, 1000, 5)
+    new OQL_NodePG_ScalaJS(g.require("fs").readFileSync("test/json.dm").toString, "localhost", 5432, "postgres", "postgres", "docker", false, 1000, 5)
+//    new OQL_NodePG_ScalaJS(g.require("fs").readFileSync("test/book.dm").toString, "localhost", 5432, "postgres", "postgres", "docker", false, 1000, 5)
 //    new OQL_NodePG_JS(g.require("fs").readFileSync("test/event.dm").toString, "localhost", 5432, "postgres", "postgres", "docker", false, 1000, 5)
 //  new OQL_NodePG(g.require("fs").readFileSync("test/accounts.dm").toString, "localhost", 5432, "postgres", "postgres", "docker", false, 1000, 5)
   async {
     db.showQuery()
+    println(await(db.queryMany("json")))
 //    println(await(db.queryMany("job { jobTitle employees { firstName } }")))
-    println(await(db.queryMany("author {* books: books {count(*)}}")))
+//    println(await(db.queryMany("author {* books: books {count(*)}}")))
     //println(await(db.queryMany("book {* author: author.name} <id>")))
 //    println(await(db.json("car")))
 //    println(await(db.queryMany("""account""", "account", 2)))
