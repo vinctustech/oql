@@ -57,7 +57,8 @@ class Mutation private[oql] (oql: AbstractOQL, entity: Entity)(implicit ec: scal
     // build list of values to insert
     val pairs =
       attrsNoPK flatMap {
-        case (k, Attribute(name, column, pk, required, typ)) if typ.isDataType && obj.contains(k) => List(k -> oql.render(obj(k)))
+        case (k, Attribute(name, column, pk, required, typ)) if typ.isDataType && obj.contains(k) =>
+          List(k -> oql.render(obj(k), Option.when(typ == JSONType)(typ.asDatatype)))
         case (k, Attribute(_, _, _, _, ManyToOneType(mtoEntity))) if obj contains k =>
           val v = obj(k)
 
@@ -169,8 +170,9 @@ class Mutation private[oql] (oql: AbstractOQL, entity: Entity)(implicit ec: scal
                 case Attribute(_, _, _, _, ManyToOneType(mtoEntity)) => v.asInstanceOf[Map[String, Any]](mtoEntity.pk.get.name)
                 case _                                               => sys.error(s"attribute '$k' of entity '${entity.name}' is not an entity attribute")
               } else v
+          val attr = attrs(k)
 
-          attrs(k).column -> oql.render(v1)
+          attr.column -> oql.render(v1, Option.when(attr.typ == JSONType)(attr.typ.asDatatype))
       }
 
     val command = new StringBuilder

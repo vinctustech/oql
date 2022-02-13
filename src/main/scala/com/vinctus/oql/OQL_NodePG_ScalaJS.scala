@@ -91,9 +91,12 @@ class OQL_NodePG_ScalaJS(dm: String,
     }
 
   def render(a: Any, typ: Option[Datatype] = None): String =
-    if (typ.isDefined)
-      ds.typed(a, typ.get)
-    else
+    if (typ.isDefined) {
+      if (typ.get == JSONType) {
+        println(JSON(a, ds.platformSpecific))
+        s"'${JSON(a, ds.platformSpecific)}'"
+      } else ds.typed(a, typ.get)
+    } else
       a match {
         case s: String            => ds.string(s)
         case d: js.Date           => s"'${d.toISOString()}'"
@@ -102,3 +105,5 @@ class OQL_NodePG_ScalaJS(dm: String,
       }
 
 }
+
+//
