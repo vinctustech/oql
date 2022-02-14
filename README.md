@@ -186,3 +186,4 @@ License
 -------
 
 OQL uses the commercial friendly open source [ISC](https://raw.githubusercontent.com/vinctustech/oql/stable/LICENSE) license.
+
