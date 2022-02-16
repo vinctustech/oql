@@ -38,9 +38,18 @@ trait PGDataSource extends SQLDataSource {
       case "double precision"            => FloatType
     }
 
-  val resultArrayFunctionStart: String = "to_json(ARRAY("
-  val resultArrayFunctionEnd: String = "))"
-  val rowSequenceFunctionStart: String = "json_build_array("
+  /*
+  postgres=# select name, array(select array[name] from book where author_id = pk_author_id) from author;
+          name          |                   array
+------------------------+-------------------------------------------
+ Robert Louis Stevenson | {{"Robert Louis Stevenson"}}
+ Lewis Carroll          | {{"Lewis Carroll"}}
+ Charles Dickens        | {{"Charles Dickens"},{"Charles Dickens"}}
+ Mark Twain             | {{"Mark Twain"},{"Mark Twain"}}
+   */
+  val resultArrayFunctionStart: String = "array("
+  val resultArrayFunctionEnd: String = ")"
+  val rowSequenceFunctionStart: String = "row("
   val rowSequenceFunctionEnd: String = ")"
   val typeFunction: Option[String] = Some("pg_typeof(?)")
   val convertFunction: Option[String] = None
