@@ -4,7 +4,7 @@ version := "1.1.0-alpha.1"
 
 description := "Object Query Language"
 
-scalaVersion := "2.13.8"
+scalaVersion := "3.1.1"
 
 scalacOptions ++= Seq("-deprecation",
                       "-feature",
@@ -84,13 +84,13 @@ Compile / npmDependencies ++= Seq(
 
 libraryDependencies ++= Seq(
   "org.scalatest" %%% "scalatest" % "3.2.11" % "test",
-  //"xyz.hyperreal" %%% "rdb-sjs" % "0.1.0-snapshot.10",
-  "com.vinctus" %%% "sjs-utils" % "0.1.0-snapshot.26",
-  "com.vinctus" %%% "mappable" % "0.1.2"
+  "io.github.edadma" %%% "rdb" % "0.1.0-pre.4",
+  "com.vinctus" %%% "sjs-utils" % "0.1.0-snapshot.27",
+//  "com.vinctus" %%% "mappable" % "0.1.2"
 )
 
 libraryDependencies ++= Seq(
-  "org.scala-lang.modules" %%% "scala-parser-combinators" % "2.1.0",
+  "org.scala-lang.modules" %%% "scala-parser-combinators" % "2.1.1",
   //  "org.scala-lang.modules" %%% "scala-async" % "1.0.0-M1"
 )
 
