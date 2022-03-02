@@ -28,30 +28,30 @@ class RDBDataSource(data: String)(implicit ec: scala.concurrent.ExecutionContext
 
   def mapPKType(typ: TypeSpecifier): String =
     typ match {
-      case IntegerType => "SERIAL"
-      case BigintType  => "BIGSERIAL"
+      case IntegerType => "INT AUTO"
+      case BigintType  => "BIGINT AUTO"
       case _: Datatype => mapType(typ)
     }
 
   def reverseMapType(typ: String): Datatype =
     typ match {
-      case "TIMESTAMP"        => TimestampType
-      case "uuid"             => UUIDType
-      case "integer"          => IntegerType
-      case "bigint"           => BigintType
-      case "double precision" => FloatType
+      case "TIMESTAMP" => TimestampType
+      case "UUID"      => UUIDType
+      case "INT"       => IntegerType
+      case "BIGINT"    => BigintType
+      case "DOUBLE"    => FloatType
     }
 
-  val resultArrayFunctionStart: String = "to_json(ARRAY("
-  val resultArrayFunctionEnd: String = "))"
-  val rowSequenceFunctionStart: String = "json_build_array("
-  val rowSequenceFunctionEnd: String = ")"
-  val typeFunction: Option[String] = Some("pg_typeof(?)")
+  val resultArrayFunctionStart: String = "ARRAY("
+  val resultArrayFunctionEnd: String = ")"
+  val rowSequenceFunctionStart: String = ""
+  val rowSequenceFunctionEnd: String = ""
+  val typeFunction: Option[String] = Some("type(?)")
   val convertFunction: Option[String] = None
   val caseSensitive: Boolean = true
   val functionReturnType: Map[(String, Int), List[Datatype] => Datatype] =
     Map[(String, Int), List[Datatype] => Datatype](
-      ("count", 1) -> (_ => BigintType),
+      ("count", 1) -> (_ => IntegerType), // todo: this should really be 'BigintType'
       ("min", 1) -> (_.head),
       ("max", 1) -> (_.head),
       ("avg", 1) -> (_ => FloatType)
