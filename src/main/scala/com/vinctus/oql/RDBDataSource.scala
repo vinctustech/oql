@@ -42,21 +42,21 @@ class RDBDataSource(data: String)(implicit ec: scala.concurrent.ExecutionContext
       case "DOUBLE"    => FloatType
     }
 
-  val resultArrayFunctionStart: String = "ARRAY("
+  val resultArrayFunctionStart: String = "TABLE("
   val resultArrayFunctionEnd: String = ")"
   val rowSequenceFunctionStart: String = ""
   val rowSequenceFunctionEnd: String = ""
-  val typeFunction: Option[String] = Some("type(?)")
+  val typeFunction: Option[String] = Some("TYPE(?)")
   val convertFunction: Option[String] = None
   val caseSensitive: Boolean = true
   val functionReturnType: Map[(String, Int), List[Datatype] => Datatype] =
     Map[(String, Int), List[Datatype] => Datatype](
-      ("count", 1) -> (_ => IntegerType), // todo: this should really be 'BigintType'
-      ("min", 1) -> (_.head),
-      ("max", 1) -> (_.head),
-      ("avg", 1) -> (_ => FloatType)
+      ("COUNT", 1) -> (_ => IntegerType), // todo: this should really be 'BigintType'
+      ("MIN", 1) -> (_.head),
+      ("MAX", 1) -> (_.head),
+      ("AVG", 1) -> (_ => FloatType)
     )
-  val builtinVariables = Map("current_date" -> DateType, "current_timestamp" -> TimestampType, "current_time" -> TimeType)
+  val builtinVariables = Map("CURRENT_DATE" -> DateType, "CURRENT_TIMESTAMP" -> TimestampType, "CURRENT_TIME" -> TimeType)
 
   override def string(s: String): String = super.string(s).substring(1) // we don't want the 'E' prefix for RDB's version of SQL
 
