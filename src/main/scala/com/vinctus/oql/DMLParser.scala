@@ -24,7 +24,7 @@ class DMLParser extends RegexParsers {
     case p ~ l => Ident(l drop 1 dropRight 1, p)
   }
 
-  def model: Parser[DMLModel] = rep1(entity | enumType) ^^ DMLModel
+  def model: Parser[DMLModel] = rep1(entity | enumType) ^^ DMLModel.apply
 
   def enumType: Parser[DMLEnum] = kw("enum") ~ ident ~ "{" ~ rep1(label) ~ "}" ^^ {
     case _ ~ n ~ _ ~ ls ~ _ => DMLEnum(n, ls)
@@ -50,11 +50,11 @@ class DMLParser extends RegexParsers {
       kw("date") |
       kw("float8") | kw("float") |
       kw("uuid") |
-      kw("timestamp")) ^^ DMLSimpleDataType |
+      kw("timestamp")) ^^ DMLSimpleDataType.apply |
       kw("decimal") ~ "(" ~ integer ~ "," ~ integer ~ ")" ^^ {
         case _ ~ _ ~ p ~ _ ~ s ~ _ => DMLParametricDataType("decimal", List(p, s))
       } |
-      ident ^^ DMLNameType |
+      ident ^^ DMLNameType.apply |
       "[" ~ ident ~ "]" ~ "(" ~ ident ~ ")" ^^ {
         case _ ~ n ~ _ ~ _ ~ l ~ _ => DMLManyToManyType(n, l)
       } |

@@ -338,7 +338,7 @@ object AbstractOQL {
               query.entity = typ.entity
               query.attr = attr
               typ.entity
-            case None => problem(query.source.pos, s"entity '${outer.get}' does not have relational attribute '${query.source.s}'", oql)
+            case _ => problem(query.source.pos, s"entity '${outer.get}' does not have relational attribute '${query.source.s}'", oql)
           }
         }
       } else
@@ -411,7 +411,7 @@ object AbstractOQL {
                   preprocessQuery(Some(entity), OQLQuery(id, otmEntity, attr, List(StarOQLProject), None, None, None, None, None), model, ds, oql))
               case None if ds.builtinVariables contains (if (ds.caseSensitive) id.s else id.s.toLowerCase) =>
                 expProj // it's a built-in variable so leave dmrefs null and let it go through
-              case None => problem(id.pos, s"entity '${entity.name}' does not have attribute '${id.s}'", oql)
+              case _ => problem(id.pos, s"entity '${entity.name}' does not have attribute '${id.s}'", oql)
             }
           case _ =>
             decorate(entity, expr, model, ds, oql)
@@ -428,6 +428,7 @@ object AbstractOQL {
     exprs match {
       case List(expr)   => expr
       case head :: tail => InfixOQLExpression(head, "OR", orList(tail))
+      case _            => sys.error("orList: problem")
     }
 
   private[oql] def writeQuery(node: Node,

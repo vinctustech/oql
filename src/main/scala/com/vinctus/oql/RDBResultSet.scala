@@ -1,9 +1,9 @@
 package com.vinctus.oql
 
-import xyz.hyperreal.rdb_sjs.Tuple
+import io.github.edadma.rdb.Row
 
-class RDBResultSet(rs: Iterator[Tuple]) extends OQLResultSet with JSONResultSet {
-  private var row: Tuple = _
+class RDBResultSet(rs: Iterator[Row]) extends OQLResultSet with JSONResultSet {
+  private var row: Row = _
 
   def next: Boolean =
     if (rs.hasNext) {
@@ -11,8 +11,10 @@ class RDBResultSet(rs: Iterator[Tuple]) extends OQLResultSet with JSONResultSet 
       true
     } else false
 
-  def get(idx: Int): Any = row(idx)
+  def get(idx: Int): OQLResultSetValue = RDBResultSetValue(row.data(idx))
 
-  def getString(idx: Int): String = row(idx).toString
+  def getString(idx: Int): String = row.data(idx).toString
 
 }
+
+case class RDBResultSetValue(v: Any) extends OQLResultSetValue

@@ -1,6 +1,6 @@
 package com.vinctus.oql
 
-import com.vinctus.mappable.{Mappable, map2cc}
+//import com.vinctus.mappable.{Mappable, map2cc}
 import com.vinctus.sjs_utils.DynamicMap
 
 import scala.collection.immutable.VectorMap
@@ -9,8 +9,8 @@ import scala.language.postfixOps
 
 class Mutation private[oql] (oql: AbstractOQL, entity: Entity)(implicit ec: scala.concurrent.ExecutionContext) {
 
-  def insert[T <: Product: Mappable](obj: T): Future[T] =
-    insert(implicitly[Mappable[T]].toMap(obj)) map map2cc[T] //implicitly[Mappable[T]].fromMap(m))
+//  def insert[T <: Product: Mappable](obj: T): Future[T] =
+//    insert(implicitly[Mappable[T]].toMap(obj)) map map2cc[T] //implicitly[Mappable[T]].fromMap(m))
 
   def insert(obj: collection.Map[String, Any]): Future[DynamicMap] = {
     // check if the object has a primary key

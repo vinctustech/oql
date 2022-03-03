@@ -30,7 +30,7 @@ object OQLParser extends RegexParsers with PackratParsers {
       "{" ~> rep1(attributeProject) <~ "}" |
       success(List(StarOQLProject))
 
-  lazy val subtracts: PackratParser[List[OQLProject]] = rep("-" ~> attributeName ^^ SubtractOQLProject)
+  lazy val subtracts: PackratParser[List[OQLProject]] = rep("-" ~> attributeName ^^ SubtractOQLProject.apply)
 
   lazy val attributeProject: PackratParser[OQLProject] =
     opt(label) ~ identifier ~ "(" ~ argument ~ ")" ^^ {
@@ -124,10 +124,10 @@ object OQLParser extends RegexParsers with PackratParsers {
       expression ~ isNull ^^ { case e ~ n                                => PostfixOQLExpression(e, n) } |
       expression ~ in ~ ("(" ~> expressions <~ ")") ^^ { case e ~ i ~ es => InArrayOQLExpression(e, i, es) } |
       expression ~ in ~ ("(" ~> query <~ ")") ^^ { case e ~ i ~ q        => InQueryOQLExpression(e, i, q) } |
-      kw("EXISTS") ~> "(" ~> query <~ ")" ^^ ExistsOQLExpression |
+      kw("EXISTS") ~> "(" ~> query <~ ")" ^^ ExistsOQLExpression.apply |
       booleanLiteral |
       qualifiedAttributeExpression |
-      "(" ~> booleanExpression <~ ")" ^^ GroupedOQLExpression
+      "(" ~> booleanExpression <~ ")" ^^ GroupedOQLExpression.apply
 
   lazy val isNull: PackratParser[String] = kw("IS") ~ kw("NULL") ^^^ "IS NULL" | kw("IS") ~ kw("NOT") ~ kw("NULL") ^^^ "IS NOT NULL"
 
@@ -136,7 +136,7 @@ object OQLParser extends RegexParsers with PackratParsers {
   lazy val comparison: PackratParser[String] =
     "<=" | ">=" | "<" | ">" | "=" | "!=" | kw("LIKE") | kw("ILIKE") | (kw("NOT") ~ kw("LIKE") ^^^ "NOT LIKE") | (kw("NOT") ~ kw("ILIKE") ^^^ "NOT ILIKE")
 
-  lazy val booleanLiteral: PackratParser[OQLExpression] = (kw("TRUE") | kw("FALSE") | kw("NULL")) ^^ BooleanOQLExpression
+  lazy val booleanLiteral: PackratParser[OQLExpression] = (kw("TRUE") | kw("FALSE") | kw("NULL")) ^^ BooleanOQLExpression.apply
 
   lazy val expression: PackratParser[OQLExpression] = additive
 
@@ -153,13 +153,13 @@ object OQLParser extends RegexParsers with PackratParsers {
       primary
 
   lazy val literalExpression: PackratParser[OQLExpression] =
-    float ^^ FloatOQLExpression |
-      integer ^^ IntegerOQLExpression |
+    float ^^ FloatOQLExpression.apply |
+      integer ^^ IntegerOQLExpression.apply |
       stringLiteral |
       booleanLiteral
 
   lazy val stringLiteral: PackratParser[OQLExpression] =
-    string ^^ (unescape _ andThen StringOQLExpression)
+    string ^^ (unescape _ andThen StringOQLExpression.apply)
 
   lazy val pair: PackratParser[(String, OQLExpression)] =
     doubleQuoteString ~ ":" ~ (arrayExpression | objectExpression | literalExpression) ^^ {
@@ -167,13 +167,13 @@ object OQLParser extends RegexParsers with PackratParsers {
     }
 
   lazy val arrayExpression: PackratParser[OQLExpression] =
-    "[" ~> repsep(arrayExpression | objectExpression | literalExpression, ",") <~ "]" ^^ ArrayOQLExpression
+    "[" ~> repsep(arrayExpression | objectExpression | literalExpression, ",") <~ "]" ^^ ArrayOQLExpression.apply
 
   lazy val objectExpression: PackratParser[OQLExpression] =
-    "{" ~> repsep(pair, ",") <~ "}" ^^ ObjectOQLExpression
+    "{" ~> repsep(pair, ",") <~ "}" ^^ ObjectOQLExpression.apply
 
   lazy val jsonExpression: PackratParser[OQLExpression] =
-    (arrayExpression | objectExpression) ^^ JSONOQLExpression
+    (arrayExpression | objectExpression) ^^ JSONOQLExpression.apply
 
   lazy val primary: PackratParser[OQLExpression] =
     literalExpression |
@@ -184,8 +184,8 @@ object OQLParser extends RegexParsers with PackratParsers {
       qualifiedAttributeExpression |
       "&" ~> identifiers ^^ (ReferenceOQLExpression(_)) |
       "-" ~> primary ^^ (e => PrefixOQLExpression("-", e)) |
-      "(" ~> query <~ ")" ^^ QueryOQLExpression |
-      "(" ~> expression <~ ")" ^^ GroupedOQLExpression
+      "(" ~> query <~ ")" ^^ QueryOQLExpression.apply |
+      "(" ~> expression <~ ")" ^^ GroupedOQLExpression.apply
 
   lazy val caseExpression: PackratParser[CaseOQLExpression] =
     kw("CASE") ~> rep1(when) ~ opt(kw("ELSE") ~> expression) <~ kw("END") ^^ { case ws ~ e => CaseOQLExpression(ws, e) }

@@ -1,7 +1,7 @@
 package com.vinctus.oql
 
 import com.vinctus.sjs_utils.{DynamicMap, toJS}
-import com.vinctus.mappable.{Mappable, map2cc}
+//import com.vinctus.mappable.{Mappable, map2cc}
 import typings.node.tlsMod.ConnectionOptions
 
 import scala.concurrent.Future
@@ -33,8 +33,8 @@ class OQL_NodePG_ScalaJS(dm: String,
   def jsQueryOne[T <: js.Object](q: OQLQuery, fixed: Fixed): Future[Option[T]] =
     queryOne(q, "", fixed) map (_.map(toJS(_).asInstanceOf[T]))
 
-  def ccQueryOne[T <: Product: Mappable](oql: String, fixed: String = null, at: Any = null): Future[Option[T]] =
-    queryOne(oql, fixed, at) map (_.map(m => map2cc[T](m.asInstanceOf[Map[String, Any]])))
+//  def ccQueryOne[T <: Product: Mappable](oql: String, fixed: String = null, at: Any = null): Future[Option[T]] =
+//    queryOne(oql, fixed, at) map (_.map(m => map2cc[T](m.asInstanceOf[Map[String, Any]])))
 
   def queryOne(oql: String, fixed: String = null, at: Any = null): Future[Option[DynamicMap]] = queryOne(parseQuery(oql), oql, fixedEntity(fixed, at))
 
@@ -44,8 +44,8 @@ class OQL_NodePG_ScalaJS(dm: String,
   def jsQueryMany[T <: js.Object](q: OQLQuery): Future[T] =
     (queryMany(q, "", () => new ScalaPlainResultBuilder, Fixed(operative = false)) map (toJS(_))).asInstanceOf[Future[T]]
 
-  def ccQueryMany[T <: Product: Mappable](oql: String, fixed: String = null, at: Any = null): Future[List[T]] =
-    queryMany(oql, fixed, at) map (_.map(m => map2cc[T](m.asInstanceOf[Map[String, Any]])))
+//  def ccQueryMany[T <: Product: Mappable](oql: String, fixed: String = null, at: Any = null): Future[List[T]] =
+//    queryMany(oql, fixed, at) map (_.map(m => map2cc[T](m.asInstanceOf[Map[String, Any]])))
 
   def queryMany(oql: String, fixed: String = null, at: Any = null, parameters: Map[String, Any] = Map()): Future[List[DynamicMap]] = {
     val subst = substitute(oql, parameters)
@@ -105,5 +105,3 @@ class OQL_NodePG_ScalaJS(dm: String,
       }
 
 }
-
-//

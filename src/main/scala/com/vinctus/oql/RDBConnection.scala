@@ -1,24 +1,20 @@
 package com.vinctus.oql
 
 import io.github.edadma.rdb
-import io.github.edadma.rdb.{CreateTableResult, InsertResult, QueryResult, UpdateResult}
+import io.github.edadma.rdb.{MemoryDB, executeSQL, CreateTableResult, InsertResult, QueryResult, UpdateResult}
 
 import scala.concurrent.Future
 
-class RDBConnection(val dataSource: RDBDataSource, data: String)(implicit ec: scala.concurrent.ExecutionContext) extends OQLConnection {
+class RDBConnection(val dataSource: RDBDataSource)(implicit ec: scala.concurrent.ExecutionContext) extends OQLConnection {
 
-  private val client =
-    new rdb_sjs.Connection {
-      if (data ne null)
-        load(data, doubleSpaces = true)
-    }
+  private val db = new MemoryDB
 
   def command(sql: String): Future[RDBResultSet] =
-    Future(new RDBResultSet(client.executeSQLStatement(sql) match {
-      case CreateResult(_)          => Iterator()
-      case RelationResult(relation) => relation.iterator
-      case InsertResult(auto, _)    => Iterator(auto.head.values.toIndexedSeq)
-      case UpdateResult(_)          => Iterator()
+    Future(new RDBResultSet(executeSQL(sql)(db).head match {
+//      case CreateTableResult(_) => Iterator()
+      case QueryResult(table) => table.data.iterator
+//      case InsertResult(auto)   => Iterator(auto.values.toIndexedSeq)
+//      case UpdateResult(_)      => Iterator()
     }))
 
   def insert(command: String): Future[OQLResultSet] = ???

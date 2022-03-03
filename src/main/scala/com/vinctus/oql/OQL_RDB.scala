@@ -7,7 +7,7 @@ import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 import scala.concurrent.Future
 import scala.scalajs.js
 
-class OQL_RDB(dm: String, data: String) extends AbstractOQL(dm, new RDBDataSource(data), ScalaConversions) with Dynamic {
+class OQL_RDB(dm: String) extends AbstractOQL(dm, new RDBDataSource(), ScalaConversions) with Dynamic {
 
   def execute[R](action: OQLConnection => Future[R]): Future[R] = action(connect)
 

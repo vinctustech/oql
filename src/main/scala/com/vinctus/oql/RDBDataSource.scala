@@ -2,11 +2,11 @@ package com.vinctus.oql
 
 import scala.scalajs.js
 
-class RDBDataSource(data: String)(implicit ec: scala.concurrent.ExecutionContext) extends SQLDataSource {
+class RDBDataSource()(implicit ec: scala.concurrent.ExecutionContext) extends SQLDataSource {
 
   val name: String = "RDB"
 
-  val connect = new RDBConnection(this, data)
+  val connect = new RDBConnection(this)
 
   val platformSpecific: PartialFunction[Any, String] = {
     case d: js.Date => s""""${d.toISOString()}""""

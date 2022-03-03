@@ -1,6 +1,6 @@
 package com.vinctus.oql
 
-import com.vinctus.sjs_utils.{Mappable, map2cc}
+//import com.vinctus.sjs_utils.{/*Mappable,*/ map2cc}
 
 import scala.concurrent.Future
 
@@ -15,11 +15,11 @@ class ScalaPlainQueryBuilder private[oql] (private val oql: AbstractOQL, private
 
     override def getMany: Future[List[Any]] = na
 
-    override def ccGetMany[T <: Product: Mappable]: Future[List[T]] = na
+//    override def ccGetMany[T <: Product: Mappable]: Future[List[T]] = na
 
     override def getOne: Future[Option[Any]] = na
 
-    override def ccGetOne[T <: Product: Mappable]: Future[Option[T]] = na
+//    override def ccGetOne[T <: Product: Mappable]: Future[Option[T]] = na
 
     override def getCount: Future[Int] = na
 
@@ -94,11 +94,11 @@ class ScalaPlainQueryBuilder private[oql] (private val oql: AbstractOQL, private
   def getMany: Future[List[Any]] =
     check.oql.queryMany(q, null, () => new ScalaPlainResultBuilder, Fixed(operative = false)) map (_.arrayResult.asInstanceOf[List[Any]])
 
-  def ccGetMany[T <: Product: Mappable]: Future[List[T]] = getMany map (_.map(m => map2cc[T](m.asInstanceOf[Map[String, Any]])))
+//  def ccGetMany[T <: Product: Mappable]: Future[List[T]] = getMany map (_.map(m => map2cc[T](m.asInstanceOf[Map[String, Any]])))
 
   def getOne: Future[Option[Any]] = check.oql.queryOne(q, "", fixed)
 
-  def ccGetOne[T <: Product: Mappable]: Future[Option[T]] = getOne map (_.map(m => map2cc[T](m.asInstanceOf[Map[String, Any]])))
+//  def ccGetOne[T <: Product: Mappable]: Future[Option[T]] = getOne map (_.map(m => map2cc[T](m.asInstanceOf[Map[String, Any]])))
 
   def getCount: Future[Int] = oql.count(q, "", fixed)
 
