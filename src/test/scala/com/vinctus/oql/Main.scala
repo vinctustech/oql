@@ -5,43 +5,46 @@ import typings.pg.mod.types
 import typings.pgTypes.mod.TypeId
 
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
-import scala.async.Async.{async, await}
 import scala.scalajs.js
-import js.Dynamic.{global => g}
+import js.Dynamic.global as g
+import scala.util.{Failure, Success}
 
 object Main extends App {
+
+  def readFile(f: String) = g.require("fs").readFileSync(f).toString
 
   g.require("source-map-support").install()
   types.setTypeParser(114.asInstanceOf[TypeId], (s: String) => s) // tell node-pg not to parse JSON
   types.setTypeParser(1114.asInstanceOf[TypeId], (s: String) => new js.Date(s"$s+00:00"))
 
-  val db =
+  val db = new OQL_RDB(readFile("test/book.dm"))
+
 //    new OQL_NodePG_ScalaJS(g.require("fs").readFileSync("test/json.dm").toString, "localhost", 5432, "postgres", "postgres", "docker", false, 1000, 5)
-    // new OQL_NodePG_JS(g.require("fs").readFileSync("test/json.dm").toString, "localhost", 5432, "postgres", "postgres", "docker", false, 1000, 5)
-    new OQL_NodePG_ScalaJS(g.require("fs").readFileSync("test/book.dm").toString, "localhost", 5432, "postgres", "postgres", "docker", false, 1000, 5)
+  // new OQL_NodePG_JS(g.require("fs").readFileSync("test/json.dm").toString, "localhost", 5432, "postgres", "postgres", "docker", false, 1000, 5)
+//    new OQL_NodePG_ScalaJS(g.require("fs").readFileSync("test/book.dm").toString, "localhost", 5432, "postgres", "postgres", "docker", false, 1000, 5)
 //    new OQL_NodePG_JS(g.require("fs").readFileSync("test/event.dm").toString, "localhost", 5432, "postgres", "postgres", "docker", false, 1000, 5)
 //  new OQL_NodePG(g.require("fs").readFileSync("test/accounts.dm").toString, "localhost", 5432, "postgres", "postgres", "docker", false, 1000, 5)
-  async {
 //    println(await(db.entity("info").insert(Map("main" -> 1, "data" -> List(1, Map("asdf" -> 345), 3)))))
 //    println(await(db.entity("info").update(3, Map("data" -> List(5, 6, 7)))))
-    db.showQuery()
+//      db.showQuery()
 //    println(await(db.queryMany("main {* infos}")))
 //    println(stringify(await(db.jsQueryMany("main {* infos}").toFuture)))
-    db.showQuery()
+  db.showQuery()
 //    println(await(db.queryMany("info")))
 //    println(stringify(await(db.jsQueryMany("info").toFuture)))
 //    println(await(db.queryMany("job { jobTitle employees { firstName } }")))
 //    println(await(db.queryMany("author {* books: books {count(*)}}")))
-    println(await(db.queryMany("author {* books}")))
+  db.queryMany("author {* books}")
     //println(await(db.queryMany("book {* author: author.name} <id>")))
 //    println(await(db.json("car")))
 //    println(await(db.queryMany("""account""", "account", 2)))
 //    println(await(db.queryMany("""vehicle""", "account", 2)))
 //    println(await(db.queryMany("""store""", "account", 2)))
 //    println(await(db.jsQueryMany("attendee { * events <when> } <name>").toFuture map (v => JSON(v, db.ds.platformSpecific, 2, true))))
-  } recover {
-    case e => e.printStackTrace()
-  }
+    .onComplete {
+      case Failure(exception) => exception.printStackTrace()
+      case Success(value) => println(value)
+    }
 
   def stringify(x: Any) = js.JSON.stringify(x.asInstanceOf[js.Any], null.asInstanceOf[js.Array[js.Any]], 2)
 
