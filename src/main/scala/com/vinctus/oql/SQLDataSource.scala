@@ -6,7 +6,7 @@ trait SQLDataSource extends OQLDataSource {
 
   def mapPKType(typ: TypeSpecifier): String
 
-  def schema(model: DataModel): Seq[String] = {
+  def schema(model: DataModel): String = {
     val tables =
       for (entity <- model.entities.values.toList.sortBy(_.table))
         yield {
@@ -21,17 +21,17 @@ trait SQLDataSource extends OQLDataSource {
           s"""
              |CREATE TABLE "${entity.table}" (
              |${columns mkString ",\n"}
-             |);""".trim.stripMargin
+             |);
+             |""".trim.stripMargin
         }
 
-    val foreignKeys =
-      for (entity <- model.entities.values.toList.sortBy(_.table))
-        yield
-          for (attribute <- entity.attributes.values if attribute.typ.isInstanceOf[ManyToOneType])
-            yield
-              s"ALTER TABLE \"${entity.table}\" ADD FOREIGN KEY (\"${attribute.column}\") REFERENCES \"${attribute.typ.asInstanceOf[ManyToOneType].entity.table}\";"
-
-    tables ++ foreignKeys.flatten
+//    val foreignKeys =
+//      for (entity <- model.entities.values.toList.sortBy(_.table))
+//        yield for (attribute <- entity.attributes.values if attribute.typ.isInstanceOf[ManyToOneType])
+//          yield s"ALTER TABLE \"${entity.table}\" ADD FOREIGN KEY (\"${attribute.column}\") REFERENCES \"${attribute.typ.asInstanceOf[ManyToOneType].entity.table}\";\n"
+//
+//    (tables ++ foreignKeys.flatten) mkString
+    tables.mkString
   }
 
   val typeFunction: Option[String]
@@ -49,13 +49,14 @@ trait SQLDataSource extends OQLDataSource {
 
   val builtinVariables: Map[String, Datatype]
 
-  def string(s: String): String = s"E'${s.replace("\\", """\\""").replace("'", """\'""").replace("\r", """\r""").replace("\n", """\n""")}'"
+  def string(s: String): String =
+    s"E'${s.replace("\\", """\\""").replace("'", """\'""").replace("\r", """\r""").replace("\n", """\n""")}'"
 
   def typed(a: Any, typ: Datatype): String =
     (a, typ) match {
-      case (s: String, TextType) => string(s)
-      case (s: String, UUIDType) => s"UUID'$s'"
-      case (_, IntegerType|FloatType) => a.toString
+      case (s: String, TextType)        => string(s)
+      case (s: String, UUIDType)        => s"UUID'$s'"
+      case (_, IntegerType | FloatType) => a.toString
       case _ =>
         Console.err.println(s"WARNING: SQLDataSource.typed(): don't know how to render '$a' as type $typ")
         a.toString

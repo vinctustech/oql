@@ -19,6 +19,8 @@ object Main extends App {
 
   val db = new OQL_RDB(readFile("test/book.dm"))
 
+  db.create()
+
 //    new OQL_NodePG_ScalaJS(g.require("fs").readFileSync("test/json.dm").toString, "localhost", 5432, "postgres", "postgres", "docker", false, 1000, 5)
   // new OQL_NodePG_JS(g.require("fs").readFileSync("test/json.dm").toString, "localhost", 5432, "postgres", "postgres", "docker", false, 1000, 5)
 //    new OQL_NodePG_ScalaJS(g.require("fs").readFileSync("test/book.dm").toString, "localhost", 5432, "postgres", "postgres", "docker", false, 1000, 5)
@@ -35,7 +37,7 @@ object Main extends App {
 //    println(await(db.queryMany("job { jobTitle employees { firstName } }")))
 //    println(await(db.queryMany("author {* books: books {count(*)}}")))
   db.queryMany("author {* books}")
-    //println(await(db.queryMany("book {* author: author.name} <id>")))
+    // println(await(db.queryMany("book {* author: author.name} <id>")))
 //    println(await(db.json("car")))
 //    println(await(db.queryMany("""account""", "account", 2)))
 //    println(await(db.queryMany("""vehicle""", "account", 2)))
@@ -43,7 +45,7 @@ object Main extends App {
 //    println(await(db.jsQueryMany("attendee { * events <when> } <name>").toFuture map (v => JSON(v, db.ds.platformSpecific, 2, true))))
     .onComplete {
       case Failure(exception) => exception.printStackTrace()
-      case Success(value) => println(value)
+      case Success(value)     => println(value)
     }
 
   def stringify(x: Any) = js.JSON.stringify(x.asInstanceOf[js.Any], null.asInstanceOf[js.Array[js.Any]], 2)

@@ -1,11 +1,13 @@
 package com.vinctus.oql
 
 import io.github.edadma.rdb
-import io.github.edadma.rdb.{MemoryDB, executeSQL, CreateTableResult, InsertResult, QueryResult, UpdateResult}
+import io.github.edadma.rdb.{CreateTableResult, InsertResult, MemoryDB, QueryResult, UpdateResult, executeSQL}
 
+import scala.collection.mutable
 import scala.concurrent.Future
 
-class RDBConnection(val dataSource: RDBDataSource)(implicit ec: scala.concurrent.ExecutionContext) extends OQLConnection {
+class RDBConnection(val dataSource: RDBDataSource)(implicit ec: scala.concurrent.ExecutionContext)
+    extends OQLConnection:
 
   private val db = new MemoryDB
 
@@ -21,8 +23,8 @@ class RDBConnection(val dataSource: RDBDataSource)(implicit ec: scala.concurrent
 
   def execute(command: String): Future[Unit] = ???
 
-  def create(model: DataModel): Future[Unit] = ???
+  def create(model: DataModel): Future[Unit] =
+    println(dataSource.schema(model))
+    Future(executeSQL(dataSource.schema(model))(db))
 
   def close(): Unit = ???
-
-}
