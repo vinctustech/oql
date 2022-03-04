@@ -2,16 +2,16 @@ package com.vinctus.oql
 
 import typings.node.tlsMod.ConnectionOptions
 
-import scala.scalajs.js
-import scala.scalajs.js.|
-import js.JSConverters._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import scala.scalajs.js
+import scala.scalajs.js.JSConverters.*
 import scala.scalajs.js.annotation.{JSExport, JSExportTopLevel}
+import scala.scalajs.js.|
 import scala.util.matching.Regex
 
-@JSExportTopLevel("OQL")
-class OQL_NodePG_JS(
+@JSExportTopLevel("OQL_RDB")
+class OQL_RDB_JS(
     dm: String,
     host: String,
     port: Int,
@@ -30,7 +30,7 @@ class OQL_NodePG_JS(
   def execute[R](action: OQLConnection => Future[R]): Future[R] = action(connect)
 
   @JSExport
-  def entity(name: String): Mutation_JS_NodePG = new Mutation_JS_NodePG(this, model.entities(name))
+  def entity(name: String): Mutation_JS_RDB = new Mutation_JS_RDB(this, model.entities(name))
 
   @JSExport("showQuery")
   def jsShowQuery(): Unit = showQuery()
@@ -82,7 +82,7 @@ class OQL_NodePG_JS(
 
   @JSExport("queryBuilder")
   def jsQueryBuilder(fixed: js.UndefOr[String], at: js.Any) =
-    new QueryBuilder_JS_NodePG(
+    new QueryBuilder_JS_RDB(
       this,
       OQLQuery(null, null, null, List(StarOQLProject), None, None, None, None, None),
       fixedEntity(fixed.orNull, at)

@@ -2,14 +2,14 @@ package com.vinctus.oql
 
 import scala.scalajs.js
 
-class RDBDataSource()(implicit ec: scala.concurrent.ExecutionContext) extends SQLDataSource {
+class RDBDataSource(implicit ec: scala.concurrent.ExecutionContext) extends SQLDataSource {
 
   val name: String = "RDB"
 
   val connect = new RDBConnection(this)
 
-  val platformSpecific: PartialFunction[Any, String] = {
-    case d: js.Date => s""""${d.toISOString()}""""
+  val platformSpecific: PartialFunction[Any, String] = { case d: js.Date =>
+    s""""${d.toISOString()}""""
   }
 
   def mapType(typ: TypeSpecifier): String =
@@ -56,8 +56,10 @@ class RDBDataSource()(implicit ec: scala.concurrent.ExecutionContext) extends SQ
       ("MAX", 1) -> (_.head),
       ("AVG", 1) -> (_ => FloatType)
     )
-  val builtinVariables = Map("CURRENT_DATE" -> DateType, "CURRENT_TIMESTAMP" -> TimestampType, "CURRENT_TIME" -> TimeType)
+  val builtinVariables =
+    Map("CURRENT_DATE" -> DateType, "CURRENT_TIMESTAMP" -> TimestampType, "CURRENT_TIME" -> TimeType)
 
-  override def string(s: String): String = super.string(s).substring(1) // we don't want the 'E' prefix for RDB's version of SQL
+  override def string(s: String): String =
+    super.string(s).substring(1) // we don't want the 'E' prefix for RDB's version of SQL
 
 }

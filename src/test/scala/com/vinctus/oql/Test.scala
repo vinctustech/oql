@@ -2,6 +2,8 @@ package com.vinctus.oql
 
 import com.vinctus.sjs_utils.fromJS
 
+import io.github.edadma.rdb
+
 import scala.scalajs.js
 import scala.concurrent.Future
 import scala.language.postfixOps
@@ -12,9 +14,35 @@ trait Test {
 
   val dm: String
   lazy val db =
-    new OQL_NodePG_ScalaJS(g.require("fs").readFileSync(s"test/$dm.dm").toString, "localhost", 5432, "postgres", "postgres", "docker", false, 1000, 5)
+    val conn = new OQL_RDB_ScalaJS(g.require("fs").readFileSync(s"test/$dm.dm").toString)
+
+    rdb
+      .executeSQL(g.require("fs").readFileSync(s"test/tests.sql").toString)(conn.connect.asInstanceOf[RDBConnection].db)
+    conn
+
+//    new OQL_NodePG_ScalaJS(
+//      g.require("fs").readFileSync(s"test/$dm.dm").toString,
+//      "localhost",
+//      5432,
+//      "postgres",
+//      "postgres",
+//      "docker",
+//      false,
+//      1000,
+//      5
+//    )
   lazy val dbjs =
-    new OQL_NodePG_JS(g.require("fs").readFileSync(s"test/$dm.dm").toString, "localhost", 5432, "postgres", "postgres", "docker", false, 1000, 5)
+    new OQL_RDB_JS(
+      g.require("fs").readFileSync(s"test/$dm.dm").toString,
+      "localhost",
+      5432,
+      "postgres",
+      "postgres",
+      "docker",
+      false,
+      1000,
+      5
+    )
 
   def test(oql: String, parameters: (String, Any)*): Future[String] = db.json(oql, parameters = parameters.toMap)
 

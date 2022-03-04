@@ -17,7 +17,7 @@ object Main extends App {
   types.setTypeParser(114.asInstanceOf[TypeId], (s: String) => s) // tell node-pg not to parse JSON
   types.setTypeParser(1114.asInstanceOf[TypeId], (s: String) => new js.Date(s"$s+00:00"))
 
-  val db = new OQL_RDB(readFile("test/book.dm"))
+  val db = new OQL_RDB_ScalaJS(readFile("test/book.dm"))
 
   (for
     _ <- db.create()

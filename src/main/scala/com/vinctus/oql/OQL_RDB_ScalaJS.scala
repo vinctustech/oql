@@ -1,6 +1,8 @@
 package com.vinctus.oql
 
 import com.vinctus.sjs_utils.{DynamicMap, toJS}
+
+import scala.scalajs.js.annotation.JSExportTopLevel
 //import com.vinctus.mappable.{Mappable, map2cc}
 import typings.node.tlsMod.ConnectionOptions
 
@@ -9,20 +11,12 @@ import scala.scalajs.js
 import scala.scalajs.js.|
 import scala.util.matching.Regex
 
-class OQL_NodePG_ScalaJS(
-    dm: String,
-    host: String,
-    port: Int,
-    database: String,
-    user: String,
-    password: String,
-    ssl: Boolean | ConnectionOptions,
-    idleTimeoutMillis: Int,
-    max: Int
+class OQL_RDB_ScalaJS(
+    dm: String
 )(implicit ec: scala.concurrent.ExecutionContext)
     extends AbstractOQL(
       dm,
-      new NodePG(host, port, database, user, password, ssl, idleTimeoutMillis, max),
+      new RDBDataSource,
       ScalaConversions
     )
     with Dynamic {
@@ -68,7 +62,7 @@ class OQL_NodePG_ScalaJS(
   }
 
   def queryBuilder(fixed: String = null, at: js.Any = null) =
-    new ScalaJSNodePGQueryBuilder(
+    new ScalaJSRDBQueryBuilder(
       this,
       OQLQuery(null, null, null, List(StarOQLProject), None, None, None, None, None),
       fixedEntity(fixed, at)

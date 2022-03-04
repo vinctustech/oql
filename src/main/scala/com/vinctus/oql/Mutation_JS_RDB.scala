@@ -4,16 +4,18 @@ import com.vinctus.sjs_utils.{jsObject, toJS, toMap}
 
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 import scala.scalajs.js
-import scala.scalajs.js.JSConverters._
+import scala.scalajs.js.JSConverters.*
 import scala.scalajs.js.annotation.JSExport
 
-class JSMutation private[oql] (oql: OQL_NodePG_JS, entity: Entity) extends Mutation(oql, entity) {
+class Mutation_JS_RDB private[oql] (oql: OQL_RDB_JS, entity: Entity) extends Mutation(oql, entity) {
 
   @JSExport("insert")
   def jsInsert(obj: js.Dictionary[js.Any]): js.Promise[js.Any] = insert(toMap(obj)) map toJS toJSPromise
 
   @JSExport("delete")
-  def jsDelete(e: js.Any): js.Promise[Unit] = delete(if (jsObject(e)) e.asInstanceOf[js.Dictionary[String]](entity.pk.get.name) else e) toJSPromise
+  def jsDelete(e: js.Any): js.Promise[Unit] = delete(
+    if (jsObject(e)) e.asInstanceOf[js.Dictionary[String]](entity.pk.get.name) else e
+  ) toJSPromise
 
   @JSExport("link")
   def jsLink(e1: js.Any, resource: String, e2: js.Any): js.Promise[Unit] = {
@@ -38,7 +40,9 @@ class JSMutation private[oql] (oql: OQL_NodePG_JS, entity: Entity) extends Mutat
   @JSExport("bulkUpdate")
   def jsBulkUpdate(updates: js.Array[js.Array[js.Any]]): js.Promise[Unit] =
     bulkUpdate(updates.toList map { (u: js.Array[js.Any]) =>
-      (if (jsObject(u.head)) u.head.asInstanceOf[js.Dictionary[Any]](entity.pk.get.name) else u.head) -> toMap(u.tail.head)
+      (if (jsObject(u.head)) u.head.asInstanceOf[js.Dictionary[Any]](entity.pk.get.name) else u.head) -> toMap(
+        u.tail.head
+      )
     }).toJSPromise
 
 }
