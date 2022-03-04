@@ -14,8 +14,8 @@ class RDBConnection(val dataSource: RDBDataSource)(implicit ec: scala.concurrent
   def command(sql: String): Future[RDBResultSet] =
     Future(new RDBResultSet(executeSQL(sql)(db).head match {
 //      case CreateTableResult(_) => Iterator()
-      case QueryResult(table) => table.data.iterator
-//      case InsertResult(auto)   => Iterator(auto.values.toIndexedSeq)
+      case QueryResult(table)    => table.data.iterator
+      case InsertResult(_, auto) => auto.data.iterator
 //      case UpdateResult(_)      => Iterator()
     }))
 

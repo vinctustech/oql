@@ -6,13 +6,15 @@ description := "Object Query Language"
 
 scalaVersion := "3.1.1"
 
-scalacOptions ++= Seq("-deprecation",
-                      "-feature",
-                      "-unchecked",
-                      "-language:postfixOps",
-                      "-language:implicitConversions",
-                      "-language:existentials",
-                      "-language:dynamics")
+scalacOptions ++= Seq(
+  "-deprecation",
+  "-feature",
+  "-unchecked",
+  "-language:postfixOps",
+  "-language:implicitConversions",
+  "-language:existentials",
+  "-language:dynamics"
+)
 
 organization := "com.vinctus"
 
@@ -60,7 +62,7 @@ Compile / paradoxMaterialTheme := {
 
 Compile / paradoxProperties ++=
   Map(
-    //"github.base_url" -> "https://github.com/vinctustech/oql/blob/dev",
+    // "github.base_url" -> "https://github.com/vinctustech/oql/blob/dev",
     "image.base_url" -> ".../assets/images"
   )
 
@@ -84,13 +86,13 @@ Compile / npmDependencies ++= Seq(
 
 libraryDependencies ++= Seq(
   "org.scalatest" %%% "scalatest" % "3.2.11" % "test",
-  "io.github.edadma" %%% "rdb" % "0.1.0-pre.7",
-  "com.vinctus" %%% "sjs-utils" % "0.1.0-snapshot.27",
+  "io.github.edadma" %%% "rdb" % "0.1.0-pre.9",
+  "com.vinctus" %%% "sjs-utils" % "0.1.0-snapshot.27"
 //  "com.vinctus" %%% "mappable" % "0.1.2"
 )
 
 libraryDependencies ++= Seq(
-  "org.scala-lang.modules" %%% "scala-parser-combinators" % "2.1.1",
+  "org.scala-lang.modules" %%% "scala-parser-combinators" % "2.1.1"
   //  "org.scala-lang.modules" %%% "scala-async" % "1.0.0-M1"
 )
 
