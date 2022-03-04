@@ -24,7 +24,7 @@ object Main extends App {
   (for
     _ <- db.create()
     i <- db.entity("author").insert(Map("name" -> "Robert Louis Stevenson"))
-    r <- db.queryMany("author {* books}")
+    r <- db.queryMany("author")
   yield r)
     .onComplete {
       case Failure(exception) => exception.printStackTrace()
