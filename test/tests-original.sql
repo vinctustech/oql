@@ -269,9 +269,10 @@ INSERT INTO "rep" ("id", "name", "country") VALUES
   (2, 'Joseph Nkrumah', 2),
   (3, 'Lauren Zuma', 3),
   (4, 'Batman', NULL);
+CREATE TYPE "color" AS ENUM ('red', 'blue', 'black', 'white', 'gray', 'silver', 'green', 'yellow');
 CREATE TABLE "cars" (
   "make" TEXT,
-  "color" TEXT
+  "color" color
 );
 INSERT INTO "cars" ("make", "color") VALUES
   ('ferrari', 'red'),
