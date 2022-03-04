@@ -16,7 +16,7 @@ INSERT INTO "author" ("pk_author_id", "name") VALUES
   (4, 'Mark Twain');
 INSERT INTO "book" ("pk_book_id", "title", "year", "author_id") VALUES
   (1, 'Treasure Island', 1883, 1),
-  (2, 'Alice\'s Adventures in Wonderland', 1865, 2),
+  (2, E'Alice\'s Adventures in Wonderland', 1865, 2),
   (3, 'Oliver Twist', 1838, 3),
   (4, 'A Tale of Two Cities', 1859, 3),
   (5, 'The Adventures of Tom Sawyer', 1876, 4),
@@ -102,7 +102,7 @@ INSERT INTO "planet" ("plan_id", "name", "climate") VALUES
   (1, 'Earth', 'not too bad'),
   (2, 'Vulcan', 'pretty hot'),
   (3, 'Betazed', 'awesome weather'),
-  (4, 'Qo''noS', 'turbulent'),
+  (4, E'Qo\'noS', 'turbulent'),
   (5, 'Turkana IV', NULL);
 INSERT INTO "species" ("spec_id", "name", "lifespan", "origin") VALUES
   (1, 'Human', 71, 1),
