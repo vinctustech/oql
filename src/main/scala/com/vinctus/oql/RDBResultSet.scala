@@ -31,13 +31,14 @@ class RDBResultSet(rs: Iterator[Row]) extends OQLResultSet {
       case NumberValue(dal.IntType, value)    => value.intValue
       case NumberValue(dal.DoubleType, value) => value.doubleValue
       case NumberValue(dal.LongType, value)   => value.doubleValue // todo: js hack
-      case NumberValue(dal.BigDecType, value) => value.doubleValue // todo: js hack
-      case TextValue(s)                       => s
-      case UUIDValue(id)                      => id
-      case TimestampValue(t)                  => new js.Date(t.toISOString) // todo: js hack
-      case ArrayValue(data)                   => data map unpack
-      case ObjectValue(properties)            => properties map { case (k, v) => k -> unpack(v) } toMap
-      case NullValue()                        => null
+      case NumberValue(dal.BigDecType, value) =>
+        value.toString // todo: js hack (to retain decimals even if they are zero)
+      case TextValue(s)            => s
+      case UUIDValue(id)           => id
+      case TimestampValue(t)       => new js.Date(t.toISOString) // todo: js hack
+      case ArrayValue(data)        => data map unpack
+      case ObjectValue(properties) => properties map { case (k, v) => k -> unpack(v) } toMap
+      case NullValue()             => null
 
   def get(idx: Int): OQLResultSetValue = RDBResultSetValue(unpack(row.data(idx)))
 
