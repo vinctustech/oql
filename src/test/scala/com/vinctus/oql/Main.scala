@@ -19,12 +19,13 @@ object Main extends App {
 
   val db = new OQL_RDB(readFile("test/book.dm"))
 
-  db.showQuery()
-
   (for
     _ <- db.create()
-    i <- db.entity("author").insert(Map("name" -> "Robert Louis Stevenson"))
-    r <- db.queryMany("author")
+    _ <- db.entity("author").insert(Map("name" -> "Robert Louis Stevenson"))
+    _ <- db.entity("book").insert(Map("title" -> "Treasure Island", "year" -> 1883, "author" -> 1))
+    _ <- db.entity("author").insert(Map("name" -> "Lewis Carroll"))
+    _ <- db.entity("book").insert(Map("title" -> "Alice's Adventures in Wonderland", "year" -> 1865, "author" -> 2))
+    r <- { db.showQuery(); db.queryMany("author {* books}") }
   yield r)
     .onComplete {
       case Failure(exception) => exception.printStackTrace()
