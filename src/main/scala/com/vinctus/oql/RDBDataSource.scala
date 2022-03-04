@@ -40,6 +40,7 @@ class RDBDataSource(implicit ec: scala.concurrent.ExecutionContext) extends SQLD
       case "INT"       => IntegerType
       case "BIGINT"    => BigintType
       case "DOUBLE"    => FloatType
+      case "number"    => FloatType
     }
 
   val resultArrayFunctionStart: String = "TABLE("

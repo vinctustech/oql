@@ -9,6 +9,8 @@ import scala.scalajs.js
 import js.Dynamic.global as g
 import scala.util.{Failure, Success}
 
+import io.github.edadma.rdb
+
 object Main extends App {
 
   def readFile(f: String) = g.require("fs").readFileSync(f).toString
@@ -19,13 +21,45 @@ object Main extends App {
 
   val db = new OQL_RDB_ScalaJS(readFile("test/book.dm"))
 
+  rdb.executeSQL(
+    """
+      |CREATE TABLE "author" (
+      |  "pk_author_id" BIGINT PRIMARY KEY,
+      |  "name" TEXT
+      |);
+      |CREATE TABLE "book" (
+      |  "pk_book_id" BIGINT PRIMARY KEY,
+      |  "title" TEXT,
+      |  "year" INTEGER,
+      |  "author_id" BIGINT
+      |);
+      |ALTER TABLE "book" ADD FOREIGN KEY ("author_id") REFERENCES "author";
+      |INSERT INTO "author" ("pk_author_id", "name") VALUES
+      |  (1, 'Robert Louis Stevenson'),
+      |  (2, 'Lewis Carroll'),
+      |  (3, 'Charles Dickens'),
+      |  (4, 'Mark Twain');
+      |INSERT INTO "book" ("pk_book_id", "title", "year", "author_id") VALUES
+      |  (1, 'Treasure Island', 1883, 1),
+      |  (2, E'Alice\'s Adventures in Wonderland', 1865, 2),
+      |  (3, 'Oliver Twist', 1838, 3),
+      |  (4, 'A Tale of Two Cities', 1859, 3),
+      |  (5, 'The Adventures of Tom Sawyer', 1876, 4),
+      |  (6, 'Adventures of Huckleberry Finn', 1884, 4);
+      |""".stripMargin
+  )(
+    db.connect
+      .asInstanceOf[RDBConnection]
+      .db
+  )
+
   (for
-    _ <- db.create()
-    _ <- db.entity("author").insert(Map("name" -> "Robert Louis Stevenson"))
-    _ <- db.entity("book").insert(Map("title" -> "Treasure Island", "year" -> 1883, "author" -> 1))
-    _ <- db.entity("author").insert(Map("name" -> "Lewis Carroll"))
-    _ <- db.entity("book").insert(Map("title" -> "Alice's Adventures in Wonderland", "year" -> 1865, "author" -> 2))
-    r <- { db.showQuery(); db.queryMany("author {* books}") }
+    //    _ <- db.create()
+//    _ <- db.entity("author").insert(Map("name" -> "Robert Louis Stevenson"))
+//    _ <- db.entity("book").insert(Map("title" -> "Treasure Island", "year" -> 1883, "author" -> 1))
+//    _ <- db.entity("author").insert(Map("name" -> "Lewis Carroll"))
+//    _ <- db.entity("book").insert(Map("title" -> "Alice's Adventures in Wonderland", "year" -> 1865, "author" -> 2))
+    r <- { db.showQuery(); db.queryMany("author { name books: books {count(*)} }") }
   yield r)
     .onComplete {
       case Failure(exception) => exception.printStackTrace()
