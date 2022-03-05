@@ -24,7 +24,6 @@ class RDBConnection(val dataSource: RDBDataSource)(implicit ec: scala.concurrent
   def execute(command: String): Future[Unit] = ???
 
   def create(model: DataModel): Future[Unit] =
-    println(dataSource.schema(model))
     Future(executeSQL(dataSource.schema(model))(db))
 
   def close(): Unit = ???

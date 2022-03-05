@@ -46,6 +46,8 @@ export class OQL {
 
   constructor(dm: string, host: string, port: number, database: string, user: string, password: string, ssl: any, idleTimeoutMillis: number, max: number)
 
+  create(): Promise<void>
+
   showQuery(): void
 
   entity(name: string): Mutation
@@ -65,6 +67,8 @@ export class OQL {
 export class OQL_RDB {
 
   constructor(dm: string)
+
+  create(): Promise<void>
 
   showQuery(): void
 

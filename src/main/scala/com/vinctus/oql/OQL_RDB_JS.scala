@@ -7,9 +7,8 @@ import scala.concurrent.Future
 import scala.scalajs.js
 import scala.scalajs.js.JSConverters.*
 import scala.scalajs.js.annotation.{JSExport, JSExportTopLevel}
-import scala.scalajs.js.|
+import scala.scalajs.js.{Promise, |}
 import scala.util.matching.Regex
-
 import io.github.edadma.rdb
 
 @JSExportTopLevel("OQL_RDB")
@@ -20,13 +19,11 @@ class OQL_RDB_JS(
       new RDBDataSource,
       JSConversions
     ) {
-  rdb.executeSQL(connect.asInstanceOf[RDBConnection].dataSource.schema(model))(
-    connect
-      .asInstanceOf[RDBConnection]
-      .db
-  )
 
   def execute[R](action: OQLConnection => Future[R]): Future[R] = action(connect)
+
+  @JSExport("create")
+  def jsCreate(): Promise[Unit] = create.toJSPromise
 
   @JSExport
   def entity(name: String): Mutation_JS_RDB = new Mutation_JS_RDB(this, model.entities(name))
