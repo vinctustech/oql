@@ -5,6 +5,7 @@ import io.github.edadma.rdb.{CreateTableResult, InsertResult, MemoryDB, QueryRes
 
 import scala.collection.mutable
 import scala.concurrent.Future
+import scala.scalajs.js
 
 class RDBConnection(val dataSource: RDBDataSource)(implicit ec: scala.concurrent.ExecutionContext)
     extends OQLConnection:
@@ -19,6 +20,8 @@ class RDBConnection(val dataSource: RDBDataSource)(implicit ec: scala.concurrent
 //      case UpdateResult(_)      => Iterator()
     }))
 
+  def raw(sql: String, values: js.Array[js.Any]): Future[js.Array[js.Any]] =
+
   def insert(command: String): Future[OQLResultSet] = ???
 
   def execute(command: String): Future[Unit] = ???
@@ -27,3 +30,22 @@ class RDBConnection(val dataSource: RDBDataSource)(implicit ec: scala.concurrent
     Future(executeSQL(dataSource.schema(model))(db))
 
   def close(): Unit = ???
+
+/*
+  static async canUserView(customerId: string, userId: string): Promise<boolean> {
+    const result = await oql.raw(
+      `
+      SELECT id FROM customers
+      WHERE id = $1
+      AND store_id IN (SELECT store_id FROM users_stores us WHERE us.user_id = $2)
+    `,
+      [customerId, userId]
+    )
+
+    if (result && result.length === 1) {
+      return true
+    }
+
+    return false
+  }
+ */
