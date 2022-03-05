@@ -61,3 +61,23 @@ export class OQL {
   raw<T = any>(sql: string, values?: any[]): Promise<T[]>
 
 }
+
+export class OQL_RDB {
+
+  constructor(dm: string)
+
+  showQuery(): void
+
+  entity(name: string): Mutation
+
+  queryBuilder<T = any>(fixed?: string, at?: any): QueryBuilder<T>
+
+  queryOne<T = any>(oql: string, parameters?: any, fixed?: string, at?: any): Promise<T | undefined>
+
+  queryMany<T = any>(oql: string, parameters?: any, fixed?: string, at?: any): Promise<T[]>
+
+  count(oql: string, parameters?: any, fixed?: string, at?: any): Promise<number>
+
+  raw<T = any>(sql: string, values?: any[]): Promise<T[]>
+
+}
