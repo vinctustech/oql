@@ -10,22 +10,21 @@ import scala.scalajs.js.annotation.{JSExport, JSExportTopLevel}
 import scala.scalajs.js.|
 import scala.util.matching.Regex
 
+import io.github.edadma.rdb
+
 @JSExportTopLevel("OQL_RDB")
 class OQL_RDB_JS(
-    dm: String,
-    host: String,
-    port: Int,
-    database: String,
-    user: String,
-    password: String,
-    ssl: Boolean | ConnectionOptions,
-    idleTimeoutMillis: Int,
-    max: Int
+    dm: String
 ) extends AbstractOQL(
       dm,
-      new NodePG(host, port, database, user, password, ssl, idleTimeoutMillis, max),
+      new RDBDataSource,
       JSConversions
     ) {
+  rdb.executeSQL(connect.asInstanceOf[RDBConnection].dataSource.schema(model))(
+    connect
+      .asInstanceOf[RDBConnection]
+      .db
+  )
 
   def execute[R](action: OQLConnection => Future[R]): Future[R] = action(connect)
 

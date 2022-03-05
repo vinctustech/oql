@@ -13,7 +13,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 trait Test {
 
   val dm: String
-  lazy val db =
+  lazy val db: OQL_RDB_ScalaJS =
     val conn = new OQL_RDB_ScalaJS(g.require("fs").readFileSync(s"test/$dm.dm").toString)
 
     rdb
@@ -31,18 +31,27 @@ trait Test {
 //      1000,
 //      5
 //    )
-  lazy val dbjs =
-    new OQL_RDB_JS(
-      g.require("fs").readFileSync(s"test/$dm.dm").toString,
-      "localhost",
-      5432,
-      "postgres",
-      "postgres",
-      "docker",
-      false,
-      1000,
-      5
-    )
+
+  lazy val dbjs: OQL_RDB_JS =
+    val conn = new OQL_RDB_JS(g.require("fs").readFileSync(s"test/$dm.dm").toString)
+
+    rdb
+      .executeSQL(g.require("fs").readFileSync(s"test/tests.sql").toString)(
+        conn.connect.asInstanceOf[RDBConnection].db
+      )
+    conn
+
+//    new OQL_RDB_JS(
+//      g.require("fs").readFileSync(s"test/$dm.dm").toString,
+//      "localhost",
+//      5432,
+//      "postgres",
+//      "postgres",
+//      "docker",
+//      false,
+//      1000,
+//      5
+//    )
 
   def test(oql: String, parameters: (String, Any)*): Future[String] = db.json(oql, parameters = parameters.toMap)
 

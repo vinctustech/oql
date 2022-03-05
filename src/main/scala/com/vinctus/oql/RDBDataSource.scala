@@ -20,7 +20,7 @@ class RDBDataSource(implicit ec: scala.concurrent.ExecutionContext) extends SQLD
       case BigintType            => "BIGINT"
       case DecimalType(p, s)     => s"DECIMAL($p, $s)"
       case DateType              => "DATE"
-      case FloatType             => "FLOAT"
+      case FloatType             => "DOUBLE"
       case UUIDType              => "UUID"
       case TimestampType         => "TIMESTAMP"
       case ManyToOneType(entity) => mapType(entity.pk.get.typ)
@@ -30,6 +30,7 @@ class RDBDataSource(implicit ec: scala.concurrent.ExecutionContext) extends SQLD
     typ match {
       case IntegerType => "INT AUTO"
       case BigintType  => "BIGINT AUTO"
+      case UUIDType    => "UUID AUTO"
       case _: Datatype => mapType(typ)
     }
 
