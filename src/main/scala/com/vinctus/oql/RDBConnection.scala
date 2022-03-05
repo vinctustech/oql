@@ -20,7 +20,7 @@ class RDBConnection(val dataSource: RDBDataSource)(implicit ec: scala.concurrent
 //      case UpdateResult(_)      => Iterator()
     }))
 
-  def raw(sql: String, values: js.Array[js.Any]): Future[js.Array[js.Any]] =
+  def raw(sql: String, values: IndexedSeq[Any]): Future[Seq[Any]] = Future(Seq())
 
   def insert(command: String): Future[OQLResultSet] = ???
 

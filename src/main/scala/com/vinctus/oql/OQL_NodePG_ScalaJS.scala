@@ -22,7 +22,7 @@ class OQL_NodePG_ScalaJS(
 )(implicit ec: scala.concurrent.ExecutionContext)
     extends AbstractOQL(
       dm,
-      new NodePG(host, port, database, user, password, ssl, idleTimeoutMillis, max),
+      new NodePGDataSource(host, port, database, user, password, ssl, idleTimeoutMillis, max),
       ScalaConversions
     )
     with Dynamic {

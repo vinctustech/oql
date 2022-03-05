@@ -7,7 +7,8 @@ import scala.concurrent.Future
 import scala.scalajs.js
 import scala.scalajs.js.JSConverters._
 
-class NodePGConnection(val dataSource: NodePG)(implicit ec: scala.concurrent.ExecutionContext) extends OQLConnection {
+class NodePGConnection(val dataSource: NodePGDataSource)(implicit ec: scala.concurrent.ExecutionContext)
+    extends OQLConnection {
 
   private val pool = new Pool(
     PoolConfig()
@@ -18,31 +19,32 @@ class NodePGConnection(val dataSource: NodePG)(implicit ec: scala.concurrent.Exe
       .setPassword(dataSource.password)
       .setSsl(dataSource.ssl)
       .setIdleTimeoutMillis(dataSource.idleTimeoutMillis)
-      .setMax(dataSource.max))
+      .setMax(dataSource.max)
+  )
 
   def command(sql: String): Future[NodePGResultSet] =
     pool
       .connect()
       .toFuture
-      .flatMap(
-        (client: PoolClient) =>
-          client
-            .query[js.Array[js.Any], js.Any](QueryArrayConfig[js.Any](sql))
-            .toFuture
-            .map(rs => new NodePGResultSet(rs))
-            .andThen(_ => client.release()))
+      .flatMap((client: PoolClient) =>
+        client
+          .query[js.Array[js.Any], js.Any](QueryArrayConfig[js.Any](sql))
+          .toFuture
+          .map(rs => new NodePGResultSet(rs))
+          .andThen(_ => client.release())
+      )
 
   def raw(sql: String, values: js.Array[js.Any]): js.Promise[js.Array[js.Any]] =
     pool
       .connect()
       .toFuture
-      .flatMap(
-        (client: PoolClient) =>
-          client
-            .query[js.Any, js.Any](sql, values)
-            .toFuture
-            .map(_.rows)
-            .andThen(_ => client.release()))
+      .flatMap((client: PoolClient) =>
+        client
+          .query[js.Any, js.Any](sql, values)
+          .toFuture
+          .map(_.rows)
+          .andThen(_ => client.release())
+      )
       .toJSPromise
 
   def insert(command: String): Future[OQLResultSet] = ???

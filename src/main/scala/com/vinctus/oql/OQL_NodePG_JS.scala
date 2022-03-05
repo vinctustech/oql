@@ -23,7 +23,7 @@ class OQL_NodePG_JS(
     max: Int
 ) extends AbstractOQL(
       dm,
-      new NodePG(host, port, database, user, password, ssl, idleTimeoutMillis, max),
+      new NodePGDataSource(host, port, database, user, password, ssl, idleTimeoutMillis, max),
       JSConversions
     ) {
 
@@ -90,7 +90,7 @@ class OQL_NodePG_JS(
 
   @JSExport
   def raw(sql: String, values: js.UndefOr[js.Array[js.Any]]): js.Promise[js.Array[js.Any]] =
-    ds.asInstanceOf[NodePG]
+    ds.asInstanceOf[NodePGDataSource]
       .connect
       .raw(sql, if (values.isEmpty) js.Array() else values.get)
 
