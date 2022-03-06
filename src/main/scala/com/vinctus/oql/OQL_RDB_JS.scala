@@ -89,7 +89,8 @@ class OQL_RDB_JS(
     ds.asInstanceOf[RDBDataSource]
       .connect
       .raw(sql, if (values.isEmpty) Vector() else values.get.toIndexedSeq.asInstanceOf[IndexedSeq[Any]])
-      .map(_.toJSArray)
+      .map(t => t map (_.toJSArray) toJSArray)
+      .asInstanceOf[Future[js.Array[js.Any]]]
       .toJSPromise
 
   private val varRegex = ":([a-zA-Z_][a-zA-Z0-9_]*)" r

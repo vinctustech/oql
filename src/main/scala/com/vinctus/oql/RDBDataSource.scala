@@ -6,7 +6,7 @@ class RDBDataSource(implicit ec: scala.concurrent.ExecutionContext) extends SQLD
 
   val name: String = "RDB"
 
-  val connect = new RDBConnection(this)
+  val connect: RDBConnection = new RDBConnection(this)
 
   val platformSpecific: PartialFunction[Any, String] = { case d: js.Date =>
     s""""${d.toISOString()}""""

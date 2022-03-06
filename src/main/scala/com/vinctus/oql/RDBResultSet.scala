@@ -26,25 +26,25 @@ class RDBResultSet(rs: Iterator[Row]) extends OQLResultSet {
       true
     } else false
 
-  private def unpack(v: Value): Any =
-    v match
-      case NumberValue(dal.IntType, value)    => value.intValue
-      case NumberValue(dal.DoubleType, value) => value.doubleValue
-      case NumberValue(dal.LongType, value)   => value.doubleValue // todo: js hack
-      case NumberValue(dal.BigDecType, value) =>
-        value.toString // todo: js hack (to retain decimals even if they are zero)
-      case TextValue(s)            => s
-      case UUIDValue(id)           => id
-      case TimestampValue(t)       => new js.Date(t.toISOString) // todo: js hack
-      case ArrayValue(data)        => data map unpack
-      case ObjectValue(properties) => properties map { case (k, v) => k -> unpack(v) } toMap
-      case NullValue()             => null
-
   def get(idx: Int): OQLResultSetValue = RDBResultSetValue(unpack(row.data(idx)))
 
   def getString(idx: Int): String = row.data(idx).string
 
   def getResultSet(idx: Int): OQLResultSet = new RDBResultSet(row.data(idx).asInstanceOf[TableValue].data.iterator)
 }
+
+def unpack(v: Value): Any =
+  v match
+    case NumberValue(dal.IntType, value)    => value.intValue
+    case NumberValue(dal.DoubleType, value) => value.doubleValue
+    case NumberValue(dal.LongType, value)   => value.doubleValue // todo: js hack
+    case NumberValue(dal.BigDecType, value) =>
+      value.toString // todo: js hack (to retain decimals even if they are zero)
+    case TextValue(s)            => s
+    case UUIDValue(id)           => id
+    case TimestampValue(t)       => new js.Date(t.toISOString) // todo: js hack
+    case ArrayValue(data)        => data map unpack
+    case ObjectValue(properties) => properties map { case (k, v) => k -> unpack(v) } toMap
+    case NullValue()             => null
 
 case class RDBResultSetValue(v: Any) extends OQLResultSetValue

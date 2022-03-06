@@ -60,7 +60,7 @@ export class OQL {
 
   count(oql: string, parameters?: any, fixed?: string, at?: any): Promise<number>
 
-  raw<T = any>(sql: string, values?: any[]): Promise<T[]>
+  raw(sql: string, values?: any[]): Promise<any[][]>
 
 }
 
@@ -82,6 +82,6 @@ export class OQL_RDB {
 
   count(oql: string, parameters?: any, fixed?: string, at?: any): Promise<number>
 
-  raw<T = any>(sql: string, values?: any[]): Promise<T[]>
+  raw(sql: string, values?: any[]): Promise<any[][]>
 
 }

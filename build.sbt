@@ -1,6 +1,6 @@
 name := "@vinctus/oql" //@vinctus/
 
-version := "1.1.0-pre.11"
+version := "1.1.0-pre.13"
 
 description := "Object Query Language"
 
@@ -68,13 +68,13 @@ Compile / paradoxProperties ++=
 
 scalaJSUseMainModuleInitializer := true
 
-Test / scalaJSUseMainModuleInitializer := false
-
-Test / scalaJSUseTestModuleInitializer := true
-
-//Test / scalaJSUseMainModuleInitializer := true
+//Test / scalaJSUseMainModuleInitializer := false
 //
-//Test / scalaJSUseTestModuleInitializer := false
+//Test / scalaJSUseTestModuleInitializer := true
+
+Test / scalaJSUseMainModuleInitializer := true
+
+Test / scalaJSUseTestModuleInitializer := false
 
 Compile / npmDependencies ++= Seq(
   "pg" -> "8.7.3",
@@ -86,7 +86,7 @@ Compile / npmDependencies ++= Seq(
 
 libraryDependencies ++= Seq(
   "org.scalatest" %%% "scalatest" % "3.2.11" % "test",
-  "io.github.edadma" %%% "rdb" % "0.1.0-pre.31",
+  "io.github.edadma" %%% "rdb" % "0.1.0-pre.32",
   "com.vinctus" %%% "sjs-utils" % "0.1.0-snapshot.27",
   "com.lihaoyi" %%% "pprint" % "0.7.1"
 //  "com.vinctus" %%% "mappable" % "0.1.2"
