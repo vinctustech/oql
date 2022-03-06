@@ -10,11 +10,11 @@ object OQLParser extends RegexParsers with PackratParsers {
 
   def kw(s: String): Regex = (s"(?i)$s\\b").r
 
-  lazy val command: PackratParser[OQLAST] = query | insert
-
-  lazy val insert: PackratParser[OQLInsert] = (entityName <~ "<-") ~ objectExpression ^^ { case e ~ _ ~ v =>
-    OQLInsert(e, v)
-  }
+//  lazy val command: PackratParser[OQLAST] = query | insert
+//
+//  lazy val insert: PackratParser[OQLInsert] = (entityName <~ "<-") ~ objectExpression ^^ { case e ~ _ ~ v =>
+//    OQLInsert(e, v)
+//  }
 
   lazy val query: PackratParser[OQLQuery] =
     entityName ~ not(".") ~ project ~ opt(select) ~ opt(group) ~ opt(order) ~ restrict ^^ {
@@ -163,8 +163,8 @@ object OQLParser extends RegexParsers with PackratParsers {
     float ^^ FloatOQLExpression.apply |
       integer ^^ IntegerOQLExpression.apply |
       stringLiteral |
-      booleanLiteral |
-      insert
+      booleanLiteral /*|
+      insert*/
 
   lazy val stringLiteral: PackratParser[OQLExpression] =
     string ^^ (unescape _ andThen StringOQLExpression.apply)

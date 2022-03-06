@@ -84,4 +84,6 @@ export class OQL_MEM {
 
   raw(sql: string, values?: any[]): Promise<any[][]>
 
+  rawMulti(sql: string): Promise<void>
+
 }

@@ -59,6 +59,15 @@ class RDBConnection(val dataSource: RDBDataSource)(implicit ec: scala.concurrent
 
     Future(res)
 
+  def rawMulti(sql: String): Future[Seq[IndexedSeq[IndexedSeq[Any]]]] =
+    val res =
+      executeSQL(sql)(db) map {
+        case QueryResult(table)    => table.data map (_.data map unpack)
+        case InsertResult(_, auto) => auto.data map (_.data map unpack)
+      }
+
+    Future(res)
+
   def insert(command: String): Future[OQLResultSet] = ???
 
   def execute(command: String): Future[Unit] = ???
