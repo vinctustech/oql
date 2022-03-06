@@ -4,6 +4,8 @@ import scala.util.parsing.input.Position
 
 trait OQLAST
 
+trait OQLCommand extends OQLAST
+
 case class OQLQuery(
     source: Ident,
     var entity: Entity,
@@ -14,7 +16,7 @@ case class OQLQuery(
     order: Option[List[OQLOrdering]],
     limit: Option[Int],
     offset: Option[Int]
-) extends OQLAST
+) extends OQLCommand
 
 trait OQLProject { val label: Ident }
 case object StarOQLProject extends OQLProject { val label: Ident = null }
@@ -53,4 +55,4 @@ case class GroupedOQLExpression(expr: OQLExpression) extends OQLExpression
 
 case class OQLWhen(cond: OQLExpression, expr: OQLExpression)
 
-case class OQLInsert(entity: Ident, values: ObjectOQLExpression) extends OQLAST
+case class OQLInsert(entity: Ident, values: ObjectOQLExpression) extends OQLCommand

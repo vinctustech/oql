@@ -38,15 +38,14 @@ abstract class AbstractOQL(dm: String, val ds: SQLDataSource, conv: Conversions)
 
   def create: Future[Unit] = execute(_.create(model))
 
-  def parseQuery(oql: String): OQLQuery = {
-    val query = OQLParser.parseQuery(oql)
+  def parseQuery(oql: String): OQLQuery = processQuery(OQLParser.parseQuery(oql), oql)
 
+  def processQuery(query: OQLQuery, oql: String): OQLQuery =
     preprocessQuery(None, query, model, ds, oql) // todo: should be called "preprocessQuery" and do all decorating
     query.select foreach (decorate(query.entity, _, model, ds, oql))
     query.group foreach (_ foreach (decorate(query.entity, _, model, ds, oql)))
     query.order foreach (_ foreach { case OQLOrdering(expr, _) => decorate(query.entity, expr, model, ds, oql) })
     query
-  }
 
   def parseCondition(cond: String, entity: Entity): OQLExpression = {
     val expr = OQLParser.parseBooleanExpression(cond)
