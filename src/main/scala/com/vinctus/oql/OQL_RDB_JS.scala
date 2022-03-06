@@ -11,7 +11,7 @@ import scala.scalajs.js.{Promise, |}
 import scala.util.matching.Regex
 import io.github.edadma.rdb
 
-@JSExportTopLevel("OQL_RDB")
+@JSExportTopLevel("OQL_MEM")
 class OQL_RDB_JS(
     dm: String
 ) extends AbstractOQL(

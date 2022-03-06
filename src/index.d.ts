@@ -64,7 +64,7 @@ export class OQL {
 
 }
 
-export class OQL_RDB {
+export class OQL_MEM {
 
   constructor(dm: string)
 

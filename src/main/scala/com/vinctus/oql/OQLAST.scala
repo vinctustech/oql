@@ -4,16 +4,17 @@ import scala.util.parsing.input.Position
 
 trait OQLAST
 
-case class OQLQuery(source: Ident,
-                    var entity: Entity,
-                    var attr: Attribute,
-                    var project: List[OQLProject],
-                    select: Option[OQLExpression],
-                    group: Option[List[OQLExpression]],
-                    order: Option[List[OQLOrdering]],
-                    limit: Option[Int],
-                    offset: Option[Int])
-    extends OQLAST
+case class OQLQuery(
+    source: Ident,
+    var entity: Entity,
+    var attr: Attribute,
+    var project: List[OQLProject],
+    select: Option[OQLExpression],
+    group: Option[List[OQLExpression]],
+    order: Option[List[OQLOrdering]],
+    limit: Option[Int],
+    offset: Option[Int]
+) extends OQLAST
 
 trait OQLProject { val label: Ident }
 case object StarOQLProject extends OQLProject { val label: Ident = null }
@@ -33,7 +34,8 @@ case class QueryOQLExpression(query: OQLQuery) extends OQLExpression
 case class InfixOQLExpression(left: OQLExpression, op: String, right: OQLExpression) extends OQLExpression
 case class PrefixOQLExpression(op: String, expr: OQLExpression) extends OQLExpression
 case class PostfixOQLExpression(expr: OQLExpression, op: String) extends OQLExpression
-case class BetweenOQLExpression(expr: OQLExpression, op: String, lower: OQLExpression, upper: OQLExpression) extends OQLExpression
+case class BetweenOQLExpression(expr: OQLExpression, op: String, lower: OQLExpression, upper: OQLExpression)
+    extends OQLExpression
 case class JSONOQLExpression(expr: OQLExpression) extends OQLExpression
 case class ObjectOQLExpression(pairs: List[(String, OQLExpression)]) extends OQLExpression
 case class ArrayOQLExpression(elems: List[OQLExpression]) extends OQLExpression
@@ -51,5 +53,4 @@ case class GroupedOQLExpression(expr: OQLExpression) extends OQLExpression
 
 case class OQLWhen(cond: OQLExpression, expr: OQLExpression)
 
-case class OQLKeyValue(key: Ident, value: OQLExpression)
-case class OQLInsert(entity: Ident, values: Seq[Seq[OQLKeyValue]]) extends OQLAST
+case class OQLInsert(entity: Ident, values: ObjectOQLExpression) extends OQLAST
