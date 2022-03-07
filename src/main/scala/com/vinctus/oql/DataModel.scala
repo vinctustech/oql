@@ -7,9 +7,11 @@ import scala.collection.mutable.ListBuffer
 
 class DataModel(model: DMLModel, dml: String) {
 
-  private case class EntityInfo(entity: Entity,
-                                dmlattrs: Seq[DMLAttribute],
-                                attrs: mutable.LinkedHashMap[String, Attribute] = new mutable.LinkedHashMap)
+  private case class EntityInfo(
+      entity: Entity,
+      dmlattrs: Seq[DMLAttribute],
+      attrs: mutable.LinkedHashMap[String, Attribute] = new mutable.LinkedHashMap
+  )
 
   private var first: Entity = _
 
@@ -68,7 +70,8 @@ class DataModel(model: DMLModel, dml: String) {
             case DMLSimpleDataType("integer" | "int" | "int4") => IntegerType
             case DMLSimpleDataType("bool" | "boolean")         => BooleanType
             case DMLSimpleDataType("bigint" | "int8")          => BigintType
-            case DMLParametricDataType("decimal", parameters)  => DecimalType(parameters.head.toInt, parameters.tail.head.toInt)
+            case DMLParametricDataType("decimal", parameters) =>
+              DecimalType(parameters.head.toInt, parameters.tail.head.toInt)
 //            case DMLSimpleDataType("date")                     => DateType
             case DMLSimpleDataType("float" | "float8") => FloatType
             case DMLSimpleDataType("uuid")             => UUIDType
@@ -95,7 +98,8 @@ class DataModel(model: DMLModel, dml: String) {
               }
             case DMLManyToManyType(entity, link) =>
               (entities get entity.s, entities get link.s) match {
-                case (Some(EntityInfo(entity, _, _)), Some(EntityInfo(link, _, _))) => ManyToManyType(entity, link, null, null)
+                case (Some(EntityInfo(entity, _, _)), Some(EntityInfo(link, _, _))) =>
+                  ManyToManyType(entity, link, null, null)
                 case (e, l) =>
                   if (e.isEmpty)
                     unknownEntity(entity)
@@ -134,10 +138,18 @@ class DataModel(model: DMLModel, dml: String) {
             }
 
           if (self.size > 1)
-            printError(link.pos, s"junction entity '${linkinfo.entity.name}' has more than one attribute of type '${link.s}'", dml)
+            printError(
+              link.pos,
+              s"junction entity '${linkinfo.entity.name}' has more than one attribute of type '${link.s}'",
+              dml
+            )
 
           if (self.size < 1)
-            printError(link.pos, s"junction entity '${linkinfo.entity.name}' has no attributes of type '${link.s}'", dml)
+            printError(
+              link.pos,
+              s"junction entity '${linkinfo.entity.name}' has no attributes of type '${link.s}'",
+              dml
+            )
 
           val targetentity = entities(entity.s).entity
           val target =
@@ -147,10 +159,18 @@ class DataModel(model: DMLModel, dml: String) {
             }
 
           if (target.size > 1)
-            printError(link.pos, s"junction entity '${linkinfo.entity.name}' has more than one attribute of type '${link.s}'", dml)
+            printError(
+              link.pos,
+              s"junction entity '${linkinfo.entity.name}' has more than one attribute of type '${link.s}'",
+              dml
+            )
 
           if (target.size < 1)
-            printError(link.pos, s"junction entity '${linkinfo.entity.name}' has no attributes of type '${link.s}'", dml)
+            printError(
+              link.pos,
+              s"junction entity '${linkinfo.entity.name}' has no attributes of type '${link.s}'",
+              dml
+            )
 
           as(a.name.s) = as(a.name.s).copy(typ = ManyToManyType(targetentity, linkinfo.entity, self.head, target.head))
         case DMLAttribute(_, _, DMLNameType(entity), _, _) =>
@@ -163,8 +183,14 @@ class DataModel(model: DMLModel, dml: String) {
               case Some(id) =>
                 entityinfo.attrs get id.s match {
                   case Some(a @ Attribute(_, _, _, _, ManyToOneType(`e`))) => OneToOneType(entityinfo.entity, a)
-                  case Some(_)                                             => printError(id.pos, s"attribute '${id.s}' of entity '${entityinfo.entity.name}' does not have the correct type", dml)
-                  case None                                                => printError(id.pos, s"entity '${entityinfo.entity.name}' does not have attribute '${id.s}'", dml)
+                  case Some(_) =>
+                    printError(
+                      id.pos,
+                      s"attribute '${id.s}' of entity '${entityinfo.entity.name}' does not have the correct type",
+                      dml
+                    )
+                  case None =>
+                    printError(id.pos, s"entity '${entityinfo.entity.name}' does not have attribute '${id.s}'", dml)
                 }
               case None =>
                 val attrs =
@@ -174,7 +200,11 @@ class DataModel(model: DMLModel, dml: String) {
                   }
 
                 if (attrs.size > 1)
-                  printError(typ.pos, s"entity '${entityinfo.entity.name}' has more than one attribute of type '${typ.s}'", dml)
+                  printError(
+                    typ.pos,
+                    s"entity '${entityinfo.entity.name}' has more than one attribute of type '${typ.s}'",
+                    dml
+                  )
 
                 if (attrs.size < 1)
                   printError(typ.pos, s"entity '${entityinfo.entity.name}' has no attributes of type '${typ.s}'", dml)
@@ -190,8 +220,14 @@ class DataModel(model: DMLModel, dml: String) {
               case Some(id) =>
                 entityinfo.attrs get id.s match {
                   case Some(a @ Attribute(_, _, _, _, ManyToOneType(`e`))) => OneToManyType(entityinfo.entity, a)
-                  case Some(_)                                             => printError(id.pos, s"attribute '${id.s}' of entity '${entityinfo.entity.name}' does not have the correct type", dml)
-                  case None                                                => printError(id.pos, s"entity '${entityinfo.entity.name}' does not have attribute '${id.s}'", dml)
+                  case Some(_) =>
+                    printError(
+                      id.pos,
+                      s"attribute '${id.s}' of entity '${entityinfo.entity.name}' does not have the correct type",
+                      dml
+                    )
+                  case None =>
+                    printError(id.pos, s"entity '${entityinfo.entity.name}' does not have attribute '${id.s}'", dml)
                 }
               case None =>
                 val attrs =
@@ -201,7 +237,11 @@ class DataModel(model: DMLModel, dml: String) {
                   }
 
                 if (attrs.size > 1)
-                  printError(typ.pos, s"entity '${entityinfo.entity.name}' has more than one attribute of type '${typ.s}'", dml)
+                  printError(
+                    typ.pos,
+                    s"entity '${entityinfo.entity.name}' has more than one attribute of type '${typ.s}'",
+                    dml
+                  )
 
                 if (attrs.size < 1)
                   printError(typ.pos, s"entity '${entityinfo.entity.name}' has no attributes of type '${typ.s}'", dml)
@@ -270,7 +310,13 @@ class DataModel(model: DMLModel, dml: String) {
     e._fixing = Map(first -> attrs)
   }
 
-  def lookup(expr: OQLExpression, ids: List[Ident], ref: Boolean, entity: Entity, input: String): List[(Entity, Attribute)] = { // todo: code duplication
+  def lookup(
+      expr: OQLExpression,
+      ids: List[Ident],
+      ref: Boolean,
+      entity: Entity,
+      input: String
+  ): List[(Entity, Attribute)] = { // todo: code duplication
     val dmrefs = new ListBuffer[(Entity, Attribute)]
 
     @tailrec
@@ -299,8 +345,9 @@ class DataModel(model: DMLModel, dml: String) {
             case Some(attr @ Attribute(name, column, pk, required, ManyToOneType(mtoEntity))) =>
               dmrefs += (mtoEntity -> attr)
               lookup(tail, mtoEntity)
-            case Some(_) => problem(head.pos, s"attribute '${head.s}' of entity '${entity.name}' does not have an entity type", input)
-            case None    => problem(head.pos, s"entity '${entity.name}' does not have attribute '${head.s}'", input)
+            case Some(_) =>
+              problem(head.pos, s"attribute '${head.s}' of entity '${entity.name}' does not have an entity type", input)
+            case None => problem(head.pos, s"entity '${entity.name}' does not have attribute '${head.s}'", input)
           }
       }
 
