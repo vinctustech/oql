@@ -19,28 +19,42 @@ object Main extends App {
   types.setTypeParser(114.asInstanceOf[TypeId], (s: String) => s) // tell node-pg not to parse JSON
   types.setTypeParser(1114.asInstanceOf[TypeId], (s: String) => new js.Date(s"$s+00:00"))
 
-//  val db = new OQL_RDB_ScalaJS(readFile("test/orders.dm"))
-//
-//  rdb.executeSQL(
-//    """
-//      |
-//      |""".stripMargin
-//  )(
-//    db.connect
-//      .asInstanceOf[RDBConnection]
-//      .db
-//  )
+  val db = new OQL_RDB_ScalaJS(readFile("test/cars.dm"))
 
-  val db = new OQL_RDB_ScalaJS(
+  rdb.executeSQL(
     """
-      |enum e { one two three }
-      |entity t { *id int a e } 
+      |CREATE TYPE "color" AS ENUM ('red', 'blue', 'black', 'white', 'gray', 'silver', 'green', 'yellow');
+      |CREATE TABLE "cars" (
+      |  "make" TEXT,
+      |  "color" color
+      |);
+      |INSERT INTO "cars" ("make", "color") VALUES
+      |  ('ferrari', 'red'),
+      |  ('aston martin', 'blue'),
+      |  ('bentley', 'gray'),
+      |  ('ford', 'black');
       |""".stripMargin
+  )(
+    db.connect
+      .asInstanceOf[RDBConnection]
+      .db
   )
 
+//  val db = new OQL_RDB_ScalaJS(
+//    """
+//      |enum color { red blue black white gray silver green yellow }
+//      |
+//      |entity car (cars) {
+//      |  make: text
+//      |  color: color
+//      |}
+//      |""".stripMargin
+//  )
+
   (for
-    _ <- db.create
-    r <- { db.showQuery(); db.queryMany("t") }
+    //    _ <- db.create
+//    _ <- db.entity("t").insert(Map("a" -> "two"))
+    r <- { db.showQuery(); db.queryMany("car [color = 'blue']") }
   yield r)
     .onComplete {
       case Failure(exception) => exception.printStackTrace()

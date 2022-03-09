@@ -17,7 +17,7 @@ trait Test {
     val conn = new OQL_RDB_ScalaJS(g.require("fs").readFileSync(s"test/$dm.dm").toString)
 
     rdb
-      .executeSQL(g.require("fs").readFileSync(s"test/tests-changed.sql").toString)(
+      .executeSQL(g.require("fs").readFileSync(s"test/tests.sql").toString)(
         conn.connect.asInstanceOf[RDBConnection].db
       )
     conn
@@ -38,7 +38,7 @@ trait Test {
     val conn = new OQL_RDB_JS(g.require("fs").readFileSync(s"test/$dm.dm").toString)
 
     rdb
-      .executeSQL(g.require("fs").readFileSync(s"test/tests-changed.sql").toString)(
+      .executeSQL(g.require("fs").readFileSync(s"test/tests.sql").toString)(
         conn.connect.asInstanceOf[RDBConnection].db
       )
     conn

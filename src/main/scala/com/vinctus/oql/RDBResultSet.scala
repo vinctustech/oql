@@ -10,6 +10,7 @@ import io.github.edadma.rdb.{
   TextValue,
   TimestampValue,
   UUIDValue,
+  EnumValue,
   Value
 }
 import io.github.edadma.dal
@@ -47,6 +48,7 @@ def unpack(v: Value): Any =
     case ArrayValue(data)  => (data map unpack) toJSArray // todo: js hack
     case ObjectValue(properties) =>
       (properties map { case (k, v) => k -> unpack(v) }).toMap toJSDictionary // todo: js hack
-    case NullValue() => null
+    case NullValue()           => null
+    case EnumValue(value, typ) => typ.labels(value)
 
 case class RDBResultSetValue(v: Any) extends OQLResultSetValue

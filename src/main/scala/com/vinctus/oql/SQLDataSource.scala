@@ -7,6 +7,11 @@ trait SQLDataSource extends OQLDataSource {
   def mapPKType(typ: TypeSpecifier): String
 
   def schema(model: DataModel): String = {
+    val enums =
+      model.enums.values.toSeq.sortBy(_.name).map { case EnumType(name, labels) =>
+        s"CREATE TYPE \"$name\" AS ENUM (${labels map (l => s"'$l'") mkString ", "});\n"
+      }
+
     val tables =
       for (entity <- model.entities.values.toList.sortBy(_.table))
         yield {
@@ -31,7 +36,7 @@ trait SQLDataSource extends OQLDataSource {
 //          yield s"ALTER TABLE \"${entity.table}\" ADD FOREIGN KEY (\"${attribute.column}\") REFERENCES \"${attribute.typ.asInstanceOf[ManyToOneType].entity.table}\";\n"
 //
 //    (tables ++ foreignKeys.flatten) mkString
-    tables.mkString
+    enums.mkString ++ tables.mkString
   }
 
   val typeFunction: Option[String]

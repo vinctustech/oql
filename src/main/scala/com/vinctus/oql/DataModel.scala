@@ -15,7 +15,7 @@ class DataModel(model: DMLModel, dml: String) {
 
   private var first: Entity = _
 
-  val entities: Map[String, Entity] = {
+  val (entities: Map[String, Entity], enums: Map[String, EnumType]) = {
     parsingError = false
 
     val enums = new mutable.HashMap[String, EnumType]
@@ -259,7 +259,7 @@ class DataModel(model: DMLModel, dml: String) {
     if (parsingError)
       sys.error("errors while creating data model")
 
-    entities.view.mapValues(_.entity) to VectorMap
+    (entities.view.mapValues(_.entity) to VectorMap, enums.toMap)
   }
 
   // fixed entity processing
