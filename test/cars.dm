@@ -1,4 +1,4 @@
-enum color { 'red' 'blue' 'black' 'white' 'gray' 'silver' 'green' 'yellow' }
+enum color { red blue black white gray silver green yellow }
 
 entity car (cars) {
   make: text

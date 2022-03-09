@@ -49,7 +49,7 @@ class RDBDataSource(implicit ec: scala.concurrent.ExecutionContext) extends SQLD
   val resultArrayFunctionEnd: String = ")"
   val rowSequenceFunctionStart: String = ""
   val rowSequenceFunctionEnd: String = ""
-  val typeFunction: Option[String] = Some("TYPE(?)")
+  val typeFunction: Option[String] = Some("TYPEOF(?)")
   val convertFunction: Option[String] = None
   val caseSensitive: Boolean = true
   val functionReturnType: Map[(String, Int), List[Datatype] => Datatype] =

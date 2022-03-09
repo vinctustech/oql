@@ -16,29 +16,24 @@ class DMLParser extends RegexParsers {
   def integer: Parser[String] = "[0-9]+".r
 
   def ident: Parser[Ident] =
-    pos ~ """[a-zA-Z_$][a-zA-Z0-9_$]*""".r ^^ {
-      case p ~ s => Ident(s, p)
+    pos ~ """[a-zA-Z_$][a-zA-Z0-9_$]*""".r ^^ { case p ~ s =>
+      Ident(s, p)
     }
-
-  def label: Parser[Ident] = pos ~ """'[^']+'""".r ^^ {
-    case p ~ l => Ident(l drop 1 dropRight 1, p)
-  }
 
   def model: Parser[DMLModel] = rep1(entity | enumType) ^^ DMLModel.apply
 
-  def enumType: Parser[DMLEnum] = kw("enum") ~ ident ~ "{" ~ rep1(label) ~ "}" ^^ {
-    case _ ~ n ~ _ ~ ls ~ _ => DMLEnum(n, ls)
+  def enumType: Parser[DMLEnum] = kw("enum") ~ ident ~ "{" ~ rep1(ident) ~ "}" ^^ { case _ ~ n ~ _ ~ ls ~ _ =>
+    DMLEnum(n, ls)
   }
 
   def entity: Parser[DMLEntity] =
-    kw("entity") ~ ident ~ opt("(" ~> ident <~ ")") ~ "{" ~ rep1(attribute) ~ "}" ^^ {
-      case _ ~ n ~ a ~ _ ~ as ~ _ => DMLEntity(n, a, as)
+    kw("entity") ~ ident ~ opt("(" ~> ident <~ ")") ~ "{" ~ rep1(attribute) ~ "}" ^^ { case _ ~ n ~ a ~ _ ~ as ~ _ =>
+      DMLEntity(n, a, as)
     }
 
   def attribute: Parser[DMLAttribute] =
-    opt("*") ~ ident ~ opt("(" ~> ident <~ ")") ~ ":" ~ typeSpecifier ~ opt("!") ^^ {
-      case pk ~ n ~ a ~ _ ~ t ~ r =>
-        DMLAttribute(n, a, t, pk isDefined, r isDefined)
+    opt("*") ~ ident ~ opt("(" ~> ident <~ ")") ~ ":" ~ typeSpecifier ~ opt("!") ^^ { case pk ~ n ~ a ~ _ ~ t ~ r =>
+      DMLAttribute(n, a, t, pk isDefined, r isDefined)
     }
 
   def typeSpecifier: Parser[DMLTypeSpecifier] =
@@ -51,18 +46,18 @@ class DMLParser extends RegexParsers {
       kw("float8") | kw("float") |
       kw("uuid") |
       kw("timestamp")) ^^ DMLSimpleDataType.apply |
-      kw("decimal") ~ "(" ~ integer ~ "," ~ integer ~ ")" ^^ {
-        case _ ~ _ ~ p ~ _ ~ s ~ _ => DMLParametricDataType("decimal", List(p, s))
+      kw("decimal") ~ "(" ~ integer ~ "," ~ integer ~ ")" ^^ { case _ ~ _ ~ p ~ _ ~ s ~ _ =>
+        DMLParametricDataType("decimal", List(p, s))
       } |
       ident ^^ DMLNameType.apply |
-      "[" ~ ident ~ "]" ~ "(" ~ ident ~ ")" ^^ {
-        case _ ~ n ~ _ ~ _ ~ l ~ _ => DMLManyToManyType(n, l)
+      "[" ~ ident ~ "]" ~ "(" ~ ident ~ ")" ^^ { case _ ~ n ~ _ ~ _ ~ l ~ _ =>
+        DMLManyToManyType(n, l)
       } |
-      "[" ~ ident ~ "]" ~ opt("." ~> ident) ^^ {
-        case _ ~ n ~ _ ~ t => DMLOneToManyType(n, t)
+      "[" ~ ident ~ "]" ~ opt("." ~> ident) ^^ { case _ ~ n ~ _ ~ t =>
+        DMLOneToManyType(n, t)
       } |
-      "<" ~ ident ~ ">" ~ opt("." ~> ident) ^^ {
-        case _ ~ n ~ _ ~ t => DMLOneToOneType(n, t)
+      "<" ~ ident ~ ">" ~ opt("." ~> ident) ^^ { case _ ~ n ~ _ ~ t =>
+        DMLOneToOneType(n, t)
       }
 
   def parseModel(src: String): DMLModel =
