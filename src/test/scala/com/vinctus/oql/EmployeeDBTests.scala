@@ -203,23 +203,10 @@ class EmployeeDBTests extends AsyncFreeSpec with Matchers with Test {
   }
 
   "simple many-to-many query" in {
-    test("department { departmentName jobs <id> } <id>") map { result =>
+    test("department { departmentName jobs <id> } <departmentName>") map { result =>
       result shouldBe
         """
           |[
-          |  {
-          |    "departmentName": "IT",
-          |    "jobs": [
-          |      {
-          |        "id": 9,
-          |        "jobTitle": "Programmer"
-          |      },
-          |      {
-          |        "id": 20,
-          |        "jobTitle": "IT Manager"
-          |      }
-          |    ]
-          |  },
           |  {
           |    "departmentName": "Executive",
           |    "jobs": [
@@ -234,6 +221,19 @@ class EmployeeDBTests extends AsyncFreeSpec with Matchers with Test {
           |      {
           |        "id": 5,
           |        "jobTitle": "Administration Vice President"
+          |      }
+          |    ]
+          |  },
+          |  {
+          |    "departmentName": "IT",
+          |    "jobs": [
+          |      {
+          |        "id": 9,
+          |        "jobTitle": "Programmer"
+          |      },
+          |      {
+          |        "id": 20,
+          |        "jobTitle": "IT Manager"
           |      }
           |    ]
           |  }

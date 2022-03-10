@@ -19,20 +19,43 @@ object Main extends App {
   types.setTypeParser(114.asInstanceOf[TypeId], (s: String) => s) // tell node-pg not to parse JSON
   types.setTypeParser(1114.asInstanceOf[TypeId], (s: String) => new js.Date(s"$s+00:00"))
 
-  val db = new OQL_RDB_ScalaJS(readFile("test/cars.dm"))
+  val db = new OQL_RDB_ScalaJS(readFile("test/employee.dm"))
 
   rdb.executeSQL(
     """
-      |CREATE TYPE "color" AS ENUM ('red', 'blue', 'black', 'white', 'gray', 'silver', 'green', 'yellow');
-      |CREATE TABLE "cars" (
-      |  "make" TEXT,
-      |  "color" color
+      |CREATE TABLE "job" (
+      |  "id" INTEGER PRIMARY KEY,
+      |  "jobTitle" TEXT
       |);
-      |INSERT INTO "cars" ("make", "color") VALUES
-      |  ('ferrari', 'red'),
-      |  ('aston martin', 'blue'),
-      |  ('bentley', 'gray'),
-      |  ('ford', 'black');
+      |CREATE TABLE "department" (
+      |  "id" INTEGER PRIMARY KEY,
+      |  "departmentName" TEXT
+      |);
+      |CREATE TABLE "employee" (
+      |  "id" INTEGER PRIMARY KEY,
+      |  "firstName" TEXT,
+      |  "lastName" TEXT,
+      |  "manager" INTEGER,
+      |  "job" INTEGER,
+      |  "department" INTEGER
+      |);
+      |ALTER TABLE "employee" ADD FOREIGN KEY ("manager") REFERENCES "employee";
+      |ALTER TABLE "employee" ADD FOREIGN KEY ("job") REFERENCES "job";
+      |ALTER TABLE "employee" ADD FOREIGN KEY ("department") REFERENCES "department";
+      |INSERT INTO "job" ("id", "jobTitle") VALUES
+      |  (4, 'President'),
+      |  (5, 'Administration Vice President'),
+      |  (9, 'Programmer'),
+      |  (20, 'IT Manager');
+      |INSERT INTO "department" ("id", "departmentName") VALUES
+      |  (9, 'Executive'),
+      |  (6, 'IT');
+      |INSERT INTO "employee" ("id", "firstName", "lastName", "manager", "job", "department") VALUES
+      |  (100, 'Steven', 'King', NULL, 4, 9),
+      |  (101, 'Neena', 'Kochhar', 100, 5, 9),
+      |  (102, 'Lex', 'De Haan', 100, 5, 9),
+      |  (103, 'Alexander', 'Hunold', 102, 20, 6),
+      |  (104, 'Bruce', 'Ernst', 103, 9, 6);
       |""".stripMargin
   )(
     db.connect
@@ -54,7 +77,7 @@ object Main extends App {
   (for
     //    _ <- db.create
 //    _ <- db.entity("t").insert(Map("a" -> "two"))
-    r <- { db.showQuery(); db.queryMany("car [color = 'blue']") }
+    r <- { db.showQuery(); db.queryMany("department { departmentName jobs <id> } <departmentName>") }
   yield r)
     .onComplete {
       case Failure(exception) => exception.printStackTrace()
