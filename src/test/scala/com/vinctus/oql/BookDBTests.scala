@@ -98,7 +98,10 @@ class BookDBTests extends AsyncFreeSpec with Matchers with Test {
   }
 
   "simplest query with select using parameter - js" in {
-    testjs("book [year > :year]", js.Dictionary("year" -> 1880)) map (_ shouldBe `simplest query with select using parameter`)
+    testjs(
+      "book [year > :year]",
+      js.Dictionary("year" -> 1880)
+    ) map (_ shouldBe `simplest query with select using parameter`)
   }
 
   "many-to-one query with dot notation" in {

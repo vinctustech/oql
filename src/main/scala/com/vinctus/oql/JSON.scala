@@ -35,7 +35,10 @@ object JSON {
     def space(): Unit = while (next.isWhitespace) advance()
 
     def chmatch(c: Char): Unit =
-      if (ch != c) error(if (c == EOI) "expected end of input" else s"expected '$c', but found '$prev':\n$json\n${(" " * idx) :+ '^'}")
+      if (ch != c)
+        error(
+          if (c == EOI) "expected end of input" else s"expected '$c', but found '$prev':\n$json\n${(" " * idx) :+ '^'}"
+        )
 
     def delim(c: Char): Unit = {
       chmatch(c)
@@ -172,7 +175,12 @@ object JSON {
     v
   }
 
-  def apply(value: Any, platformSpecific: PartialFunction[Any, String], tab: Int = 2, format: Boolean = false): String = {
+  def apply(
+      value: Any,
+      platformSpecific: PartialFunction[Any, String],
+      tab: Int = 2,
+      format: Boolean = false
+  ): String = {
     val buf = new StringBuilder
     var level = 0
 
@@ -218,15 +226,15 @@ object JSON {
 
     def jsonValue(value: Any): Unit =
       value match {
-        case p if platformSpecific isDefinedAt p        => buf ++= platformSpecific(p)
-        case _: Number | _: java.math.BigDecimal | null => buf ++= String.valueOf(value)
-        case m: collection.Map[_, _]                    => jsonObject(m.toSeq.asInstanceOf[Seq[(String, Any)]])
-        case s: collection.Seq[_] if s.isEmpty          => buf ++= "[]"
-        case s: collection.Seq[_]                       => aggregate('[', s, ']')(jsonValue)
-        case a: Array[_]                                => jsonValue(a.toList)
-        case a: js.Array[_]                             => jsonValue(a.toList)
-        case p: Product                                 => jsonObject(p.productElementNames zip p.productIterator toList)
-        case t: Instant                                 => buf ++= '"' +: ISO.format(t.atOffset(ZoneOffset.UTC)) :+ '"'
+        case p if platformSpecific isDefinedAt p                     => buf ++= platformSpecific(p)
+        case _: Number | _: java.math.BigDecimal | _: Boolean | null => buf ++= String.valueOf(value)
+        case m: collection.Map[_, _]           => jsonObject(m.toSeq.asInstanceOf[Seq[(String, Any)]])
+        case s: collection.Seq[_] if s.isEmpty => buf ++= "[]"
+        case s: collection.Seq[_]              => aggregate('[', s, ']')(jsonValue)
+        case a: Array[_]                       => jsonValue(a.toList)
+        case a: js.Array[_]                    => jsonValue(a.toList)
+        case p: Product                        => jsonObject(p.productElementNames zip p.productIterator toList)
+        case t: Instant                        => buf ++= '"' +: ISO.format(t.atOffset(ZoneOffset.UTC)) :+ '"'
 //        case t: Timestamp                      => jsonValue(t.toInstant.toString) //  | _: Instant  _: java.util.UUID
         case _: String =>
           buf += '"'
@@ -247,11 +255,10 @@ object JSON {
       if (pairs.isEmpty)
         buf ++= "{}"
       else
-        aggregate('{', pairs, '}') {
-          case (k, v) =>
-            jsonValue(k)
-            buf ++= (if (format) ": " else ":")
-            jsonValue(v)
+        aggregate('{', pairs, '}') { case (k, v) =>
+          jsonValue(k)
+          buf ++= (if (format) ": " else ":")
+          jsonValue(v)
         }
 
     jsonValue(value)
