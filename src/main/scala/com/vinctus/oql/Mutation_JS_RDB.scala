@@ -34,8 +34,11 @@ class Mutation_JS_RDB private[oql] (oql: OQL_RDB_JS, entity: Entity) extends Mut
   }
 
   @JSExport("update")
-  def jsUpdate(e: js.Any, updates: js.Any): js.Promise[Unit] =
-    update(if (jsObject(e)) e.asInstanceOf[js.Dictionary[Any]](entity.pk.get.name) else e, toMap(updates)).toJSPromise
+  def jsUpdate(e: js.Any, updates: js.Any): js.Promise[js.Any] =
+    update(
+      if (jsObject(e)) e.asInstanceOf[js.Dictionary[Any]](entity.pk.get.name) else e,
+      toMap(updates)
+    ) map toJS toJSPromise
 
   @JSExport("bulkUpdate")
   def jsBulkUpdate(updates: js.Array[js.Array[js.Any]]): js.Promise[Unit] =

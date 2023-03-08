@@ -76,12 +76,14 @@ object Main extends App {
 
   (for
     //    _ <- db.create
-//    _ <- db.entity("t").insert(Map("a" -> "two"))
-    r <- { db.showQuery(); db.queryMany("department { departmentName jobs <id> } <departmentName>") }
-  yield r)
+    u <- db.entity("employee").update(104, Map("lastName" -> "Lee"))
+    r <- { db.showQuery(); db.queryMany("employee { id firstName lastName }") }
+  yield (u, r))
     .onComplete {
       case Failure(exception) => exception.printStackTrace()
-      case Success(value)     => println(value)
+      case Success((u, r)) =>
+        println(u)
+        println(r)
     }
 
 //    new OQL_NodePG_ScalaJS(g.require("fs").readFileSync("test/json.dm").toString, "localhost", 5432, "postgres", "postgres", "docker", false, 1000, 5)

@@ -20,7 +20,7 @@ class RDBConnection(val dataSource: RDBDataSource)(implicit ec: scala.concurrent
 //      case CreateTableResult(_) => Iterator()
           case QueryResult(table)    => table.data.iterator
           case InsertResult(_, auto) => auto.data.iterator
-//      case UpdateResult(_)      => Iterator()
+          case UpdateResult(_)       => Iterator()
       )
     )
 

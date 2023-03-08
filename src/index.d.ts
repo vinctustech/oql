@@ -1,4 +1,4 @@
-export class QueryBuilder<T> {
+export class QueryBuilder<T = any> {
 
   cond(v: any): QueryBuilder<T>
 
@@ -34,7 +34,7 @@ export class Mutation {
 
   unlink(id1: any, resource: string, id2: any): Promise<void>
 
-  update(id: any, updates: any): Promise<void>
+  update<T = any>(id: any, updates: any): Promise<T>
 
   bulkUpdate(updates: [any, any][]): Promise<void>
 
