@@ -4,7 +4,7 @@ version := "1.1.0-pre.24"
 
 description := "Object Query Language"
 
-scalaVersion := "3.1.1"
+scalaVersion := "3.2.2"
 
 scalacOptions ++= Seq(
   "-deprecation",
@@ -38,7 +38,7 @@ jsEnv := new org.scalajs.jsenv.nodejs.NodeJSEnv()
 
 enablePlugins(ScalablyTypedConverterPlugin)
 
-stTypescriptVersion := "4.2.4"
+stTypescriptVersion := "4.8.4"
 
 stIgnore += "source-map-support"
 
@@ -77,15 +77,15 @@ Test / scalaJSUseTestModuleInitializer := true
 //Test / scalaJSUseTestModuleInitializer := false
 
 Compile / npmDependencies ++= Seq(
-  "pg" -> "8.7.3",
-  "@types/pg" -> "8.6.4",
+  "pg" -> "8.10.0",
+  "@types/pg" -> "8.6.6",
   "source-map-support" -> "0.5.21"
 //  "big.js" -> "6.1.1",
 //  "@types/big.js" -> "6.1.3"
 )
 
 libraryDependencies ++= Seq(
-  "org.scalatest" %%% "scalatest" % "3.2.11" % "test",
+  "org.scalatest" %%% "scalatest" % "3.2.15" % "test",
   "io.github.edadma" %%% "rdb" % "0.1.0-pre.40",
   "com.vinctus" %%% "sjs-utils" % "0.1.0-snapshot.27",
   "com.lihaoyi" %%% "pprint" % "0.7.1"
@@ -98,7 +98,7 @@ libraryDependencies ++= Seq(
 )
 
 libraryDependencies ++= Seq(
-  "io.github.cquiroz" %%% "scala-java-time" % "2.3.0"
+  "io.github.cquiroz" %%% "scala-java-time" % "2.5.0"
 )
 
 mainClass := Some("com.vinctus." + "oql" + ".Main")
