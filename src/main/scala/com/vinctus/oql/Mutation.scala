@@ -96,7 +96,7 @@ class Mutation private[oql] (oql: AbstractOQL, entity: Entity)(implicit ec: scal
       new DynamicMap(entity.pk match {
         case None => obj to VectorMap
         case Some(pk) =>
-          obj.to(VectorMap) + (pk.name -> rs.get(0)) // only one value is being requested: the primary key
+          obj.to(VectorMap) + (pk.name -> rs.get(0).value) // only one value is being requested: the primary key
       })
     }
   end insert

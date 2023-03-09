@@ -31,4 +31,4 @@ class NodePGResultSet(rs: QueryArrayResult[js.Array[js.Any]]) extends OQLResultS
 
 }
 
-case class NodePGResultSetValue(v: Any) extends OQLResultSetValue
+case class NodePGResultSetValue(value: Any) extends OQLResultSetValue

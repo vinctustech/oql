@@ -130,7 +130,7 @@ abstract class AbstractOQL(dm: String, val ds: SQLDataSource, conv: Conversions)
 
               result
             case n @ ManyToOneNode(_, element) =>
-              if (n.idx.isDefined && resultSet.get(n.idx.get).v == null) null
+              if (n.idx.isDefined && resultSet.get(n.idx.get).value == null) null
               else buildResult(element, resultSet)
             case n @ OneToOneNode(query, element) =>
               val sequenceResultSet = resultSet.getResultSet(n.idx)
@@ -167,7 +167,7 @@ abstract class AbstractOQL(dm: String, val ds: SQLDataSource, conv: Conversions)
                 if (n.typed) ds.reverseMapType(resultSet getString (n.idx + 1))
                 else expr.typ
 
-              (v, v.v, typ) match {
+              (v, v.value, typ) match {
                 case (_, s: String, IntegerType)                   => s.toInt
                 case (_, s: String, FloatType)                     => s.toDouble
                 case (_, s: String, BigintType)                    => conv.bigint(s)
@@ -176,7 +176,7 @@ abstract class AbstractOQL(dm: String, val ds: SQLDataSource, conv: Conversions)
                 case (_, d: String, DecimalType(precision, scale)) => conv.decimal(d, precision, scale)
                 case (NodePGResultSetValue(v), _, JSONType)        => conv.jsonNodePG(v.asInstanceOf[js.Any])
                 case (SequenceResultSetValue(v), _, JSONType)      => conv.jsonSequence(v)
-                case _                                             => v.v
+                case _                                             => v.value
               }
             case ObjectNode(properties) =>
               val result = newResultBuilder().newObject

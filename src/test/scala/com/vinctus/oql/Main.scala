@@ -28,7 +28,7 @@ object Main extends App {
       |  "jobTitle" TEXT
       |);
       |CREATE TABLE "department" (
-      |  "id" INTEGER PRIMARY KEY,
+      |  "id" INTEGER AUTO PRIMARY KEY,
       |  "departmentName" TEXT
       |);
       |CREATE TABLE "employee" (
@@ -74,15 +74,18 @@ object Main extends App {
 //      |""".stripMargin
 //  )
 
+  import com.vinctus.sjs_utils.{jsObject, toJS, toMap}
+
   (for
     //    _ <- db.create
 //    u <- db.entity("employee").update(104, Map("lastName" -> "Lee"))
+    i <- { db.entity("department").insert(Map("departmentName" -> "RnR")) }
     r <- { db.showQuery(); db.queryMany("department") }
-  yield (r))
+  yield (i, r))
     .onComplete {
       case Failure(exception) => exception.printStackTrace()
-      case Success((r))       =>
-//        println(u)
+      case Success((i, r)) =>
+        println(i)
         println(r)
     }
 

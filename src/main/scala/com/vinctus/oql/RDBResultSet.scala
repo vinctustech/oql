@@ -51,4 +51,4 @@ def unpack(v: Value): Any =
     case NullValue()           => null
     case EnumValue(value, typ) => typ.labels(value)
 
-case class RDBResultSetValue(v: Any) extends OQLResultSetValue
+case class RDBResultSetValue(value: Any) extends OQLResultSetValue

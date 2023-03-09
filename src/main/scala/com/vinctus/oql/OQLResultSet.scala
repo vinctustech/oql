@@ -18,4 +18,4 @@ abstract class OQLResultSet {
 
 }
 
-abstract class OQLResultSetValue { val v: Any }
+abstract class OQLResultSetValue { val value: Any }

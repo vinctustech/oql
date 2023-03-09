@@ -35,4 +35,4 @@ class SequenceResultSet(list: IndexedSeq[IndexedSeq[Any]]) extends OQLResultSet 
 
 }
 
-case class SequenceResultSetValue(v: Any) extends OQLResultSetValue
+case class SequenceResultSetValue(value: Any) extends OQLResultSetValue
