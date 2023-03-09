@@ -68,11 +68,11 @@ Add the following lines to your `build.sbt`:
 ```sbt
 externalResolvers += "OQL" at "https://maven.pkg.github.com/vinctustech/oql"
 
-libraryDependencies += "com.vinctus" %%% "-vinctus-oql" % "1.0.0-RC.3.23"
+libraryDependencies += "com.vinctus" %%% "-vinctus-oql" % "1.1.0-pre.25"
 
 Compile / npmDependencies ++= Seq(
-  "pg" -> "8.5.1",
-  "@types/pg" -> "7.14.7"
+  "pg" -> "8.10.0",
+  "@types/pg" -> "8.6.6"
 )
 ```
 
