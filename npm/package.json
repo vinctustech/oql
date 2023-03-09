@@ -1,0 +1,11 @@
+{
+  "name": "@vinctus/oql",
+  "version": "1.1.0-pre.25",
+  "description": "Object Query Language",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Vinctus Technologies Inc.",
+  "license": "ISC"
+}
