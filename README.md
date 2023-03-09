@@ -73,6 +73,9 @@ libraryDependencies += "com.vinctus" %%% "-vinctus-oql" % "1.1.0"
 Compile / npmDependencies ++= Seq(
   "pg" -> "8.10.0",
   "@types/pg" -> "8.6.6"
+  "source-map-support" -> "0.5.21",
+  "big.js" -> "6.1.1",
+  "@types/big.js" -> "6.1.3"
 )
 ```
 
