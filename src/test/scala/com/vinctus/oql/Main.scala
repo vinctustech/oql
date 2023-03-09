@@ -76,13 +76,13 @@ object Main extends App {
 
   (for
     //    _ <- db.create
-    u <- db.entity("employee").update(104, Map("lastName" -> "Lee"))
-    r <- { db.showQuery(); db.queryMany("employee { id firstName lastName }") }
-  yield (u, r))
+//    u <- db.entity("employee").update(104, Map("lastName" -> "Lee"))
+    r <- { db.showQuery(); db.queryMany("department") }
+  yield (r))
     .onComplete {
       case Failure(exception) => exception.printStackTrace()
-      case Success((u, r)) =>
-        println(u)
+      case Success((r))       =>
+//        println(u)
         println(r)
     }
 
