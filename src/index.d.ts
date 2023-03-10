@@ -2,12 +2,6 @@ export class QueryBuilder<T = any> {
 
   cond(v: any): QueryBuilder<T>
 
-//   add(attribute: QueryBuilder): QueryBuilder
-//
-//   add(query: String): QueryBuilder
-//
-//   project(resource: string, ...attributes: string[]): QueryBuilder
-
   query(oql: string, parameters?: any): QueryBuilder<T>
 
   select(oql: string, parameters?: any): QueryBuilder<T>
@@ -60,7 +54,7 @@ export class OQL {
 
   count(oql: string, parameters?: any, fixed?: string, at?: any): Promise<number>
 
-  raw(sql: string, values?: any[]): Promise<any[][]>
+  raw<T = any>(sql: string, values?: any[]): Promise<T[][]>
 
 }
 
@@ -82,7 +76,7 @@ export class OQL_MEM {
 
   count(oql: string, parameters?: any, fixed?: string, at?: any): Promise<number>
 
-  raw(sql: string, values?: any[]): Promise<any[][]>
+  raw<T = any>(sql: string, values?: any[]): Promise<T[][]>
 
   rawMulti(sql: string): Promise<void>
 
