@@ -54,7 +54,7 @@ export class OQL {
 
   count(oql: string, parameters?: any, fixed?: string, at?: any): Promise<number>
 
-  raw<T = any>(sql: string, values?: any[]): Promise<T[][]>
+  raw<T = any>(sql: string, values?: any[]): Promise<T[]>
 
 }
 
@@ -76,7 +76,7 @@ export class OQL_MEM {
 
   count(oql: string, parameters?: any, fixed?: string, at?: any): Promise<number>
 
-  raw<T = any>(sql: string, values?: any[]): Promise<T[][]>
+  raw<T = any>(sql: string, values?: any[]): Promise<T[]>
 
   rawMulti(sql: string): Promise<void>
 
