@@ -76,12 +76,14 @@ object Main extends App {
 
   import com.vinctus.sjs_utils.{jsObject, toJS, toMap}
 
+  db.showQuery()
+
   (for
     //    _ <- db.create
-    u <- db.entity("employee").update(104, Map("lastName" -> "Lee"))
-//    i <- { db.entity("department").insert(Map("departmentName" -> "RnR")) }
-    r <- { db.showQuery(); db.queryMany("employee") }
-  yield (u, r))
+//    u <- db.entity("employee").update(104, Map("lastName" -> "Lee"))
+    i <- { db.entity("department").insert(Map("departmentName" -> "RnR")) }
+    r <- { db.showQuery(); db.queryMany("department") }
+  yield (i, r))
     .onComplete {
       case Failure(exception) => exception.printStackTrace()
       case Success((u, r)) =>

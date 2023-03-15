@@ -13,12 +13,12 @@ class Mutation private[oql] (oql: AbstractOQL, entity: Entity)(implicit ec: scal
 //    insert(implicitly[Mappable[T]].toMap(obj)) map map2cc[T] //implicitly[Mappable[T]].fromMap(m))
 
   def insert(obj: collection.Map[String, Any]): Future[DynamicMap] =
-    // check if the object has a primary key
-    entity.pk foreach { pk =>
-      // object being inserted should not have a primary key property
-      if (obj.contains(pk.name)) // todo: && obj(pk.name).asInstanceOf[js.UndefOr[_]] != js.undefined
-        sys.error(s"insert(): object has a primary key property: $pk = ${obj(pk.name)}")
-    }
+//    // check if the object has a primary key
+//    entity.pk foreach { pk =>
+//      // object being inserted should not have a primary key property
+//      if (obj.contains(pk.name)) // todo: && obj(pk.name).asInstanceOf[js.UndefOr[_]] != js.undefined
+//        sys.error(s"insert(): object has a primary key property: $pk = ${obj(pk.name)}")
+//    }
 
     // get sub-map of all column attributes
     val attrs =
@@ -44,7 +44,7 @@ class Mutation private[oql] (oql: AbstractOQL, entity: Entity)(implicit ec: scal
     // get key set of all attributes
     val allKeys = entity.attributes.keySet
 
-    // check if object contains undefined attributes
+    // check if object contains properties not defined for a entity
     if ((keyset diff allKeys).nonEmpty)
       sys.error(
         s"insert(): found properties not defined for entity '${entity.name}': ${(keyset diff allKeys) map (p => s"'$p'") mkString ", "}"
@@ -60,7 +60,7 @@ class Mutation private[oql] (oql: AbstractOQL, entity: Entity)(implicit ec: scal
 
     // build list of values to insert
     val pairs =
-      attrsNoPK flatMap {
+      attrs flatMap {
         case (k, Attribute(name, column, pk, required, typ)) if typ.isDataType && obj.contains(k) =>
           List(k -> oql.render(obj(k), Option.when(typ == JSONType)(typ.asDatatype)))
         case (k, Attribute(_, _, _, _, ManyToOneType(mtoEntity))) if obj contains k =>
