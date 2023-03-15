@@ -137,7 +137,7 @@ class Mutation private[oql] (oql: AbstractOQL, entity: Entity)(implicit ec: scal
       case None    => sys.error(s"attribute '$attribute' does not exist on entity '${entity.name}'")
     }
 
-  def update(id: Any, updates: collection.Map[String, Any]): Future[DynamicMap] =
+  def update(id: Any, updates: collection.Map[String, Any]): Future[VectorMap[String, Any]] =
     // check if updates is empty
     if (updates.isEmpty)
       sys.error(s"update: empty update: $id")
@@ -198,11 +198,10 @@ class Mutation private[oql] (oql: AbstractOQL, entity: Entity)(implicit ec: scal
 
     // execute update command (to get a future)
     oql.connect.command(command.toString) map { _ =>
-      new DynamicMap(entity.pk match {
-        case None => updates to VectorMap
-        case Some(pk) =>
-          updates.to(VectorMap) + (pk.name -> id)
-      })
+      entity.pk match {
+        case None     => updates to VectorMap
+        case Some(pk) => (VectorMap(pk.name -> id) ++ updates) to VectorMap
+      }
     }
   end update
 
