@@ -81,7 +81,7 @@ object Main extends App {
   (for
     //    _ <- db.create
 //    u <- db.entity("employee").update(104, Map("lastName" -> "Lee"))
-    i <- { db.entity("department").insert(Map("departmentName" -> "RnR")) }
+    i <- { db.entity("department").insert(Map("id" -> 123, "departmentName" -> "RnR")) }
     r <- { db.showQuery(); db.queryMany("department") }
   yield (i, r))
     .onComplete {
