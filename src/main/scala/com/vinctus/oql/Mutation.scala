@@ -6,13 +6,14 @@ import com.vinctus.sjs_utils.DynamicMap
 import scala.collection.immutable.VectorMap
 import scala.concurrent.Future
 import scala.language.postfixOps
+import scala.scalajs.js
 
 class Mutation private[oql] (oql: AbstractOQL, entity: Entity)(implicit ec: scala.concurrent.ExecutionContext) {
 
 //  def insert[T <: Product: Mappable](obj: T): Future[T] =
 //    insert(implicitly[Mappable[T]].toMap(obj)) map map2cc[T] //implicitly[Mappable[T]].fromMap(m))
 
-  def insert(obj: collection.Map[String, Any]): Future[DynamicMap] =
+  def insert(obj: collection.Map[String, Any]): Future[VectorMap[String, Any]] =
 //    // check if the object has a primary key
 //    entity.pk foreach { pk =>
 //      // object being inserted should not have a primary key property
@@ -93,11 +94,10 @@ class Mutation private[oql] (oql: AbstractOQL, entity: Entity)(implicit ec: scal
       if (!rs.next)
         sys.error("insert: empty result set")
 
-      new DynamicMap(entity.pk match {
-        case None => obj to VectorMap
-        case Some(pk) =>
-          obj.to(VectorMap) + (pk.name -> rs.get(0).value) // only one value is being requested: the primary key
-      })
+      entity.pk match {
+        case None     => obj to VectorMap
+        case Some(pk) => (VectorMap(pk.name -> rs.get(0).value) ++ obj) to VectorMap
+      }
     }
   end insert
 
@@ -138,10 +138,6 @@ class Mutation private[oql] (oql: AbstractOQL, entity: Entity)(implicit ec: scal
     }
 
   def update(id: Any, updates: collection.Map[String, Any]): Future[VectorMap[String, Any]] =
-    // check if updates is empty
-    if (updates.isEmpty)
-      sys.error(s"update: empty update: $id")
-
     // check if updates has a primary key
     entity.pk foreach (pk =>
       // object being updated should not have it's primary key changed
@@ -172,9 +168,16 @@ class Mutation private[oql] (oql: AbstractOQL, entity: Entity)(implicit ec: scal
         s"extrinsic properties not found in entity '${entity.name}': ${(keyset diff attrsNoPKKeys) map (p => s"'$p'") mkString ", "}"
       )
 
+    // removed properties with a value of undefined
+    val updatesWithoutUndefined = updates filterNot { case (k, v) => v == js.undefined }
+
+    // check if updates is empty
+    if (updatesWithoutUndefined.isEmpty)
+      sys.error(s"update: empty update: $id")
+
     // build list of attributes to update
     val pairs =
-      updates map { case (k, v) =>
+      updatesWithoutUndefined map { case (k, v) =>
         val v1 =
           if (v.isInstanceOf[Map[_, _]])
             entity.attributes(k) match {
@@ -199,13 +202,11 @@ class Mutation private[oql] (oql: AbstractOQL, entity: Entity)(implicit ec: scal
     // execute update command (to get a future)
     oql.connect.command(command.toString) map { _ =>
       entity.pk match {
-        case None     => updates to VectorMap
-        case Some(pk) => (VectorMap(pk.name -> id) ++ updates) to VectorMap
+        case None     => updatesWithoutUndefined to VectorMap
+        case Some(pk) => (VectorMap(pk.name -> id) ++ updatesWithoutUndefined) to VectorMap
       }
     }
   end update
-
-  // update account set name = __data__.name from (values (1, 'a'), (2, 'b')) as __data__ (id, name) where account.id = __data__.id
 
   def bulkUpdate(updates: List[(Any, collection.Map[String, Any])]): Future[Unit] = {
     if (updates.isEmpty)

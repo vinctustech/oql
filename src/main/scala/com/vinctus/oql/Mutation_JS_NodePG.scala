@@ -37,7 +37,7 @@ class Mutation_JS_NodePG private[oql] (oql: OQL_NodePG_JS, entity: Entity) exten
   def jsUpdate(e: js.Any, updates: js.Any): js.Promise[js.Any] =
     update(
       if (jsObject(e)) e.asInstanceOf[js.Dictionary[Any]](entity.pk.get.name) else e,
-      toMap(updates)
+      toMap(updates, false)
     ) map toJS toJSPromise
 
   @JSExport("bulkUpdate")

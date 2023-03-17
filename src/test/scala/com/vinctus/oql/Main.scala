@@ -11,7 +11,7 @@ import scala.util.{Failure, Success}
 
 import io.github.edadma.rdb
 
-object Main extends App {
+@main def run(): Unit = {
 
   def readFile(f: String) = g.require("fs").readFileSync(f).toString
 
@@ -19,49 +19,80 @@ object Main extends App {
   types.setTypeParser(114.asInstanceOf[TypeId], (s: String) => s) // tell node-pg not to parse JSON
   types.setTypeParser(1114.asInstanceOf[TypeId], (s: String) => new js.Date(s"$s+00:00"))
 
-  val db = new OQL_RDB_ScalaJS(readFile("test/employee.dm"))
+//  val db = new OQL_RDB_ScalaJS(readFile("test/employee.dm"))
+  val db: OQL_NodePG_JS =
+    new OQL_NodePG_JS(
+      """
+        |entity test {
+        | *id: integer
+        |  a: integer
+        |  b: integer
+        |}
+        |""".stripMargin,
+      "localhost",
+      5432,
+      "postgres",
+      "postgres",
+      "docker",
+      false,
+      1000,
+      5
+    )
 
-  rdb.executeSQL(
-    """
-      |CREATE TABLE "job" (
-      |  "id" INTEGER PRIMARY KEY,
-      |  "jobTitle" TEXT
-      |);
-      |CREATE TABLE "department" (
-      |  "id" INTEGER AUTO PRIMARY KEY,
-      |  "departmentName" TEXT
-      |);
-      |CREATE TABLE "employee" (
-      |  "id" INTEGER PRIMARY KEY,
-      |  "firstName" TEXT,
-      |  "lastName" TEXT,
-      |  "manager" INTEGER,
-      |  "job" INTEGER,
-      |  "department" INTEGER
-      |);
-      |ALTER TABLE "employee" ADD FOREIGN KEY ("manager") REFERENCES "employee";
-      |ALTER TABLE "employee" ADD FOREIGN KEY ("job") REFERENCES "job";
-      |ALTER TABLE "employee" ADD FOREIGN KEY ("department") REFERENCES "department";
-      |INSERT INTO "job" ("id", "jobTitle") VALUES
-      |  (4, 'President'),
-      |  (5, 'Administration Vice President'),
-      |  (9, 'Programmer'),
-      |  (20, 'IT Manager');
-      |INSERT INTO "department" ("id", "departmentName") VALUES
-      |  (9, 'Executive'),
-      |  (6, 'IT');
-      |INSERT INTO "employee" ("id", "firstName", "lastName", "manager", "job", "department") VALUES
-      |  (100, 'Steven', 'King', NULL, 4, 9),
-      |  (101, 'Neena', 'Kochhar', 100, 5, 9),
-      |  (102, 'Lex', 'De Haan', 100, 5, 9),
-      |  (103, 'Alexander', 'Hunold', 102, 20, 6),
-      |  (104, 'Bruce', 'Ernst', 103, 9, 6);
-      |""".stripMargin
-  )(
-    db.connect
-      .asInstanceOf[RDBConnection]
-      .db
-  )
+  db.showQuery()
+
+  db.entity("test").jsUpdate(1, js.Dynamic.literal(ax = js.undefined)).toFuture.onComplete {
+    case Failure(exception) => exception.printStackTrace()
+    case Success(u) =>
+      db.jsQueryMany("test").toFuture.onComplete {
+        case Failure(exception) => exception.printStackTrace()
+        case Success(r) =>
+          println(stringify(u))
+          println(stringify(r))
+      }
+  }
+
+  //  rdb.executeSQL(
+//    """
+//      |CREATE TABLE "job" (
+//      |  "id" INTEGER PRIMARY KEY,
+//      |  "jobTitle" TEXT
+//      |);
+//      |CREATE TABLE "department" (
+//      |  "id" INTEGER AUTO PRIMARY KEY,
+//      |  "departmentName" TEXT
+//      |);
+//      |CREATE TABLE "employee" (
+//      |  "id" INTEGER PRIMARY KEY,
+//      |  "firstName" TEXT,
+//      |  "lastName" TEXT,
+//      |  "manager" INTEGER,
+//      |  "job" INTEGER,
+//      |  "department" INTEGER
+//      |);
+//      |ALTER TABLE "employee" ADD FOREIGN KEY ("manager") REFERENCES "employee";
+//      |ALTER TABLE "employee" ADD FOREIGN KEY ("job") REFERENCES "job";
+//      |ALTER TABLE "employee" ADD FOREIGN KEY ("department") REFERENCES "department";
+//      |INSERT INTO "job" ("id", "jobTitle") VALUES
+//      |  (4, 'President'),
+//      |  (5, 'Administration Vice President'),
+//      |  (9, 'Programmer'),
+//      |  (20, 'IT Manager');
+//      |INSERT INTO "department" ("id", "departmentName") VALUES
+//      |  (9, 'Executive'),
+//      |  (6, 'IT');
+//      |INSERT INTO "employee" ("id", "firstName", "lastName", "manager", "job", "department") VALUES
+//      |  (100, 'Steven', 'King', NULL, 4, 9),
+//      |  (101, 'Neena', 'Kochhar', 100, 5, 9),
+//      |  (102, 'Lex', 'De Haan', 100, 5, 9),
+//      |  (103, 'Alexander', 'Hunold', 102, 20, 6),
+//      |  (104, 'Bruce', 'Ernst', 103, 9, 6);
+//      |""".stripMargin
+//  )(
+//    db.connect
+//      .asInstanceOf[RDBConnection]
+//      .db
+//  )
 
 //  val db = new OQL_RDB_ScalaJS(
 //    """
@@ -74,22 +105,22 @@ object Main extends App {
 //      |""".stripMargin
 //  )
 
-  import com.vinctus.sjs_utils.{jsObject, toJS, toMap}
-
-  db.showQuery()
-
-  (for
-    //    _ <- db.create
-//    u <- db.entity("employee").update(104, Map("lastName" -> "Lee"))
-    i <- { db.entity("department").insert(Map("id" -> 123, "departmentName" -> "RnR")) }
-    r <- { db.showQuery(); db.queryMany("department") }
-  yield (i, r))
-    .onComplete {
-      case Failure(exception) => exception.printStackTrace()
-      case Success((u, r)) =>
-        println(u)
-        println(r)
-    }
+//  import com.vinctus.sjs_utils.{jsObject, toJS, toMap}
+//
+//  db.showQuery()
+//
+//  (for
+//    //    _ <- db.create
+//    u <- db.entity("employee").update(104, Map("firstName" -> js.undefined, "lastName" -> "Lee"))
+////    i <- { db.entity("department").insert(Map("id" -> 123, "departmentName" -> "RnR")) }
+//    r <- { db.showQuery(); db.queryMany("employee") }
+//  yield (u, r))
+//    .onComplete {
+//      case Failure(exception) => exception.printStackTrace()
+//      case Success((u, r)) =>
+//        println(u)
+//        println(r)
+//    }
 
 //    new OQL_NodePG_ScalaJS(g.require("fs").readFileSync("test/json.dm").toString, "localhost", 5432, "postgres", "postgres", "docker", false, 1000, 5)
   // new OQL_NodePG_JS(g.require("fs").readFileSync("test/json.dm").toString, "localhost", 5432, "postgres", "postgres", "docker", false, 1000, 5)
