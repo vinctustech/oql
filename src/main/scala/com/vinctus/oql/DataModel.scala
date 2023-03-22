@@ -140,14 +140,14 @@ class DataModel(model: DMLModel, dml: String) {
           if (self.size > 1)
             printError(
               link.pos,
-              s"junction entity '${linkinfo.entity.name}' has more than one attribute of type '${link.s}'",
+              s"junction entity '${linkinfo.entity.name}' has more than one attribute of type '${e.name}'",
               dml
             )
 
           if (self.size < 1)
             printError(
               link.pos,
-              s"junction entity '${linkinfo.entity.name}' has no attributes of type '${link.s}'",
+              s"junction entity '${linkinfo.entity.name}' has no attributes of type '${e.name}'",
               dml
             )
 
@@ -161,14 +161,14 @@ class DataModel(model: DMLModel, dml: String) {
           if (target.size > 1)
             printError(
               link.pos,
-              s"junction entity '${linkinfo.entity.name}' has more than one attribute of type '${link.s}'",
+              s"junction entity '${linkinfo.entity.name}' has more than one attribute of type '${entity.s}'",
               dml
             )
 
           if (target.size < 1)
             printError(
               link.pos,
-              s"junction entity '${linkinfo.entity.name}' has no attributes of type '${link.s}'",
+              s"junction entity '${linkinfo.entity.name}' has no attributes of type '${entity.s}'",
               dml
             )
 
