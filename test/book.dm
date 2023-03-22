@@ -8,5 +8,5 @@ entity book {
 entity author {
  *id (pk_author_id): bigint
   name: text
-  books: [book]
+  books: [book].author
 }

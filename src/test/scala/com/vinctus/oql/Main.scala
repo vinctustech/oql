@@ -23,15 +23,15 @@ import io.github.edadma.rdb
     """
       |entity b {
       | *id: int
-      |  a (a_id): a
+      |  a: a
+      |  other: a
       |}
       |
       |entity a {
       | *id: int
       |  n: text
-      |  b: [b]
+      |  bs: [b].a
       |}
-      |
       |""".trim.stripMargin
   )
 
@@ -99,7 +99,8 @@ import io.github.edadma.rdb
     """
       |CREATE TABLE "b" (
       |  "id" INTEGER PRIMARY KEY,
-      |  "a" INTEGER
+      |  "a" INTEGER,
+      |  "other" INTEGER
       |);
       |CREATE TABLE "a" (
       |  "id" INTEGER AUTO PRIMARY KEY,
@@ -108,10 +109,13 @@ import io.github.edadma.rdb
       |ALTER TABLE "b" ADD FOREIGN KEY ("a") REFERENCES "a";
       |INSERT INTO "b" ("id", "a") VALUES
       |  (1, 1),
-      |  (2, 2);
+      |  (1, 2),
+      |  (2, 2),
+      |  (2, 3);
       |INSERT INTO "a" ("id", "n") VALUES
-      |  (1, 'asdf'),
-      |  (2, 'zxcv');
+      |  (1, 'one'),
+      |  (2, 'two'),
+      |  (3, 'three');
       |""".stripMargin
   )(
     db.connect
@@ -181,12 +185,12 @@ import io.github.edadma.rdb
     //    _ <- db.create
 //    u <- db.entity("employee").update(104, Map("firstName" -> js.undefined, "lastName" -> "Lee"))
 //    i <- { db.entity("department").insert(Map("id" -> 123, "departmentName" -> "RnR")) }
-    r <- { db.showQuery(); db.queryMany("employee {previous {name}}") }
-  yield (u, r))
+    r <- { db.showQuery(); db.queryMany("b {id a {id} other {id}}") } // a {* bs}
+  yield (r))
     .onComplete {
       case Failure(exception) => exception.printStackTrace()
-      case Success((u, r)) =>
-        println(u)
+      case Success((r))       =>
+//        println(u)
         println(r)
     }
 
