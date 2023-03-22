@@ -21,33 +21,49 @@ import io.github.edadma.rdb
 
   val db = new OQL_RDB_ScalaJS(
     """
-      |entity employee {
-      | *id: bigint
-      |  firstName: text
-      |  lastName: text
-      |  manager: employee
-      |  job: job
-      |  department: department
-      |  previous: department
+      |entity b {
+      | *id: int
+      |  a (a_id): a
       |}
       |
-      |entity job {
-      | *id: bigint
-      |  jobTitle: text
-      |  employees: [employee]
-      |  departments: [department] (employee)
+      |entity a {
+      | *id: int
+      |  n: text
+      |  b: [b]
       |}
       |
-      |entity department {
-      | *id: bigint
-      |  departmentName: text
-      |  employees: [employee]
-      |  jobs: [job] (employee)
-      |}
       |""".trim.stripMargin
   )
 
-//  val db: OQL_NodePG_JS =
+//  val db = new OQL_RDB_ScalaJS(
+//    """
+//      |entity employee {
+//      | *id: bigint
+//      |  firstName: text
+//      |  lastName: text
+//      |  manager: employee
+//      |  job: job
+//      |  department: department
+//      |  previous: department
+//      |}
+//      |
+//      |entity job {
+//      | *id: bigint
+//      |  jobTitle: text
+//      |  employees: [employee]
+//      |  departments: [department] (employee)
+//      |}
+//      |
+//      |entity department {
+//      | *id: bigint
+//      |  departmentName: text
+//      |  employees: [employee]
+//      |  jobs: [job] (employee)
+//      |}
+//      |""".trim.stripMargin
+//  )
+
+  //  val db: OQL_NodePG_JS =
 //    new OQL_NodePG_JS(
 //      """
 //        |entity test {
@@ -81,48 +97,72 @@ import io.github.edadma.rdb
 
   rdb.executeSQL(
     """
-      |CREATE TABLE "job" (
+      |CREATE TABLE "b" (
       |  "id" INTEGER PRIMARY KEY,
-      |  "jobTitle" TEXT
+      |  "a" INTEGER
       |);
-      |CREATE TABLE "department" (
+      |CREATE TABLE "a" (
       |  "id" INTEGER AUTO PRIMARY KEY,
-      |  "departmentName" TEXT
+      |  "n" TEXT
       |);
-      |CREATE TABLE "employee" (
-      |  "id" INTEGER PRIMARY KEY,
-      |  "firstName" TEXT,
-      |  "lastName" TEXT,
-      |  "manager" INTEGER,
-      |  "job" INTEGER,
-      |  "department" INTEGER,
-      |  "previous" INTEGER
-      |);
-      |ALTER TABLE "employee" ADD FOREIGN KEY ("manager") REFERENCES "employee";
-      |ALTER TABLE "employee" ADD FOREIGN KEY ("job") REFERENCES "job";
-      |ALTER TABLE "employee" ADD FOREIGN KEY ("department") REFERENCES "department";
-      |ALTER TABLE "employee" ADD FOREIGN KEY ("previous") REFERENCES "department";
-      |INSERT INTO "job" ("id", "jobTitle") VALUES
-      |  (4, 'President'),
-      |  (5, 'Administration Vice President'),
-      |  (9, 'Programmer'),
-      |  (20, 'IT Manager');
-      |INSERT INTO "department" ("id", "departmentName") VALUES
-      |  (9, 'Executive'),
-      |  (5, 'Research'),
-      |  (6, 'IT');
-      |INSERT INTO "employee" ("id", "firstName", "lastName", "manager", "job", "department", "previous") VALUES
-      |  (100, 'Steven', 'King', NULL, 4, 9, NULL),
-      |  (101, 'Neena', 'Kochhar', 100, 5, 9, NULL),
-      |  (102, 'Lex', 'De Haan', 100, 5, 9, NULL),
-      |  (103, 'Alexander', 'Hunold', 102, 20, 6, NULL),
-      |  (104, 'Bruce', 'Ernst', 103, 9, 6, 5);
+      |ALTER TABLE "b" ADD FOREIGN KEY ("a") REFERENCES "a";
+      |INSERT INTO "b" ("id", "a") VALUES
+      |  (1, 1),
+      |  (2, 2);
+      |INSERT INTO "a" ("id", "n") VALUES
+      |  (1, 'asdf'),
+      |  (2, 'zxcv');
       |""".stripMargin
   )(
     db.connect
       .asInstanceOf[RDBConnection]
       .db
   )
+
+//  rdb.executeSQL(
+//    """
+//      |CREATE TABLE "job" (
+//      |  "id" INTEGER PRIMARY KEY,
+//      |  "jobTitle" TEXT
+//      |);
+//      |CREATE TABLE "department" (
+//      |  "id" INTEGER AUTO PRIMARY KEY,
+//      |  "departmentName" TEXT
+//      |);
+//      |CREATE TABLE "employee" (
+//      |  "id" INTEGER PRIMARY KEY,
+//      |  "firstName" TEXT,
+//      |  "lastName" TEXT,
+//      |  "manager" INTEGER,
+//      |  "job" INTEGER,
+//      |  "department" INTEGER,
+//      |  "previous" INTEGER
+//      |);
+//      |ALTER TABLE "employee" ADD FOREIGN KEY ("manager") REFERENCES "employee";
+//      |ALTER TABLE "employee" ADD FOREIGN KEY ("job") REFERENCES "job";
+//      |ALTER TABLE "employee" ADD FOREIGN KEY ("department") REFERENCES "department";
+//      |ALTER TABLE "employee" ADD FOREIGN KEY ("previous") REFERENCES "department";
+//      |INSERT INTO "job" ("id", "jobTitle") VALUES
+//      |  (4, 'President'),
+//      |  (5, 'Administration Vice President'),
+//      |  (9, 'Programmer'),
+//      |  (20, 'IT Manager');
+//      |INSERT INTO "department" ("id", "departmentName") VALUES
+//      |  (9, 'Executive'),
+//      |  (5, 'Research'),
+//      |  (6, 'IT');
+//      |INSERT INTO "employee" ("id", "firstName", "lastName", "manager", "job", "department", "previous") VALUES
+//      |  (100, 'Steven', 'King', NULL, 4, 9, NULL),
+//      |  (101, 'Neena', 'Kochhar', 100, 5, 9, NULL),
+//      |  (102, 'Lex', 'De Haan', 100, 5, 9, NULL),
+//      |  (103, 'Alexander', 'Hunold', 102, 20, 6, NULL),
+//      |  (104, 'Bruce', 'Ernst', 103, 9, 6, 5);
+//      |""".stripMargin
+//  )(
+//    db.connect
+//      .asInstanceOf[RDBConnection]
+//      .db
+//  )
 
 //  val db = new OQL_RDB_ScalaJS(
 //    """
@@ -139,7 +179,7 @@ import io.github.edadma.rdb
 
   (for
     //    _ <- db.create
-    u <- db.entity("employee").update(104, Map("firstName" -> js.undefined, "lastName" -> "Lee"))
+//    u <- db.entity("employee").update(104, Map("firstName" -> js.undefined, "lastName" -> "Lee"))
 //    i <- { db.entity("department").insert(Map("id" -> 123, "departmentName" -> "RnR")) }
     r <- { db.showQuery(); db.queryMany("employee {previous {name}}") }
   yield (u, r))
