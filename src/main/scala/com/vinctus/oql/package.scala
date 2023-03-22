@@ -26,6 +26,7 @@ package object oql {
       Console.err.println(s"${pos.line}: $msg\n${pos.longString}")
 //      printError(pos.line, pos.col, msg, input)
 
+    parsingError = true
     null
   }
 

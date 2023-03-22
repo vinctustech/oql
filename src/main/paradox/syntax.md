@@ -43,7 +43,7 @@ An "Entity-Relationship" style language is used to describe the database.  Only 
     - `EntityName` representing the many-to-one relationship (from the point of view of the current entity). This is the entity relationship type that corresponds to a table column that is a foreign key.
     - `[ EntityName ]` or `[ EntityName ] . AttributeName` representing the one-to-many relationship (from the point of view of the current entity). This is the array type that represents all the entities (rows) that are referencing the current entity.
     - `[ EntityName ] ( EntityName )` or `[ EntityName ] . AttributeName ( EntityName )` representing the many-to-many relationship.  The second `EntityName` in parentheses refers to the junction or link entity (table).
-    - `< EntityName >` or `< EntityName > . AttributeName` representing the one-to-many relationship (the current entity is the one being referenced by a foreign key).
+    - `< EntityName >` or `< EntityName > . AttributeName` representing the one-to-one relationship (the current entity is the one being referenced by a foreign key).
 : ![Type](.../dml-diagram/Type.png)
 
 *DataType*

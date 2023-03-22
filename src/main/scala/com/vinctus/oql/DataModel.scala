@@ -202,12 +202,12 @@ class DataModel(model: DMLModel, dml: String) {
                 if (attrs.size > 1)
                   printError(
                     typ.pos,
-                    s"entity '${entityinfo.entity.name}' has more than one attribute of type '${typ.s}'",
+                    s"entity '${entityinfo.entity.name}' has more than one attribute of type '${e.name}'",
                     dml
                   )
 
                 if (attrs.size < 1)
-                  printError(typ.pos, s"entity '${entityinfo.entity.name}' has no attributes of type '${typ.s}'", dml)
+                  printError(typ.pos, s"entity '${entityinfo.entity.name}' has no attributes of type '${e.name}'", dml)
 
                 OneToOneType(entityinfo.entity, attrs.head)
             }
@@ -239,12 +239,12 @@ class DataModel(model: DMLModel, dml: String) {
                 if (attrs.size > 1)
                   printError(
                     typ.pos,
-                    s"entity '${entityinfo.entity.name}' has more than one attribute of type '${typ.s}'",
+                    s"entity '${entityinfo.entity.name}' has more than one attribute of type '${e.name}'",
                     dml
                   )
 
                 if (attrs.size < 1)
-                  printError(typ.pos, s"entity '${entityinfo.entity.name}' has no attributes of type '${typ.s}'", dml)
+                  printError(typ.pos, s"entity '${entityinfo.entity.name}' has no attributes of type '${e.name}'", dml)
 
                 OneToManyType(entityinfo.entity, attrs.head)
             }
