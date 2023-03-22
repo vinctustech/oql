@@ -1,6 +1,6 @@
 name := "@vinctus/oql" //@vinctus/
 
-version := "1.1.6"
+version := "1.1.7"
 
 description := "Object Query Language"
 
@@ -69,13 +69,13 @@ Compile / paradoxProperties ++=
 
 scalaJSUseMainModuleInitializer := true
 
-//Test / scalaJSUseMainModuleInitializer := false
+Test / scalaJSUseMainModuleInitializer := false
+
+Test / scalaJSUseTestModuleInitializer := true
+
+//Test / scalaJSUseMainModuleInitializer := true
 //
-//Test / scalaJSUseTestModuleInitializer := true
-
-Test / scalaJSUseMainModuleInitializer := true
-
-Test / scalaJSUseTestModuleInitializer := false
+//Test / scalaJSUseTestModuleInitializer := false
 
 Compile / npmDependencies ++= Seq(
   "pg" -> "8.10.0",
