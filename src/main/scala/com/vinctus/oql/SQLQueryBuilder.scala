@@ -12,7 +12,14 @@ object SQLQueryBuilder {
 
 }
 
-class SQLQueryBuilder(oql: String, ds: SQLDataSource, fixed: Fixed, model: DataModel, val margin: Int = 0, subquery: Boolean = false) {
+class SQLQueryBuilder(
+    oql: String,
+    ds: SQLDataSource,
+    fixed: Fixed,
+    model: DataModel,
+    val margin: Int = 0,
+    subquery: Boolean = false
+) {
 
   import SQLQueryBuilder._
 
@@ -34,7 +41,9 @@ class SQLQueryBuilder(oql: String, ds: SQLDataSource, fixed: Fixed, model: DataM
       s"$exp$typing"
     }
   }
-  private case class QueryProject(query: SQLQueryBuilder) extends Project { override def toString: String = query.toString.trim }
+  private case class QueryProject(query: SQLQueryBuilder) extends Project {
+    override def toString: String = query.toString.trim
+  }
 
   private var from: (String, Option[String]) = _
   private val innerJoins = new ArrayBuffer[Join]
@@ -84,12 +93,11 @@ class SQLQueryBuilder(oql: String, ds: SQLDataSource, fixed: Fixed, model: DataM
     def attribute(dmrefs: List[(Entity, Attribute)]): String = {
       var alias = table
 
-      dmrefs dropRight 1 foreach {
-        case (e: Entity, Attribute(name, column, _, _, _)) =>
-          val old_alias = alias
+      dmrefs dropRight 1 foreach { case (e: Entity, Attribute(name, column, _, _, _)) =>
+        val old_alias = alias
 
-          alias = s"$alias$$$name"
-          leftJoin(old_alias, column, e.table, alias, e.pk.get.column)
+        alias = s"$alias$$$name"
+        leftJoin(old_alias, column, e.table, alias, e.pk.get.column)
       }
 
       s"\"$alias\".\"${dmrefs.last._2.column}\""
@@ -97,47 +105,53 @@ class SQLQueryBuilder(oql: String, ds: SQLDataSource, fixed: Fixed, model: DataM
 
     expr match {
       case ExistsOQLExpression(query) =>
-        val subquery = writeQuery(innerQuery(query), table, Right(margin + 2 * SQLQueryBuilder.INDENT), oql, ds, fixed, model)
+        val subquery =
+          writeQuery(innerQuery(query), table, Right(margin + 2 * SQLQueryBuilder.INDENT), oql, ds, fixed, model)
         val sql = subquery.toString
 
         s"EXISTS (\n$sql${" " * (margin + 2 * SQLQueryBuilder.INDENT)})"
       case QueryOQLExpression(query) =>
-        val subquery = writeQuery(innerQuery(query), table, Right(margin + 2 * SQLQueryBuilder.INDENT), oql, ds, fixed, model)
+        val subquery =
+          writeQuery(innerQuery(query), table, Right(margin + 2 * SQLQueryBuilder.INDENT), oql, ds, fixed, model)
         val sql = subquery.toString
 
         s"(\n$sql${" " * (margin + 2 * SQLQueryBuilder.INDENT)})"
       case InQueryOQLExpression(left, op, query) =>
-        val subquery = writeQuery(innerQuery(query), table, Right(margin + 2 * SQLQueryBuilder.INDENT), oql, ds, fixed, model)
+        val subquery =
+          writeQuery(innerQuery(query), table, Right(margin + 2 * SQLQueryBuilder.INDENT), oql, ds, fixed, model)
         val sql = subquery.toString
 
         s"${expression(left, table)} $op (\n$sql${" " * (margin + 2 * SQLQueryBuilder.INDENT)})"
-      case InArrayOQLExpression(left, op, right)             => s"${expression(left, table)} $op (${right map (expression(_, table)) mkString ", "})"
-      case ApplyOQLExpression(f, args)                       => s"${f.s}(${args map (expression(_, table)) mkString ", "})"
-      case StarOQLExpression                                 => "*"
-      case RawOQLExpression(s)                               => s
-      case InfixOQLExpression(left, op @ ("*" | "/"), right) => s"${expression(left, table)}$op${expression(right, table)}"
-      case InfixOQLExpression(left, op, right)               => s"${expression(left, table)} $op ${expression(right, table)}"
-      case PrefixOQLExpression("-", expr)                    => s"-${expression(expr, table)}"
-      case PrefixOQLExpression(op, expr)                     => s"$op ${expression(expr, table)}"
-      case PostfixOQLExpression(expr, op)                    => s"${expression(expr, table)} $op"
-      case BetweenOQLExpression(expr, op, lower, upper)      => s"${expression(expr, table)} $op ${expression(lower, table)} AND ${expression(upper, table)}"
-      case GroupedOQLExpression(expr)             => s"(${expression(expr, table)})"
-      case TypedOQLExpression(v, typ)             => ds.typed(v, typ)
-      case FloatOQLExpression(n)                  => n.toString
-      case IntegerOQLExpression(n)                => n.toString
-      case JSONOQLExpression(e)                   => s"'${expression(e, table)}'"
-      case ArrayOQLExpression(elems)              => s"[${elems.map(e => expression(e, table)).mkString(", ")}]"
-      case ObjectOQLExpression(pairs)             => s"{${pairs.map({case (k, v) => s"\"$k\": ${expression(v, table)}"}).mkString(", ")}}"
+      case InArrayOQLExpression(left, op, right) =>
+        s"${expression(left, table)} $op (${right map (expression(_, table)) mkString ", "})"
+      case ApplyOQLExpression(f, args) => s"${f.s}(${args map (expression(_, table)) mkString ", "})"
+      case StarOQLExpression           => "*"
+      case RawOQLExpression(s)         => s
+      case InfixOQLExpression(left, op @ ("*" | "/"), right) =>
+        s"${expression(left, table)}$op${expression(right, table)}"
+      case InfixOQLExpression(left, op, right) => s"${expression(left, table)} $op ${expression(right, table)}"
+      case PrefixOQLExpression("-", expr)      => s"-${expression(expr, table)}"
+      case PrefixOQLExpression(op, expr)       => s"$op ${expression(expr, table)}"
+      case PostfixOQLExpression(expr, op)      => s"${expression(expr, table)} $op"
+      case BetweenOQLExpression(expr, op, lower, upper) =>
+        s"${expression(expr, table)} $op ${expression(lower, table)} AND ${expression(upper, table)}"
+      case GroupedOQLExpression(expr)    => s"(${expression(expr, table)})"
+      case TypedOQLExpression(expr, typ) => ds.typed(expression(expr, table), typ)
+      case FloatOQLExpression(n)         => n.toString
+      case IntegerOQLExpression(n)       => n.toString
+      case JSONOQLExpression(e)          => s"'${expression(e, table)}'"
+      case ArrayOQLExpression(elems)     => s"[${elems.map(e => expression(e, table)).mkString(", ")}]"
+      case ObjectOQLExpression(pairs) =>
+        s"{${pairs.map({ case (k, v) => s"\"$k\": ${expression(v, table)}" }).mkString(", ")}}"
       case StringOQLExpression(s)                 => ds.string(s)
       case ReferenceOQLExpression(_, dmrefs)      => attribute(dmrefs)
       case AttributeOQLExpression(List(id), null) => id.s // it's a built-in variable if dmrefs is null
       case AttributeOQLExpression(_, dmrefs)      => attribute(dmrefs)
       case BooleanOQLExpression(b)                => b
       case CaseOQLExpression(whens, els) =>
-        s"CASE ${whens map {
-          case OQLWhen(cond, expr) =>
+        s"CASE ${whens map { case OQLWhen(cond, expr) =>
             s"WHEN ${expression(cond, table)} THEN ${expression(expr, table)}"
-        } mkString " "}${if (els.isDefined) s" ELSE ${expression(els.get, table)}" else ""} END"
+          } mkString " "}${if (els.isDefined) s" ELSE ${expression(els.get, table)}" else ""} END"
     }
   }
 
@@ -192,14 +206,14 @@ class SQLQueryBuilder(oql: String, ds: SQLDataSource, fixed: Fixed, model: DataM
 
     val whereClause = where map { case (table, expr) => s"WHERE ${expression(expr, table)}" }
     val groupByClause =
-      _group map {
-        case (table, groupings) =>
-          s"GROUP BY ${groupings map (expr => s"${expression(expr, table)}") mkString ", "}"
+      _group map { case (table, groupings) =>
+        s"GROUP BY ${groupings map (expr => s"${expression(expr, table)}") mkString ", "}"
       }
     val orderByClause =
-      _order map {
-        case (table, orderings) =>
-          s"ORDER BY ${orderings map { case OQLOrdering(expr, ordering) => s"${expression(expr, table)} $ordering" } mkString ", "}"
+      _order map { case (table, orderings) =>
+        s"ORDER BY ${orderings map { case OQLOrdering(expr, ordering) =>
+            s"${expression(expr, table)} $ordering"
+          } mkString ", "}"
       }
 
     for (Join(t1, c1, t2, alias, c2) <- innerJoins)

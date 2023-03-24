@@ -530,7 +530,14 @@ object AbstractOQL {
                 nullables.map(n => PostfixOQLExpression(n, "IS NULL")) :+ InfixOQLExpression(
                   attr,
                   "=",
-                  TypedOQLExpression(fixed.at, fixed.entity.pk.get.typ.asDatatype)
+                  TypedOQLExpression(
+                    fixed.at match {
+                      case n: Int    => IntegerOQLExpression(n)
+                      case s: String => StringOQLExpression(s)
+                      case v         => sys.error(s"no type match for creating TypedOQLExpression for fixed.at: '$v'")
+                    },
+                    fixed.entity.pk.get.typ.asDatatype
+                  )
                 )
               )
 
