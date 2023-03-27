@@ -62,6 +62,9 @@ trait SQLDataSource extends OQLDataSource {
       case (s: String, TextType)        => string(s)
       case (s: String, UUIDType)        => s"'$s'::UUID"
       case (s: String, TimestampType)   => s"'$s'::TIMESTAMP"
+      case (s: String, DateType)        => s"'$s'::DATE"
+      case (s: String, JSONType)        => s"'$s'::JSON"
+      case (s: String, IntervalType)    => s"'$s'::INTERVAL"
       case (_, IntegerType | FloatType) => a.toString
       case _ =>
         Console.err.println(s"WARNING: SQLDataSource.typed(): don't know how to render '$a' as type $typ")

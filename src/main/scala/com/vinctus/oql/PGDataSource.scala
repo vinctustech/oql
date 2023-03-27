@@ -35,6 +35,9 @@ trait PGDataSource extends SQLDataSource {
       case "uuid"                        => UUIDType
       case "integer"                     => IntegerType
       case "bigint"                      => BigintType
+      case "time"                        => TimeType
+      case "date"                        => DateType
+      case "interval"                    => IntervalType
       case "double precision"            => FloatType
     }
 
@@ -52,6 +55,7 @@ trait PGDataSource extends SQLDataSource {
       ("max", 1) -> (_.head),
       ("avg", 1) -> (_ => FloatType)
     )
-  val builtinVariables = Map("current_date" -> DateType, "current_timestamp" -> TimestampType, "current_time" -> TimeType)
+  val builtinVariables: Map[String, Datatype] =
+    Map("current_date" -> DateType, "current_timestamp" -> TimestampType, "current_time" -> TimeType)
 
 }

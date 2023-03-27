@@ -72,7 +72,9 @@ class DataModel(model: DMLModel, dml: String) {
             case DMLSimpleDataType("bigint" | "int8")          => BigintType
             case DMLParametricDataType("decimal", parameters) =>
               DecimalType(parameters.head.toInt, parameters.tail.head.toInt)
-//            case DMLSimpleDataType("date")                     => DateType
+            case DMLSimpleDataType("date")             => DateType
+            case DMLSimpleDataType("time")             => TimeType
+            case DMLSimpleDataType("interval")         => IntervalType
             case DMLSimpleDataType("float" | "float8") => FloatType
             case DMLSimpleDataType("uuid")             => UUIDType
             case DMLSimpleDataType("timestamp")        => TimestampType

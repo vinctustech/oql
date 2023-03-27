@@ -42,7 +42,7 @@ class DMLParser extends RegexParsers {
       kw("integer") | kw("int4") | kw("int") |
       kw("boolean") | kw("bool") |
       kw("bigint") | kw("int8") |
-      kw("date") |
+      kw("date") | kw("time") | kw("interval") |
       kw("float8") | kw("float") |
       kw("uuid") |
       kw("timestamp")) ^^ DMLSimpleDataType.apply |
