@@ -75,7 +75,7 @@ object OQLParser extends RegexParsers with PackratParsers {
       kw("uuid") ^^^ UUIDType |
       kw("timestamp") ^^^ TimestampType
 
-  lazy val castExpression: PackratParser[TypedOQLExpression] =
+  lazy val castExpression: PackratParser[OQLExpression] =
     primary ~ "::" ~ simpleType ^^ { case p ~ _ ~ t => TypedOQLExpression(p, t) }
 
   lazy val attributeExpression: PackratParser[AttributeOQLExpression] =

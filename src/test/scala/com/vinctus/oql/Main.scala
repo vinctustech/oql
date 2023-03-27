@@ -166,7 +166,7 @@ import io.github.edadma.rdb
     //    _ <- db.create
 //    u <- db.entity("employee").update(104, Map("firstName" -> js.undefined, "lastName" -> "Lee"))
 //    i <- { db.entity("department").insert(Map("id" -> 123, "departmentName" -> "RnR")) }
-    r <- { db.showQuery(); db.queryMany("a [t = '2021-04-21T06:30:00.000Z'::timestamp]") } // a {* bs}
+    r <- { db.showQuery(); db.queryMany("a [t::timestamp = '2021-04-21T06:30:00.000Z'::timestamp]") } // a {* bs}
   yield (r))
     .onComplete {
       case Failure(exception) => exception.printStackTrace()

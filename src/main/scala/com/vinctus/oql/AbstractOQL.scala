@@ -342,12 +342,14 @@ object AbstractOQL {
 
         query.select foreach (decorate(query.entity, _, model, ds, oql))
         query.order foreach (_ foreach { case OQLOrdering(expr, _) => decorate(query.entity, expr, model, ds, oql) })
-      case e: StringOQLExpression                  => e.typ = TextType
-      case e: FloatOQLExpression                   => e.typ = FloatType
-      case e: IntegerOQLExpression                 => e.typ = IntegerType
-      case e: BooleanOQLExpression                 => e.typ = BooleanType
-      case e: JSONOQLExpression                    => e.typ = JSONType
-      case e @ TypedOQLExpression(_, t)            => e.typ = t
+      case e: StringOQLExpression  => e.typ = TextType
+      case e: FloatOQLExpression   => e.typ = FloatType
+      case e: IntegerOQLExpression => e.typ = IntegerType
+      case e: BooleanOQLExpression => e.typ = BooleanType
+      case e: JSONOQLExpression    => e.typ = JSONType
+      case e @ TypedOQLExpression(expr, t) =>
+        _decorate(expr)
+        e.typ = t
       case StarOQLExpression | _: RawOQLExpression =>
     }
   }
