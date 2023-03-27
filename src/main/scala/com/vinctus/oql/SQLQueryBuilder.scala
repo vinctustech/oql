@@ -135,14 +135,12 @@ class SQLQueryBuilder(
       case PostfixOQLExpression(expr, op)      => s"${expression(expr, table)} $op"
       case BetweenOQLExpression(expr, op, lower, upper) =>
         s"${expression(expr, table)} $op ${expression(lower, table)} AND ${expression(upper, table)}"
-      case GroupedOQLExpression(expr) => s"(${expression(expr, table)})"
-      case TypedOQLExpression(expr, typ) =>
-        println(expr)
-        ds.typed(expression(expr, table), typ)
-      case FloatOQLExpression(n)     => n.toString
-      case IntegerOQLExpression(n)   => n.toString
-      case JSONOQLExpression(e)      => s"'${expression(e, table)}'"
-      case ArrayOQLExpression(elems) => s"[${elems.map(e => expression(e, table)).mkString(", ")}]"
+      case GroupedOQLExpression(expr)    => s"(${expression(expr, table)})"
+      case TypedOQLExpression(expr, typ) => ds.typed(expression(expr, table), typ)
+      case FloatOQLExpression(n)         => n.toString
+      case IntegerOQLExpression(n)       => n.toString
+      case JSONOQLExpression(e)          => s"'${expression(e, table)}'"
+      case ArrayOQLExpression(elems)     => s"[${elems.map(e => expression(e, table)).mkString(", ")}]"
       case ObjectOQLExpression(pairs) =>
         s"{${pairs.map({ case (k, v) => s"\"$k\": ${expression(v, table)}" }).mkString(", ")}}"
       case StringOQLExpression(s)                 => ds.string(s)
