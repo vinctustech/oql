@@ -1,6 +1,6 @@
 name := "@vinctus/oql" //@vinctus/
 
-version := "1.1.9"
+version := "1.1.11"
 
 description := "Object Query Language"
 
@@ -107,6 +107,8 @@ mainClass := Some("com.vinctus." + "oql" + ".Main")
 lazy val packageName = SettingKey[String]("packageName", "package name")
 
 packageName := "oql"
+
+scalaJSLinkerConfig ~= { _.withESFeatures(_.withESVersion(org.scalajs.linker.interface.ESVersion.ES2018)) }
 
 publishMavenStyle := true
 

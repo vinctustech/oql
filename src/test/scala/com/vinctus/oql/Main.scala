@@ -21,16 +21,9 @@ import io.github.edadma.rdb
 
   val db = new OQL_RDB_ScalaJS(
     """
-      |entity b {
-      | *id: int
-      |  a: a
-      |  other: a
-      |}
-      |
       |entity a {
       | *id: int
-      |  n: text
-      |  bs: [b].a
+      |  t: timestamp
       |}
       |""".trim.stripMargin
   )
@@ -97,25 +90,13 @@ import io.github.edadma.rdb
 
   rdb.executeSQL(
     """
-      |CREATE TABLE "b" (
-      |  "id" INTEGER PRIMARY KEY,
-      |  "a" INTEGER,
-      |  "other" INTEGER
-      |);
       |CREATE TABLE "a" (
-      |  "id" INTEGER AUTO PRIMARY KEY,
-      |  "n" TEXT
+      |  "id" INTEGER PRIMARY KEY,
+      |  "t" TIMESTAMP
       |);
-      |ALTER TABLE "b" ADD FOREIGN KEY ("a") REFERENCES "a";
-      |INSERT INTO "b" ("id", "a") VALUES
-      |  (1, 1),
-      |  (1, 2),
-      |  (2, 2),
-      |  (2, 3);
-      |INSERT INTO "a" ("id", "n") VALUES
-      |  (1, 'one'),
-      |  (2, 'two'),
-      |  (3, 'three');
+      |INSERT INTO "a" ("id", "t") VALUES
+      |  (3, '2021-04-21T06:30:00.000Z'),
+      |  (4, '2022-04-21T06:30:00.000Z');
       |""".stripMargin
   )(
     db.connect
@@ -185,7 +166,7 @@ import io.github.edadma.rdb
     //    _ <- db.create
 //    u <- db.entity("employee").update(104, Map("firstName" -> js.undefined, "lastName" -> "Lee"))
 //    i <- { db.entity("department").insert(Map("id" -> 123, "departmentName" -> "RnR")) }
-    r <- { db.showQuery(); db.queryMany("b {id a {id} other {id}}") } // a {* bs}
+    r <- { db.showQuery(); db.queryMany("a [t = '2021-04-21T06:30:00.000Z'::timestamp]") } // a {* bs}
   yield (r))
     .onComplete {
       case Failure(exception) => exception.printStackTrace()

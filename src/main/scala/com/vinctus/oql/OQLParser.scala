@@ -194,12 +194,12 @@ object OQLParser extends RegexParsers with PackratParsers {
     (arrayExpression | objectExpression) ^^ JSONOQLExpression.apply
 
   lazy val primary: PackratParser[OQLExpression] =
-    literalExpression |
+    castExpression |
+      literalExpression |
       jsonExpression |
       starExpression |
       caseExpression |
       applyExpression |
-      castExpression |
       qualifiedAttributeExpression |
       "&" ~> identifiers ^^ (ReferenceOQLExpression(_)) |
       "-" ~> primary ^^ (e => PrefixOQLExpression("-", e)) |
