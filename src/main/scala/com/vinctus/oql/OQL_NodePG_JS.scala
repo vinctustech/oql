@@ -94,7 +94,7 @@ class OQL_NodePG_JS(
       .connect
       .raw(sql, if (values.isEmpty) js.Array() else values.get)
 
-  private val varRegex = ":([a-zA-Z_][a-zA-Z0-9_]*)" r
+  private val varRegex = "(?<!:):([a-zA-Z_][a-zA-Z0-9_]*)" r
 
   def substitute(s: String, parameters: js.UndefOr[js.Any]): String = // todo: unit tests for parameters
     if (parameters.isEmpty) s
