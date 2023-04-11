@@ -124,7 +124,7 @@ class OQL_NodePG_JS(
   def render(a: Any, typ: Option[Datatype] = None): String =
     if (typ.isDefined)
       if (typ.get == JSONType) s"'${JSON(a, ds.platformSpecific)}'"
-      else ds.typed(a, typ.get)
+      else ds.typed(render(a), typ.get)
     else
       a match {
         case s: String      => ds.string(s)
@@ -134,5 +134,3 @@ class OQL_NodePG_JS(
       }
 
 }
-
-//todo: investigate 'subsrender' thoroughly
