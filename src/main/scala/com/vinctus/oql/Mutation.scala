@@ -254,14 +254,15 @@ class Mutation private[oql] (oql: AbstractOQL, entity: Entity)(implicit ec: scal
     val command = new StringBuilder
 
     // build update command
-    val columns = updates.head._2.keys.map(k => attrsNoPK(k).column)
+    val keys = updates.head._2.keys
+    val columns = keys.map(k => attrsNoPK(k).column)
 
     command append s"UPDATE  ${entity.table}\n"
     command append s"  SET   ${columns map { k =>
         s"$k = __data__.$k"
       } mkString ", "}\n"
     command append s"  FROM  (VALUES ${updates map { case (id, update) =>
-        s"(${oql.render(id, Some(entity.pk.get.typ.asDatatype))}, ${columns map (update andThen (x => oql.render(x))) mkString ", "})"
+        s"(${oql.render(id, Some(entity.pk.get.typ.asDatatype))}, ${keys map (update andThen (x => oql.render(x))) mkString ", "})"
       } mkString ", "}) AS __data__ (${entity.pk.get.column}, ${columns mkString ", "})\n"
     command append s"  WHERE ${entity.table}.${entity.pk.get.column} = __data__.${entity.pk.get.column}\n"
     oql.show(command.toString)
@@ -271,3 +272,10 @@ class Mutation private[oql] (oql: AbstractOQL, entity: Entity)(implicit ec: scal
   }
 
 }
+
+/*
+UPDATE  workflows
+  SET   kioskEnabled = __data__.kioskEnabled
+  FROM  (VALUES ('3d37a404-5433-4bd7-bbd7-88d01b3e5d3e'::UUID, true), ('63871ef9-bbda-498a-93c7-02d5418031c9'::UUID, true), ('f851b568-f07d-4128-b143-e7b29cf03611'::UUID, false), ('1165d4c0-7221-4522-a293-3d1c0c86c951'::UUID, false), ('bd38cb89-b3b5-43aa-99b9-2971948d11cf'::UUID, false), ('af2dac35-0c5c-4678-84ad-085620dd684b'::UUID, false), ('f6d1ba00-62dd-4b2b-ae50-6c04899d549b'::UUID, false)) AS __data__ (id, kioskEnabled)
+  WHERE workflows.id = __data__.id
+ */
