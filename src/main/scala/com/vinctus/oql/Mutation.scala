@@ -169,7 +169,7 @@ class Mutation private[oql] (oql: AbstractOQL, entity: Entity)(implicit ec: scal
       )
 
     // removed properties with a value of undefined
-    val updatesWithoutUndefined = updates filterNot { case (k, v) => v == js.undefined }
+    val updatesWithoutUndefined = updates filterNot { case (_, v) => v == js.undefined }
 
     // check if updates is empty
     if (updatesWithoutUndefined.isEmpty)
@@ -251,35 +251,18 @@ class Mutation private[oql] (oql: AbstractOQL, entity: Entity)(implicit ec: scal
         s"extrinsic properties not found in entity '${entity.name}': ${(keyset diff attrsNoPKKeys) map (p => s"'$p'") mkString ", "}"
       )
 
-    // build list of attributes to update
-    val pairs =
-      updates map { case (_, u) =>
-        u map { case (k, v) =>
-          val v1 =
-            if (v.isInstanceOf[Map[_, _]])
-              entity.attributes(k) match {
-                case Attribute(_, _, _, _, ManyToOneType(mtoEntity)) =>
-                  v.asInstanceOf[Map[String, Any]](mtoEntity.pk.get.name)
-                case _ => sys.error(s"attribute '$k' of entity '${entity.name}' is not an entity attribute")
-              }
-            else v
-
-          attrs(k).column -> oql.render(v1)
-        }
-      }
-
     val command = new StringBuilder
 
     // build update command
-    val keys = updates.head._2.keys
+    val columns = updates.head._2.keys.map(k => attrsNoPK(k).column)
 
     command append s"UPDATE  ${entity.table}\n"
-    command append s"  SET   ${keys map { k =>
+    command append s"  SET   ${columns map { k =>
         s"$k = __data__.$k"
       } mkString ", "}\n"
     command append s"  FROM  (VALUES ${updates map { case (id, update) =>
-        s"(${oql.render(id, Some(entity.pk.get.typ.asDatatype))}, ${keys map (update andThen (x => oql.render(x))) mkString ", "})"
-      } mkString ", "}) AS __data__ (${entity.pk.get.column}, ${keys mkString ", "})\n"
+        s"(${oql.render(id, Some(entity.pk.get.typ.asDatatype))}, ${columns map (update andThen (x => oql.render(x))) mkString ", "})"
+      } mkString ", "}) AS __data__ (${entity.pk.get.column}, ${columns mkString ", "})\n"
     command append s"  WHERE ${entity.table}.${entity.pk.get.column} = __data__.${entity.pk.get.column}\n"
     oql.show(command.toString)
 
