@@ -54,8 +54,17 @@ trait SQLDataSource extends OQLDataSource {
 
   val builtinVariables: Map[String, Datatype]
 
+  def quote(s: String): String =
+    s.replace("\\", """\\""")
+      .replace("'", """\'""")
+      .replace("\t", """\t""")
+      .replace("\r", """\r""")
+      .replace("\n", """\n""")
+
   def string(s: String): String =
-    s"E'${s.replace("\\", """\\""").replace("'", """\'""").replace("\r", """\r""").replace("\n", """\n""")}'"
+    val quoted = quote(s)
+
+    if quoted == s then s"'$s'" else s"E'$quoted'"
 
   def typed(a: Any, typ: Datatype): String =
     (a, typ) match {

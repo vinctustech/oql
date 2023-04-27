@@ -63,7 +63,6 @@ class RDBDataSource(implicit ec: scala.concurrent.ExecutionContext) extends SQLD
   val builtinVariables =
     Map("CURRENT_DATE" -> DateType, "CURRENT_TIMESTAMP" -> TimestampType, "CURRENT_TIME" -> TimeType)
 
-  override def string(s: String): String =
-    super.string(s).substring(1) // we don't want the 'E' prefix for RDB's version of SQL
+  override def string(s: String): String = s"'${quote(s)}'"
 
 }
