@@ -9,7 +9,7 @@ object OQLParser extends RegexParsers with PackratParsers {
 
   lazy val pos: PackratParser[Position] = positioned(success(new Positional {})) ^^ (_.pos)
 
-  def kw(s: String): Regex = (s"(?i)$s\\b").r
+  def kw(s: String): Regex = s"(?i)$s\\b".r
 
 //  lazy val command: PackratParser[OQLAST] = query | insert
 //
@@ -67,7 +67,9 @@ object OQLParser extends RegexParsers with PackratParsers {
   lazy val attributeName: PackratParser[Ident] = identifier
 
   lazy val applyExpression: PackratParser[OQLExpression] =
-    identifier ~ ("(" ~> expressions <~ ")") ^^ { case f ~ as => ApplyOQLExpression(f, as to ArraySeq) }
+    identifier ~ ("(" ~> rep1sep(booleanExpression | expression, ",") <~ ")") ^^ { case f ~ as =>
+      ApplyOQLExpression(f, as to ArraySeq)
+    }
 
   lazy val simpleType: PackratParser[Datatype] =
     kw("json") ^^^ JSONType |
