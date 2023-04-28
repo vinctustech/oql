@@ -53,12 +53,12 @@ class RDBDataSource(implicit ec: scala.concurrent.ExecutionContext) extends SQLD
   val typeFunction: Option[String] = Some("TYPEOF(?)")
   val convertFunction: Option[String] = None
   val caseSensitive: Boolean = true
-  val functionReturnType: Map[(String, Int), List[Datatype] => Datatype] =
-    Map[(String, Int), List[Datatype] => Datatype](
-      ("COUNT", 1) -> (_ => IntegerType), // todo: this should really be 'BigintType'
-      ("MIN", 1) -> (_.head),
-      ("MAX", 1) -> (_.head),
-      ("AVG", 1) -> (_ => FloatType)
+  val functionReturnType: Map[(String, Int), Seq[Datatype] => Datatype] =
+    Map[(String, Int), Seq[Datatype] => Datatype](
+      ("count", 1) -> (_ => IntegerType), // todo: this should really be 'BigintType'
+      ("min", 1) -> (_.head),
+      ("max", 1) -> (_.head),
+      ("avg", 1) -> (_ => FloatType)
     )
   val builtinVariables =
     Map("CURRENT_DATE" -> DateType, "CURRENT_TIMESTAMP" -> TimestampType, "CURRENT_TIME" -> TimeType)

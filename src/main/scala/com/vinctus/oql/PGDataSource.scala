@@ -48,8 +48,8 @@ trait PGDataSource extends SQLDataSource {
   val typeFunction: Option[String] = Some("pg_typeof(?)")
   val convertFunction: Option[String] = None
   val caseSensitive: Boolean = false
-  val functionReturnType: Map[(String, Int), List[Datatype] => Datatype] =
-    Map[(String, Int), List[Datatype] => Datatype](
+  val functionReturnType: Map[(String, Int), Seq[Datatype] => Datatype] =
+    Map[(String, Int), Seq[Datatype] => Datatype](
       ("count", 1) -> (_ => IntegerType), // todo: this should really be 'BigintType'
       ("min", 1) -> (_.head),
       ("max", 1) -> (_.head),

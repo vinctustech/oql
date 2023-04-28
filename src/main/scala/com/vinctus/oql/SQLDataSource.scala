@@ -45,7 +45,7 @@ trait SQLDataSource extends OQLDataSource {
   val resultArrayFunctionEnd: String
   val rowSequenceFunctionStart: String
   val rowSequenceFunctionEnd: String
-  val functionReturnType: Map[(String, Int), List[Datatype] => Datatype]
+  val functionReturnType: Map[(String, Int), Seq[Datatype] => Datatype]
   val caseSensitive: Boolean
 
   def reverseMapType(typ: String): Datatype

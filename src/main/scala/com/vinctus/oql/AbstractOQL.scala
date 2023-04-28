@@ -31,7 +31,7 @@ abstract class AbstractOQL(dm: String, val ds: SQLDataSource, conv: Conversions)
 
     for m <- macroSubstitutionRegex.findAllMatchIn(definition) do
       if m.groupCount > 0 then
-        val group = m.group(0)
+        val group = m.group(1)
 
         encounteredSet += group
 

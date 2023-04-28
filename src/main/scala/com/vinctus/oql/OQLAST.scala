@@ -48,7 +48,7 @@ case class BooleanOQLExpression(b: String) extends OQLExpression
 case class TypedOQLExpression(expr: OQLExpression, t: Datatype) extends OQLExpression
 case class AttributeOQLExpression(ids: List[Ident], var dmrefs: List[(Entity, Attribute)] = null) extends OQLExpression
 case class ReferenceOQLExpression(ids: List[Ident], var dmrefs: List[(Entity, Attribute)] = null) extends OQLExpression
-case class ApplyOQLExpression(f: Ident, args: List[OQLExpression]) extends OQLExpression
+case class ApplyOQLExpression(f: Ident, args: Seq[OQLExpression]) extends OQLExpression
 case object StarOQLExpression extends OQLExpression
 case class CaseOQLExpression(whens: List[OQLWhen], els: Option[OQLExpression]) extends OQLExpression
 case class GroupedOQLExpression(expr: OQLExpression) extends OQLExpression

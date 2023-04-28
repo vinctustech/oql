@@ -1,5 +1,6 @@
 package com.vinctus.oql
 
+import scala.collection.immutable.ArraySeq
 import scala.util.matching.Regex
 import scala.util.parsing.combinator.{PackratParsers, RegexParsers}
 import scala.util.parsing.input.{CharSequenceReader, Position, Positional}
@@ -66,7 +67,7 @@ object OQLParser extends RegexParsers with PackratParsers {
   lazy val attributeName: PackratParser[Ident] = identifier
 
   lazy val applyExpression: PackratParser[OQLExpression] =
-    identifier ~ ("(" ~> expressions <~ ")") ^^ { case f ~ as => ApplyOQLExpression(f, as) }
+    identifier ~ ("(" ~> expressions <~ ")") ^^ { case f ~ as => ApplyOQLExpression(f, as to ArraySeq) }
 
   lazy val simpleType: PackratParser[Datatype] =
     kw("json") ^^^ JSONType |

@@ -108,26 +108,67 @@ class SQLQueryBuilder(
     expr match {
       case ExistsOQLExpression(query) =>
         val subquery =
-          writeQuery(innerQuery(query), table, Right(margin + 2 * SQLQueryBuilder.INDENT), oql, ds, fixed, model, macros)
+          writeQuery(
+            innerQuery(query),
+            table,
+            Right(margin + 2 * SQLQueryBuilder.INDENT),
+            oql,
+            ds,
+            fixed,
+            model,
+            macros
+          )
         val sql = subquery.toString
 
         s"EXISTS (\n$sql${" " * (margin + 2 * SQLQueryBuilder.INDENT)})"
       case QueryOQLExpression(query) =>
         val subquery =
-          writeQuery(innerQuery(query), table, Right(margin + 2 * SQLQueryBuilder.INDENT), oql, ds, fixed, model, macros)
+          writeQuery(
+            innerQuery(query),
+            table,
+            Right(margin + 2 * SQLQueryBuilder.INDENT),
+            oql,
+            ds,
+            fixed,
+            model,
+            macros
+          )
         val sql = subquery.toString
 
         s"(\n$sql${" " * (margin + 2 * SQLQueryBuilder.INDENT)})"
       case InQueryOQLExpression(left, op, query) =>
         val subquery =
-          writeQuery(innerQuery(query), table, Right(margin + 2 * SQLQueryBuilder.INDENT), oql, ds, fixed, model, macros)
+          writeQuery(
+            innerQuery(query),
+            table,
+            Right(margin + 2 * SQLQueryBuilder.INDENT),
+            oql,
+            ds,
+            fixed,
+            model,
+            macros
+          )
         val sql = subquery.toString
 
         s"${expression(left, table)} $op (\n$sql${" " * (margin + 2 * SQLQueryBuilder.INDENT)})"
       case InArrayOQLExpression(left, op, right) =>
         s"${expression(left, table)} $op (${right map (expression(_, table)) mkString ", "})"
       case ApplyOQLExpression(f, args) =>
-        s"${f.s}(${args map (expression(_, table)) mkString ", "})"
+        val expandedArgs = args map (expression(_, table))
+
+        macros get f.s match
+          case None => s"${f.s}(${expandedArgs mkString ", "})"
+          case Some(Macro(definition, parameters)) =>
+            if parameters.length != args.length then
+              problem(f.pos, "number of arguments doesn't equal number of parameters in macro definition", null)
+
+            macroSubstitutionRegex.replaceAllIn(
+              definition,
+              { m =>
+                if m.groupCount == 0 then "$"
+                else expandedArgs(parameters.indexOf(m.group(1)))
+              }
+            )
       case StarOQLExpression   => "*"
       case RawOQLExpression(s) => s
       case InfixOQLExpression(left, op @ ("*" | "/"), right) =>
