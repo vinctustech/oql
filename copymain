@@ -1,1 +1,2 @@
 cp -v target/scala-3.2.2/-vinctus-oql-fastopt/main.js* npm
+cp -v src/index.d.ts npm
