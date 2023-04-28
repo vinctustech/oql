@@ -19,10 +19,29 @@ abstract class AbstractOQL(dm: String, val ds: SQLDataSource, conv: Conversions)
   private var _showQuery = false
 
   val model: DataModel = new DataModel(new DMLParser().parseModel(dm), dm)
-//    DMLParse(dm) match {
-//      case None              => sys.error("error building data model")
-//      case Some(m: DMLModel) => new DataModel(m, dm)
-//    }
+  val macros: mutable.HashMap[String, Macro]
+
+  def define(name: String, definition: String, parameters: Seq[String]): Unit =
+    parameters groupBy identity collect { case (x, List(_, _, _*)) => x } match
+      case Nil        =>
+      case duplicates => sys.error(s"duplicate parameters: ${duplicates.mkString("'", "', '", "'")}")
+
+    val encounteredSet = new mutable.HashSet[String]
+    val parameterSet = parameters.toSet
+
+    for m <- macroSubstitutionRegex.findAllMatchIn(definition) do
+      if m.groupCount > 0 then
+        val group = m.group(0)
+
+        encounteredSet += group
+
+        if !parameterSet(group) then sys.error(s"substitution '$group' is not listed as a parameter")
+
+    parameterSet diff encounteredSet match
+      case s if s.nonEmpty =>
+        sys.error(s"parameter(s) not encountered in the definition: ${s.mkString("'", "', '", "'")}")
+      case _ =>
+  end define
 
   def render(a: Any, typ: Option[Datatype] = None): String
 
