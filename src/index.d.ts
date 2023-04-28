@@ -44,6 +44,8 @@ export class OQL {
 
   showQuery(): void
 
+  define(name: string, definition: string, parameters: string[]): void
+
   entity(name: string): Mutation
 
   queryBuilder<T = any>(fixed?: string, at?: any): QueryBuilder<T>
@@ -65,6 +67,8 @@ export class OQL_MEM {
   create(): Promise<void>
 
   showQuery(): void
+
+  define(name: string, definition: string, parameters: string[]): void
 
   entity(name: string): Mutation
 

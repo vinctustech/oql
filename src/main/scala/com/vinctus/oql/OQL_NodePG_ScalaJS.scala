@@ -67,7 +67,7 @@ class OQL_NodePG_ScalaJS(
       .asInstanceOf[List[DynamicMap]])
   }
 
-  def queryBuilder(fixed: String = null, at: js.Any = null) =
+  def queryBuilder(fixed: String = null, at: js.Any = null): ScalaJSNodePGQueryBuilder =
     new ScalaJSNodePGQueryBuilder(
       this,
       OQLQuery(null, null, null, List(StarOQLProject), None, None, None, None, None),
@@ -82,7 +82,7 @@ class OQL_NodePG_ScalaJS(
     )
   }
 
-  private val varRegex = ":([a-zA-Z_][a-zA-Z0-9_]*)" r
+  private val varRegex = ":([a-zA-Z_][a-zA-Z0-9_]*)".r
 
   def substitute(s: String, parameters: Map[String, Any]): String = // todo: unit tests for parameters
     if (parameters.isEmpty) s

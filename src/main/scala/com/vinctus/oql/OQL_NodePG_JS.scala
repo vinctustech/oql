@@ -35,6 +35,10 @@ class OQL_NodePG_JS(
   @JSExport("showQuery")
   def jsShowQuery(): Unit = showQuery()
 
+  @JSExport("define")
+  def jsDefine(name: String, definition: String, parameters: js.Array[String]): Unit =
+    define(name, definition, parameters.toSeq)
+
   @JSExport("count")
   def jsCount(
       oql: String,
