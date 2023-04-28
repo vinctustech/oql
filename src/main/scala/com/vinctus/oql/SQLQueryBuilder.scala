@@ -1,7 +1,8 @@
 package com.vinctus.oql
 
-import AbstractOQL._
+import AbstractOQL.*
 
+import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
 import scala.language.postfixOps
 import scala.scalajs.js
@@ -17,6 +18,7 @@ class SQLQueryBuilder(
     ds: SQLDataSource,
     fixed: Fixed,
     model: DataModel,
+    macros: mutable.HashMap[String, Macro],
     val margin: Int = 0,
     subquery: Boolean = false
 ) {
@@ -106,27 +108,28 @@ class SQLQueryBuilder(
     expr match {
       case ExistsOQLExpression(query) =>
         val subquery =
-          writeQuery(innerQuery(query), table, Right(margin + 2 * SQLQueryBuilder.INDENT), oql, ds, fixed, model)
+          writeQuery(innerQuery(query), table, Right(margin + 2 * SQLQueryBuilder.INDENT), oql, ds, fixed, model, macros)
         val sql = subquery.toString
 
         s"EXISTS (\n$sql${" " * (margin + 2 * SQLQueryBuilder.INDENT)})"
       case QueryOQLExpression(query) =>
         val subquery =
-          writeQuery(innerQuery(query), table, Right(margin + 2 * SQLQueryBuilder.INDENT), oql, ds, fixed, model)
+          writeQuery(innerQuery(query), table, Right(margin + 2 * SQLQueryBuilder.INDENT), oql, ds, fixed, model, macros)
         val sql = subquery.toString
 
         s"(\n$sql${" " * (margin + 2 * SQLQueryBuilder.INDENT)})"
       case InQueryOQLExpression(left, op, query) =>
         val subquery =
-          writeQuery(innerQuery(query), table, Right(margin + 2 * SQLQueryBuilder.INDENT), oql, ds, fixed, model)
+          writeQuery(innerQuery(query), table, Right(margin + 2 * SQLQueryBuilder.INDENT), oql, ds, fixed, model, macros)
         val sql = subquery.toString
 
         s"${expression(left, table)} $op (\n$sql${" " * (margin + 2 * SQLQueryBuilder.INDENT)})"
       case InArrayOQLExpression(left, op, right) =>
         s"${expression(left, table)} $op (${right map (expression(_, table)) mkString ", "})"
-      case ApplyOQLExpression(f, args) => s"${f.s}(${args map (expression(_, table)) mkString ", "})"
-      case StarOQLExpression           => "*"
-      case RawOQLExpression(s)         => s
+      case ApplyOQLExpression(f, args) =>
+        s"${f.s}(${args map (expression(_, table)) mkString ", "})"
+      case StarOQLExpression   => "*"
+      case RawOQLExpression(s) => s
       case InfixOQLExpression(left, op @ ("*" | "/"), right) =>
         s"${expression(left, table)}$op${expression(right, table)}"
       case InfixOQLExpression(left, op, right) => s"${expression(left, table)} $op ${expression(right, table)}"

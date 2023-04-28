@@ -17,9 +17,9 @@ abstract class AbstractOQL(dm: String, val ds: SQLDataSource, conv: Conversions)
 
   private var _transpileOnly = false
   private var _showQuery = false
+  private val macros = new mutable.HashMap[String, Macro]
 
   val model: DataModel = new DataModel(new DMLParser().parseModel(dm), dm)
-  val macros: mutable.HashMap[String, Macro]
 
   def define(name: String, definition: String, parameters: Seq[String]): Unit =
     parameters groupBy identity collect { case (x, List(_, _, _*)) => x } match
@@ -129,10 +129,9 @@ abstract class AbstractOQL(dm: String, val ds: SQLDataSource, conv: Conversions)
       fixed: Fixed
   ): Future[ResultBuilder] = {
     val root: ResultNode = ResultNode(query, objectNode(query.project))
-    val sqlBuilder = new SQLQueryBuilder(oql, ds, fixed, model)
+    val sqlBuilder = new SQLQueryBuilder(oql, ds, fixed, model, macros)
 
-//    println(prettyPrint(root))
-    writeQuery(root, null, Left(sqlBuilder), oql, ds, fixed, model)
+    writeQuery(root, null, Left(sqlBuilder), oql, ds, fixed, model, macros)
 
     val sql = sqlBuilder.toString
 
@@ -536,7 +535,8 @@ object AbstractOQL {
       oql: String,
       ds: SQLDataSource,
       fixed: Fixed,
-      model: DataModel
+      model: DataModel,
+      macros: mutable.HashMap[String, Macro]
   ): SQLQueryBuilder =
     node match {
       case ResultNode(query, element) =>
@@ -570,7 +570,7 @@ object AbstractOQL {
         query.order foreach (builder.left.toOption.get.order(_, query.entity.table))
         query.limit foreach builder.left.toOption.get.limit
         query.offset foreach builder.left.toOption.get.offset
-        writeQuery(element, query.entity.table, builder, oql, ds, fixed, model)
+        writeQuery(element, query.entity.table, builder, oql, ds, fixed, model, macros)
         builder.left.toOption.get
       case e @ ValueNode(expr) =>
         val (idx, typed) = builder.left.toOption.get.projectValue(expr, table)
@@ -579,7 +579,7 @@ object AbstractOQL {
         e.typed = typed
         builder.left.toOption.get
       case ObjectNode(properties) =>
-        properties foreach { case (_, e) => writeQuery(e, table, builder, oql, ds, fixed, model) }
+        properties foreach { case (_, e) => writeQuery(e, table, builder, oql, ds, fixed, model, macros) }
         builder.left.toOption.get
       case n @ ManyToOneNode(
             OQLQuery(
@@ -607,7 +607,7 @@ object AbstractOQL {
         }
 
         builder.left.toOption.get.leftJoin(table, column, entity.table, alias, entity.pk.get.column)
-        writeQuery(element, alias, builder, oql, ds, fixed, model)
+        writeQuery(element, alias, builder, oql, ds, fixed, model, macros)
         // todo: check query sections (i.e. order) that don't apply to many-to-one
         builder.left.toOption.get
       case n @ ManyToManyNode(
@@ -627,15 +627,22 @@ object AbstractOQL {
         val alias = s"$table$$$name"
         val subquery =
           if (builder.isLeft)
-            new SQLQueryBuilder(oql, ds, fixed, model, builder.left.toOption.get.margin + 2 * SQLQueryBuilder.INDENT)
-          else new SQLQueryBuilder(oql, ds, fixed, model, builder.toOption.get, true)
+            new SQLQueryBuilder(
+              oql,
+              ds,
+              fixed,
+              model,
+              macros,
+              builder.left.toOption.get.margin + 2 * SQLQueryBuilder.INDENT
+            )
+          else new SQLQueryBuilder(oql, ds, fixed, model, macros, builder.toOption.get, true)
         val joinAlias = s"$alias$$${targetAttr.name}"
 
         if (builder.isLeft)
           n.idx = builder.left.toOption.get.projectQuery(subquery)
 
         subquery.table(linkEntity.table, Some(alias))
-        writeQuery(element, joinAlias, Left(subquery), oql, ds, fixed, model)
+        writeQuery(element, joinAlias, Left(subquery), oql, ds, fixed, model, macros)
         subquery.select(
           RawOQLExpression(s""""$alias"."${selfAttr.column}" = "$table"."${entity.pk.get.column}""""),
           null
@@ -664,14 +671,21 @@ object AbstractOQL {
         val alias = s"$table$$$name"
         val subquery =
           if (builder.isLeft)
-            new SQLQueryBuilder(oql, ds, fixed, model, builder.left.toOption.get.margin + 2 * SQLQueryBuilder.INDENT)
-          else new SQLQueryBuilder(oql, ds, fixed, model, builder.toOption.get, true)
+            new SQLQueryBuilder(
+              oql,
+              ds,
+              fixed,
+              model,
+              macros,
+              builder.left.toOption.get.margin + 2 * SQLQueryBuilder.INDENT
+            )
+          else new SQLQueryBuilder(oql, ds, fixed, model, macros, builder.toOption.get, true)
 
         if (builder.isLeft)
           n.idx = builder.left.toOption.get.projectQuery(subquery)
 
         subquery.table(mtoEntity.table, Some(alias))
-        writeQuery(element, alias, Left(subquery), oql, ds, fixed, model)
+        writeQuery(element, alias, Left(subquery), oql, ds, fixed, model, macros)
         subquery.select(
           RawOQLExpression(s""""$alias"."${otmAttr.column}" = "$table"."${entity.pk.get.column}""""),
           null
@@ -696,14 +710,21 @@ object AbstractOQL {
         val alias = s"$table$$$name"
         val subquery =
           if (builder.isLeft)
-            new SQLQueryBuilder(oql, ds, fixed, model, builder.left.toOption.get.margin + 2 * SQLQueryBuilder.INDENT)
-          else new SQLQueryBuilder(oql, ds, fixed, model, builder.toOption.get, true)
+            new SQLQueryBuilder(
+              oql,
+              ds,
+              fixed,
+              model,
+              macros,
+              builder.left.toOption.get.margin + 2 * SQLQueryBuilder.INDENT
+            )
+          else new SQLQueryBuilder(oql, ds, fixed, model, macros, builder.toOption.get, true)
 
         if (builder.isLeft)
           n.idx = builder.left.toOption.get.projectQuery(subquery)
 
         subquery.table(otmEntity.table, Some(alias))
-        writeQuery(element, alias, Left(subquery), oql, ds, fixed, model)
+        writeQuery(element, alias, Left(subquery), oql, ds, fixed, model, macros)
         subquery.select(
           RawOQLExpression(s""""$alias"."${otmAttr.column}" = "$table"."${otmAttr.typ
               .asInstanceOf[ManyToOneType]
