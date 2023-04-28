@@ -41,6 +41,9 @@ abstract class AbstractOQL(dm: String, val ds: SQLDataSource, conv: Conversions)
       case s if s.nonEmpty =>
         sys.error(s"parameter(s) not encountered in the definition: ${s.mkString("'", "', '", "'")}")
       case _ =>
+
+    if macros contains name then sys.error(s"macro '$name' is already defined")
+    else macros(name) = Macro(definition, parameters)
   end define
 
   def render(a: Any, typ: Option[Datatype] = None): String
