@@ -12,6 +12,7 @@ trait PGDataSource extends SQLDataSource {
     typ match {
       case TextType              => "TEXT"
       case IntegerType           => "INTEGER"
+      case SmallintType          => "SMALLINT"
       case BooleanType           => "BOOLEAN"
       case BigintType            => "BIGINT"
       case DecimalType(p, s)     => s"NUMERIC($p, $s)"
@@ -33,6 +34,7 @@ trait PGDataSource extends SQLDataSource {
     typ match {
       case "timestamp without time zone" => TimestampType
       case "uuid"                        => UUIDType
+      case "smallint"                    => SmallintType
       case "integer"                     => IntegerType
       case "bigint"                      => BigintType
       case "time"                        => TimeType

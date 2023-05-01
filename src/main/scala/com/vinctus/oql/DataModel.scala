@@ -67,6 +67,7 @@ class DataModel(model: DMLModel, dml: String) {
         val typ =
           a.typ match {
             case DMLSimpleDataType("text")                     => TextType
+            case DMLSimpleDataType("smallint" | "int2")        => SmallintType
             case DMLSimpleDataType("integer" | "int" | "int4") => IntegerType
             case DMLSimpleDataType("bool" | "boolean")         => BooleanType
             case DMLSimpleDataType("bigint" | "int8")          => BigintType

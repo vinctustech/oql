@@ -189,7 +189,7 @@ abstract class AbstractOQL(dm: String, val ds: SQLDataSource, conv: Conversions)
                 else expr.typ
 
               (v, v.value, typ) match {
-                case (_, s: String, IntegerType)                   => s.toInt
+                case (_, s: String, SmallintType | IntegerType)    => s.toInt
                 case (_, s: String, FloatType)                     => s.toDouble
                 case (_, s: String, BigintType)                    => conv.bigint(s)
                 case (_, s: String, UUIDType)                      => conv.uuid(s)

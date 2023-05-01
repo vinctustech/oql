@@ -5,7 +5,8 @@ trait DMLDeclaration extends DMLAST
 case class DMLEnum(name: Ident, labels: List[Ident]) extends DMLDeclaration
 case class DMLModel(decls: Seq[DMLDeclaration]) extends DMLAST
 case class DMLEntity(name: Ident, actualName: Option[Ident], attributes: Seq[DMLAttribute]) extends DMLDeclaration
-case class DMLAttribute(name: Ident, actualName: Option[Ident], typ: DMLTypeSpecifier, pk: Boolean, required: Boolean) extends DMLAST
+case class DMLAttribute(name: Ident, actualName: Option[Ident], typ: DMLTypeSpecifier, pk: Boolean, required: Boolean)
+    extends DMLAST
 
 trait DMLTypeSpecifier extends DMLAST
 trait DMLDataType extends DMLTypeSpecifier

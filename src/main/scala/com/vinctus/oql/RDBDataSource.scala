@@ -15,6 +15,7 @@ class RDBDataSource(implicit ec: scala.concurrent.ExecutionContext) extends SQLD
   def mapType(typ: TypeSpecifier): String =
     typ match {
       case TextType              => "TEXT"
+      case SmallintType          => "SMALLINT"
       case IntegerType           => "INTEGER"
       case BooleanType           => "BOOLEAN"
       case BigintType            => "BIGINT"
@@ -30,16 +31,18 @@ class RDBDataSource(implicit ec: scala.concurrent.ExecutionContext) extends SQLD
 
   def mapPKType(typ: TypeSpecifier): String =
     typ match {
-      case IntegerType => "INT AUTO"
-      case BigintType  => "BIGINT AUTO"
-      case UUIDType    => "UUID AUTO"
-      case _: Datatype => mapType(typ)
+      case SmallintType => "SMALLINT AUTO"
+      case IntegerType  => "INT AUTO"
+      case BigintType   => "BIGINT AUTO"
+      case UUIDType     => "UUID AUTO"
+      case _: Datatype  => mapType(typ)
     }
 
   def reverseMapType(typ: String): Datatype =
     typ match {
       case "TIMESTAMP" => TimestampType
       case "UUID"      => UUIDType
+      case "SMALLINT"  => SmallintType
       case "INT"       => IntegerType
       case "BIGINT"    => BigintType
       case "DOUBLE"    => FloatType
