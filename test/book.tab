@@ -7,7 +7,7 @@ author
 
 book
  pk_book_id: bigint, pk            title: text             year: integer  author_id: bigint, fk, author, pk_author_id 
- 1                       Treasure Island                   1883           1                                           
+ 1                       Treasure Island                   1883           1
  2                       Alice's Adventures in Wonderland  1865           2                                           
  3                       Oliver Twist                      1838           3                                           
  4                       A Tale of Two Cities              1859           3                                           

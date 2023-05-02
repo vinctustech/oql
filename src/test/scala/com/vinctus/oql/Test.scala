@@ -57,7 +57,10 @@ trait Test {
       5
     )
 
-  def test(oql: String, parameters: (String, Any)*): Future[String] = db.json(oql, parameters = parameters.toMap)
+  def test(oql: String, parameters: (String, Any)*): Future[String] =
+//    if oql startsWith "races" then db.showQuery()
+
+    db.json(oql, parameters = parameters.toMap)
 
   def testjs(oql: String, parameters: js.UndefOr[js.Any] = js.undefined): Future[String] =
     dbjs.jsQueryMany(oql, parameters = parameters).toFuture map (v => JSON(v, dbjs.ds.platformSpecific, format = true))

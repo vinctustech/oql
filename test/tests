@@ -7,3 +7,4 @@
 /home/ed/dev-sn/createdb/target/scala-2.13/createdb-out un.tab >>tests.sql
 /home/ed/dev-sn/createdb/target/scala-2.13/createdb-out cars.tab >>tests.sql
 cat escapes.sql >>tests.sql
+cat races.sql >>tests.sql
