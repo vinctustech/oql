@@ -10,6 +10,7 @@ trait PGDataSource extends SQLDataSource {
 
   def mapType(typ: TypeSpecifier): String =
     typ match {
+      case CharacterType(n)      => s"CHAR($n)"
       case TextType              => "TEXT"
       case IntegerType           => "INTEGER"
       case SmallintType          => "SMALLINT"
@@ -25,9 +26,10 @@ trait PGDataSource extends SQLDataSource {
 
   def mapPKType(typ: TypeSpecifier): String =
     typ match {
-      case IntegerType => "SERIAL"
-      case BigintType  => "BIGSERIAL"
-      case _: Datatype => mapType(typ)
+      case SmallintType => "SMALLSERIAL"
+      case IntegerType  => "SERIAL"
+      case BigintType   => "BIGSERIAL"
+      case _: Datatype  => mapType(typ)
     }
 
   def reverseMapType(typ: String): Datatype =

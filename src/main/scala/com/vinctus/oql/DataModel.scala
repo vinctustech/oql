@@ -66,6 +66,7 @@ class DataModel(model: DMLModel, dml: String) {
       for (a <- dmlas) {
         val typ =
           a.typ match {
+            case DMLParametricDataType("char", parameters)     => CharacterType(parameters.head.toInt)
             case DMLSimpleDataType("text")                     => TextType
             case DMLSimpleDataType("smallint" | "int2")        => SmallintType
             case DMLSimpleDataType("integer" | "int" | "int4") => IntegerType

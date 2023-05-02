@@ -7,6 +7,7 @@ trait TypeSpecifier {
 trait Datatype extends TypeSpecifier { val isDataType = true; val isColumnType = true; val isArrayType = false }
 
 case class EnumType(name: String, labels: List[String]) extends Datatype
+case class CharacterType(n: Int) extends Datatype
 case object TextType extends Datatype
 case object SmallintType extends Datatype
 case object IntegerType extends Datatype

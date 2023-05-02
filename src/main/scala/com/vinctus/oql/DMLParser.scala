@@ -50,6 +50,9 @@ class DMLParser extends RegexParsers {
       kw("decimal") ~ "(" ~ integer ~ "," ~ integer ~ ")" ^^ { case _ ~ _ ~ p ~ _ ~ s ~ _ =>
         DMLParametricDataType("decimal", List(p, s))
       } |
+      kw("char") ~ "(" ~ integer ~ ")" ^^ { case _ ~ _ ~ n ~ _ =>
+        DMLParametricDataType("char", List(n))
+      } |
       ident ^^ DMLNameType.apply |
       "[" ~ ident ~ "]" ~ "(" ~ ident ~ ")" ^^ { case _ ~ n ~ _ ~ _ ~ l ~ _ =>
         DMLManyToManyType(n, l)
