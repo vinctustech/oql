@@ -70,7 +70,7 @@ abstract class AbstractOQL(dm: String, val ds: SQLDataSource, conv: Conversions)
     query
 
   def parseCondition(cond: String, entity: Entity): OQLExpression = {
-    val expr = OQLParser.parseBooleanExpression(cond)
+    val expr = OQLParser.parseExpression(cond)
 
     decorate(entity, expr, model, ds, cond)
     expr

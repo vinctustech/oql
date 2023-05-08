@@ -77,6 +77,21 @@ class BookDBTests extends AsyncFreeSpec with Matchers with Test {
     }
   }
 
+  "query with boolean expression in select" in {
+    test("book [1880 < year AND year < 1884]") map { result =>
+      result shouldBe
+        """
+          |[
+          |  {
+          |    "id": 1,
+          |    "title": "Treasure Island",
+          |    "year": 1883
+          |  }
+          |]
+          |""".trim.stripMargin
+    }
+  }
+
   val `simplest query with select using parameter`: String =
     """
       |[
