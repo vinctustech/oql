@@ -70,6 +70,10 @@ trait SQLDataSource extends OQLDataSource {
     (a, typ) match {
       case (s: String, TextType)        => string(s)
       case (s: String, UUIDType)        => s"$s::UUID"
+      case (s: String, IntegerType)     => s"$s::INTEGER"
+      case (s: String, BooleanType)     => s"$s::BOOLEAN"
+      case (s: String, BigintType)      => s"$s::BIGINT"
+      case (s: String, FloatType)       => s"$s::DOUBLE PRECISION"
       case (s: String, TimestampType)   => s"$s::TIMESTAMP"
       case (s: String, DateType)        => s"$s::DATE"
       case (s: String, JSONType)        => s"$s::JSON"
