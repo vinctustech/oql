@@ -67,7 +67,7 @@ object OQLParser extends RegexParsers with PackratParsers {
   lazy val attributeName: PackratParser[Ident] = identifier
 
   lazy val applyExpression: PackratParser[OQLExpression] =
-    identifier ~ ("(" ~> rep1sep(expression, ",") <~ ")") ^^ { case f ~ as =>
+    identifier ~ ("(" ~> repsep(expression, ",") <~ ")") ^^ { case f ~ as =>
       ApplyOQLExpression(f, as to ArraySeq)
     }
 
@@ -99,7 +99,7 @@ object OQLParser extends RegexParsers with PackratParsers {
 
   lazy val select: PackratParser[OQLExpression] = "[" ~> expression <~ "]"
 
-  lazy val group: PackratParser[List[OQLExpression]] = "/" ~> expressions <~ "/"
+  lazy val group: PackratParser[List[OQLExpression]] = "/" ~> rep1sep(expression, ",") <~ "/"
 
   lazy val order: PackratParser[List[OQLOrdering]] = "<" ~> rep1sep(ordering, ",") <~ ">"
 
@@ -120,8 +120,6 @@ object OQLParser extends RegexParsers with PackratParsers {
     "|" ~> integer ~ opt("," ~> integer) <~ "|" ^^ { case l ~ o => Seq(Some(l), o) } |
       "|" ~> "," ~> integer <~ "|" ^^ (o => Seq(None, Some(o))) |
       success(Seq(None, None))
-
-  lazy val expressions: PackratParser[List[OQLExpression]] = rep1sep(expression, ",")
 
   lazy val expression: PackratParser[OQLExpression] = orExpression
 
@@ -144,7 +142,7 @@ object OQLParser extends RegexParsers with PackratParsers {
         BetweenOQLExpression(e, b, l, u)
       } |
       additive ~ isNull ^^ { case e ~ n => PostfixOQLExpression(e, n) } |
-      additive ~ in ~ ("(" ~> expressions <~ ")") ^^ { case e ~ i ~ es => InArrayOQLExpression(e, i, es) } |
+      additive ~ in ~ ("(" ~> repsep(expression, ",") <~ ")") ^^ { case e ~ i ~ es => InArrayOQLExpression(e, i, es) } |
       additive ~ in ~ ("(" ~> query <~ ")") ^^ { case e ~ i ~ q => InQueryOQLExpression(e, i, q) } |
       additive
 
@@ -198,8 +196,7 @@ object OQLParser extends RegexParsers with PackratParsers {
     (arrayExpression | objectExpression) ^^ JSONOQLExpression.apply
 
   lazy val primary: PackratParser[OQLExpression] =
-    booleanLiteral |
-      castExpression |
+    castExpression |
       literalExpression |
       jsonExpression |
       starExpression |
