@@ -76,6 +76,7 @@ trait SQLDataSource extends OQLDataSource {
       case (s: String, FloatType)     => s"$s::DOUBLE PRECISION"
       case (s: String, TimestampType) => s"$s::TIMESTAMP"
       case (s: String, DateType)      => s"$s::DATE"
+      case (s: String, TimeType)      => s"$s::TIME"
       case (s: String, JSONType)      => s"$s::JSON"
       case (s: String, IntervalType)  => s"$s::INTERVAL"
       case _ =>
