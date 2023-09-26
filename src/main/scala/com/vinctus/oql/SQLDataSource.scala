@@ -68,14 +68,16 @@ trait SQLDataSource extends OQLDataSource {
 
   def typed(a: Any, typ: Datatype): String =
     (a, typ) match {
-      case (s: String, TextType | CharacterType(_))                                     => string(s)
-      case (s: String, UUIDType)                                                        => s"$s::UUID"
-      case (s: String, TimestampType)                                                   => s"$s::TIMESTAMP"
-      case (s: String, DateType)                                                        => s"$s::DATE"
-      case (s: String, TimeType)                                                        => s"$s::TIME"
-      case (s: String, JSONType)                                                        => s"$s::JSON"
-      case (s: String, IntervalType)                                                    => s"$s::INTERVAL"
-      case (_, SmallintType | IntegerType | FloatType | BigintType | DecimalType(_, _)) => a.toString
+      case (s: String, UUIDType)      => s"$s::UUID"
+      case (s: String, IntegerType)   => s"$s::INTEGER"
+      case (s: String, SmallintType)  => s"$s::SMALLINT"
+      case (s: String, BooleanType)   => s"$s::BOOLEAN"
+      case (s: String, BigintType)    => s"$s::BIGINT"
+      case (s: String, FloatType)     => s"$s::DOUBLE PRECISION"
+      case (s: String, TimestampType) => s"$s::TIMESTAMP"
+      case (s: String, DateType)      => s"$s::DATE"
+      case (s: String, JSONType)      => s"$s::JSON"
+      case (s: String, IntervalType)  => s"$s::INTERVAL"
       case _ =>
         Console.err.println(s"WARNING: SQLDataSource.typed(): don't know how to render '$a' as type $typ")
         a.toString

@@ -73,8 +73,14 @@ object OQLParser extends RegexParsers with PackratParsers {
 
   lazy val simpleType: PackratParser[Datatype] =
     kw("json") ^^^ JSONType |
+      kw("text") ^^^ TextType |
+      kw("integer") ^^^ IntegerType |
+      kw("boolean") ^^^ BooleanType |
+      kw("bigint") ^^^ BigintType |
+      kw("float") ^^^ FloatType |
       kw("date") ^^^ DateType |
-      kw("time") ^^^ TimeType | kw("interval") ^^^ IntervalType |
+      kw("time") ^^^ TimeType |
+      kw("interval") ^^^ IntervalType |
       kw("uuid") ^^^ UUIDType |
       kw("timestamp") ^^^ TimestampType
 
