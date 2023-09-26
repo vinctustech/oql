@@ -99,21 +99,22 @@ object OQLParser extends RegexParsers with PackratParsers {
 
   lazy val select: PackratParser[OQLExpression] = "[" ~> expression <~ "]"
 
-  lazy val group: PackratParser[List[OQLExpression]] = "/" ~> rep1sep(expression, ",") <~ "/"
+  lazy val group: PackratParser[List[OQLExpression]] = "/" ~> rep1sep(primary, ",") <~ "/"
 
   lazy val order: PackratParser[List[OQLOrdering]] = "<" ~> rep1sep(ordering, ",") <~ ">"
 
   lazy val ordering: PackratParser[OQLOrdering] =
-    expression ~ opt(kw("ASC") | kw("DESC")) ~ opt(kw("NULLS") ~> (kw("FIRST") | kw("LAST"))) ^^ { case e ~ d ~ n =>
-      OQLOrdering(
-        e,
-        (d, n) match {
-          case (None, None) | (Some("ASC"), None) => "ASC NULLS FIRST"
-          case (None, Some(nulls))                => s"ASC NULLS ${nulls.toUpperCase}"
-          case (_, None)                          => "DESC NULLS LAST"
-          case (Some(dir), Some(nulls))           => s"${dir.toUpperCase} NULLS ${nulls.toUpperCase}"
-        }
-      )
+    additiveExpression ~ opt(kw("ASC") | kw("DESC")) ~ opt(kw("NULLS") ~> (kw("FIRST") | kw("LAST"))) ^^ {
+      case e ~ d ~ n =>
+        OQLOrdering(
+          e,
+          (d, n) match {
+            case (None, None) | (Some("ASC"), None) => "ASC NULLS FIRST"
+            case (None, Some(nulls))                => s"ASC NULLS ${nulls.toUpperCase}"
+            case (_, None)                          => "DESC NULLS LAST"
+            case (Some(dir), Some(nulls))           => s"${dir.toUpperCase} NULLS ${nulls.toUpperCase}"
+          }
+        )
     }
 
   lazy val restrict: PackratParser[Seq[Option[Int]]] =
@@ -135,16 +136,18 @@ object OQLParser extends RegexParsers with PackratParsers {
     kw("NOT") ~> comparisonExpression ^^ (e => PrefixOQLExpression("NOT", e)) | comparisonExpression
 
   lazy val comparisonExpression: PackratParser[OQLExpression] =
-    additive ~ comparison ~ additive ^^ { case l ~ c ~ r => InfixOQLExpression(l, c, r) } |
-      additive ~ ((kw("NOT") ~ kw("BETWEEN") ^^^ "NOT BETWEEN") | kw("BETWEEN")) ~ additive ~ kw(
+    additiveExpression ~ comparison ~ additiveExpression ^^ { case l ~ c ~ r => InfixOQLExpression(l, c, r) } |
+      additiveExpression ~ ((kw("NOT") ~ kw("BETWEEN") ^^^ "NOT BETWEEN") | kw("BETWEEN")) ~ additiveExpression ~ kw(
         "AND"
-      ) ~ additive ^^ { case e ~ b ~ l ~ _ ~ u =>
+      ) ~ additiveExpression ^^ { case e ~ b ~ l ~ _ ~ u =>
         BetweenOQLExpression(e, b, l, u)
       } |
-      additive ~ isNull ^^ { case e ~ n => PostfixOQLExpression(e, n) } |
-      additive ~ in ~ ("(" ~> repsep(expression, ",") <~ ")") ^^ { case e ~ i ~ es => InArrayOQLExpression(e, i, es) } |
-      additive ~ in ~ ("(" ~> query <~ ")") ^^ { case e ~ i ~ q => InQueryOQLExpression(e, i, q) } |
-      additive
+      additiveExpression ~ isNull ^^ { case e ~ n => PostfixOQLExpression(e, n) } |
+      additiveExpression ~ in ~ ("(" ~> repsep(expression, ",") <~ ")") ^^ { case e ~ i ~ es =>
+        InArrayOQLExpression(e, i, es)
+      } |
+      additiveExpression ~ in ~ ("(" ~> query <~ ")") ^^ { case e ~ i ~ q => InQueryOQLExpression(e, i, q) } |
+      additiveExpression
 
   lazy val isNull: PackratParser[String] =
     kw("IS") ~ kw("NULL") ^^^ "IS NULL" | kw("IS") ~ kw("NOT") ~ kw("NULL") ^^^ "IS NOT NULL"
@@ -159,8 +162,8 @@ object OQLParser extends RegexParsers with PackratParsers {
   lazy val booleanLiteral: PackratParser[OQLExpression] =
     (kw("TRUE") | kw("FALSE") | kw("NULL")) ^^ BooleanOQLExpression.apply
 
-  lazy val additive: PackratParser[OQLExpression] =
-    additive ~ ("+" | "-") ~ multiplicative ^^ { case l ~ o ~ r =>
+  lazy val additiveExpression: PackratParser[OQLExpression] =
+    additiveExpression ~ ("+" | "-") ~ multiplicative ^^ { case l ~ o ~ r =>
       InfixOQLExpression(l, o, r)
     } |
       multiplicative

@@ -51,7 +51,7 @@ Compile / paradoxMaterialTheme := {
     .withFavicon("assets/images/favicon.ico")
     .withLogo("assets/images/vinctus.png")
     .withRepository(uri("https://github.com/vinctustech/oql"))
-    .withCopyright("© Vinctus Technologies Inc. All Rights Reserved 2021")
+    .withCopyright("© Vinctus Technologies Inc. All Rights Reserved 2023")
     .withSocial(uri("https://github.com/vinctustech"))
     .withLanguage(java.util.Locale.ENGLISH)
     .withSearch(tokenizer = "[\\s\\-\\.]+")

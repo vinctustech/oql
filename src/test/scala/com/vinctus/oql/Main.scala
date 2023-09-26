@@ -166,7 +166,53 @@ import io.github.edadma.rdb
     //    _ <- db.create
 //    u <- db.entity("employee").update(104, Map("firstName" -> js.undefined, "lastName" -> "Lee"))
 //    i <- { db.entity("department").insert(Map("id" -> 123, "departmentName" -> "RnR")) }
-    r <- { db.showQuery(); db.queryMany("a [t::timestamp = '2021-04-21T06:30:00.000Z'::timestamp]") } // a {* bs}
+//    r <- { db.showQuery(); db.queryMany("a [t::timestamp = '2021-04-21T06:30:00.000Z'::timestamp]") } // a {* bs}
+    r <- {
+      db.showQuery(); db.queryMany("""
+        |user {
+        |  id
+        |  role
+        |  enabled
+        |  firstName
+        |  lastName
+        |  phoneNumber
+        |  email
+        |  emailVerified
+        |  language
+        |  loginToken
+        |  createdAt
+        |  password
+        |  account {
+        |    id
+        |    enabled
+        |    name
+        |    plan
+        |    uom
+        |    createdAt
+        |    country
+        |    trialEndAt
+        |    integrations {id name}
+        |  }
+        |  stores {
+        |    id
+        |    name
+        |    color
+        |    radiusBound
+        |    place {
+        |      id
+        |      latitude
+        |      longitude
+        |      address
+        |    }
+        |  } <createdAt>
+        |  lastLoginAt
+        |  createdBy {id firstName lastName}
+        |  updatedAt
+        |  updatedBy {id firstName lastName}
+        |  vehicle {id model make licensePlate seats store {id name}}
+        |}
+        |""".stripMargin)
+    } // a {* bs}
   yield (r))
     .onComplete {
       case Failure(exception) => exception.printStackTrace()
