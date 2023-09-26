@@ -25,13 +25,9 @@ githubRepository := "oql"
 
 Global / onChangedBuildSource := ReloadOnSourceChanges
 
-resolvers += "Typesafe Repository" at "https://repo.typesafe.com/typesafe/releases/"
-
 resolvers += Resolver.githubPackages("vinctustech")
 
 resolvers += Resolver.githubPackages("edadma", "importer")
-
-resolvers += Resolver.githubPackages("edadma", "pretty")
 
 enablePlugins(ScalaJSPlugin)
 
@@ -86,15 +82,15 @@ Compile / npmDependencies ++= Seq(
 )
 
 libraryDependencies ++= Seq(
-  "org.scalatest" %%% "scalatest" % "3.2.15" % "test",
+  "org.scalatest" %%% "scalatest" % "3.2.17" % "test",
   "io.github.edadma" %%% "rdb" % "0.1.0-pre.42",
-  "com.vinctus" %%% "sjs-utils" % "0.1.0-snapshot.33",
-  "com.lihaoyi" %%% "pprint" % "0.7.1"
+  "com.vinctus" %%% "sjs-utils" % "0.1.0-snapshot.33"
+//  "com.lihaoyi" %%% "pprint" % "0.7.1"
 //  "com.vinctus" %%% "mappable" % "0.1.2"
 )
 
 libraryDependencies ++= Seq(
-  "org.scala-lang.modules" %%% "scala-parser-combinators" % "2.1.1"
+  "org.scala-lang.modules" %%% "scala-parser-combinators" % "2.3.0"
   //  "org.scala-lang.modules" %%% "scala-async" % "1.0.0-M1"
 )
 
@@ -108,7 +104,7 @@ lazy val packageName = SettingKey[String]("packageName", "package name")
 
 packageName := "oql"
 
-scalaJSLinkerConfig ~= { _.withESFeatures(_.withESVersion(org.scalajs.linker.interface.ESVersion.ES2018)) }
+scalaJSLinkerConfig ~= { _.withESFeatures(_.withESVersion(org.scalajs.linker.interface.ESVersion.ES2019)) }
 
 publishMavenStyle := true
 
