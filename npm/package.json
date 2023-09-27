@@ -1,6 +1,6 @@
 {
   "name": "@vinctus/oql",
-  "version": "1.2.0-alpha.8",
+  "version": "1.2.0",
   "description": "Object Query Language",
   "main": "main.js",
   "scripts": {
