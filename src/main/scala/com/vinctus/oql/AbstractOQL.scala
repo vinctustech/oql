@@ -217,6 +217,7 @@ abstract class AbstractOQL(dm: String, val ds: SQLDataSource, conv: Conversions)
     } else Future(null)
   }
 
+  define("countDistinct", "COUNT(DISTINCT $a)", List("a"))
 }
 
 object AbstractOQL {
