@@ -409,7 +409,7 @@ oql
   })
 ```
 
-Output:
+Expected output:
 
 ```json
 [

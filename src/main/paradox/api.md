@@ -20,6 +20,57 @@ oql.count('product [price < :max]', {max: 100.00})
 
 gets the number of products that are less than $100.
 
+### `define(name, definition, parameters)`
+
+Defines a macro called *name* where *definition* is substituted into the generated SQL query.  *parameters* is an array of strings naming the parameters of the macro and specifying the order in which they are given. Parameters references in the definition are prefixed with a `$`. Use `$$` to cause a dollar sign to appear in the SQL query. 
+
+For example
+
+```typescript
+oql.define('countFiltered', 'COUNT(*) FILTER (WHERE $condition)', ['condition'])
+oql.showQuery()
+oql
+  .queryMany(
+    `
+    employee { 
+      dept: department.name count: countFiltered(job_title != 'MANAGER' AND job_title != 'PRESIDENT')
+    } /department.dep_id/ <department.name>
+    `
+  )
+  .then((result: any) => {
+    console.log(JSON.stringify(result, null, 2))
+  })
+```
+
+if applied to the employees database created in the [tutorial](https://vinctustech.github.io/oql/tutorial.html) produces the output
+
+```sql
+SELECT 
+    "employees$department"."dep_name",
+    COUNT(*) FILTER (WHERE "employees"."job_title" != 'MANAGER' AND "employees"."job_title" != 'PRESIDENT')
+  FROM "employees"
+    LEFT JOIN "department" AS "employees$department" ON "employees"."dep_id" = "employees$department"."dep_id"
+  GROUP BY "employees$department"."dep_id"
+  ORDER BY "employees$department"."dep_name" ASC NULLS FIRST
+```
+
+```json
+[
+  {
+    "dept": "AUDIT",
+    "count": 4
+  },
+  {
+    "dept": "FINANCE",
+    "count": 1
+  },
+  {
+    "dept": "MARKETING",
+    "count": 5
+  }
+]
+```
+
 ### `entity(name)`
 
 Returns a `Mutation` instance for OQL class instance that it was called on. See [The `Mutation` Class](#the-resource-class) for a method reference.
@@ -27,18 +78,6 @@ Returns a `Mutation` instance for OQL class instance that it was called on. See 
 ### `queryBuilder()`
 
 Returns a `QueryBuilder` instance for OQL class instance that it was called on. See [The `QueryBuilder` Class](#the-querybuilder-class) for a method reference.
-
-### `queryOne(query, [parameters])`
-
-Returns a promise for zero or one object where *query* is the query string written in the [OQL query language](#query-language). If *parameters* is given, each parameter is referenced in the query as `:name` where *name* is the name of the parameter.
-
-For example
-
-```typescript
-oql.queryOne('user {id name email} [id < :id]', {id: 12345})
-```
-
-gets the *id*, *name*, and *email* for user with id 12345.
 
 ### `queryMany(query, [parameters])`
 
@@ -52,9 +91,25 @@ oql.queryMany('product {id name price supplier.name} [price < :max]', {max: 100.
 
 gets the *id*, *name*, *price* and `supplier.name` for products that are less than $100.
 
+### `queryOne(query, [parameters])`
+
+Returns a promise for zero or one object where *query* is the query string written in the [OQL query language](#query-language). If *parameters* is given, each parameter is referenced in the query as `:name` where *name* is the name of the parameter.
+
+For example
+
+```typescript
+oql.queryOne('user {id name email} [id < :id]', {id: 12345})
+```
+
+gets the *id*, *name*, and *email* for user with id 12345.
+
 ### `raw(sql, [values])`
 
 Perform the raw SQL query and return a promise for the results where *sql* is the query string and *values* are query parameter values.
+
+### `showQuery()`
+
+Causes the generated SQL for the very next query or mutation that is executed to be output. See 
 
 The `QueryBuilder` Class
 ------------------------

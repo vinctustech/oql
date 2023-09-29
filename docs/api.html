@@ -204,24 +204,67 @@ vinctustech/oql
 <pre class="prettyprint"><code class="language-typescript">oql.count(&#39;product [price &lt; :max]&#39;, {max: 100.00})
 </code></pre>
 <p>gets the number of products that are less than $100.</p>
+<h3><a href="#define-name-definition-parameters-" name="define-name-definition-parameters-" class="anchor"><span class="anchor-link"></span></a><code>define(name, definition, parameters)</code></h3>
+<p>Defines a macro called <em>name</em> where <em>definition</em> is substituted into the generated SQL query. <em>parameters</em> is an array of strings naming the parameters of the macro and specifying the order in which they are given. Parameters references in the definition are prefixed with a <code>$</code>. Use <code>$$</code> to cause a dollar sign to appear in the SQL query. </p>
+<p>For example</p>
+<pre class="prettyprint"><code class="language-typescript">oql.define(&#39;countFiltered&#39;, &#39;COUNT(*) FILTER (WHERE $condition)&#39;, [&#39;condition&#39;])
+oql.showQuery()
+oql
+  .queryMany(
+    `
+    employee { 
+      dept: department.name count: countFiltered(job_title != &#39;MANAGER&#39; AND job_title != &#39;PRESIDENT&#39;)
+    } /department.dep_id/ &lt;department.name&gt;
+    `
+  )
+  .then((result: any) =&gt; {
+    console.log(JSON.stringify(result, null, 2))
+  })
+</code></pre>
+<p>if applied to the employees database created in the <a href="https://vinctustech.github.io/oql/tutorial.html">tutorial</a> produces the output</p>
+<pre class="prettyprint"><code class="language-sql">SELECT 
+    &quot;employees$department&quot;.&quot;dep_name&quot;,
+    COUNT(*) FILTER (WHERE &quot;employees&quot;.&quot;job_title&quot; != &#39;MANAGER&#39; AND &quot;employees&quot;.&quot;job_title&quot; != &#39;PRESIDENT&#39;)
+  FROM &quot;employees&quot;
+    LEFT JOIN &quot;department&quot; AS &quot;employees$department&quot; ON &quot;employees&quot;.&quot;dep_id&quot; = &quot;employees$department&quot;.&quot;dep_id&quot;
+  GROUP BY &quot;employees$department&quot;.&quot;dep_id&quot;
+  ORDER BY &quot;employees$department&quot;.&quot;dep_name&quot; ASC NULLS FIRST
+</code></pre>
+<pre class="prettyprint"><code class="language-json">[
+  {
+    &quot;dept&quot;: &quot;AUDIT&quot;,
+    &quot;count&quot;: 4
+  },
+  {
+    &quot;dept&quot;: &quot;FINANCE&quot;,
+    &quot;count&quot;: 1
+  },
+  {
+    &quot;dept&quot;: &quot;MARKETING&quot;,
+    &quot;count&quot;: 5
+  }
+]
+</code></pre>
 <h3><a href="#entity-name-" name="entity-name-" class="anchor"><span class="anchor-link"></span></a><code>entity(name)</code></h3>
 <p>Returns a <code>Mutation</code> instance for OQL class instance that it was called on. See <a href="#the-resource-class">The <code>Mutation</code> Class</a> for a method reference.</p>
 <h3><a href="#querybuilder-" name="querybuilder-" class="anchor"><span class="anchor-link"></span></a><code>queryBuilder()</code></h3>
 <p>Returns a <code>QueryBuilder</code> instance for OQL class instance that it was called on. See <a href="#the-querybuilder-class">The <code>QueryBuilder</code> Class</a> for a method reference.</p>
-<h3><a href="#queryone-query-parameters-" name="queryone-query-parameters-" class="anchor"><span class="anchor-link"></span></a><code>queryOne(query, [parameters])</code></h3>
-<p>Returns a promise for zero or one object where <em>query</em> is the query string written in the <a href="#query-language">OQL query language</a>. If <em>parameters</em> is given, each parameter is referenced in the query as <code>:name</code> where <em>name</em> is the name of the parameter.</p>
-<p>For example</p>
-<pre class="prettyprint"><code class="language-typescript">oql.queryOne(&#39;user {id name email} [id &lt; :id]&#39;, {id: 12345})
-</code></pre>
-<p>gets the <em>id</em>, <em>name</em>, and <em>email</em> for user with id 12345.</p>
 <h3><a href="#querymany-query-parameters-" name="querymany-query-parameters-" class="anchor"><span class="anchor-link"></span></a><code>queryMany(query, [parameters])</code></h3>
 <p>Returns a promise for an array of objects where <em>query</em> is the query string written in the <a href="#query-language">OQL query language</a>. If <em>parameters</em> is given, each parameter is referenced in the query as <code>:name</code> where <em>name</em> is the name of the parameter.</p>
 <p>For example</p>
 <pre class="prettyprint"><code class="language-typescript">oql.queryMany(&#39;product {id name price supplier.name} [price &lt; :max]&#39;, {max: 100.00})
 </code></pre>
 <p>gets the <em>id</em>, <em>name</em>, <em>price</em> and <code>supplier.name</code> for products that are less than $100.</p>
+<h3><a href="#queryone-query-parameters-" name="queryone-query-parameters-" class="anchor"><span class="anchor-link"></span></a><code>queryOne(query, [parameters])</code></h3>
+<p>Returns a promise for zero or one object where <em>query</em> is the query string written in the <a href="#query-language">OQL query language</a>. If <em>parameters</em> is given, each parameter is referenced in the query as <code>:name</code> where <em>name</em> is the name of the parameter.</p>
+<p>For example</p>
+<pre class="prettyprint"><code class="language-typescript">oql.queryOne(&#39;user {id name email} [id &lt; :id]&#39;, {id: 12345})
+</code></pre>
+<p>gets the <em>id</em>, <em>name</em>, and <em>email</em> for user with id 12345.</p>
 <h3><a href="#raw-sql-values-" name="raw-sql-values-" class="anchor"><span class="anchor-link"></span></a><code>raw(sql, [values])</code></h3>
 <p>Perform the raw SQL query and return a promise for the results where <em>sql</em> is the query string and <em>values</em> are query parameter values.</p>
+<h3><a href="#showquery-" name="showquery-" class="anchor"><span class="anchor-link"></span></a><code>showQuery()</code></h3>
+<p>Causes the generated SQL for the very next query or mutation that is executed to be output. See </p>
 <h2><a href="#the-querybuilder-class" name="the-querybuilder-class" class="anchor"><span class="anchor-link"></span></a>The <code>QueryBuilder</code> Class</h2>
 <p><code>QueryBuilder</code> is used to build up a query step by step. <code>QueryBuilder</code> instances are immutable so each method that returns a <code>QueryBuilder</code> object is returning a new instance.</p>
 <h3><a href="#cond-exp-" name="cond-exp-" class="anchor"><span class="anchor-link"></span></a><code>cond(exp)</code></h3>

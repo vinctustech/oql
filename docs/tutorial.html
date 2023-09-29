@@ -306,7 +306,7 @@ entity department {
 <h2><a href="#many-to-one-query" name="many-to-one-query" class="anchor"><span class="anchor-link"></span></a>Many-to-one Query</h2>
 <p>Run the following TypeScript program:</p>
 <pre class="prettyprint"><code class="language-typescript">import { OQL } from &#39;@vinctus/oql&#39;
-import fs from &#39;fs&#39;
+import * as fs from &#39;fs&#39;
 
 const oql = new OQL(
   fs.readFileSync(&#39;data-model&#39;).toString(),
@@ -374,7 +374,7 @@ oql
 <h2><a href="#one-to-many-query" name="one-to-many-query" class="anchor"><span class="anchor-link"></span></a>One-to-many Query</h2>
 <p>Run the following TypeScript program:</p>
 <pre class="prettyprint"><code class="language-typescript">import { OQL } from &#39;@vinctus/oql&#39;
-import fs from &#39;fs&#39;
+import * as fs from &#39;fs&#39;
 
 const oql = new OQL(
   fs.readFileSync(&#39;data-model&#39;).toString(),
@@ -491,11 +491,11 @@ oql
   name subordinates { name dept: department.name }
 } [exists(subordinates)]
 </code></pre>
-<p>we are asking for the name and list of immediate subordinates of every employee who has any subordinates. For the subordinates, we want their name and the name or their department.</p>
+<p>we are asking for the name and list of immediate subordinates of every employee who has any subordinates. For the subordinates, we want their name and the name of their department.</p>
 <h2><a href="#grouping-query" name="grouping-query" class="anchor"><span class="anchor-link"></span></a>Grouping Query</h2>
 <p>Run the following TypeScript program:</p>
 <pre class="prettyprint"><code class="language-typescript">import { OQL } from &#39;@vinctus/oql&#39;
-import fs from &#39;fs&#39;
+import * as fs from &#39;fs&#39;
 
 const oql = new OQL(
   fs.readFileSync(&#39;data-model&#39;).toString(),
@@ -514,11 +514,14 @@ oql
     `
     employee { 
       dept: department.name count(*)
-    } /department.dep_id/ &lt;department.name&gt;`
+    } /department.dep_id/ &lt;department.name&gt;
+    `
   )
-  .then((res: any) =&gt; console.log(JSON.stringify(res, null, 2)))
+  .then((result: any) =&gt; {
+    console.log(JSON.stringify(result, null, 2))
+  })
 </code></pre>
-<p>Output:</p>
+<p>Expected output:</p>
 <pre class="prettyprint"><code class="language-json">[
   {
     &quot;dept&quot;: &quot;AUDIT&quot;,
