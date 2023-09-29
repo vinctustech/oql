@@ -1,7 +1,7 @@
 Tutorial
 ========
 
-We present a fully explained tutorial example showing how to apply OQL to an SQL database.  To begin, we need to create a dockerized [PostgreSQL](https://www.postgresql.org/) database.  Therefore, you will need to have [docker](https://www.docker.com/) installed.
+We present a fully explained tutorial example showing how to apply OQL to a [PostgreSQL](https://www.postgresql.org/) database which we will create using normal SQL.  To begin, we need to create a dockerized [PostgreSQL](https://www.postgresql.org/) database, therefore, you will need to have [docker](https://www.docker.com/) installed.
 
 See @ref:[Examples](examples.md) for other examples.
 
@@ -26,11 +26,9 @@ Create the database
 
 Run `psql` with the command:
 
-`psql -h localhost -U postgres -d postgres`
+`PGPASSWORD=docker psql -h localhost -U postgres -d postgres`
 
-Enter password `docker`.
-
-Create a simple database by copy-pasting the following (yes, all in one shot) at the `psql` prompt:
+You should see a prompt that looks like this `postgres=#`.  Create a simple database by copy-pasting the following (yes, all in one shot) at the `psql` prompt:
 
 ```sql
 CREATE DATABASE employees;
@@ -189,12 +187,15 @@ oql
     `
     employee { 
       name manager: manager.name department { name }
-    } [job_title = 'CLERK']`
+    } [job_title = 'CLERK']
+    `
   )
-  .then((res: any) => console.log(JSON.stringify(res, null, 2)))
+  .then((result: any) => {
+    console.log(JSON.stringify(result, null, 2))
+  })
 ```
 
-Output:
+Expected output:
 
 ```json
 [
@@ -267,9 +268,12 @@ oql
     `
     employee {
       name subordinates { name dept: department.name }
-    } [exists(subordinates)]`
+    } [exists(subordinates)]
+    `
   )
-  .then((res: any) => console.log(JSON.stringify(res, null, 2)))
+  .then((result: any) => {
+    console.log(JSON.stringify(result, null, 2))
+  })
 ```
 
 Output:

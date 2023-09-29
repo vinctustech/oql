@@ -204,8 +204,8 @@ object OQLParser extends RegexParsers with PackratParsers {
       jsonExpression |
       starExpression |
       caseExpression |
-      applyExpression |
       kw("EXISTS") ~> "(" ~> query <~ ")" ^^ ExistsOQLExpression.apply |
+      applyExpression |
       qualifiedAttributeExpression |
       "&" ~> identifiers ^^ (ReferenceOQLExpression(_)) |
       "-" ~> primary ^^ (e => PrefixOQLExpression("-", e)) |
