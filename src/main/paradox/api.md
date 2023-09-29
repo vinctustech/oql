@@ -109,7 +109,7 @@ Perform the raw SQL query and return a promise for the results where *sql* is th
 
 ### `showQuery()`
 
-Causes the generated SQL for the very next query or mutation that is executed to be output. See 
+Causes the generated SQL for the very next query or mutation that is executed to be output. See [define()](#define-name-definition-parameters-) for an example.
 
 The `QueryBuilder` Class
 ------------------------
