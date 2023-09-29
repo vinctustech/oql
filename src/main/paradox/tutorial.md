@@ -168,7 +168,7 @@ Run the following TypeScript program:
 
 ```typescript
 import { OQL } from '@vinctus/oql'
-import fs from 'fs'
+import * as fs from 'fs'
 
 const oql = new OQL(
   fs.readFileSync('data-model').toString(),
@@ -249,7 +249,7 @@ Run the following TypeScript program:
 
 ```typescript
 import { OQL } from '@vinctus/oql'
-import fs from 'fs'
+import * as fs from 'fs'
 
 const oql = new OQL(
   fs.readFileSync('data-model').toString(),
@@ -373,7 +373,7 @@ employee {
 } [exists(subordinates)]
 ```
 
-we are asking for the name and list of immediate subordinates of every employee who has any subordinates.  For the subordinates, we want their name and the name or their department.
+we are asking for the name and list of immediate subordinates of every employee who has any subordinates.  For the subordinates, we want their name and the name of their department.
 
 Grouping Query
 --------------
@@ -382,7 +382,7 @@ Run the following TypeScript program:
 
 ```typescript
 import { OQL } from '@vinctus/oql'
-import fs from 'fs'
+import * as fs from 'fs'
 
 const oql = new OQL(
   fs.readFileSync('data-model').toString(),
@@ -401,9 +401,12 @@ oql
     `
     employee { 
       dept: department.name count(*)
-    } /department.dep_id/ <department.name>`
+    } /department.dep_id/ <department.name>
+    `
   )
-  .then((res: any) => console.log(JSON.stringify(res, null, 2)))
+  .then((result: any) => {
+    console.log(JSON.stringify(result, null, 2))
+  })
 ```
 
 Output:
