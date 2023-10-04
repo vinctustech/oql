@@ -14,7 +14,6 @@ import io.github.edadma.rdb.{
   Value
 }
 import io.github.edadma.dal
-import pprint.*
 
 import scala.scalajs.js
 import js.JSConverters._
