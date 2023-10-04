@@ -482,7 +482,7 @@ object AbstractOQL {
                   label,
                   preprocessQuery(
                     Some(entity),
-                    OQLQuery(id, mtmEntity, attr, List(StarOQLProject), None, None, None, None, None),
+                    OQLQuery(id, mtmEntity, attr, List(StarOQLProject), None, None, None, None, None, None),
                     model,
                     ds,
                     oql
@@ -493,7 +493,7 @@ object AbstractOQL {
                   label,
                   preprocessQuery(
                     Some(entity),
-                    OQLQuery(id, mtoEntity, attr, List(StarOQLProject), None, None, None, None, None),
+                    OQLQuery(id, mtoEntity, attr, List(StarOQLProject), None, None, None, None, None, None),
                     model,
                     ds,
                     oql
@@ -504,7 +504,7 @@ object AbstractOQL {
                   label,
                   preprocessQuery(
                     Some(entity),
-                    OQLQuery(id, otmEntity, attr, List(StarOQLProject), None, None, None, None, None),
+                    OQLQuery(id, otmEntity, attr, List(StarOQLProject), None, None, None, None, None, None),
                     model,
                     ds,
                     oql

@@ -18,8 +18,8 @@ object OQLParser extends RegexParsers with PackratParsers {
 //  }
 
   lazy val query: PackratParser[OQLQuery] =
-    entityName ~ not(".") ~ project ~ opt(select) ~ opt(group) ~ opt(order) ~ restrict ^^ {
-      case e ~ _ ~ p ~ s ~ g ~ o ~ Seq(lim, off) => OQLQuery(e, null, null, p, s, g, o, lim, off)
+    entityName ~ not(".") ~ project ~ opt(select) ~ opt(group) ~ opt(having) ~ opt(order) ~ restrict ^^ {
+      case e ~ _ ~ p ~ s ~ g ~ h ~ o ~ Seq(lim, off) => OQLQuery(e, null, null, p, s, g, h, o, lim, off)
     }
 
   lazy val project: PackratParser[List[OQLProject]] =
@@ -100,6 +100,8 @@ object OQLParser extends RegexParsers with PackratParsers {
   lazy val select: PackratParser[OQLExpression] = "[" ~> expression <~ "]"
 
   lazy val group: PackratParser[List[OQLExpression]] = "/" ~> rep1sep(primary, ",") <~ "/"
+
+  lazy val having: PackratParser[OQLExpression] = "\\" ~> expression <~ "\\"
 
   lazy val order: PackratParser[List[OQLOrdering]] = "<" ~> rep1sep(ordering, ",") <~ ">"
 

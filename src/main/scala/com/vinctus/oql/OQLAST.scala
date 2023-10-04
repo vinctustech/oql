@@ -13,6 +13,7 @@ case class OQLQuery(
     var project: List[OQLProject],
     select: Option[OQLExpression],
     group: Option[List[OQLExpression]],
+    having: Option[OQLExpression],
     order: Option[List[OQLOrdering]],
     limit: Option[Int],
     offset: Option[Int]
