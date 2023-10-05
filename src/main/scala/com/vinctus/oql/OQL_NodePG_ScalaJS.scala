@@ -70,7 +70,7 @@ class OQL_NodePG_ScalaJS(
   def queryBuilder(fixed: String = null, at: js.Any = null): ScalaJSNodePGQueryBuilder =
     new ScalaJSNodePGQueryBuilder(
       this,
-      OQLQuery(null, null, null, List(StarOQLProject), None, None, None, None, None),
+      OQLQuery(null, null, null, List(StarOQLProject), None, None, None, None, None, None),
       fixedEntity(fixed, at)
     )
 

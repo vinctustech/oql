@@ -54,6 +54,7 @@ class SQLQueryBuilder(
   private val projects = new ArrayBuffer[Project]
   private var where: Option[(String, OQLExpression)] = None
   private var _group: Option[(String, List[OQLExpression])] = None
+  private var _having: Option[(String, OQLExpression)] = None
   private var _order: Option[(String, List[OQLOrdering])] = None
   private var _limit: Option[Int] = None
   private var _offset: Option[Int] = None

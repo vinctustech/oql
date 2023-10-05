@@ -88,7 +88,7 @@ class OQL_NodePG_JS(
   def jsQueryBuilder(fixed: js.UndefOr[String], at: js.Any) =
     new QueryBuilder_JS_NodePG(
       this,
-      OQLQuery(null, null, null, List(StarOQLProject), None, None, None, None, None),
+      OQLQuery(null, null, null, List(StarOQLProject), None, None, None, None, None, None),
       fixedEntity(fixed.orNull, at)
     )
 
