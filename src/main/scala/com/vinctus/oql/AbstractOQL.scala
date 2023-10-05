@@ -623,6 +623,7 @@ object AbstractOQL {
               _,
               select,
               group,
+              having,
               order,
               limit,
               offset
@@ -668,6 +669,7 @@ object AbstractOQL {
               _,
               select,
               _,
+              having,
               order,
               _,
               _
@@ -707,6 +709,7 @@ object AbstractOQL {
               _,
               select,
               group,
+              having,
               order,
               limit,
               offset
@@ -742,6 +745,7 @@ object AbstractOQL {
         )
         select foreach (subquery.select(_, alias))
         group foreach (subquery.group(_, alias))
+        having foreach (subquery.having(_, alias))
         order foreach (subquery.order(_, alias))
         limit foreach subquery.limit
         offset foreach subquery.offset
