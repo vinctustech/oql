@@ -595,6 +595,7 @@ object AbstractOQL {
               _,
               _,
               _,
+              _,
               _
             ),
             element
@@ -654,6 +655,7 @@ object AbstractOQL {
         select foreach (subquery.select(_, joinAlias))
         group foreach (subquery.group(_, joinAlias))
         order foreach (subquery.order(_, joinAlias))
+        having foreach (subquery.having(_, joinAlias))
         limit foreach subquery.limit
         offset foreach subquery.offset
         subquery.innerJoin(alias, targetAttr.column, mtmEntity.table, joinAlias, mtmEntity.pk.get.column)

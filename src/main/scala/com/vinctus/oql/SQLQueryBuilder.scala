@@ -72,6 +72,8 @@ class SQLQueryBuilder(
 
   def order(orderings: List[OQLOrdering], table: String): Unit = _order = Some((table, orderings))
 
+  def having(expr: Option[OQLExpression], table: String): Unit = _having = Some((table, expr))
+
   def limit(n: Int): Unit = _limit = Some(n)
 
   def offset(n: Int): Unit = _offset = Some(n)
