@@ -21,9 +21,10 @@ import io.github.edadma.rdb
 
   val db = new OQL_RDB_ScalaJS(
     """
-      |entity a {
+      |entity t {
       | *id: int
-      |  t: timestamp
+      |  a: text
+      |  b: int
       |}
       |""".trim.stripMargin
   )
@@ -90,13 +91,14 @@ import io.github.edadma.rdb
 
   rdb.executeSQL(
     """
-      |CREATE TABLE "a" (
-      |  "id" INTEGER PRIMARY KEY,
-      |  "t" TIMESTAMP
+      |CREATE TABLE "t" (
+      |  "id" INTEGER AUTO PRIMARY KEY,
+      |  "a" TEXT,
+      |  "b" INTEGER
       |);
-      |INSERT INTO "a" ("id", "t") VALUES
-      |  (3, '2021-04-21T06:30:00.000Z'),
-      |  (4, '2022-04-21T06:30:00.000Z');
+      |INSERT INTO "t" ("a", "b") VALUES
+      |  ('g1', 3),
+      |  ('g2', 4);
       |""".stripMargin
   )(
     db.connect
@@ -166,7 +168,7 @@ import io.github.edadma.rdb
     //    _ <- db.create
 //    u <- db.entity("employee").update(104, Map("firstName" -> js.undefined, "lastName" -> "Lee"))
 //    i <- { db.entity("department").insert(Map("id" -> 123, "departmentName" -> "RnR")) }
-    r <- { db.showQuery(); db.queryMany("a [id = 4]") }
+    r <- { db.showQuery(); db.queryMany("t") }
   yield (r))
     .onComplete {
       case Failure(exception) => exception.printStackTrace()
