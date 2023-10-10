@@ -66,6 +66,7 @@ abstract class AbstractOQL(dm: String, val ds: SQLDataSource, conv: Conversions)
     preprocessQuery(None, query, model, ds, oql) // todo: should be called "preprocessQuery" and do all decorating
     query.select foreach (decorate(query.entity, _, model, ds, oql))
     query.group foreach (_ foreach (decorate(query.entity, _, model, ds, oql)))
+    query.having foreach (decorate(query.entity, _, model, ds, oql))
     query.order foreach (_ foreach { case OQLOrdering(expr, _) => decorate(query.entity, expr, model, ds, oql) })
     query
 
@@ -86,6 +87,7 @@ abstract class AbstractOQL(dm: String, val ds: SQLDataSource, conv: Conversions)
     preprocessQuery(None, query, model, ds, oql)
     query.select foreach (decorate(query.entity, _, model, ds, oql))
     query.group foreach (_ foreach (decorate(query.entity, _, model, ds, oql)))
+    query.having foreach (decorate(query.entity, _, model, ds, oql))
 
     queryMany(query.copy(order = None), oql, () => new ScalaPlainResultBuilder, fixed) map {
       _.arrayResult match {
@@ -571,6 +573,7 @@ object AbstractOQL {
         }
 
         query.group foreach (builder.left.toOption.get.group(_, query.entity.table))
+        query.having foreach (builder.left.toOption.get.having(_, query.entity.table))
         query.order foreach (builder.left.toOption.get.order(_, query.entity.table))
         query.limit foreach builder.left.toOption.get.limit
         query.offset foreach builder.left.toOption.get.offset
@@ -655,8 +658,8 @@ object AbstractOQL {
         )
         select foreach (subquery.select(_, joinAlias))
         group foreach (subquery.group(_, joinAlias))
-        order foreach (subquery.order(_, joinAlias))
         having foreach (subquery.having(_, joinAlias))
+        order foreach (subquery.order(_, joinAlias))
         limit foreach subquery.limit
         offset foreach subquery.offset
         subquery.innerJoin(alias, targetAttr.column, mtmEntity.table, joinAlias, mtmEntity.pk.get.column)
