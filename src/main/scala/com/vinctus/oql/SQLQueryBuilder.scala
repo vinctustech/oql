@@ -135,6 +135,8 @@ class SQLQueryBuilder(
       case PostfixOQLExpression(expr, op)      => s"${expression(expr, table)} $op"
       case BetweenOQLExpression(expr, op, lower, upper) =>
         s"${expression(expr, table)} $op ${expression(lower, table)} AND ${expression(upper, table)}"
+      case OverlapsOQLExpression(leftStart, leftEnd, rightStart, rightEnd) =>
+        s"(${expression(leftStart, table)}, ${expression(leftEnd, table)}) OVERLAPS (${expression(rightStart, table)}, ${expression(rightEnd, table)})"
       case GroupedOQLExpression(expr)    => s"(${expression(expr, table)})"
       case TypedOQLExpression(expr, typ) => ds.typed(expression(expr, table), typ)
       case FloatOQLExpression(n)         => n.toString

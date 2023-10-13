@@ -26,8 +26,8 @@ case class ExpressionOQLProject(label: Ident, expr: OQLExpression) extends OQLPr
 case class QueryOQLProject(label: Ident, query: OQLQuery) extends OQLProject
 case class OverlapsOQLExpression(
     leftStart: OQLExpression,
-    rightStart: OQLExpression,
     leftEnd: OQLExpression,
+    rightStart: OQLExpression,
     rightEnd: OQLExpression
 ) extends OQLExpression
 case class OQLOrdering(expr: OQLExpression, ordering: String)

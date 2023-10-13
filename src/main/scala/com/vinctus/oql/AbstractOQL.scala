@@ -301,6 +301,11 @@ object AbstractOQL {
         _decorate(expr)
         _decorate(lower)
         _decorate(upper)
+      case OverlapsOQLExpression(leftStart, leftEnd, rightStart, rightEnd) =>
+        _decorate(leftStart)
+        _decorate(leftEnd)
+        _decorate(rightStart)
+        _decorate(rightEnd)
       case e @ GroupedOQLExpression(expr) =>
         _decorate(expr)
         e.typ = expr.typ
