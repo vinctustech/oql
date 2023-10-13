@@ -24,7 +24,12 @@ case object SQLStarOQLProject extends OQLProject { val label: Ident = null }
 case class SubtractOQLProject(id: Ident) extends OQLProject { val label: Ident = null }
 case class ExpressionOQLProject(label: Ident, expr: OQLExpression) extends OQLProject
 case class QueryOQLProject(label: Ident, query: OQLQuery) extends OQLProject
-
+case class OverlapsOQLExpression(
+    leftStart: OQLExpression,
+    rightStart: OQLExpression,
+    leftEnd: OQLExpression,
+    rightEnd: OQLExpression
+) extends OQLExpression
 case class OQLOrdering(expr: OQLExpression, ordering: String)
 case class OQLRestrict(limit: Option[Int], offset: Option[Int])
 abstract class OQLExpression { var typ: Datatype = _ }

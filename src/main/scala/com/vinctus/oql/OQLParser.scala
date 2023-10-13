@@ -134,7 +134,9 @@ object OQLParser extends RegexParsers with PackratParsers {
     kw("NOT") ~> booleanPrimary ^^ (e => PrefixOQLExpression("NOT", e)) | booleanPrimary
 
   lazy val booleanPrimary: PackratParser[OQLExpression] =
-    expression ~ comparison ~ expression ^^ { case l ~ c ~ r => InfixOQLExpression(l, c, r) } |
+    expression ~ comparison ~ expression ^^ { case l ~ c ~ r =>
+      InfixOQLExpression(l, c, r)
+    } | // TODO: should not use InfixOQLExpression because result type is boolean
       expression ~ ((kw("NOT") ~ kw("BETWEEN") ^^^ "NOT BETWEEN") | kw("BETWEEN")) ~ expression ~ kw(
         "AND"
       ) ~ expression ^^ { case e ~ b ~ l ~ _ ~ u =>
@@ -146,6 +148,11 @@ object OQLParser extends RegexParsers with PackratParsers {
       kw("EXISTS") ~> "(" ~> query <~ ")" ^^ ExistsOQLExpression.apply |
       booleanLiteral |
       qualifiedAttributeExpression |
+      ("(" ~> booleanExpression <~ ",") ~ (booleanExpression <~ ")" <~ kw(
+        "OVERLAPS"
+      )) ~ ("(" ~> booleanExpression <~ ",") ~ (booleanExpression <~ ")") ^^ { case ls ~ le ~ rs ~ re =>
+        OverlapsOQLExpression(ls, le, rs, re)
+      } |
       "(" ~> booleanExpression <~ ")" ^^ GroupedOQLExpression.apply
 
   lazy val isNull: PackratParser[String] =
