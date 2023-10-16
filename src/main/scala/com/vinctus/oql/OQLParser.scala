@@ -143,16 +143,16 @@ object OQLParser extends RegexParsers with PackratParsers {
         BetweenOQLExpression(e, b, l, u)
       } |
       expression ~ isNull ^^ { case e ~ n => PostfixOQLExpression(e, n) } |
+      ("(" ~> expression <~ ",") ~ (expression <~ ")" <~ kw(
+        "OVERLAPS"
+      )) ~ ("(" ~> expression <~ ",") ~ (expression <~ ")") ^^ { case ls ~ le ~ rs ~ re =>
+        OverlapsOQLExpression(ls, le, rs, re)
+      } |
       expression ~ in ~ ("(" ~> expressions <~ ")") ^^ { case e ~ i ~ es => InArrayOQLExpression(e, i, es) } |
       expression ~ in ~ ("(" ~> query <~ ")") ^^ { case e ~ i ~ q => InQueryOQLExpression(e, i, q) } |
       kw("EXISTS") ~> "(" ~> query <~ ")" ^^ ExistsOQLExpression.apply |
       booleanLiteral |
       qualifiedAttributeExpression |
-      ("(" ~> booleanExpression <~ ",") ~ (booleanExpression <~ ")" <~ kw(
-        "OVERLAPS"
-      )) ~ ("(" ~> booleanExpression <~ ",") ~ (booleanExpression <~ ")") ^^ { case ls ~ le ~ rs ~ re =>
-        OverlapsOQLExpression(ls, le, rs, re)
-      } |
       "(" ~> booleanExpression <~ ")" ^^ GroupedOQLExpression.apply
 
   lazy val isNull: PackratParser[String] =

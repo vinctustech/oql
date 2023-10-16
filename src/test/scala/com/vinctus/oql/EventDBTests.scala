@@ -49,4 +49,17 @@ class EventDBTests extends AsyncFreeSpec with Matchers with Test {
     testjs("attendee { * events <when> } <name>") map (_ shouldBe `uuid, timestamp test with many-to-many inner query`)
   }
 
+  "overlaps" in {
+    test(
+      "event {what} [(when, when + concat('3 hours')::INTERVAL) OVERLAPS ('2021-04-21T18:42:49.943Z', '2021-04-21T19:42:49.943Z')]"
+    ) map (_ shouldBe
+      """
+        |[
+        |  {
+        |    "what": "start testing timestamps"
+        |  }
+        |]
+        |""".trim.stripMargin)
+  }
+
 }
