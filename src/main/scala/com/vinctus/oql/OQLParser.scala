@@ -143,8 +143,9 @@ object OQLParser extends RegexParsers with PackratParsers {
         BetweenOQLExpression(e, b, l, u)
       } |
       additiveExpression ~ isNull ^^ { case e ~ n => PostfixOQLExpression(e, n) } |
-      additiveExpression ~ in ~ ("(" ~> repsep(expression, ",") <~ ")") ^^ { case e ~ i ~ es =>
-        InArrayOQLExpression(e, i, es)
+      additiveExpression ~ in ~ ("(" ~> expression ~ "," ~ rep1sep(expression, ",") <~ ")") ^^ {
+        case e ~ i ~ f ~ _ ~ es =>
+          InArrayOQLExpression(e, i, f +: es)
       } |
       additiveExpression ~ in ~ ("(" ~> query <~ ")") ^^ { case e ~ i ~ q => InQueryOQLExpression(e, i, q) } |
       additiveExpression
