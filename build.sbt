@@ -1,10 +1,10 @@
-name := "@vinctus/oql" //@vinctus/
+name := "@vinctus/oql"
 
 version := "1.1.30"
 
 description := "Object Query Language"
 
-scalaVersion := "3.5.0"
+scalaVersion := "3.7.2"
 
 scalacOptions ++= Seq(
   "-deprecation",
@@ -14,7 +14,7 @@ scalacOptions ++= Seq(
   "-language:implicitConversions",
   "-language:existentials",
   "-language:dynamics",
-  "-explain"
+  "-explain",
 )
 
 organization := "com.vinctus"
@@ -64,7 +64,7 @@ Compile / paradoxMaterialTheme := {
 Compile / paradoxProperties ++=
   Map(
     // "github.base_url" -> "https://github.com/vinctustech/oql/blob/dev",
-    "image.base_url" -> ".../assets/images"
+    "image.base_url" -> ".../assets/images",
   )
 
 scalaJSUseMainModuleInitializer := true
@@ -78,31 +78,29 @@ Test / scalaJSUseMainModuleInitializer := true
 Test / scalaJSUseTestModuleInitializer := false
 
 Compile / npmDependencies ++= Seq(
-  "pg" -> "8.10.0",
-  "@types/pg" -> "8.6.6",
-  "source-map-support" -> "0.5.21"
+  "pg"                 -> "8.10.0",
+  "@types/pg"          -> "8.6.6",
+  "source-map-support" -> "0.5.21",
 //  "big.js" -> "6.1.1",
 //  "@types/big.js" -> "6.1.3"
 )
 
 libraryDependencies ++= Seq(
-  "org.scalatest" %%% "scalatest" % "3.2.19" % "test",
-  "io.github.edadma" %%% "rdb" % "0.1.0-pre.42",
-  "com.vinctus" %%% "sjs-utils" % "0.1.0-snapshot.33",
-  "com.lihaoyi" %%% "pprint" % "0.9.0"
+  "org.scalatest"    %%% "scalatest" % "3.2.19" % "test",
+  "io.github.edadma" %%% "rdb"       % "0.1.0-pre.42",
+  "com.vinctus"      %%% "sjs-utils" % "0.1.0-snapshot.33",
+  "com.lihaoyi"      %%% "pprint"    % "0.9.0",
 //  "com.vinctus" %%% "mappable" % "0.1.2"
 )
 
 libraryDependencies ++= Seq(
-  "org.scala-lang.modules" %%% "scala-parser-combinators" % "2.1.1"
+  "org.scala-lang.modules" %%% "scala-parser-combinators" % "2.1.1",
   //  "org.scala-lang.modules" %%% "scala-async" % "1.0.0-M1"
 )
 
 libraryDependencies ++= Seq(
-  "io.github.cquiroz" %%% "scala-java-time" % "2.5.0"
+  "io.github.cquiroz" %%% "scala-java-time" % "2.6.0",
 )
-
-mainClass := Some("com.vinctus." + "oql" + ".Main")
 
 lazy val packageName = SettingKey[String]("packageName", "package name")
 
