@@ -5,6 +5,7 @@ import AbstractOQL._
 import scala.collection.mutable.ArrayBuffer
 import scala.language.postfixOps
 import scala.scalajs.js
+import scala.compiletime.uninitialized
 
 object SQLQueryBuilder {
 
@@ -18,7 +19,7 @@ class SQLQueryBuilder(
     fixed: Fixed,
     model: DataModel,
     val margin: Int = 0,
-    subquery: Boolean = false
+    subquery: Boolean = false,
 ) {
 
   import SQLQueryBuilder._
@@ -45,16 +46,16 @@ class SQLQueryBuilder(
     override def toString: String = query.toString.trim
   }
 
-  private var from: (String, Option[String]) = _
-  private val innerJoins = new ArrayBuffer[Join]
-  private val leftJoins = new ArrayBuffer[Join]
-  private var idx = 0
-  private val projects = new ArrayBuffer[Project]
-  private var where: Option[(String, OQLExpression)] = None
+  private var from: (String, Option[String])                = uninitialized
+  private val innerJoins                                    = new ArrayBuffer[Join]
+  private val leftJoins                                     = new ArrayBuffer[Join]
+  private var idx                                           = 0
+  private val projects                                      = new ArrayBuffer[Project]
+  private var where: Option[(String, OQLExpression)]        = None
   private var _group: Option[(String, List[OQLExpression])] = None
-  private var _order: Option[(String, List[OQLOrdering])] = None
-  private var _limit: Option[Int] = None
-  private var _offset: Option[Int] = None
+  private var _order: Option[(String, List[OQLOrdering])]   = None
+  private var _limit: Option[Int]                           = None
+  private var _offset: Option[Int]                          = None
 
   def table(name: String, alias: Option[String]): Unit = if (from eq null) from = (name, alias)
 
@@ -74,7 +75,7 @@ class SQLQueryBuilder(
   def offset(n: Int): Unit = _offset = Some(n)
 
   def projectValue(expr: OQLExpression, table: String): (Int, Boolean) = {
-    val cur = idx
+    val cur   = idx
     val typed = projectQuery && ds.typeFunction.isDefined && expr.typ == null
 
     projects += ValueProject(expr, table, typed)
@@ -129,10 +130,10 @@ class SQLQueryBuilder(
       case RawOQLExpression(s)         => s
       case InfixOQLExpression(left, op @ ("*" | "/"), right) =>
         s"${expression(left, table)}$op${expression(right, table)}"
-      case InfixOQLExpression(left, op, right) => s"${expression(left, table)} $op ${expression(right, table)}"
-      case PrefixOQLExpression("-", expr)      => s"-${expression(expr, table)}"
-      case PrefixOQLExpression(op, expr)       => s"$op ${expression(expr, table)}"
-      case PostfixOQLExpression(expr, op)      => s"${expression(expr, table)} $op"
+      case InfixOQLExpression(left, op, right)          => s"${expression(left, table)} $op ${expression(right, table)}"
+      case PrefixOQLExpression("-", expr)               => s"-${expression(expr, table)}"
+      case PrefixOQLExpression(op, expr)                => s"$op ${expression(expr, table)}"
+      case PostfixOQLExpression(expr, op)               => s"${expression(expr, table)} $op"
       case BetweenOQLExpression(expr, op, lower, upper) =>
         s"${expression(expr, table)} $op ${expression(lower, table)} AND ${expression(upper, table)}"
       case OverlapsOQLExpression(leftStart, leftEnd, rightStart, rightEnd) =>
@@ -143,14 +144,14 @@ class SQLQueryBuilder(
       case IntegerOQLExpression(n)       => n.toString
       case JSONOQLExpression(e)          => s"'${expression(e, table)}'"
       case ArrayOQLExpression(elems)     => s"[${elems.map(e => expression(e, table)).mkString(", ")}]"
-      case ObjectOQLExpression(pairs) =>
+      case ObjectOQLExpression(pairs)    =>
         s"{${pairs.map({ case (k, v) => s"\"$k\": ${expression(v, table)}" }).mkString(", ")}}"
       case StringOQLExpression(s)                 => ds.string(s)
       case ReferenceOQLExpression(_, dmrefs)      => attribute(dmrefs)
       case AttributeOQLExpression(List(id), null) => id.s // it's a built-in variable if dmrefs is null
       case AttributeOQLExpression(_, dmrefs)      => attribute(dmrefs)
       case BooleanOQLExpression(b)                => b
-      case CaseOQLExpression(whens, els) =>
+      case CaseOQLExpression(whens, els)          =>
         s"CASE ${whens map { case OQLWhen(cond, expr) =>
             s"WHEN ${expression(cond, table)} THEN ${expression(expr, table)}"
           } mkString " "}${if (els.isDefined) s" ELSE ${expression(els.get, table)}" else ""} END"
@@ -172,9 +173,9 @@ class SQLQueryBuilder(
   private case class Join(t1: String, c1: String, t2: String, alias: String, c2: String)
 
   override def toString: String = {
-    val buf = new StringBuilder
+    val buf    = new StringBuilder
     var indent = margin
-    var first = true
+    var first  = true
 
     def line(s: String): Unit = {
       if (first && !subquery)
@@ -206,7 +207,7 @@ class SQLQueryBuilder(
     line(s"FROM \"$table\"${if (alias.isDefined) s" AS \"${alias.get}\"" else ""}")
     in()
 
-    val whereClause = where map { case (table, expr) => s"WHERE ${expression(expr, table)}" }
+    val whereClause   = where map { case (table, expr) => s"WHERE ${expression(expr, table)}" }
     val groupByClause =
       _group map { case (table, groupings) =>
         s"GROUP BY ${groupings map (expr => s"${expression(expr, table)}") mkString ", "}"

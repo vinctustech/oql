@@ -4,21 +4,22 @@ import scala.annotation.tailrec
 import scala.collection.immutable.VectorMap
 import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
+import scala.compiletime.uninitialized
 
 class DataModel(model: DMLModel, dml: String) {
 
   private case class EntityInfo(
       entity: Entity,
       dmlattrs: Seq[DMLAttribute],
-      attrs: mutable.LinkedHashMap[String, Attribute] = new mutable.LinkedHashMap
+      attrs: mutable.LinkedHashMap[String, Attribute] = new mutable.LinkedHashMap,
   )
 
-  private var first: Entity = _
+  private var first: Entity = uninitialized
 
   val (entities: Map[String, Entity], enums: Map[String, EnumType]) = {
     parsingError = false
 
-    val enums = new mutable.HashMap[String, EnumType]
+    val enums    = new mutable.HashMap[String, EnumType]
     val entities = new mutable.LinkedHashMap[String, EntityInfo]
 
     def duplicates(ids: Seq[Ident], typ: String): Unit =
@@ -70,7 +71,7 @@ class DataModel(model: DMLModel, dml: String) {
             case DMLSimpleDataType("integer" | "int" | "int4") => IntegerType
             case DMLSimpleDataType("bool" | "boolean")         => BooleanType
             case DMLSimpleDataType("bigint" | "int8")          => BigintType
-            case DMLParametricDataType("decimal", parameters) =>
+            case DMLParametricDataType("decimal", parameters)  =>
               DecimalType(parameters.head.toInt, parameters.tail.head.toInt)
             case DMLSimpleDataType("date")             => DateType
             case DMLSimpleDataType("time")             => TimeType
@@ -79,10 +80,10 @@ class DataModel(model: DMLModel, dml: String) {
             case DMLSimpleDataType("uuid")             => UUIDType
             case DMLSimpleDataType("timestamp")        => TimestampType
             case DMLSimpleDataType("json")             => JSONType
-            case DMLNameType(typ) =>
+            case DMLNameType(typ)                      =>
               entities get typ.s match {
                 case Some(EntityInfo(entity, _, _)) => ManyToOneType(entity)
-                case None =>
+                case None                           =>
                   enums get typ.s match {
                     case Some(e) => e
                     case None    => unknownEntity(typ)
@@ -133,7 +134,7 @@ class DataModel(model: DMLModel, dml: String) {
       dmlas.foreach {
         case a @ DMLAttribute(_, _, DMLManyToManyType(entity, link), _, _) =>
           val linkinfo = entities(link.s)
-          val self =
+          val self     =
             linkinfo.attrs.values.filter {
               case Attribute(_, _, _, _, ManyToOneType(`e`)) => true
               case _                                         => false
@@ -143,18 +144,18 @@ class DataModel(model: DMLModel, dml: String) {
             printError(
               link.pos,
               s"junction entity '${linkinfo.entity.name}' has more than one attribute of type '${e.name}'",
-              dml
+              dml,
             )
 
           if (self.size < 1)
             printError(
               link.pos,
               s"junction entity '${linkinfo.entity.name}' has no attributes of type '${e.name}'",
-              dml
+              dml,
             )
 
           val targetentity = entities(entity.s).entity
-          val target =
+          val target       =
             linkinfo.attrs.values.filter {
               case Attribute(_, _, _, _, ManyToOneType(`targetentity`)) => true
               case _                                                    => false
@@ -164,14 +165,14 @@ class DataModel(model: DMLModel, dml: String) {
             printError(
               link.pos,
               s"junction entity '${linkinfo.entity.name}' has more than one attribute of type '${entity.s}'",
-              dml
+              dml,
             )
 
           if (target.size < 1)
             printError(
               link.pos,
               s"junction entity '${linkinfo.entity.name}' has no attributes of type '${entity.s}'",
-              dml
+              dml,
             )
 
           as(a.name.s) = as(a.name.s).copy(typ = ManyToManyType(targetentity, linkinfo.entity, self.head, target.head))
@@ -180,16 +181,16 @@ class DataModel(model: DMLModel, dml: String) {
             printError(entity.pos, s"target entity '${entity.s}' has no declared primary key", dml)
         case a @ DMLAttribute(_, _, DMLOneToOneType(typ, attr), _, _) =>
           val entityinfo = entities(typ.s)
-          val newtyp =
+          val newtyp     =
             attr match {
               case Some(id) =>
                 entityinfo.attrs get id.s match {
                   case Some(a @ Attribute(_, _, _, _, ManyToOneType(`e`))) => OneToOneType(entityinfo.entity, a)
-                  case Some(_) =>
+                  case Some(_)                                             =>
                     printError(
                       id.pos,
                       s"attribute '${id.s}' of entity '${entityinfo.entity.name}' does not have the correct type",
-                      dml
+                      dml,
                     )
                   case None =>
                     printError(id.pos, s"entity '${entityinfo.entity.name}' does not have attribute '${id.s}'", dml)
@@ -205,7 +206,7 @@ class DataModel(model: DMLModel, dml: String) {
                   printError(
                     typ.pos,
                     s"entity '${entityinfo.entity.name}' has more than one attribute of type '${e.name}'",
-                    dml
+                    dml,
                   )
 
                 if (attrs.size < 1)
@@ -217,16 +218,16 @@ class DataModel(model: DMLModel, dml: String) {
           as(a.name.s) = as(a.name.s).copy(typ = newtyp)
         case a @ DMLAttribute(_, _, DMLOneToManyType(typ, attr), _, _) =>
           val entityinfo = entities(typ.s)
-          val newtyp =
+          val newtyp     =
             attr match {
               case Some(id) =>
                 entityinfo.attrs get id.s match {
                   case Some(a @ Attribute(_, _, _, _, ManyToOneType(`e`))) => OneToManyType(entityinfo.entity, a)
-                  case Some(_) =>
+                  case Some(_)                                             =>
                     printError(
                       id.pos,
                       s"attribute '${id.s}' of entity '${entityinfo.entity.name}' does not have the correct type",
-                      dml
+                      dml,
                     )
                   case None =>
                     printError(id.pos, s"entity '${entityinfo.entity.name}' does not have attribute '${id.s}'", dml)
@@ -242,7 +243,7 @@ class DataModel(model: DMLModel, dml: String) {
                   printError(
                     typ.pos,
                     s"entity '${entityinfo.entity.name}' has more than one attribute of type '${e.name}'",
-                    dml
+                    dml,
                   )
 
                 if (attrs.size < 1)
@@ -267,7 +268,7 @@ class DataModel(model: DMLModel, dml: String) {
   // fixed entity processing
 
   for (e <- entities.values) {
-    val idsbuf = new ListBuffer[List[String]]
+    val idsbuf       = new ListBuffer[List[String]]
     val nullablesbuf = new ListBuffer[List[String]]
 
     def scan(attrs: List[String], ents: List[Entity], entity: Entity): Unit =
@@ -293,14 +294,14 @@ class DataModel(model: DMLModel, dml: String) {
     val attrs =
       idsbuf.toList map { ids =>
         val attridents = ids map (id => Ident(id))
-        val attr = AttributeOQLExpression(attridents)
+        val attr       = AttributeOQLExpression(attridents)
 
         attr.dmrefs = lookup(attr, attridents, ref = false, e, null)
 
         val nullables =
           nullablesbuf.toList filter (ids startsWith _) map { ids =>
             val nullidents = ids map (id => Ident(id))
-            val nullable = ReferenceOQLExpression(nullidents)
+            val nullable   = ReferenceOQLExpression(nullidents)
 
             nullable.dmrefs = lookup(nullable, nullidents, ref = true, e, null)
             nullable
@@ -317,7 +318,7 @@ class DataModel(model: DMLModel, dml: String) {
       ids: List[Ident],
       ref: Boolean,
       entity: Entity,
-      input: String
+      input: String,
   ): List[(Entity, Attribute)] = { // todo: code duplication
     val dmrefs = new ListBuffer[(Entity, Attribute)]
 

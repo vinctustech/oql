@@ -11,16 +11,17 @@ import io.github.edadma.rdb.{
   TimestampValue,
   UUIDValue,
   EnumValue,
-  Value
+  Value,
 }
 import io.github.edadma.dal
 import pprint.*
 
 import scala.scalajs.js
 import js.JSConverters._
+import scala.compiletime.uninitialized
 
 class RDBResultSet(rs: Iterator[Row]) extends OQLResultSet {
-  private var row: Row = _
+  private var row: Row = uninitialized
 
   def next: Boolean =
     if (rs.hasNext) {
@@ -42,10 +43,10 @@ def unpack(v: Value): Any =
     case NumberValue(dal.LongType, value)   => value.doubleValue // todo: js hack
     case NumberValue(dal.BigDecType, value) =>
       value.toString // todo: js hack (to retain decimals even if they are zero)
-    case TextValue(s)      => s
-    case UUIDValue(id)     => id
-    case TimestampValue(t) => new js.Date(t.toISOString) // todo: js hack
-    case ArrayValue(data)  => (data map unpack) toJSArray // todo: js hack
+    case TextValue(s)            => s
+    case UUIDValue(id)           => id
+    case TimestampValue(t)       => new js.Date(t.toISOString)  // todo: js hack
+    case ArrayValue(data)        => (data map unpack) toJSArray // todo: js hack
     case ObjectValue(properties) =>
       (properties map { case (k, v) => k -> unpack(v) }).toMap toJSDictionary // todo: js hack
     case NullValue()           => null

@@ -1,11 +1,12 @@
 package com.vinctus.oql
 
 import scala.scalajs.js
+import scala.compiletime.uninitialized
 
 class JSResultBuilder extends ResultBuilder {
 
-  private var array: js.Array[Any] = _
-  private var obj: js.Object = _
+  private var array: js.Array[Any] = uninitialized
+  private var obj: js.Object       = uninitialized
 
   def newArray: ResultBuilder = {
     array = new js.Array[Any]

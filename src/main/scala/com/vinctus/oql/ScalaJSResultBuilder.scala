@@ -4,14 +4,15 @@ import com.vinctus.sjs_utils.DynamicMap
 
 import scala.collection.immutable.VectorMap
 import scala.collection.mutable.ListBuffer
+import scala.compiletime.uninitialized
 
 class ScalaJSResultBuilder extends ResultBuilder {
 
-  type Array = List[Any]
+  type Array  = List[Any]
   type Object = VectorMap[String, Any]
 
-  private var array: ListBuffer[Any] = _
-  private var obj: ListBuffer[(String, Any)] = _
+  private var array: ListBuffer[Any]         = uninitialized
+  private var obj: ListBuffer[(String, Any)] = uninitialized
 
   def newArray: ResultBuilder = {
     array = new ListBuffer

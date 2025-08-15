@@ -5,10 +5,11 @@ import scala.collection.immutable.ArraySeq
 import scala.scalajs.js
 import scala.util.matching.Regex
 import scala.util.parsing.input.Position
+import scala.compiletime.uninitialized
 
 package object oql {
 
-  var parsingError: Boolean = _
+  var parsingError: Boolean = uninitialized
 
   def ni: Nothing = sys.error("not implemented (yet)")
 
@@ -65,16 +66,16 @@ package object oql {
       'e' -> 14,
       'E' -> 14,
       'f' -> 15,
-      'F' -> 15
+      'F' -> 15,
     ) foreach { case (k, v) => a(k) = v }
 
     a to ArraySeq
   }
 
-  def hex(c: Char): Int = if (c < 128) HEX(c) else 0
+  def hex(c: Char): Int           = if (c < 128) HEX(c) else 0
   def unescape(s: String): String = {
     val buf = new StringBuilder
-    val it = s.iterator
+    val it  = s.iterator
 
     def ch =
       if (it.hasNext) it.next()

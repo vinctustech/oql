@@ -3,11 +3,12 @@ package com.vinctus.oql
 import typings.pg.mod.QueryArrayResult
 
 import scala.scalajs.js
+import scala.compiletime.uninitialized
 
 class NodePGResultSet(rs: QueryArrayResult[js.Array[js.Any]]) extends OQLResultSet with JSONResultSet {
-  private var first = false
-  private var ridx: Int = _
-  private var row: js.Array[js.Any] = _
+  private var first                 = false
+  private var ridx: Int             = uninitialized
+  private var row: js.Array[js.Any] = uninitialized
 
   def next: Boolean = {
     if (first)

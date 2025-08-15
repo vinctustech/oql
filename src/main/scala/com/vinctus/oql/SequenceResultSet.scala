@@ -1,5 +1,7 @@
 package com.vinctus.oql
 
+import scala.compiletime.uninitialized
+
 object SequenceResultSet {
 
   def fromJSON(json: String) = new SequenceResultSet(JSON.readArray(json).asInstanceOf[IndexedSeq[IndexedSeq[Any]]])
@@ -8,9 +10,9 @@ object SequenceResultSet {
 
 class SequenceResultSet(list: IndexedSeq[IndexedSeq[Any]]) extends OQLResultSet {
 
-  var rest: IndexedSeq[IndexedSeq[Any]] = _
-  var first = true
-  var row: IndexedSeq[Any] = _
+  var rest: IndexedSeq[IndexedSeq[Any]] = uninitialized
+  var first                             = true
+  var row: IndexedSeq[Any]              = uninitialized
 
   def next: Boolean = {
     if (first) {
