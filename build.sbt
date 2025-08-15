@@ -1,6 +1,6 @@
 name := "@vinctus/oql"
 
-version := "1.1.30"
+version := "1.1.32"
 
 description := "Object Query Language"
 
@@ -39,7 +39,7 @@ jsEnv := new org.scalajs.jsenv.nodejs.NodeJSEnv()
 
 enablePlugins(ScalablyTypedConverterPlugin)
 
-stTypescriptVersion := "4.8.4"
+stTypescriptVersion := "5.3.3"
 
 stIgnore += "source-map-support"
 
@@ -78,8 +78,8 @@ Test / scalaJSUseMainModuleInitializer := true
 Test / scalaJSUseTestModuleInitializer := false
 
 Compile / npmDependencies ++= Seq(
-  "pg"                 -> "8.10.0",
-  "@types/pg"          -> "8.6.6",
+  "pg"                 -> "8.13.1",
+  "@types/pg"          -> "8.11.11",
   "source-map-support" -> "0.5.21",
 //  "big.js" -> "6.1.1",
 //  "@types/big.js" -> "6.1.3"
@@ -104,7 +104,7 @@ lazy val packageName = SettingKey[String]("packageName", "package name")
 
 packageName := "oql"
 
-scalaJSLinkerConfig ~= { _.withESFeatures(_.withESVersion(org.scalajs.linker.interface.ESVersion.ES2018)) }
+scalaJSLinkerConfig ~= { _.withESFeatures(_.withESVersion(org.scalajs.linker.interface.ESVersion.ES2021)) }
 
 publishMavenStyle := true
 

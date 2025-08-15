@@ -12,5 +12,5 @@ addSbtPlugin("com.codecommit" % "sbt-github-packages" % "0.5.3")
 resolvers += Resolver.mavenLocal
 //addSbtPlugin("io.github.edadma" % "npm-plugin" % "0.1.14")
 
-addSbtPlugin("com.lightbend.paradox" % "sbt-paradox"                % "0.10.3")
+addSbtPlugin("com.lightbend.paradox" % "sbt-paradox"                % "0.10.7")
 addSbtPlugin("io.github.jonas"       % "sbt-paradox-material-theme" % "0.6.0")
