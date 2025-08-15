@@ -48,13 +48,15 @@ class Mutation private[oql] (oql: AbstractOQL, entity: Entity)(implicit ec: scal
     // check if object contains properties not defined for a entity
     if ((keyset diff allKeys).nonEmpty)
       sys.error(
-        s"insert(): found properties not defined for entity '${entity.name}': ${(keyset diff allKeys) map (p => s"'$p'") mkString ", "}"
+        s"insert(): found properties not defined for entity '${entity.name}': ${(keyset diff allKeys) map (p => s"'$p'") mkString ", "}",
       )
 
     // check if object contains all required column attribute properties
     if (!(attrsRequired subsetOf keyset))
       sys.error(
-        s"insert(): missing required properties for entity '${entity.name}': ${(attrsRequired diff keyset) map (p => s"'$p'") mkString ", "}"
+        s"insert(): missing required properties for entity '${entity.name}': ${(attrsRequired diff keyset) map (p =>
+            s"'$p'"
+          ) mkString ", "}",
       )
 
     val command = new StringBuilder
@@ -69,8 +71,8 @@ class Mutation private[oql] (oql: AbstractOQL, entity: Entity)(implicit ec: scal
 
           List(
             k -> oql.render(
-              if (v.isInstanceOf[Map[?, ?]]) v.asInstanceOf[Map[String, Any]](mtoEntity.pk.get.name) else v
-            )
+              if (v.isInstanceOf[Map[?, ?]]) v.asInstanceOf[Map[String, Any]](mtoEntity.pk.get.name) else v,
+            ),
           )
         case (k, _) => if (attrsRequired(k)) sys.error(s"attribute '$k' is required") else Nil
       }
@@ -114,15 +116,17 @@ class Mutation private[oql] (oql: AbstractOQL, entity: Entity)(implicit ec: scal
   }
 
   def bulkDelete(ids: List[Any]): Future[Unit] =
-    val command = new StringBuilder
+    if ids.isEmpty then Future.unit
+    else
+      val command = new StringBuilder
 
-    // build delete command
-    command append s"DELETE FROM ${entity.table}\n"
-    command append s"  WHERE ${entity.pk.get.column} IN (${ids map (id => oql.render(id)) mkString ", "})\n"
-    oql.show(command.toString)
+      // build delete command
+      command append s"DELETE FROM ${entity.table}\n"
+      command append s"  WHERE ${entity.pk.get.column} IN (${ids map (id => oql.render(id)) mkString ", "})\n"
+      oql.show(command.toString)
 
-    // execute update command (to get a future)
-    oql.connect.command(command.toString) map (_ => ())
+      // execute update command (to get a future)
+      oql.connect.command(command.toString) map (_ => ())
   end bulkDelete
 
   def link(id1: Any, attribute: String, id2: Any): Future[Unit] =
@@ -177,7 +181,7 @@ class Mutation private[oql] (oql: AbstractOQL, entity: Entity)(implicit ec: scal
     // check if object contains extrinsic attributes
     if ((keyset diff attrsNoPKKeys).nonEmpty)
       sys.error(
-        s"extrinsic properties not found in entity '${entity.name}': ${(keyset diff attrsNoPKKeys) map (p => s"'$p'") mkString ", "}"
+        s"extrinsic properties not found in entity '${entity.name}': ${(keyset diff attrsNoPKKeys) map (p => s"'$p'") mkString ", "}",
       )
 
     // removed properties with a value of undefined
@@ -260,13 +264,13 @@ class Mutation private[oql] (oql: AbstractOQL, entity: Entity)(implicit ec: scal
     // check if object contains extrinsic attributes
     if ((keyset diff attrsNoPKKeys).nonEmpty)
       sys.error(
-        s"extrinsic properties not found in entity '${entity.name}': ${(keyset diff attrsNoPKKeys) map (p => s"'$p'") mkString ", "}"
+        s"extrinsic properties not found in entity '${entity.name}': ${(keyset diff attrsNoPKKeys) map (p => s"'$p'") mkString ", "}",
       )
 
     val command = new StringBuilder
 
     // build update command
-    val keys = updates.head._2.keys
+    val keys    = updates.head._2.keys
     val columns = keys.map(k => attrsNoPK(k).column)
 
     command append s"UPDATE  ${entity.table}\n"
