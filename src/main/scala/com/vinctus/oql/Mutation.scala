@@ -69,7 +69,7 @@ class Mutation private[oql] (oql: AbstractOQL, entity: Entity)(implicit ec: scal
 
           List(
             k -> oql.render(
-              if (v.isInstanceOf[Map[_, _]]) v.asInstanceOf[Map[String, Any]](mtoEntity.pk.get.name) else v
+              if (v.isInstanceOf[Map[?, ?]]) v.asInstanceOf[Map[String, Any]](mtoEntity.pk.get.name) else v
             )
           )
         case (k, _) => if (attrsRequired(k)) sys.error(s"attribute '$k' is required") else Nil
@@ -191,7 +191,7 @@ class Mutation private[oql] (oql: AbstractOQL, entity: Entity)(implicit ec: scal
     val pairs =
       updatesWithoutUndefined map { case (k, v) =>
         val v1 =
-          if (v.isInstanceOf[Map[_, _]])
+          if (v.isInstanceOf[Map[?, ?]])
             entity.attributes(k) match {
               case Attribute(_, _, _, _, ManyToOneType(mtoEntity)) =>
                 v.asInstanceOf[Map[String, Any]](mtoEntity.pk.get.name)

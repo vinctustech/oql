@@ -105,7 +105,7 @@ class OQL_NodePG_ScalaJS(
             .replace("\r", """\r""")
             .replace("\n", """\n""")}'"
       case d: js.Date           => s"'${d.toISOString()}'"
-      case a: collection.Seq[_] => s"(${a map subsrender mkString ","})"
+      case a: collection.Seq[?] => s"(${a map subsrender mkString ","})"
       case _                    => String.valueOf(a)
     }
 
@@ -117,7 +117,7 @@ class OQL_NodePG_ScalaJS(
       a match {
         case s: String            => ds.string(s)
         case d: js.Date           => s"'${d.toISOString()}'"
-        case s: collection.Seq[_] => s"(${s map (e => render(e, typ)) mkString ","})"
+        case s: collection.Seq[?] => s"(${s map (e => render(e, typ)) mkString ","})"
         case _                    => String.valueOf(a)
       }
 

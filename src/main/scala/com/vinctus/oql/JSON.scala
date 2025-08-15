@@ -242,11 +242,11 @@ object JSON {
       value match {
         case p if platformSpecific isDefinedAt p                     => buf ++= platformSpecific(p)
         case _: Number | _: java.math.BigDecimal | _: Boolean | null => buf ++= String.valueOf(value)
-        case m: collection.Map[_, _]           => jsonObject(m.toSeq.asInstanceOf[Seq[(String, Any)]])
-        case s: collection.Seq[_] if s.isEmpty => buf ++= "[]"
-        case s: collection.Seq[_]              => aggregate('[', s, ']')(jsonValue)
-        case a: Array[_]                       => jsonValue(a.toList)
-        case a: js.Array[_]                    => jsonValue(a.toList)
+        case m: collection.Map[?, ?]           => jsonObject(m.toSeq.asInstanceOf[Seq[(String, Any)]])
+        case s: collection.Seq[?] if s.isEmpty => buf ++= "[]"
+        case s: collection.Seq[?]              => aggregate('[', s, ']')(jsonValue)
+        case a: Array[?]                       => jsonValue(a.toList)
+        case a: js.Array[?]                    => jsonValue(a.toList)
         case p: Product                        => jsonObject(p.productElementNames zip p.productIterator toList)
         case t: Instant                        => buf ++= '"' +: ISO.format(t.atOffset(ZoneOffset.UTC)) :+ '"'
 //        case t: Timestamp                      => jsonValue(t.toInstant.toString) //  | _: Instant  _: java.util.UUID

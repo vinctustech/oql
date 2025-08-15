@@ -117,7 +117,7 @@ class OQL_NodePG_JS(
             .replace("\r", """\r""")
             .replace("\n", """\n""")}'"
       case d: js.Date     => s"'${d.toISOString()}'"
-      case a: js.Array[_] => s"(${a map subsrender mkString ","})"
+      case a: js.Array[?] => s"(${a map subsrender mkString ","})"
       case _              => String.valueOf(a)
     }
 
@@ -129,7 +129,7 @@ class OQL_NodePG_JS(
       a match {
         case s: String      => ds.string(s)
         case d: js.Date     => s"'${d.toISOString()}'"
-        case a: js.Array[_] => s"(${a map (e => render(e, typ)) mkString ","})"
+        case a: js.Array[?] => s"(${a map (e => render(e, typ)) mkString ","})"
         case _              => String.valueOf(a)
       }
 

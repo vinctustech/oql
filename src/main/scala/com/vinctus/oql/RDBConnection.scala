@@ -47,7 +47,7 @@ class RDBConnection(val dataSource: RDBDataSource)(implicit ec: scala.concurrent
             .replace("\r", """\r""")
             .replace("\n", """\n""")}'"
       case d: js.Date     => s"'${d.toISOString()}'"
-      case a: js.Array[_] => s"(${a map subsrender mkString ","})"
+      case a: js.Array[?] => s"(${a map subsrender mkString ","})"
       case _              => String.valueOf(a)
 
   def raw(sql: String, parameters: IndexedSeq[Any]): Future[Seq[Seq[Any]]] =
