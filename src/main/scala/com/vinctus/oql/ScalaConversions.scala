@@ -6,7 +6,7 @@ import scala.scalajs.js
 
 object ScalaConversions extends Conversions {
 
-  def timestamp(t: String): Any = Instant.parse(if (t endsWith "Z") t else t :+ 'Z')
+  def timestamp(t: String): Any = Instant.parse(if (t.endsWith("Z")) t else t :+ 'Z')
 
   def uuid(id: String): Any = id
 

@@ -109,7 +109,7 @@ object OQLParser extends RegexParsers with PackratParsers {
           case (None, Some(nulls))                => s"ASC NULLS ${nulls.toUpperCase}"
           case (_, None)                          => "DESC NULLS LAST"
           case (Some(dir), Some(nulls))           => s"${dir.toUpperCase} NULLS ${nulls.toUpperCase}"
-        }
+        },
       )
     }
 
@@ -138,13 +138,13 @@ object OQLParser extends RegexParsers with PackratParsers {
       InfixOQLExpression(l, c, r)
     } | // TODO: should not use InfixOQLExpression because result type is boolean
       expression ~ ((kw("NOT") ~ kw("BETWEEN") ^^^ "NOT BETWEEN") | kw("BETWEEN")) ~ expression ~ kw(
-        "AND"
+        "AND",
       ) ~ expression ^^ { case e ~ b ~ l ~ _ ~ u =>
         BetweenOQLExpression(e, b, l, u)
       } |
       expression ~ isNull ^^ { case e ~ n => PostfixOQLExpression(e, n) } |
       ("(" ~> expression <~ ",") ~ (expression <~ ")" <~ kw(
-        "OVERLAPS"
+        "OVERLAPS",
       )) ~ ("(" ~> expression <~ ",") ~ (expression <~ ")") ^^ { case ls ~ le ~ rs ~ re =>
         OverlapsOQLExpression(ls, le, rs, re)
       } |
@@ -162,7 +162,7 @@ object OQLParser extends RegexParsers with PackratParsers {
 
   lazy val comparison: PackratParser[String] =
     "<=" | ">=" | "<" | ">" | "=" | "!=" | kw("LIKE") | kw("ILIKE") | (kw("NOT") ~ kw("LIKE") ^^^ "NOT LIKE") | (kw(
-      "NOT"
+      "NOT",
     ) ~ kw("ILIKE") ^^^ "NOT ILIKE")
 
   lazy val booleanLiteral: PackratParser[OQLExpression] =
@@ -190,7 +190,7 @@ object OQLParser extends RegexParsers with PackratParsers {
       insert*/
 
   lazy val stringLiteral: PackratParser[OQLExpression] =
-    string ^^ (unescape _ andThen StringOQLExpression.apply)
+    string ^^ (unescape andThen StringOQLExpression.apply)
 
   lazy val pair: PackratParser[(String, OQLExpression)] =
     doubleQuoteString ~ ":" ~ (arrayExpression | objectExpression | literalExpression) ^^ { case k ~ _ ~ v =>
