@@ -11,6 +11,7 @@ trait DMLTypeSpecifier extends DMLAST
 trait DMLDataType extends DMLTypeSpecifier
 case class DMLSimpleDataType(typ: String) extends DMLDataType
 case class DMLParametricDataType(typ: String, parameters: List[String]) extends DMLDataType
+case class DMLArrayDataType(elementType: DMLDataType) extends DMLDataType
 
 case class DMLEnumType(typ: Ident) extends DMLDataType
 

@@ -16,4 +16,6 @@ abstract class Conversions {
 
   def jsonSequence(v: Any): Any
 
+  def array(arr: Any, elementType: Datatype): Any
+
 }

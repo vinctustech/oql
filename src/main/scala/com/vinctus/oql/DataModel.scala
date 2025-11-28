@@ -80,6 +80,23 @@ class DataModel(model: DMLModel, dml: String) {
             case DMLSimpleDataType("uuid")             => UUIDType
             case DMLSimpleDataType("timestamp")        => TimestampType
             case DMLSimpleDataType("json")             => JSONType
+            case DMLArrayDataType(elemType)            =>
+              val baseType = elemType match {
+                case DMLSimpleDataType("text")                     => TextType
+                case DMLSimpleDataType("integer" | "int" | "int4") => IntegerType
+                case DMLSimpleDataType("bool" | "boolean")         => BooleanType
+                case DMLSimpleDataType("bigint" | "int8")          => BigintType
+                case DMLParametricDataType("decimal", parameters)  =>
+                  DecimalType(parameters.head.toInt, parameters.tail.head.toInt)
+                case DMLSimpleDataType("date")             => DateType
+                case DMLSimpleDataType("time")             => TimeType
+                case DMLSimpleDataType("interval")         => IntervalType
+                case DMLSimpleDataType("float" | "float8") => FloatType
+                case DMLSimpleDataType("uuid")             => UUIDType
+                case DMLSimpleDataType("timestamp")        => TimestampType
+                case DMLSimpleDataType("json")             => JSONType
+              }
+              ArrayType(baseType)
             case DMLNameType(typ)                      =>
               entities get typ.s match {
                 case Some(EntityInfo(entity, _, _)) => ManyToOneType(entity)

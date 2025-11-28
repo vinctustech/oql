@@ -174,6 +174,7 @@ abstract class AbstractOQL(dm: String, val ds: SQLDataSource, conv: Conversions)
                 case (_, d: String, DecimalType(precision, scale)) => conv.decimal(d, precision, scale)
                 case (NodePGResultSetValue(v), _, JSONType)        => conv.jsonNodePG(v.asInstanceOf[String])
                 case (SequenceResultSetValue(v), _, JSONType)      => conv.jsonSequence(v)
+                case (NodePGResultSetValue(_), arr, ArrayType(elemType)) => conv.array(arr, elemType)
                 case _                                             => v.value
               }
             case ObjectNode(properties) =>

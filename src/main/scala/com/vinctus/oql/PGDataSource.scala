@@ -19,6 +19,7 @@ trait PGDataSource extends SQLDataSource {
       case FloatType             => "DOUBLE PRECISION"
       case UUIDType              => "UUID"
       case TimestampType         => "TIMESTAMP WITHOUT TIME ZONE"
+      case ArrayType(elemType)   => mapType(elemType) + "[]"
       case ManyToOneType(entity) => mapType(entity.pk.get.typ)
     }
 
@@ -39,6 +40,11 @@ trait PGDataSource extends SQLDataSource {
       case "date"                        => DateType
       case "interval"                    => IntervalType
       case "double precision"            => FloatType
+      case "text"                        => TextType
+      case "boolean"                     => BooleanType
+      case "json" | "jsonb"              => JSONType
+      case s if s.endsWith("[]")         => ArrayType(reverseMapType(s.dropRight(2)))
+      case s if s.startsWith("_")        => ArrayType(reverseMapType(s.drop(1)))
     }
 
   val resultArrayFunctionStart: String = "to_json(ARRAY("

@@ -18,4 +18,22 @@ object ScalaConversions extends Conversions {
 
   def jsonSequence(v: Any): Any = v
 
+  def array(arr: Any, elementType: Datatype): Any = {
+    if (arr == null) null
+    else {
+      val jsArr = arr.asInstanceOf[js.Array[Any]]
+      val converted = elementType match {
+        case IntegerType                   => jsArr.map(v => if (v == null) null else v.toString.toInt)
+        case FloatType                     => jsArr.map(v => if (v == null) null else v.toString.toDouble)
+        case BigintType                    => jsArr.map(v => if (v == null) null else bigint(v.toString))
+        case UUIDType                      => jsArr.map(v => if (v == null) null else uuid(v.toString))
+        case TimestampType                 => jsArr.map(v => if (v == null) null else timestamp(v.toString))
+        case DecimalType(precision, scale) => jsArr.map(v => if (v == null) null else decimal(v.toString, precision, scale))
+        case JSONType                      => jsArr.map(v => if (v == null) null else jsonNodePG(v.asInstanceOf[String]))
+        case _                             => jsArr
+      }
+      converted.toList
+    }
+  }
+
 }

@@ -285,3 +285,20 @@ CREATE TABLE "escapes" (
 INSERT INTO "escapes" ("s") VALUES
   (E'\ba\ts\nd\rf"\'\\\f'),
   (E'\u03B8');
+CREATE TABLE "arrays_test" (
+  "id" SERIAL PRIMARY KEY,
+  "tags" TEXT[],
+  "scores" INTEGER[],
+  "flags" BOOLEAN[],
+  "amounts" DOUBLE PRECISION[],
+  "ids" UUID[],
+  "timestamps" TIMESTAMP WITHOUT TIME ZONE[],
+  "dates" DATE[],
+  "numbers" BIGINT[],
+  "decimals" NUMERIC(10,2)[]
+);
+INSERT INTO "arrays_test" ("tags", "scores", "flags", "amounts", "ids", "timestamps", "dates", "numbers", "decimals") VALUES
+  (ARRAY['red', 'green', 'blue'], ARRAY[1, 2, 3], ARRAY[true, false, true], ARRAY[1.5, 2.5, 3.5], ARRAY['797f15ab-56ba-4389-aca1-5c3c661fc9fb'::uuid], ARRAY['2021-04-21T17:42:49.943Z'::timestamp], ARRAY['2021-04-21'::date], ARRAY[9223372036854775807], ARRAY[123.45, 678.90]),
+  (ARRAY['hello', 'world'], ARRAY[10, 20], ARRAY[false], ARRAY[0.1], NULL, NULL, NULL, NULL, NULL),
+  (ARRAY[]::TEXT[], ARRAY[]::INTEGER[], NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+  (NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);

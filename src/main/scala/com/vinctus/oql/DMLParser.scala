@@ -36,7 +36,7 @@ class DMLParser extends RegexParsers {
       DMLAttribute(n, a, t, pk isDefined, r isDefined)
     }
 
-  def typeSpecifier: Parser[DMLTypeSpecifier] =
+  def simpleDataType: Parser[DMLDataType] =
     (kw("text") |
       kw("json") |
       kw("integer") | kw("int4") | kw("int") |
@@ -48,7 +48,16 @@ class DMLParser extends RegexParsers {
       kw("timestamp")) ^^ DMLSimpleDataType.apply |
       kw("decimal") ~ "(" ~ integer ~ "," ~ integer ~ ")" ^^ { case _ ~ _ ~ p ~ _ ~ s ~ _ =>
         DMLParametricDataType("decimal", List(p, s))
-      } |
+      }
+
+  def dataType: Parser[DMLDataType] =
+    simpleDataType ~ opt("[]") ^^ {
+      case dt ~ Some(_) => DMLArrayDataType(dt)
+      case dt ~ None    => dt
+    }
+
+  def typeSpecifier: Parser[DMLTypeSpecifier] =
+    dataType |
       ident ^^ DMLNameType.apply |
       "[" ~ ident ~ "]" ~ "(" ~ ident ~ ")" ^^ { case _ ~ n ~ _ ~ _ ~ l ~ _ =>
         DMLManyToManyType(n, l)

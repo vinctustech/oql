@@ -25,6 +25,7 @@ class RDBDataSource(implicit ec: scala.concurrent.ExecutionContext) extends SQLD
       case TimestampType         => "TIMESTAMP"
       case JSONType              => "JSON"
       case EnumType(name, _)     => name
+      case ArrayType(elemType)   => mapType(elemType) + " ARRAY"
       case ManyToOneType(entity) => mapType(entity.pk.get.typ)
     }
 
