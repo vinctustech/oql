@@ -5242,30 +5242,47 @@ $c_Lcom_vinctus_oql_Mutation.prototype.bulkUpdate__sci_List__s_concurrent_Future
     return ((k$3 + " = __data__.") + k$3);
   })))));
   command.append__T__scm_StringBuilder((("  SET   " + $f_sc_IterableOnceOps__mkString__T__T__T__T(this$15, "", ", ", "")) + "\n"));
-  var this$21 = $n(updates);
+  var this$22 = $n(updates);
   var f = ((x$1$3) => {
     var x$1$4 = $as_T2(x$1$3);
     if ((x$1$4 !== null)) {
       var id = $n(x$1$4)._1__O();
       var update = $as_sc_Map($n(x$1$4)._2__O());
-      var $x_6 = $n(this.Lcom_vinctus_oql_Mutation__f_oql);
-      var this$17 = $n($n($as_Lcom_vinctus_oql_Attribute($n($n(this.Lcom_vinctus_oql_Mutation__f_entity).pk__s_Option()).get__O())).Lcom_vinctus_oql_Attribute__f_typ);
-      var value = $as_Lcom_vinctus_oql_Datatype(this$17);
-      var $x_5 = $x_6.render__O__s_Option__T(id, new $c_s_Some(value));
-      var this$19 = $n(update);
-      var k$4 = new $c_sr_AbstractFunction1_$$Lambda$70e1780b84463d18653aacefee3ab989ac625f28(((x$2) => $n(this.Lcom_vinctus_oql_Mutation__f_oql).render__O__s_Option__T(x$2, $n(this.Lcom_vinctus_oql_Mutation__f_oql).render$default$2__s_Option())));
-      var this$20 = $n($as_sc_IterableOnceOps($n(keys).map__F1__O($f_s_PartialFunction__andThen__F1__s_PartialFunction(this$19, k$4))));
-      return (((("(" + $x_5) + ", ") + $f_sc_IterableOnceOps__mkString__T__T__T__T(this$20, "", ", ", "")) + ")");
+      var values = $as_sc_Iterable($n(keys).map__F1__O(new $c_sr_AbstractFunction1_$$Lambda$70e1780b84463d18653aacefee3ab989ac625f28(((k$4) => {
+        var k$5 = $as_T(k$4);
+        var typ = $n($as_Lcom_vinctus_oql_Attribute($n(attrsNoPK).apply__O__O(k$5))).Lcom_vinctus_oql_Attribute__f_typ;
+        var $x_7 = $n(this.Lcom_vinctus_oql_Mutation__f_oql);
+        var $x_6 = $n(update).apply__O__O(k$5);
+        var x$2 = $m_Lcom_vinctus_oql_JSONType$();
+        if (((typ !== null) && $n(typ).equals__O__Z(x$2))) {
+          var cond = true;
+        } else {
+          var cond = $n(typ).isArrayType__Z();
+        }
+        if (cond) {
+          var this$18 = $n(typ);
+          var $x_5 = new $c_s_Some($as_Lcom_vinctus_oql_Datatype(this$18));
+        } else {
+          var $x_5 = $m_s_None$();
+        }
+        return $x_7.render__O__s_Option__T($x_6, $x_5);
+      }))));
+      var $x_9 = $n(this.Lcom_vinctus_oql_Mutation__f_oql);
+      var this$19 = $n($n($as_Lcom_vinctus_oql_Attribute($n($n(this.Lcom_vinctus_oql_Mutation__f_entity).pk__s_Option()).get__O())).Lcom_vinctus_oql_Attribute__f_typ);
+      var value = $as_Lcom_vinctus_oql_Datatype(this$19);
+      var $x_8 = $x_9.render__O__s_Option__T(id, new $c_s_Some(value));
+      var this$21 = $n(values);
+      return (((("(" + $x_8) + ", ") + $f_sc_IterableOnceOps__mkString__T__T__T__T(this$21, "", ", ", "")) + ")");
     }
     throw new $c_s_MatchError(x$1$4);
   });
-  if ((this$21 === $m_sci_Nil$())) {
-    var this$22 = $m_sci_Nil$();
+  if ((this$22 === $m_sci_Nil$())) {
+    var this$23 = $m_sci_Nil$();
   } else {
-    var x0$3 = this$21.head__O();
+    var x0$3 = this$22.head__O();
     var h = new $c_sci_$colon$colon(f(x0$3), $m_sci_Nil$());
     var t = h;
-    var rest = $as_sci_List(this$21.tail__O());
+    var rest = $as_sci_List(this$22.tail__O());
     while ((rest !== $m_sci_Nil$())) {
       var x0$4 = $n(rest).head__O();
       var nx = new $c_sci_$colon$colon(f(x0$4), $m_sci_Nil$());
@@ -5273,16 +5290,16 @@ $c_Lcom_vinctus_oql_Mutation.prototype.bulkUpdate__sci_List__s_concurrent_Future
       t = nx;
       rest = $as_sci_List($n(rest).tail__O());
     }
-    var this$22 = h;
+    var this$23 = h;
   }
-  var $x_7 = $f_sc_IterableOnceOps__mkString__T__T__T__T(this$22, "", ", ", "");
+  var $x_10 = $f_sc_IterableOnceOps__mkString__T__T__T__T(this$23, "", ", ", "");
   var $x_4 = $n($as_Lcom_vinctus_oql_Attribute($n($n(this.Lcom_vinctus_oql_Mutation__f_entity).pk__s_Option()).get__O())).Lcom_vinctus_oql_Attribute__f_column;
-  var this$23 = $n(columns);
-  command.append__T__scm_StringBuilder((((((("  FROM  (VALUES " + $x_7) + ") AS __data__ (") + $x_4) + ", ") + $f_sc_IterableOnceOps__mkString__T__T__T__T(this$23, "", ", ", "")) + ")\n"));
+  var this$24 = $n(columns);
+  command.append__T__scm_StringBuilder((((((("  FROM  (VALUES " + $x_10) + ") AS __data__ (") + $x_4) + ", ") + $f_sc_IterableOnceOps__mkString__T__T__T__T(this$24, "", ", ", "")) + ")\n"));
   command.append__T__scm_StringBuilder((((((("  WHERE " + $n(this.Lcom_vinctus_oql_Mutation__f_entity).Lcom_vinctus_oql_Entity__f_table) + ".") + $n($as_Lcom_vinctus_oql_Attribute($n($n(this.Lcom_vinctus_oql_Mutation__f_entity).pk__s_Option()).get__O())).Lcom_vinctus_oql_Attribute__f_column) + " = __data__.") + $n($as_Lcom_vinctus_oql_Attribute($n($n(this.Lcom_vinctus_oql_Mutation__f_entity).pk__s_Option()).get__O())).Lcom_vinctus_oql_Attribute__f_column) + "\n"));
   $n(this.Lcom_vinctus_oql_Mutation__f_oql).show__T__V($n(command.scm_StringBuilder__f_underlying).jl_StringBuilder__f_java$lang$StringBuilder$$content);
-  var this$24 = $n(this.Lcom_vinctus_oql_Mutation__f_oql);
-  return $n($n($n(this$24.Lcom_vinctus_oql_AbstractOQL__f_ds).connect__Lcom_vinctus_oql_OQLConnection()).command__T__s_concurrent_Future($n(command.scm_StringBuilder__f_underlying).jl_StringBuilder__f_java$lang$StringBuilder$$content)).map__F1__s_concurrent_ExecutionContext__s_concurrent_Future(new $c_sr_AbstractFunction1_$$Lambda$70e1780b84463d18653aacefee3ab989ac625f28(((_$10) => {
+  var this$25 = $n(this.Lcom_vinctus_oql_Mutation__f_oql);
+  return $n($n($n(this$25.Lcom_vinctus_oql_AbstractOQL__f_ds).connect__Lcom_vinctus_oql_OQLConnection()).command__T__s_concurrent_Future($n(command.scm_StringBuilder__f_underlying).jl_StringBuilder__f_java$lang$StringBuilder$$content)).map__F1__s_concurrent_ExecutionContext__s_concurrent_Future(new $c_sr_AbstractFunction1_$$Lambda$70e1780b84463d18653aacefee3ab989ac625f28(((_$10) => {
     $as_Lcom_vinctus_oql_OQLResultSet(_$10);
   })), this.Lcom_vinctus_oql_Mutation__f_ec);
 });
@@ -23501,9 +23518,6 @@ $c_s_PartialFunction$.prototype.constructor = $c_s_PartialFunction$;
 function $h_s_PartialFunction$() {
 }
 $h_s_PartialFunction$.prototype = $c_s_PartialFunction$.prototype;
-$c_s_PartialFunction$.prototype.scala$PartialFunction$$fallbackOccurred__O__Z = (function(x) {
-  return (this.s_PartialFunction$__f_fallback_fn === x);
-});
 var $d_s_PartialFunction$ = new $TypeData().initClass($c_s_PartialFunction$, "scala.PartialFunction$", ({
   s_PartialFunction$: 1
 }));
@@ -29315,7 +29329,7 @@ $c_Lcom_vinctus_oql_OQL\uff3fNodePG\uff3fJS.prototype.render__O__s_Option__T = (
       var x$1 = $as_Lcom_vinctus_oql_ArrayType(x12);
       $n(x$1);
       if ((a === null)) {
-        return "NULL";
+        return ("NULL::" + $n(this.Lcom_vinctus_oql_AbstractOQL__f_ds).mapType__Lcom_vinctus_oql_TypeSpecifier__T($as_Lcom_vinctus_oql_TypeSpecifier($n(typ).get__O())));
       } else {
         matchResult4: {
           var seq$2;
@@ -29361,6 +29375,9 @@ $c_Lcom_vinctus_oql_OQL\uff3fNodePG\uff3fJS.prototype.render__O__s_Option__T = (
 $c_Lcom_vinctus_oql_OQL\uff3fNodePG\uff3fJS.prototype.render$default$2__s_Option = (function() {
   return $m_s_None$();
 });
+$c_Lcom_vinctus_oql_OQL\uff3fNodePG\uff3fJS.prototype.showQuery = (function() {
+  this.showQuery__V();
+});
 $c_Lcom_vinctus_oql_OQL\uff3fNodePG\uff3fJS.prototype.count = (function(arg, ...rest) {
   var prep0 = $as_T(arg);
   var prep1 = ((rest[0] === (void 0)) ? (void 0) : rest[0]);
@@ -29381,9 +29398,6 @@ $c_Lcom_vinctus_oql_OQL\uff3fNodePG\uff3fJS.prototype.queryMany = (function(arg,
 $c_Lcom_vinctus_oql_OQL\uff3fNodePG\uff3fJS.prototype.entity = (function(arg) {
   var prep0 = $as_T(arg);
   return this.entity__T__Lcom_vinctus_oql_Mutation\uff3fJS\uff3fNodePG(prep0);
-});
-$c_Lcom_vinctus_oql_OQL\uff3fNodePG\uff3fJS.prototype.showQuery = (function() {
-  this.showQuery__V();
 });
 $c_Lcom_vinctus_oql_OQL\uff3fNodePG\uff3fJS.prototype.raw = (function(arg, arg$2) {
   var prep0 = $as_T(arg);
@@ -29578,7 +29592,7 @@ $c_Lcom_vinctus_oql_OQL\uff3fRDB\uff3fJS.prototype.render__O__s_Option__T = (fun
       var x$1 = $as_Lcom_vinctus_oql_ArrayType(x12);
       $n(x$1);
       if ((a === null)) {
-        return "NULL";
+        return ("NULL::" + $n(this.Lcom_vinctus_oql_AbstractOQL__f_ds).mapType__Lcom_vinctus_oql_TypeSpecifier__T($as_Lcom_vinctus_oql_TypeSpecifier($n(typ).get__O())));
       } else {
         matchResult4: {
           var seq$2;
@@ -29624,8 +29638,8 @@ $c_Lcom_vinctus_oql_OQL\uff3fRDB\uff3fJS.prototype.render__O__s_Option__T = (fun
 $c_Lcom_vinctus_oql_OQL\uff3fRDB\uff3fJS.prototype.render$default$2__s_Option = (function() {
   return $m_s_None$();
 });
-$c_Lcom_vinctus_oql_OQL\uff3fRDB\uff3fJS.prototype.create = (function() {
-  return this.jsCreate__sjs_js_Promise();
+$c_Lcom_vinctus_oql_OQL\uff3fRDB\uff3fJS.prototype.showQuery = (function() {
+  this.showQuery__V();
 });
 $c_Lcom_vinctus_oql_OQL\uff3fRDB\uff3fJS.prototype.count = (function(arg, ...rest) {
   var prep0 = $as_T(arg);
@@ -29652,12 +29666,12 @@ $c_Lcom_vinctus_oql_OQL\uff3fRDB\uff3fJS.prototype.rawMulti = (function(arg) {
   var prep0 = $as_T(arg);
   return this.rawMulti__T__sjs_js_Promise(prep0);
 });
-$c_Lcom_vinctus_oql_OQL\uff3fRDB\uff3fJS.prototype.showQuery = (function() {
-  this.showQuery__V();
-});
 $c_Lcom_vinctus_oql_OQL\uff3fRDB\uff3fJS.prototype.raw = (function(arg, arg$2) {
   var prep0 = $as_T(arg);
   return this.raw__T__O__sjs_js_Promise(prep0, arg$2);
+});
+$c_Lcom_vinctus_oql_OQL\uff3fRDB\uff3fJS.prototype.create = (function() {
+  return this.jsCreate__sjs_js_Promise();
 });
 $c_Lcom_vinctus_oql_OQL\uff3fRDB\uff3fJS.prototype.queryOne = (function(arg, ...rest) {
   var prep0 = $as_T(arg);
@@ -37704,14 +37718,6 @@ function $m_s_Option$() {
     $n_s_Option$ = new $c_s_Option$();
   }
   return $n_s_Option$;
-}
-function $f_s_PartialFunction__andThen__F1__s_PartialFunction($thiz, k) {
-  if ($is_s_PartialFunction(k)) {
-    var x2 = $as_s_PartialFunction(k);
-    return new $c_s_PartialFunction$Combined($thiz, x2);
-  } else {
-    return new $c_s_PartialFunction$AndThen($thiz, k);
-  }
 }
 function $f_s_PartialFunction__applyOrElse__O__F1__O($thiz, x, default$1) {
   return ($thiz.isDefinedAt__O__Z(x) ? $thiz.apply__O__O(x) : $n(default$1).apply__O__O(x));
@@ -58057,71 +58063,6 @@ $c_s_PartialFunction$$anon$1.prototype.apply__O__O = (function(v1) {
 });
 var $d_s_PartialFunction$$anon$1 = new $TypeData().initClass($c_s_PartialFunction$$anon$1, "scala.PartialFunction$$anon$1", ({
   s_PartialFunction$$anon$1: 1,
-  s_PartialFunction: 1,
-  F1: 1,
-  Ljava_io_Serializable: 1
-}));
-/** @constructor */
-function $c_s_PartialFunction$AndThen(pf, k) {
-  this.s_PartialFunction$AndThen__f_pf = null;
-  this.s_PartialFunction$AndThen__f_k = null;
-  this.s_PartialFunction$AndThen__f_pf = pf;
-  this.s_PartialFunction$AndThen__f_k = k;
-}
-$c_s_PartialFunction$AndThen.prototype = new $h_O();
-$c_s_PartialFunction$AndThen.prototype.constructor = $c_s_PartialFunction$AndThen;
-/** @constructor */
-function $h_s_PartialFunction$AndThen() {
-}
-$h_s_PartialFunction$AndThen.prototype = $c_s_PartialFunction$AndThen.prototype;
-$c_s_PartialFunction$AndThen.prototype.toString__T = (function() {
-  return "<function1>";
-});
-$c_s_PartialFunction$AndThen.prototype.isDefinedAt__O__Z = (function(x) {
-  return $n(this.s_PartialFunction$AndThen__f_pf).isDefinedAt__O__Z(x);
-});
-$c_s_PartialFunction$AndThen.prototype.apply__O__O = (function(x) {
-  return $n(this.s_PartialFunction$AndThen__f_k).apply__O__O($n(this.s_PartialFunction$AndThen__f_pf).apply__O__O(x));
-});
-$c_s_PartialFunction$AndThen.prototype.applyOrElse__O__F1__O = (function(x, default$1) {
-  var z = $n(this.s_PartialFunction$AndThen__f_pf).applyOrElse__O__F1__O(x, $m_s_PartialFunction$().s_PartialFunction$__f_fallback_fn);
-  return ((!$m_s_PartialFunction$().scala$PartialFunction$$fallbackOccurred__O__Z(z)) ? $n(this.s_PartialFunction$AndThen__f_k).apply__O__O(z) : $n(default$1).apply__O__O(x));
-});
-var $d_s_PartialFunction$AndThen = new $TypeData().initClass($c_s_PartialFunction$AndThen, "scala.PartialFunction$AndThen", ({
-  s_PartialFunction$AndThen: 1,
-  s_PartialFunction: 1,
-  F1: 1,
-  Ljava_io_Serializable: 1
-}));
-/** @constructor */
-function $c_s_PartialFunction$Combined(pf, k) {
-  this.s_PartialFunction$Combined__f_pf = null;
-  this.s_PartialFunction$Combined__f_k = null;
-  this.s_PartialFunction$Combined__f_pf = pf;
-  this.s_PartialFunction$Combined__f_k = k;
-}
-$c_s_PartialFunction$Combined.prototype = new $h_O();
-$c_s_PartialFunction$Combined.prototype.constructor = $c_s_PartialFunction$Combined;
-/** @constructor */
-function $h_s_PartialFunction$Combined() {
-}
-$h_s_PartialFunction$Combined.prototype = $c_s_PartialFunction$Combined.prototype;
-$c_s_PartialFunction$Combined.prototype.toString__T = (function() {
-  return "<function1>";
-});
-$c_s_PartialFunction$Combined.prototype.isDefinedAt__O__Z = (function(x) {
-  var b = $n(this.s_PartialFunction$Combined__f_pf).applyOrElse__O__F1__O(x, $m_s_PartialFunction$().s_PartialFunction$__f_fallback_fn);
-  return ((!$m_s_PartialFunction$().scala$PartialFunction$$fallbackOccurred__O__Z(b)) && $n(this.s_PartialFunction$Combined__f_k).isDefinedAt__O__Z(b));
-});
-$c_s_PartialFunction$Combined.prototype.apply__O__O = (function(x) {
-  return $n(this.s_PartialFunction$Combined__f_k).apply__O__O($n(this.s_PartialFunction$Combined__f_pf).apply__O__O(x));
-});
-$c_s_PartialFunction$Combined.prototype.applyOrElse__O__F1__O = (function(x, default$1) {
-  var pfv = $n(this.s_PartialFunction$Combined__f_pf).applyOrElse__O__F1__O(x, $m_s_PartialFunction$().s_PartialFunction$__f_fallback_fn);
-  return ((!$m_s_PartialFunction$().scala$PartialFunction$$fallbackOccurred__O__Z(pfv)) ? $n(this.s_PartialFunction$Combined__f_k).applyOrElse__O__F1__O(pfv, new $c_sr_AbstractFunction1_$$Lambda$70e1780b84463d18653aacefee3ab989ac625f28(((x$1$2$2) => $n(default$1).apply__O__O(x)))) : $n(default$1).apply__O__O(x));
-});
-var $d_s_PartialFunction$Combined = new $TypeData().initClass($c_s_PartialFunction$Combined, "scala.PartialFunction$Combined", ({
-  s_PartialFunction$Combined: 1,
   s_PartialFunction: 1,
   F1: 1,
   Ljava_io_Serializable: 1

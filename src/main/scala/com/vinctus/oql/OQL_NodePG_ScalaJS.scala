@@ -114,7 +114,7 @@ class OQL_NodePG_ScalaJS(
       typ.get match {
         case JSONType => s"'${JSON(a, ds.platformSpecific)}'"
         case ArrayType(elemType) =>
-          if (a == null) "NULL"
+          if (a == null) s"NULL::${ds.mapType(typ.get)}"
           else {
             val seq: Seq[Any] = a match {
               case arr: js.Array[?] => arr.toSeq

@@ -279,7 +279,11 @@ class Mutation private[oql] (oql: AbstractOQL, entity: Entity)(implicit ec: scal
         s"$k = __data__.$k"
       } mkString ", "}\n"
     command append s"  FROM  (VALUES ${updates map { case (id, update) =>
-        s"(${oql.render(id, Some(entity.pk.get.typ.asDatatype))}, ${keys map (update andThen (x => oql.render(x))) mkString ", "})"
+        val values = keys.map { k =>
+          val typ = attrsNoPK(k).typ
+          oql.render(update(k), Option.when(typ == JSONType || typ.isArrayType)(typ.asDatatype))
+        }
+        s"(${oql.render(id, Some(entity.pk.get.typ.asDatatype))}, ${values mkString ", "})"
       } mkString ", "}) AS __data__ (${entity.pk.get.column}, ${columns mkString ", "})\n"
     command append s"  WHERE ${entity.table}.${entity.pk.get.column} = __data__.${entity.pk.get.column}\n"
     oql.show(command.toString)
