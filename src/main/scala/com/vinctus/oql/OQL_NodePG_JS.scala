@@ -123,8 +123,17 @@ class OQL_NodePG_JS(
 
   def render(a: Any, typ: Option[Datatype] = None): String =
     if (typ.isDefined)
-      if (typ.get == JSONType) s"'${JSON(a, ds.platformSpecific)}'"
-      else ds.typed(render(a), typ.get)
+      typ.get match {
+        case JSONType => s"'${JSON(a, ds.platformSpecific)}'"
+        case ArrayType(elemType) =>
+          val seq: Seq[Any] = a match {
+            case arr: js.Array[?] => arr.toSeq
+            case seq: Seq[?]      => seq
+            case other            => sys.error(s"Expected array but got ${other.getClass}")
+          }
+          s"ARRAY[${seq.map(e => render(e)).mkString(",")}]::${ds.mapType(typ.get)}"
+        case _ => ds.typed(render(a), typ.get)
+      }
     else
       a match {
         case s: String      => ds.string(s)

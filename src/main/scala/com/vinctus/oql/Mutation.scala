@@ -66,7 +66,7 @@ class Mutation private[oql] (oql: AbstractOQL, entity: Entity)(implicit ec: scal
     val pairs =
       attrs flatMap {
         case (k, Attribute(name, column, pk, required, typ)) if typ.isDataType && objNoUndefined.contains(k) =>
-          List(k -> oql.render(objNoUndefined(k), Option.when(typ == JSONType)(typ.asDatatype)))
+          List(k -> oql.render(objNoUndefined(k), Option.when(typ == JSONType || typ.isArrayType)(typ.asDatatype)))
         case (k, Attribute(_, _, _, _, ManyToOneType(mtoEntity))) if objNoUndefined contains k =>
           val v = objNoUndefined(k)
 
@@ -205,7 +205,7 @@ class Mutation private[oql] (oql: AbstractOQL, entity: Entity)(implicit ec: scal
           else v
         val attr = attrs(k)
 
-        attr.column -> oql.render(v1, Option.when(attr.typ == JSONType)(attr.typ.asDatatype))
+        attr.column -> oql.render(v1, Option.when(attr.typ == JSONType || attr.typ.isArrayType)(attr.typ.asDatatype))
       }
 
     val command = new StringBuilder
