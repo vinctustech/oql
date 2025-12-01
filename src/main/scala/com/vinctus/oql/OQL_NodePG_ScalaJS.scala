@@ -114,12 +114,15 @@ class OQL_NodePG_ScalaJS(
       typ.get match {
         case JSONType => s"'${JSON(a, ds.platformSpecific)}'"
         case ArrayType(elemType) =>
-          val seq: Seq[Any] = a match {
-            case arr: js.Array[?] => arr.toSeq
-            case seq: Seq[?]      => seq
-            case other            => sys.error(s"Expected array but got ${other.getClass}")
+          if (a == null) "NULL"
+          else {
+            val seq: Seq[Any] = a match {
+              case arr: js.Array[?] => arr.toSeq
+              case seq: Seq[?]      => seq
+              case other            => sys.error(s"Expected array but got ${other.getClass}")
+            }
+            s"ARRAY[${seq.map(e => render(e)).mkString(",")}]::${ds.mapType(typ.get)}"
           }
-          s"ARRAY[${seq.map(e => render(e)).mkString(",")}]::${ds.mapType(typ.get)}"
         case _ => ds.typed(a, typ.get)
       }
     else

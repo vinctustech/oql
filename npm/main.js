@@ -29314,23 +29314,27 @@ $c_Lcom_vinctus_oql_OQL\uff3fNodePG\uff3fJS.prototype.render__O__s_Option__T = (
     if ((x12 instanceof $c_Lcom_vinctus_oql_ArrayType)) {
       var x$1 = $as_Lcom_vinctus_oql_ArrayType(x12);
       $n(x$1);
-      matchResult4: {
-        var seq$2;
-        if ($uZ((a instanceof Array))) {
-          var seq$2 = $m_sci_IndexedSeq$().from__sc_IterableOnce__sci_IndexedSeq($ct_sjs_js_WrappedArray__sjs_js_Array__(new $c_sjs_js_WrappedArray(), a));
-          break matchResult4;
+      if ((a === null)) {
+        return "NULL";
+      } else {
+        matchResult4: {
+          var seq$2;
+          if ($uZ((a instanceof Array))) {
+            var seq$2 = $m_sci_IndexedSeq$().from__sc_IterableOnce__sci_IndexedSeq($ct_sjs_js_WrappedArray__sjs_js_Array__(new $c_sjs_js_WrappedArray(), a));
+            break matchResult4;
+          }
+          if ($is_sci_Seq(a)) {
+            var seq = $as_sci_Seq(a);
+            var seq$2 = seq;
+            break matchResult4;
+          }
+          var $x_1 = $m_s_sys_package$();
+          var this$8 = $n(a);
+          $x_1.error__T__E(("Expected array but got " + $objectGetClass(this$8)));
         }
-        if ($is_sci_Seq(a)) {
-          var seq = $as_sci_Seq(a);
-          var seq$2 = seq;
-          break matchResult4;
-        }
-        var $x_1 = $m_s_sys_package$();
-        var this$8 = $n(a);
-        $x_1.error__T__E(("Expected array but got " + $objectGetClass(this$8)));
+        var this$10 = $n($as_sc_IterableOnceOps($n(seq$2).map__F1__O(new $c_sr_AbstractFunction1_$$Lambda$70e1780b84463d18653aacefee3ab989ac625f28(((e) => this.render__O__s_Option__T(e, $m_s_None$()))))));
+        return ((("ARRAY[" + $f_sc_IterableOnceOps__mkString__T__T__T__T(this$10, "", ",", "")) + "]::") + $n(this.Lcom_vinctus_oql_AbstractOQL__f_ds).mapType__Lcom_vinctus_oql_TypeSpecifier__T($as_Lcom_vinctus_oql_TypeSpecifier($n(typ).get__O())));
       }
-      var this$10 = $n($as_sc_IterableOnceOps($n(seq$2).map__F1__O(new $c_sr_AbstractFunction1_$$Lambda$70e1780b84463d18653aacefee3ab989ac625f28(((e) => this.render__O__s_Option__T(e, $m_s_None$()))))));
-      return ((("ARRAY[" + $f_sc_IterableOnceOps__mkString__T__T__T__T(this$10, "", ",", "")) + "]::") + $n(this.Lcom_vinctus_oql_AbstractOQL__f_ds).mapType__Lcom_vinctus_oql_TypeSpecifier__T($as_Lcom_vinctus_oql_TypeSpecifier($n(typ).get__O())));
     }
     return $f_Lcom_vinctus_oql_SQLDataSource__typed__O__Lcom_vinctus_oql_Datatype__T($n(this.Lcom_vinctus_oql_AbstractOQL__f_ds), this.render__O__s_Option__T(a, $m_s_None$()), $as_Lcom_vinctus_oql_Datatype($n(typ).get__O()));
   } else if (((typeof a) === "string")) {
@@ -29357,12 +29361,15 @@ $c_Lcom_vinctus_oql_OQL\uff3fNodePG\uff3fJS.prototype.render__O__s_Option__T = (
 $c_Lcom_vinctus_oql_OQL\uff3fNodePG\uff3fJS.prototype.render$default$2__s_Option = (function() {
   return $m_s_None$();
 });
-$c_Lcom_vinctus_oql_OQL\uff3fNodePG\uff3fJS.prototype.showQuery = (function() {
-  this.showQuery__V();
-});
-$c_Lcom_vinctus_oql_OQL\uff3fNodePG\uff3fJS.prototype.raw = (function(arg, arg$2) {
+$c_Lcom_vinctus_oql_OQL\uff3fNodePG\uff3fJS.prototype.count = (function(arg, ...rest) {
   var prep0 = $as_T(arg);
-  return this.raw__T__O__sjs_js_Promise(prep0, arg$2);
+  var prep1 = ((rest[0] === (void 0)) ? (void 0) : rest[0]);
+  var prep2 = ((rest[1] === (void 0)) ? null : rest[1]);
+  var prep3 = ((rest[2] === (void 0)) ? null : rest[2]);
+  return this.jsCount__T__O__O__sjs_js_Any__sjs_js_Promise(prep0, prep1, prep2, prep3);
+});
+$c_Lcom_vinctus_oql_OQL\uff3fNodePG\uff3fJS.prototype.queryBuilder = (function(arg, arg$2) {
+  return this.jsQueryBuilder__O__sjs_js_Any__Lcom_vinctus_oql_QueryBuilder\uff3fJS\uff3fNodePG(arg, arg$2);
 });
 $c_Lcom_vinctus_oql_OQL\uff3fNodePG\uff3fJS.prototype.queryMany = (function(arg, ...rest) {
   var prep0 = $as_T(arg);
@@ -29371,12 +29378,16 @@ $c_Lcom_vinctus_oql_OQL\uff3fNodePG\uff3fJS.prototype.queryMany = (function(arg,
   var prep3 = ((rest[2] === (void 0)) ? null : rest[2]);
   return this.jsQueryMany__T__O__O__sjs_js_Any__sjs_js_Promise(prep0, prep1, prep2, prep3);
 });
-$c_Lcom_vinctus_oql_OQL\uff3fNodePG\uff3fJS.prototype.count = (function(arg, ...rest) {
+$c_Lcom_vinctus_oql_OQL\uff3fNodePG\uff3fJS.prototype.entity = (function(arg) {
   var prep0 = $as_T(arg);
-  var prep1 = ((rest[0] === (void 0)) ? (void 0) : rest[0]);
-  var prep2 = ((rest[1] === (void 0)) ? null : rest[1]);
-  var prep3 = ((rest[2] === (void 0)) ? null : rest[2]);
-  return this.jsCount__T__O__O__sjs_js_Any__sjs_js_Promise(prep0, prep1, prep2, prep3);
+  return this.entity__T__Lcom_vinctus_oql_Mutation\uff3fJS\uff3fNodePG(prep0);
+});
+$c_Lcom_vinctus_oql_OQL\uff3fNodePG\uff3fJS.prototype.showQuery = (function() {
+  this.showQuery__V();
+});
+$c_Lcom_vinctus_oql_OQL\uff3fNodePG\uff3fJS.prototype.raw = (function(arg, arg$2) {
+  var prep0 = $as_T(arg);
+  return this.raw__T__O__sjs_js_Promise(prep0, arg$2);
 });
 $c_Lcom_vinctus_oql_OQL\uff3fNodePG\uff3fJS.prototype.queryOne = (function(arg, ...rest) {
   var prep0 = $as_T(arg);
@@ -29384,13 +29395,6 @@ $c_Lcom_vinctus_oql_OQL\uff3fNodePG\uff3fJS.prototype.queryOne = (function(arg, 
   var prep2 = ((rest[1] === (void 0)) ? null : rest[1]);
   var prep3 = ((rest[2] === (void 0)) ? null : rest[2]);
   return this.jsQueryOne__T__O__O__sjs_js_Any__sjs_js_Promise(prep0, prep1, prep2, prep3);
-});
-$c_Lcom_vinctus_oql_OQL\uff3fNodePG\uff3fJS.prototype.queryBuilder = (function(arg, arg$2) {
-  return this.jsQueryBuilder__O__sjs_js_Any__Lcom_vinctus_oql_QueryBuilder\uff3fJS\uff3fNodePG(arg, arg$2);
-});
-$c_Lcom_vinctus_oql_OQL\uff3fNodePG\uff3fJS.prototype.entity = (function(arg) {
-  var prep0 = $as_T(arg);
-  return this.entity__T__Lcom_vinctus_oql_Mutation\uff3fJS\uff3fNodePG(prep0);
 });
 var $d_Lcom_vinctus_oql_OQL\uff3fNodePG\uff3fJS = new $TypeData().initClass($c_Lcom_vinctus_oql_OQL\uff3fNodePG\uff3fJS, "com.vinctus.oql.OQL_NodePG_JS", ({
   Lcom_vinctus_oql_OQL\uff3fNodePG\uff3fJS: 1,
@@ -29573,23 +29577,27 @@ $c_Lcom_vinctus_oql_OQL\uff3fRDB\uff3fJS.prototype.render__O__s_Option__T = (fun
     if ((x12 instanceof $c_Lcom_vinctus_oql_ArrayType)) {
       var x$1 = $as_Lcom_vinctus_oql_ArrayType(x12);
       $n(x$1);
-      matchResult4: {
-        var seq$2;
-        if ($uZ((a instanceof Array))) {
-          var seq$2 = $m_sci_IndexedSeq$().from__sc_IterableOnce__sci_IndexedSeq($ct_sjs_js_WrappedArray__sjs_js_Array__(new $c_sjs_js_WrappedArray(), a));
-          break matchResult4;
+      if ((a === null)) {
+        return "NULL";
+      } else {
+        matchResult4: {
+          var seq$2;
+          if ($uZ((a instanceof Array))) {
+            var seq$2 = $m_sci_IndexedSeq$().from__sc_IterableOnce__sci_IndexedSeq($ct_sjs_js_WrappedArray__sjs_js_Array__(new $c_sjs_js_WrappedArray(), a));
+            break matchResult4;
+          }
+          if ($is_sci_Seq(a)) {
+            var seq = $as_sci_Seq(a);
+            var seq$2 = seq;
+            break matchResult4;
+          }
+          var $x_1 = $m_s_sys_package$();
+          var this$8 = $n(a);
+          $x_1.error__T__E(("Expected array but got " + $objectGetClass(this$8)));
         }
-        if ($is_sci_Seq(a)) {
-          var seq = $as_sci_Seq(a);
-          var seq$2 = seq;
-          break matchResult4;
-        }
-        var $x_1 = $m_s_sys_package$();
-        var this$8 = $n(a);
-        $x_1.error__T__E(("Expected array but got " + $objectGetClass(this$8)));
+        var this$10 = $n($as_sc_IterableOnceOps($n(seq$2).map__F1__O(new $c_sr_AbstractFunction1_$$Lambda$70e1780b84463d18653aacefee3ab989ac625f28(((e) => this.render__O__s_Option__T(e, $m_s_None$()))))));
+        return ((("ARRAY[" + $f_sc_IterableOnceOps__mkString__T__T__T__T(this$10, "", ",", "")) + "]::") + $n(this.Lcom_vinctus_oql_AbstractOQL__f_ds).mapType__Lcom_vinctus_oql_TypeSpecifier__T($as_Lcom_vinctus_oql_TypeSpecifier($n(typ).get__O())));
       }
-      var this$10 = $n($as_sc_IterableOnceOps($n(seq$2).map__F1__O(new $c_sr_AbstractFunction1_$$Lambda$70e1780b84463d18653aacefee3ab989ac625f28(((e) => this.render__O__s_Option__T(e, $m_s_None$()))))));
-      return ((("ARRAY[" + $f_sc_IterableOnceOps__mkString__T__T__T__T(this$10, "", ",", "")) + "]::") + $n(this.Lcom_vinctus_oql_AbstractOQL__f_ds).mapType__Lcom_vinctus_oql_TypeSpecifier__T($as_Lcom_vinctus_oql_TypeSpecifier($n(typ).get__O())));
     }
     return $f_Lcom_vinctus_oql_SQLDataSource__typed__O__Lcom_vinctus_oql_Datatype__T($n(this.Lcom_vinctus_oql_AbstractOQL__f_ds), a, $as_Lcom_vinctus_oql_Datatype($n(typ).get__O()));
   } else if (((typeof a) === "string")) {
@@ -29616,14 +29624,8 @@ $c_Lcom_vinctus_oql_OQL\uff3fRDB\uff3fJS.prototype.render__O__s_Option__T = (fun
 $c_Lcom_vinctus_oql_OQL\uff3fRDB\uff3fJS.prototype.render$default$2__s_Option = (function() {
   return $m_s_None$();
 });
-$c_Lcom_vinctus_oql_OQL\uff3fRDB\uff3fJS.prototype.queryBuilder = (function(arg, arg$2) {
-  return this.jsQueryBuilder__O__sjs_js_Any__Lcom_vinctus_oql_QueryBuilder\uff3fJS\uff3fRDB(arg, arg$2);
-});
 $c_Lcom_vinctus_oql_OQL\uff3fRDB\uff3fJS.prototype.create = (function() {
   return this.jsCreate__sjs_js_Promise();
-});
-$c_Lcom_vinctus_oql_OQL\uff3fRDB\uff3fJS.prototype.showQuery = (function() {
-  this.showQuery__V();
 });
 $c_Lcom_vinctus_oql_OQL\uff3fRDB\uff3fJS.prototype.count = (function(arg, ...rest) {
   var prep0 = $as_T(arg);
@@ -29632,12 +29634,8 @@ $c_Lcom_vinctus_oql_OQL\uff3fRDB\uff3fJS.prototype.count = (function(arg, ...res
   var prep3 = ((rest[2] === (void 0)) ? null : rest[2]);
   return this.jsCount__T__O__O__sjs_js_Any__sjs_js_Promise(prep0, prep1, prep2, prep3);
 });
-$c_Lcom_vinctus_oql_OQL\uff3fRDB\uff3fJS.prototype.queryOne = (function(arg, ...rest) {
-  var prep0 = $as_T(arg);
-  var prep1 = ((rest[0] === (void 0)) ? (void 0) : rest[0]);
-  var prep2 = ((rest[1] === (void 0)) ? null : rest[1]);
-  var prep3 = ((rest[2] === (void 0)) ? null : rest[2]);
-  return this.jsQueryOne__T__O__O__sjs_js_Any__sjs_js_Promise(prep0, prep1, prep2, prep3);
+$c_Lcom_vinctus_oql_OQL\uff3fRDB\uff3fJS.prototype.queryBuilder = (function(arg, arg$2) {
+  return this.jsQueryBuilder__O__sjs_js_Any__Lcom_vinctus_oql_QueryBuilder\uff3fJS\uff3fRDB(arg, arg$2);
 });
 $c_Lcom_vinctus_oql_OQL\uff3fRDB\uff3fJS.prototype.queryMany = (function(arg, ...rest) {
   var prep0 = $as_T(arg);
@@ -29646,10 +29644,6 @@ $c_Lcom_vinctus_oql_OQL\uff3fRDB\uff3fJS.prototype.queryMany = (function(arg, ..
   var prep3 = ((rest[2] === (void 0)) ? null : rest[2]);
   return this.jsQueryMany__T__O__O__sjs_js_Any__sjs_js_Promise(prep0, prep1, prep2, prep3);
 });
-$c_Lcom_vinctus_oql_OQL\uff3fRDB\uff3fJS.prototype.raw = (function(arg, arg$2) {
-  var prep0 = $as_T(arg);
-  return this.raw__T__O__sjs_js_Promise(prep0, arg$2);
-});
 $c_Lcom_vinctus_oql_OQL\uff3fRDB\uff3fJS.prototype.entity = (function(arg) {
   var prep0 = $as_T(arg);
   return this.entity__T__Lcom_vinctus_oql_Mutation\uff3fJS\uff3fRDB(prep0);
@@ -29657,6 +29651,20 @@ $c_Lcom_vinctus_oql_OQL\uff3fRDB\uff3fJS.prototype.entity = (function(arg) {
 $c_Lcom_vinctus_oql_OQL\uff3fRDB\uff3fJS.prototype.rawMulti = (function(arg) {
   var prep0 = $as_T(arg);
   return this.rawMulti__T__sjs_js_Promise(prep0);
+});
+$c_Lcom_vinctus_oql_OQL\uff3fRDB\uff3fJS.prototype.showQuery = (function() {
+  this.showQuery__V();
+});
+$c_Lcom_vinctus_oql_OQL\uff3fRDB\uff3fJS.prototype.raw = (function(arg, arg$2) {
+  var prep0 = $as_T(arg);
+  return this.raw__T__O__sjs_js_Promise(prep0, arg$2);
+});
+$c_Lcom_vinctus_oql_OQL\uff3fRDB\uff3fJS.prototype.queryOne = (function(arg, ...rest) {
+  var prep0 = $as_T(arg);
+  var prep1 = ((rest[0] === (void 0)) ? (void 0) : rest[0]);
+  var prep2 = ((rest[1] === (void 0)) ? null : rest[1]);
+  var prep3 = ((rest[2] === (void 0)) ? null : rest[2]);
+  return this.jsQueryOne__T__O__O__sjs_js_Any__sjs_js_Promise(prep0, prep1, prep2, prep3);
 });
 var $d_Lcom_vinctus_oql_OQL\uff3fRDB\uff3fJS = new $TypeData().initClass($c_Lcom_vinctus_oql_OQL\uff3fRDB\uff3fJS, "com.vinctus.oql.OQL_RDB_JS", ({
   Lcom_vinctus_oql_OQL\uff3fRDB\uff3fJS: 1,
