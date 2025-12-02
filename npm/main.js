@@ -1163,134 +1163,134 @@ function $p_Lcom_vinctus_oql_AbstractOQL__buildResult$1__F0__T__Lcom_vinctus_oql
   var resultSet$tailLocal1 = resultSet;
   var node$tailLocal1 = node;
   while (true) {
-    var x66 = node$tailLocal1;
-    if ((x66 instanceof $c_Lcom_vinctus_oql_AbstractOQL$ResultNode)) {
-      var x$1 = $as_Lcom_vinctus_oql_AbstractOQL$ResultNode(x66);
+    var x75 = node$tailLocal1;
+    if ((x75 instanceof $c_Lcom_vinctus_oql_AbstractOQL$ResultNode)) {
+      var x$1 = $as_Lcom_vinctus_oql_AbstractOQL$ResultNode(x75);
       $n(x$1);
       var this$3 = $n(x$1);
-      var x92 = this$3.Lcom_vinctus_oql_AbstractOQL$ResultNode__f_element;
+      var x101 = this$3.Lcom_vinctus_oql_AbstractOQL$ResultNode__f_element;
       var result = $n($as_Lcom_vinctus_oql_ResultBuilder($n(newResultBuilder$2).apply__O())).newArray__Lcom_vinctus_oql_ResultBuilder();
       while ($n(resultSet$tailLocal1).next__Z()) {
-        $n(result).$plus$eq__O__Lcom_vinctus_oql_ResultBuilder($p_Lcom_vinctus_oql_AbstractOQL__buildResult$1__F0__T__Lcom_vinctus_oql_AbstractOQL$Node__Lcom_vinctus_oql_OQLResultSet__O($thiz, newResultBuilder$2, oql$10, x92, resultSet$tailLocal1));
+        $n(result).$plus$eq__O__Lcom_vinctus_oql_ResultBuilder($p_Lcom_vinctus_oql_AbstractOQL__buildResult$1__F0__T__Lcom_vinctus_oql_AbstractOQL$Node__Lcom_vinctus_oql_OQLResultSet__O($thiz, newResultBuilder$2, oql$10, x101, resultSet$tailLocal1));
       }
       return result;
     }
-    if ((x66 instanceof $c_Lcom_vinctus_oql_AbstractOQL$ManyToOneNode)) {
-      var x85 = $as_Lcom_vinctus_oql_AbstractOQL$ManyToOneNode(x66);
-      $n(x85);
-      var this$6 = $n(x85);
-      var x88 = this$6.Lcom_vinctus_oql_AbstractOQL$ManyToOneNode__f_element;
-      var this$7 = $n($n(x85).Lcom_vinctus_oql_AbstractOQL$ManyToOneNode__f_idx);
-      if (((!this$7.isEmpty__Z()) && ($n($n(resultSet$tailLocal1).get__I__Lcom_vinctus_oql_OQLResultSetValue($uI($n($n(x85).Lcom_vinctus_oql_AbstractOQL$ManyToOneNode__f_idx).get__O()))).value__O() === null))) {
+    if ((x75 instanceof $c_Lcom_vinctus_oql_AbstractOQL$ManyToOneNode)) {
+      var x94 = $as_Lcom_vinctus_oql_AbstractOQL$ManyToOneNode(x75);
+      $n(x94);
+      var this$6 = $n(x94);
+      var x97 = this$6.Lcom_vinctus_oql_AbstractOQL$ManyToOneNode__f_element;
+      var this$7 = $n($n(x94).Lcom_vinctus_oql_AbstractOQL$ManyToOneNode__f_idx);
+      if (((!this$7.isEmpty__Z()) && ($n($n(resultSet$tailLocal1).get__I__Lcom_vinctus_oql_OQLResultSetValue($uI($n($n(x94).Lcom_vinctus_oql_AbstractOQL$ManyToOneNode__f_idx).get__O()))).value__O() === null))) {
         return null;
       } else {
-        node$tailLocal1 = x88;
+        node$tailLocal1 = x97;
         continue;
       }
     }
-    if ((x66 instanceof $c_Lcom_vinctus_oql_AbstractOQL$OneToOneNode)) {
-      var x81 = $as_Lcom_vinctus_oql_AbstractOQL$OneToOneNode(x66);
-      var this$9 = $n(x81);
-      var x83 = this$9.Lcom_vinctus_oql_AbstractOQL$OneToOneNode__f_query;
-      var this$10 = $n(x81);
-      var x84 = this$10.Lcom_vinctus_oql_AbstractOQL$OneToOneNode__f_element;
-      var sequenceResultSet = $n(resultSet$tailLocal1).getResultSet__I__Lcom_vinctus_oql_OQLResultSet($n(x81).Lcom_vinctus_oql_AbstractOQL$OneToOneNode__f_idx);
+    if ((x75 instanceof $c_Lcom_vinctus_oql_AbstractOQL$OneToOneNode)) {
+      var x90 = $as_Lcom_vinctus_oql_AbstractOQL$OneToOneNode(x75);
+      var this$9 = $n(x90);
+      var x92 = this$9.Lcom_vinctus_oql_AbstractOQL$OneToOneNode__f_query;
+      var this$10 = $n(x90);
+      var x93 = this$10.Lcom_vinctus_oql_AbstractOQL$OneToOneNode__f_element;
+      var sequenceResultSet = $n(resultSet$tailLocal1).getResultSet__I__Lcom_vinctus_oql_OQLResultSet($n(x90).Lcom_vinctus_oql_AbstractOQL$OneToOneNode__f_idx);
       var rows = 0;
       while ($n(sequenceResultSet).next__Z()) {
         rows = ((1 + rows) | 0);
       }
       if ((rows > 1)) {
-        $m_Lcom_vinctus_oql_package$().problem__s_util_parsing_input_Position__T__T__E($n($n(x83).Lcom_vinctus_oql_OQLQuery__f_source).Lcom_vinctus_oql_Ident__f_pos, (((("attribute '" + $n($n(x83).Lcom_vinctus_oql_OQLQuery__f_source).Lcom_vinctus_oql_Ident__f_s) + "' had a result set consisting of ") + rows) + " rows"), oql$10);
+        $m_Lcom_vinctus_oql_package$().problem__s_util_parsing_input_Position__T__T__E($n($n(x92).Lcom_vinctus_oql_OQLQuery__f_source).Lcom_vinctus_oql_Ident__f_pos, (((("attribute '" + $n($n(x92).Lcom_vinctus_oql_OQLQuery__f_source).Lcom_vinctus_oql_Ident__f_s) + "' had a result set consisting of ") + rows) + " rows"), oql$10);
       }
       if ((rows === 0)) {
         return null;
       } else {
-        node$tailLocal1 = x84;
+        node$tailLocal1 = x93;
         resultSet$tailLocal1 = sequenceResultSet;
         continue;
       }
     }
-    if ((x66 instanceof $c_Lcom_vinctus_oql_AbstractOQL$OneToManyNode)) {
-      var x77 = $as_Lcom_vinctus_oql_AbstractOQL$OneToManyNode(x66);
-      $n(x77);
-      var this$13 = $n(x77);
-      var x80 = this$13.Lcom_vinctus_oql_AbstractOQL$OneToManyNode__f_element;
-      var sequenceResultSet$2 = $n(resultSet$tailLocal1).getResultSet__I__Lcom_vinctus_oql_OQLResultSet($n(x77).Lcom_vinctus_oql_AbstractOQL$OneToManyNode__f_idx);
+    if ((x75 instanceof $c_Lcom_vinctus_oql_AbstractOQL$OneToManyNode)) {
+      var x86 = $as_Lcom_vinctus_oql_AbstractOQL$OneToManyNode(x75);
+      $n(x86);
+      var this$13 = $n(x86);
+      var x89 = this$13.Lcom_vinctus_oql_AbstractOQL$OneToManyNode__f_element;
+      var sequenceResultSet$2 = $n(resultSet$tailLocal1).getResultSet__I__Lcom_vinctus_oql_OQLResultSet($n(x86).Lcom_vinctus_oql_AbstractOQL$OneToManyNode__f_idx);
       var result$2 = $n($as_Lcom_vinctus_oql_ResultBuilder($n(newResultBuilder$2).apply__O())).newArray__Lcom_vinctus_oql_ResultBuilder();
       while ($n(sequenceResultSet$2).next__Z()) {
-        $n(result$2).$plus$eq__O__Lcom_vinctus_oql_ResultBuilder($p_Lcom_vinctus_oql_AbstractOQL__buildResult$1__F0__T__Lcom_vinctus_oql_AbstractOQL$Node__Lcom_vinctus_oql_OQLResultSet__O($thiz, newResultBuilder$2, oql$10, x80, sequenceResultSet$2));
+        $n(result$2).$plus$eq__O__Lcom_vinctus_oql_ResultBuilder($p_Lcom_vinctus_oql_AbstractOQL__buildResult$1__F0__T__Lcom_vinctus_oql_AbstractOQL$Node__Lcom_vinctus_oql_OQLResultSet__O($thiz, newResultBuilder$2, oql$10, x89, sequenceResultSet$2));
       }
       return $n(result$2).arrayResult__O();
     }
-    if ((x66 instanceof $c_Lcom_vinctus_oql_AbstractOQL$ManyToManyNode)) {
-      var x73 = $as_Lcom_vinctus_oql_AbstractOQL$ManyToManyNode(x66);
-      $n(x73);
-      var this$16 = $n(x73);
-      var x76 = this$16.Lcom_vinctus_oql_AbstractOQL$ManyToManyNode__f_element;
-      var sequenceResultSet$3 = $n(resultSet$tailLocal1).getResultSet__I__Lcom_vinctus_oql_OQLResultSet($n(x73).Lcom_vinctus_oql_AbstractOQL$ManyToManyNode__f_idx);
+    if ((x75 instanceof $c_Lcom_vinctus_oql_AbstractOQL$ManyToManyNode)) {
+      var x82 = $as_Lcom_vinctus_oql_AbstractOQL$ManyToManyNode(x75);
+      $n(x82);
+      var this$16 = $n(x82);
+      var x85 = this$16.Lcom_vinctus_oql_AbstractOQL$ManyToManyNode__f_element;
+      var sequenceResultSet$3 = $n(resultSet$tailLocal1).getResultSet__I__Lcom_vinctus_oql_OQLResultSet($n(x82).Lcom_vinctus_oql_AbstractOQL$ManyToManyNode__f_idx);
       var result$3 = $n($as_Lcom_vinctus_oql_ResultBuilder($n(newResultBuilder$2).apply__O())).newArray__Lcom_vinctus_oql_ResultBuilder();
       while ($n(sequenceResultSet$3).next__Z()) {
-        $n(result$3).$plus$eq__O__Lcom_vinctus_oql_ResultBuilder($p_Lcom_vinctus_oql_AbstractOQL__buildResult$1__F0__T__Lcom_vinctus_oql_AbstractOQL$Node__Lcom_vinctus_oql_OQLResultSet__O($thiz, newResultBuilder$2, oql$10, x76, sequenceResultSet$3));
+        $n(result$3).$plus$eq__O__Lcom_vinctus_oql_ResultBuilder($p_Lcom_vinctus_oql_AbstractOQL__buildResult$1__F0__T__Lcom_vinctus_oql_AbstractOQL$Node__Lcom_vinctus_oql_OQLResultSet__O($thiz, newResultBuilder$2, oql$10, x85, sequenceResultSet$3));
       }
       return $n(result$3).arrayResult__O();
     }
-    if ((x66 instanceof $c_Lcom_vinctus_oql_AbstractOQL$ValueNode)) {
-      var x70 = $as_Lcom_vinctus_oql_AbstractOQL$ValueNode(x66);
-      var this$18 = $n(x70);
-      var x72 = this$18.Lcom_vinctus_oql_AbstractOQL$ValueNode__f_value;
-      var v = $n(resultSet$tailLocal1).get__I__Lcom_vinctus_oql_OQLResultSetValue($n(x70).Lcom_vinctus_oql_AbstractOQL$ValueNode__f_idx);
-      var typ = ($n(x70).Lcom_vinctus_oql_AbstractOQL$ValueNode__f_typed ? $n($thiz.Lcom_vinctus_oql_AbstractOQL__f_ds).reverseMapType__T__Lcom_vinctus_oql_Datatype($n(resultSet$tailLocal1).getString__I__T(((1 + $n(x70).Lcom_vinctus_oql_AbstractOQL$ValueNode__f_idx) | 0))) : $n(x72).Lcom_vinctus_oql_OQLExpression__f_typ);
+    if ((x75 instanceof $c_Lcom_vinctus_oql_AbstractOQL$ValueNode)) {
+      var x79 = $as_Lcom_vinctus_oql_AbstractOQL$ValueNode(x75);
+      var this$18 = $n(x79);
+      var x81 = this$18.Lcom_vinctus_oql_AbstractOQL$ValueNode__f_value;
+      var v = $n(resultSet$tailLocal1).get__I__Lcom_vinctus_oql_OQLResultSetValue($n(x79).Lcom_vinctus_oql_AbstractOQL$ValueNode__f_idx);
+      var typ = ($n(x79).Lcom_vinctus_oql_AbstractOQL$ValueNode__f_typed ? $n($thiz.Lcom_vinctus_oql_AbstractOQL__f_ds).reverseMapType__T__Lcom_vinctus_oql_Datatype($n(resultSet$tailLocal1).getString__I__T(((1 + $n(x79).Lcom_vinctus_oql_AbstractOQL$ValueNode__f_idx) | 0))) : $n(x81).Lcom_vinctus_oql_OQLExpression__f_typ);
       var _2 = $n(v).value__O();
       if (((typeof _2) === "string")) {
-        var x62 = $as_T(_2);
+        var x71 = $as_T(_2);
         var x = $m_Lcom_vinctus_oql_IntegerType$();
         if ((x === typ)) {
           var this$22 = $m_jl_Integer$();
-          return this$22.java$lang$Integer$$parseIntImpl__T__I__I__I(x62, 10, 214748364);
+          return this$22.java$lang$Integer$$parseIntImpl__T__I__I__I(x71, 10, 214748364);
         }
         var x$3 = $m_Lcom_vinctus_oql_FloatType$();
         if ((x$3 === typ)) {
-          return $m_jl_Double$().parseDouble__T__D(x62);
+          return $m_jl_Double$().parseDouble__T__D(x71);
         }
         var x$5 = $m_Lcom_vinctus_oql_BigintType$();
         if ((x$5 === typ)) {
-          return $n($thiz.Lcom_vinctus_oql_AbstractOQL__f_conv).bigint__T__O(x62);
+          return $n($thiz.Lcom_vinctus_oql_AbstractOQL__f_conv).bigint__T__O(x71);
         }
         var x$7 = $m_Lcom_vinctus_oql_UUIDType$();
         if ((x$7 === typ)) {
           $n($thiz.Lcom_vinctus_oql_AbstractOQL__f_conv);
-          return x62;
+          return x71;
         }
         var x$9 = $m_Lcom_vinctus_oql_TimestampType$();
         if ((x$9 === typ)) {
-          return $n($thiz.Lcom_vinctus_oql_AbstractOQL__f_conv).timestamp__T__O(x62);
+          return $n($thiz.Lcom_vinctus_oql_AbstractOQL__f_conv).timestamp__T__O(x71);
         }
         if ((typ instanceof $c_Lcom_vinctus_oql_DecimalType)) {
           var x$1$1 = $as_Lcom_vinctus_oql_DecimalType(typ);
           var this$27 = $n(x$1$1);
-          var x40 = this$27.Lcom_vinctus_oql_DecimalType__f_precision;
+          var x49 = this$27.Lcom_vinctus_oql_DecimalType__f_precision;
           var this$28 = $n(x$1$1);
-          var x41 = this$28.Lcom_vinctus_oql_DecimalType__f_scale;
-          return $n($thiz.Lcom_vinctus_oql_AbstractOQL__f_conv).decimal__T__I__I__O(x62, x40, x41);
+          var x50 = this$28.Lcom_vinctus_oql_DecimalType__f_scale;
+          return $n($thiz.Lcom_vinctus_oql_AbstractOQL__f_conv).decimal__T__I__I__O(x71, x49, x50);
         }
       }
       if ((v instanceof $c_Lcom_vinctus_oql_NodePGResultSetValue)) {
         var x$1$2 = $as_Lcom_vinctus_oql_NodePGResultSetValue(v);
         var this$30 = $n(x$1$2);
-        var x34 = this$30.Lcom_vinctus_oql_NodePGResultSetValue__f_value;
+        var x43 = this$30.Lcom_vinctus_oql_NodePGResultSetValue__f_value;
         var x$11 = $m_Lcom_vinctus_oql_JSONType$();
         if ((x$11 === typ)) {
-          return $n($thiz.Lcom_vinctus_oql_AbstractOQL__f_conv).jsonNodePG__T__O($as_T(x34));
+          return $n($thiz.Lcom_vinctus_oql_AbstractOQL__f_conv).jsonNodePG__T__O($as_T(x43));
         }
       }
       if ((v instanceof $c_Lcom_vinctus_oql_SequenceResultSetValue)) {
         var x$1$3 = $as_Lcom_vinctus_oql_SequenceResultSetValue(v);
         var this$32 = $n(x$1$3);
-        var x28 = this$32.Lcom_vinctus_oql_SequenceResultSetValue__f_value;
+        var x37 = this$32.Lcom_vinctus_oql_SequenceResultSetValue__f_value;
         var x$13 = $m_Lcom_vinctus_oql_JSONType$();
         if ((x$13 === typ)) {
           $n($thiz.Lcom_vinctus_oql_AbstractOQL__f_conv);
-          return $m_Lcom_vinctus_sjs\uff3futils_package$().toJS__O__sjs_js_Any(x28);
+          return $m_Lcom_vinctus_sjs\uff3futils_package$().toJS__O__sjs_js_Any(x37);
         }
       }
       if ((v instanceof $c_Lcom_vinctus_oql_NodePGResultSetValue)) {
@@ -1299,31 +1299,42 @@ function $p_Lcom_vinctus_oql_AbstractOQL__buildResult$1__F0__T__Lcom_vinctus_oql
         if ((typ instanceof $c_Lcom_vinctus_oql_ArrayType)) {
           var x$1$5 = $as_Lcom_vinctus_oql_ArrayType(typ);
           var this$37 = $n(x$1$5);
-          var x19 = this$37.Lcom_vinctus_oql_ArrayType__f_elementType;
-          return $n($thiz.Lcom_vinctus_oql_AbstractOQL__f_conv).array__O__Lcom_vinctus_oql_Datatype__O(_2, x19);
+          var x28 = this$37.Lcom_vinctus_oql_ArrayType__f_elementType;
+          return $n($thiz.Lcom_vinctus_oql_AbstractOQL__f_conv).array__O__Lcom_vinctus_oql_Datatype__O(_2, x28);
+        }
+      }
+      if ((v instanceof $c_Lcom_vinctus_oql_SequenceResultSetValue)) {
+        var x$1$6 = $as_Lcom_vinctus_oql_SequenceResultSetValue(v);
+        var this$39 = $n(x$1$6);
+        var x22 = this$39.Lcom_vinctus_oql_SequenceResultSetValue__f_value;
+        if ((typ instanceof $c_Lcom_vinctus_oql_ArrayType)) {
+          var x$1$7 = $as_Lcom_vinctus_oql_ArrayType(typ);
+          var this$41 = $n(x$1$7);
+          var x19 = this$41.Lcom_vinctus_oql_ArrayType__f_elementType;
+          return $n($thiz.Lcom_vinctus_oql_AbstractOQL__f_conv).array__O__Lcom_vinctus_oql_Datatype__O($m_Lcom_vinctus_sjs\uff3futils_package$().toJS__O__sjs_js_Any(x22), x19);
         }
       }
       return $n(v).value__O();
     }
-    if ((x66 instanceof $c_Lcom_vinctus_oql_AbstractOQL$ObjectNode)) {
-      var x$1$6 = $as_Lcom_vinctus_oql_AbstractOQL$ObjectNode(x66);
-      var this$39 = $n(x$1$6);
-      var x69 = this$39.Lcom_vinctus_oql_AbstractOQL$ObjectNode__f_props;
+    if ((x75 instanceof $c_Lcom_vinctus_oql_AbstractOQL$ObjectNode)) {
+      var x$1$8 = $as_Lcom_vinctus_oql_AbstractOQL$ObjectNode(x75);
+      var this$43 = $n(x$1$8);
+      var x78 = this$43.Lcom_vinctus_oql_AbstractOQL$ObjectNode__f_props;
       var result$4 = $n($as_Lcom_vinctus_oql_ResultBuilder($n(newResultBuilder$2).apply__O())).newObject__Lcom_vinctus_oql_ResultBuilder();
-      var $x_1 = $n(x69);
+      var $x_1 = $n(x78);
       var resultSet$tailLocal1$2$1 = resultSet$tailLocal1;
-      $x_1.foreach__F1__V(new $c_sr_AbstractFunction1_$$Lambda$70e1780b84463d18653aacefee3ab989ac625f28(((result$4, resultSet$tailLocal1$2, newResultBuilder$2, oql$10) => ((x$1$7) => {
-        var x$1$8 = $as_T2(x$1$7);
-        if ((x$1$8 !== null)) {
-          var label = $as_T($n(x$1$8)._1__O());
-          var node$1 = $as_Lcom_vinctus_oql_AbstractOQL$Node($n(x$1$8)._2__O());
+      $x_1.foreach__F1__V(new $c_sr_AbstractFunction1_$$Lambda$70e1780b84463d18653aacefee3ab989ac625f28(((result$4, resultSet$tailLocal1$2, newResultBuilder$2, oql$10) => ((x$1$9) => {
+        var x$1$10 = $as_T2(x$1$9);
+        if ((x$1$10 !== null)) {
+          var label = $as_T($n(x$1$10)._1__O());
+          var node$1 = $as_Lcom_vinctus_oql_AbstractOQL$Node($n(x$1$10)._2__O());
           return $n(result$4).update__T__O__Lcom_vinctus_oql_ResultBuilder(label, $p_Lcom_vinctus_oql_AbstractOQL__buildResult$1__F0__T__Lcom_vinctus_oql_AbstractOQL$Node__Lcom_vinctus_oql_OQLResultSet__O($thiz, newResultBuilder$2, oql$10, node$1, resultSet$tailLocal1$2));
         }
-        throw new $c_s_MatchError(x$1$8);
+        throw new $c_s_MatchError(x$1$10);
       }))(result$4, resultSet$tailLocal1$2$1, newResultBuilder$2, oql$10)));
       return $n(result$4).objectResult__O();
     }
-    throw new $c_s_MatchError(x66);
+    throw new $c_s_MatchError(x75);
   }
 }
 /** @constructor */
@@ -1470,28 +1481,28 @@ $h_Lcom_vinctus_oql_AbstractOQL$.prototype = $c_Lcom_vinctus_oql_AbstractOQL$.pr
 $c_Lcom_vinctus_oql_AbstractOQL$.prototype.innerQuery__Lcom_vinctus_oql_OQLQuery__Lcom_vinctus_oql_AbstractOQL$Node = (function(query) {
   matchResult7: {
     var $x_1;
-    var x93 = $n($n(query).Lcom_vinctus_oql_OQLQuery__f_attr).Lcom_vinctus_oql_Attribute__f_typ;
-    if ((x93 instanceof $c_Lcom_vinctus_oql_ManyToOneType)) {
+    var x102 = $n($n(query).Lcom_vinctus_oql_OQLQuery__f_attr).Lcom_vinctus_oql_Attribute__f_typ;
+    if ((x102 instanceof $c_Lcom_vinctus_oql_ManyToOneType)) {
       var element = this.com$vinctus$oql$AbstractOQL$$$objectNode__sci_List__Lcom_vinctus_oql_AbstractOQL$ObjectNode($n(query).Lcom_vinctus_oql_OQLQuery__f_project);
       var $x_1 = new $c_Lcom_vinctus_oql_AbstractOQL$ManyToOneNode(query, element);
       break matchResult7;
     }
-    if ((x93 instanceof $c_Lcom_vinctus_oql_OneToOneType)) {
+    if ((x102 instanceof $c_Lcom_vinctus_oql_OneToOneType)) {
       var element$1 = this.com$vinctus$oql$AbstractOQL$$$objectNode__sci_List__Lcom_vinctus_oql_AbstractOQL$ObjectNode($n(query).Lcom_vinctus_oql_OQLQuery__f_project);
       var $x_1 = new $c_Lcom_vinctus_oql_AbstractOQL$OneToOneNode(query, element$1);
       break matchResult7;
     }
-    if ((x93 instanceof $c_Lcom_vinctus_oql_OneToManyType)) {
+    if ((x102 instanceof $c_Lcom_vinctus_oql_OneToManyType)) {
       var element$2 = this.com$vinctus$oql$AbstractOQL$$$objectNode__sci_List__Lcom_vinctus_oql_AbstractOQL$ObjectNode($n(query).Lcom_vinctus_oql_OQLQuery__f_project);
       var $x_1 = new $c_Lcom_vinctus_oql_AbstractOQL$OneToManyNode(query, element$2);
       break matchResult7;
     }
-    if ((x93 instanceof $c_Lcom_vinctus_oql_ManyToManyType)) {
+    if ((x102 instanceof $c_Lcom_vinctus_oql_ManyToManyType)) {
       var element$3 = this.com$vinctus$oql$AbstractOQL$$$objectNode__sci_List__Lcom_vinctus_oql_AbstractOQL$ObjectNode($n(query).Lcom_vinctus_oql_OQLQuery__f_project);
       var $x_1 = new $c_Lcom_vinctus_oql_AbstractOQL$ManyToManyNode(query, element$3);
       break matchResult7;
     }
-    throw new $c_s_MatchError(x93);
+    throw new $c_s_MatchError(x102);
   }
   return $as_Lcom_vinctus_oql_AbstractOQL$Node($x_1);
 });
@@ -1506,16 +1517,16 @@ $c_Lcom_vinctus_oql_AbstractOQL$.prototype.com$vinctus$oql$AbstractOQL$$$objectN
         var x$1 = $as_Lcom_vinctus_oql_ExpressionOQLProject(p$1);
         $n(x$1);
         var this$3 = $n(x$1);
-        var x106 = this$3.Lcom_vinctus_oql_ExpressionOQLProject__f_expr;
-        var _2 = new $c_Lcom_vinctus_oql_AbstractOQL$ValueNode(x106);
+        var x115 = this$3.Lcom_vinctus_oql_ExpressionOQLProject__f_expr;
+        var _2 = new $c_Lcom_vinctus_oql_AbstractOQL$ValueNode(x115);
         break matchResult8;
       }
       if ((p$1 instanceof $c_Lcom_vinctus_oql_QueryOQLProject)) {
         var x$1$1 = $as_Lcom_vinctus_oql_QueryOQLProject(p$1);
         $n(x$1$1);
         var this$7 = $n(x$1$1);
-        var x102 = this$7.Lcom_vinctus_oql_QueryOQLProject__f_query;
-        var _2 = $m_Lcom_vinctus_oql_AbstractOQL$().innerQuery__Lcom_vinctus_oql_OQLQuery__Lcom_vinctus_oql_AbstractOQL$Node(x102);
+        var x111 = this$7.Lcom_vinctus_oql_QueryOQLProject__f_query;
+        var _2 = $m_Lcom_vinctus_oql_AbstractOQL$().innerQuery__Lcom_vinctus_oql_OQLQuery__Lcom_vinctus_oql_AbstractOQL$Node(x111);
         break matchResult8;
       }
       throw new $c_s_MatchError(p$1);
@@ -1544,19 +1555,19 @@ $c_Lcom_vinctus_oql_AbstractOQL$.prototype.decorate__Lcom_vinctus_oql_Entity__Lc
   if ((expr instanceof $c_Lcom_vinctus_oql_ExistsOQLExpression)) {
     var x$1 = $as_Lcom_vinctus_oql_ExistsOQLExpression(expr);
     var this$2 = $n(x$1);
-    var x202 = this$2.Lcom_vinctus_oql_ExistsOQLExpression__f_query;
-    $n(x202).Lcom_vinctus_oql_OQLQuery__f_project = new $c_sci_$colon$colon($m_Lcom_vinctus_oql_SQLStarOQLProject$(), $m_sci_Nil$());
-    this.preprocessQuery__s_Option__Lcom_vinctus_oql_OQLQuery__Lcom_vinctus_oql_DataModel__Lcom_vinctus_oql_SQLDataSource__T__Lcom_vinctus_oql_OQLQuery(new $c_s_Some(entity), x202, model, ds, oql);
-    if ((!$n($n($n(x202).Lcom_vinctus_oql_OQLQuery__f_attr).Lcom_vinctus_oql_Attribute__f_typ).isArrayType__Z())) {
-      $m_Lcom_vinctus_oql_package$().problem__s_util_parsing_input_Position__T__T__E($n($n(x202).Lcom_vinctus_oql_OQLQuery__f_source).Lcom_vinctus_oql_Ident__f_pos, (("attribute " + $n($n(x202).Lcom_vinctus_oql_OQLQuery__f_source).Lcom_vinctus_oql_Ident__f_s) + " does not have an array type"), oql);
+    var x211 = this$2.Lcom_vinctus_oql_ExistsOQLExpression__f_query;
+    $n(x211).Lcom_vinctus_oql_OQLQuery__f_project = new $c_sci_$colon$colon($m_Lcom_vinctus_oql_SQLStarOQLProject$(), $m_sci_Nil$());
+    this.preprocessQuery__s_Option__Lcom_vinctus_oql_OQLQuery__Lcom_vinctus_oql_DataModel__Lcom_vinctus_oql_SQLDataSource__T__Lcom_vinctus_oql_OQLQuery(new $c_s_Some(entity), x211, model, ds, oql);
+    if ((!$n($n($n(x211).Lcom_vinctus_oql_OQLQuery__f_attr).Lcom_vinctus_oql_Attribute__f_typ).isArrayType__Z())) {
+      $m_Lcom_vinctus_oql_package$().problem__s_util_parsing_input_Position__T__T__E($n($n(x211).Lcom_vinctus_oql_OQLQuery__f_source).Lcom_vinctus_oql_Ident__f_pos, (("attribute " + $n($n(x211).Lcom_vinctus_oql_OQLQuery__f_source).Lcom_vinctus_oql_Ident__f_s) + " does not have an array type"), oql);
     }
-    var this$4 = $n($n(x202).Lcom_vinctus_oql_OQLQuery__f_select);
+    var this$4 = $n($n(x211).Lcom_vinctus_oql_OQLQuery__f_select);
     if ((!this$4.isEmpty__Z())) {
       var x0 = this$4.get__O();
       var _$11 = $as_Lcom_vinctus_oql_OQLExpression(x0);
-      $m_Lcom_vinctus_oql_AbstractOQL$().decorate__Lcom_vinctus_oql_Entity__Lcom_vinctus_oql_OQLExpression__Lcom_vinctus_oql_DataModel__Lcom_vinctus_oql_SQLDataSource__T__V($n(x202).Lcom_vinctus_oql_OQLQuery__f_entity, _$11, model, ds, oql);
+      $m_Lcom_vinctus_oql_AbstractOQL$().decorate__Lcom_vinctus_oql_Entity__Lcom_vinctus_oql_OQLExpression__Lcom_vinctus_oql_DataModel__Lcom_vinctus_oql_SQLDataSource__T__V($n(x211).Lcom_vinctus_oql_OQLQuery__f_entity, _$11, model, ds, oql);
     }
-    var this$5 = $n($n(x202).Lcom_vinctus_oql_OQLQuery__f_order);
+    var this$5 = $n($n(x211).Lcom_vinctus_oql_OQLQuery__f_order);
     if ((!this$5.isEmpty__Z())) {
       var x0$1 = this$5.get__O();
       var _$12 = $as_sci_List(x0$1);
@@ -1568,9 +1579,9 @@ $c_Lcom_vinctus_oql_AbstractOQL$.prototype.decorate__Lcom_vinctus_oql_Entity__Lc
         matchResult9: {
           if ((x$1$1 !== null)) {
             var this$8 = $n(x$1$1);
-            var x109 = this$8.Lcom_vinctus_oql_OQLOrdering__f_expr;
+            var x118 = this$8.Lcom_vinctus_oql_OQLOrdering__f_expr;
             $n(x$1$1);
-            $m_Lcom_vinctus_oql_AbstractOQL$().decorate__Lcom_vinctus_oql_Entity__Lcom_vinctus_oql_OQLExpression__Lcom_vinctus_oql_DataModel__Lcom_vinctus_oql_SQLDataSource__T__V($n(x202).Lcom_vinctus_oql_OQLQuery__f_entity, x109, model, ds, oql);
+            $m_Lcom_vinctus_oql_AbstractOQL$().decorate__Lcom_vinctus_oql_Entity__Lcom_vinctus_oql_OQLExpression__Lcom_vinctus_oql_DataModel__Lcom_vinctus_oql_SQLDataSource__T__V($n(x211).Lcom_vinctus_oql_OQLQuery__f_entity, x118, model, ds, oql);
             break matchResult9;
           }
           throw new $c_s_MatchError(x$1$1);
@@ -1585,18 +1596,18 @@ $c_Lcom_vinctus_oql_AbstractOQL$.prototype.decorate__Lcom_vinctus_oql_Entity__Lc
   if ((expr instanceof $c_Lcom_vinctus_oql_QueryOQLExpression)) {
     var x$1$2 = $as_Lcom_vinctus_oql_QueryOQLExpression(expr);
     var this$11 = $n(x$1$2);
-    var x199 = this$11.Lcom_vinctus_oql_QueryOQLExpression__f_query;
-    this.preprocessQuery__s_Option__Lcom_vinctus_oql_OQLQuery__Lcom_vinctus_oql_DataModel__Lcom_vinctus_oql_SQLDataSource__T__Lcom_vinctus_oql_OQLQuery(new $c_s_Some(entity), x199, model, ds, oql);
-    if ((!$n($n($n(x199).Lcom_vinctus_oql_OQLQuery__f_attr).Lcom_vinctus_oql_Attribute__f_typ).isArrayType__Z())) {
-      $m_Lcom_vinctus_oql_package$().problem__s_util_parsing_input_Position__T__T__E($n($n(x199).Lcom_vinctus_oql_OQLQuery__f_source).Lcom_vinctus_oql_Ident__f_pos, (("attribute " + $n($n(x199).Lcom_vinctus_oql_OQLQuery__f_source).Lcom_vinctus_oql_Ident__f_s) + " does not have an array type"), oql);
+    var x208 = this$11.Lcom_vinctus_oql_QueryOQLExpression__f_query;
+    this.preprocessQuery__s_Option__Lcom_vinctus_oql_OQLQuery__Lcom_vinctus_oql_DataModel__Lcom_vinctus_oql_SQLDataSource__T__Lcom_vinctus_oql_OQLQuery(new $c_s_Some(entity), x208, model, ds, oql);
+    if ((!$n($n($n(x208).Lcom_vinctus_oql_OQLQuery__f_attr).Lcom_vinctus_oql_Attribute__f_typ).isArrayType__Z())) {
+      $m_Lcom_vinctus_oql_package$().problem__s_util_parsing_input_Position__T__T__E($n($n(x208).Lcom_vinctus_oql_OQLQuery__f_source).Lcom_vinctus_oql_Ident__f_pos, (("attribute " + $n($n(x208).Lcom_vinctus_oql_OQLQuery__f_source).Lcom_vinctus_oql_Ident__f_s) + " does not have an array type"), oql);
     }
-    var this$13 = $n($n(x199).Lcom_vinctus_oql_OQLQuery__f_select);
+    var this$13 = $n($n(x208).Lcom_vinctus_oql_OQLQuery__f_select);
     if ((!this$13.isEmpty__Z())) {
       var x0$3 = this$13.get__O();
       var _$13 = $as_Lcom_vinctus_oql_OQLExpression(x0$3);
-      $m_Lcom_vinctus_oql_AbstractOQL$().decorate__Lcom_vinctus_oql_Entity__Lcom_vinctus_oql_OQLExpression__Lcom_vinctus_oql_DataModel__Lcom_vinctus_oql_SQLDataSource__T__V($n(x199).Lcom_vinctus_oql_OQLQuery__f_entity, _$13, model, ds, oql);
+      $m_Lcom_vinctus_oql_AbstractOQL$().decorate__Lcom_vinctus_oql_Entity__Lcom_vinctus_oql_OQLExpression__Lcom_vinctus_oql_DataModel__Lcom_vinctus_oql_SQLDataSource__T__V($n(x208).Lcom_vinctus_oql_OQLQuery__f_entity, _$13, model, ds, oql);
     }
-    var this$14 = $n($n(x199).Lcom_vinctus_oql_OQLQuery__f_order);
+    var this$14 = $n($n(x208).Lcom_vinctus_oql_OQLQuery__f_order);
     if ((!this$14.isEmpty__Z())) {
       var x0$4 = this$14.get__O();
       var _$14 = $as_sci_List(x0$4);
@@ -1608,9 +1619,9 @@ $c_Lcom_vinctus_oql_AbstractOQL$.prototype.decorate__Lcom_vinctus_oql_Entity__Lc
         matchResult10: {
           if ((x$1$3 !== null)) {
             var this$17 = $n(x$1$3);
-            var x113 = this$17.Lcom_vinctus_oql_OQLOrdering__f_expr;
+            var x122 = this$17.Lcom_vinctus_oql_OQLOrdering__f_expr;
             $n(x$1$3);
-            $m_Lcom_vinctus_oql_AbstractOQL$().decorate__Lcom_vinctus_oql_Entity__Lcom_vinctus_oql_OQLExpression__Lcom_vinctus_oql_DataModel__Lcom_vinctus_oql_SQLDataSource__T__V($n(x199).Lcom_vinctus_oql_OQLQuery__f_entity, x113, model, ds, oql);
+            $m_Lcom_vinctus_oql_AbstractOQL$().decorate__Lcom_vinctus_oql_Entity__Lcom_vinctus_oql_OQLExpression__Lcom_vinctus_oql_DataModel__Lcom_vinctus_oql_SQLDataSource__T__V($n(x208).Lcom_vinctus_oql_OQLQuery__f_entity, x122, model, ds, oql);
             break matchResult10;
           }
           throw new $c_s_MatchError(x$1$3);
@@ -1623,12 +1634,12 @@ $c_Lcom_vinctus_oql_AbstractOQL$.prototype.decorate__Lcom_vinctus_oql_Entity__Lc
     }
   }
   if ((expr instanceof $c_Lcom_vinctus_oql_ApplyOQLExpression)) {
-    var x193 = $as_Lcom_vinctus_oql_ApplyOQLExpression(expr);
-    var this$20 = $n(x193);
-    var x195 = this$20.Lcom_vinctus_oql_ApplyOQLExpression__f_f;
-    var this$21 = $n(x193);
-    var x196 = this$21.Lcom_vinctus_oql_ApplyOQLExpression__f_args;
-    var this$22 = $n(x196);
+    var x202 = $as_Lcom_vinctus_oql_ApplyOQLExpression(expr);
+    var this$20 = $n(x202);
+    var x204 = this$20.Lcom_vinctus_oql_ApplyOQLExpression__f_f;
+    var this$21 = $n(x202);
+    var x205 = this$21.Lcom_vinctus_oql_ApplyOQLExpression__f_args;
+    var this$22 = $n(x205);
     var these$2 = this$22;
     while ((!$n(these$2).isEmpty__Z())) {
       var x0$6 = $n(these$2).head__O();
@@ -1637,27 +1648,27 @@ $c_Lcom_vinctus_oql_AbstractOQL$.prototype.decorate__Lcom_vinctus_oql_Entity__Lc
       these$2 = $as_sci_List($n(these$2).tail__O());
     }
     if ($n(ds).caseSensitive__Z()) {
-      var fname = $n(x195).Lcom_vinctus_oql_Ident__f_s;
+      var fname = $n(x204).Lcom_vinctus_oql_Ident__f_s;
     } else {
-      var this$23 = $n($n(x195).Lcom_vinctus_oql_Ident__f_s);
+      var this$23 = $n($n(x204).Lcom_vinctus_oql_Ident__f_s);
       var fname = $as_T(this$23.toLowerCase());
     }
     var $x_1 = $n($n(ds).functionReturnType__sci_Map());
-    var _2 = $n(x196).length__I();
-    var x115 = $x_1.get__O__s_Option(new $c_T2(fname, _2));
+    var _2 = $n(x205).length__I();
+    var x124 = $x_1.get__O__s_Option(new $c_T2(fname, _2));
     var x = $m_s_None$();
-    if ((x === x115)) {
-      if ((((((fname === "sum") || (fname === "avg")) || (fname === "min")) || (fname === "max")) && ($n(x196).length__I() === 1))) {
-        $n(x193).Lcom_vinctus_oql_OQLExpression__f_typ = $n($as_Lcom_vinctus_oql_OQLExpression($n(x196).head__O())).Lcom_vinctus_oql_OQLExpression__f_typ;
+    if ((x === x124)) {
+      if ((((((fname === "sum") || (fname === "avg")) || (fname === "min")) || (fname === "max")) && ($n(x205).length__I() === 1))) {
+        $n(x202).Lcom_vinctus_oql_OQLExpression__f_typ = $n($as_Lcom_vinctus_oql_OQLExpression($n(x205).head__O())).Lcom_vinctus_oql_OQLExpression__f_typ;
         return (void 0);
       } else {
         return (void 0);
       }
     }
-    if ((x115 instanceof $c_s_Some)) {
-      var t = $as_F1($n($as_s_Some(x115)).s_Some__f_value);
-      var $x_3 = $n(x193);
-      var this$25 = $n(x196);
+    if ((x124 instanceof $c_s_Some)) {
+      var t = $as_F1($n($as_s_Some(x124)).s_Some__f_value);
+      var $x_3 = $n(x202);
+      var this$25 = $n(x205);
       var f = ((_$15) => {
         var _$15$1 = $as_Lcom_vinctus_oql_OQLExpression(_$15);
         return $n(_$15$1).Lcom_vinctus_oql_OQLExpression__f_typ;
@@ -1681,53 +1692,53 @@ $c_Lcom_vinctus_oql_AbstractOQL$.prototype.decorate__Lcom_vinctus_oql_Entity__Lc
       $x_3.Lcom_vinctus_oql_OQLExpression__f_typ = $as_Lcom_vinctus_oql_Datatype($n(t).apply__O__O($x_2));
       return (void 0);
     }
-    throw new $c_s_MatchError(x115);
+    throw new $c_s_MatchError(x124);
   }
   if ((expr instanceof $c_Lcom_vinctus_oql_BetweenOQLExpression)) {
     var x$1$4 = $as_Lcom_vinctus_oql_BetweenOQLExpression(expr);
     var this$27 = $n(x$1$4);
-    var x189 = this$27.Lcom_vinctus_oql_BetweenOQLExpression__f_expr;
+    var x198 = this$27.Lcom_vinctus_oql_BetweenOQLExpression__f_expr;
     $n(x$1$4);
     var this$29 = $n(x$1$4);
-    var x191 = this$29.Lcom_vinctus_oql_BetweenOQLExpression__f_lower;
+    var x200 = this$29.Lcom_vinctus_oql_BetweenOQLExpression__f_lower;
     var this$30 = $n(x$1$4);
-    var x192 = this$30.Lcom_vinctus_oql_BetweenOQLExpression__f_upper;
-    this.decorate__Lcom_vinctus_oql_Entity__Lcom_vinctus_oql_OQLExpression__Lcom_vinctus_oql_DataModel__Lcom_vinctus_oql_SQLDataSource__T__V(entity, x189, model, ds, oql);
-    this.decorate__Lcom_vinctus_oql_Entity__Lcom_vinctus_oql_OQLExpression__Lcom_vinctus_oql_DataModel__Lcom_vinctus_oql_SQLDataSource__T__V(entity, x191, model, ds, oql);
-    this.decorate__Lcom_vinctus_oql_Entity__Lcom_vinctus_oql_OQLExpression__Lcom_vinctus_oql_DataModel__Lcom_vinctus_oql_SQLDataSource__T__V(entity, x192, model, ds, oql);
+    var x201 = this$30.Lcom_vinctus_oql_BetweenOQLExpression__f_upper;
+    this.decorate__Lcom_vinctus_oql_Entity__Lcom_vinctus_oql_OQLExpression__Lcom_vinctus_oql_DataModel__Lcom_vinctus_oql_SQLDataSource__T__V(entity, x198, model, ds, oql);
+    this.decorate__Lcom_vinctus_oql_Entity__Lcom_vinctus_oql_OQLExpression__Lcom_vinctus_oql_DataModel__Lcom_vinctus_oql_SQLDataSource__T__V(entity, x200, model, ds, oql);
+    this.decorate__Lcom_vinctus_oql_Entity__Lcom_vinctus_oql_OQLExpression__Lcom_vinctus_oql_DataModel__Lcom_vinctus_oql_SQLDataSource__T__V(entity, x201, model, ds, oql);
     return (void 0);
   }
   if ((expr instanceof $c_Lcom_vinctus_oql_OverlapsOQLExpression)) {
     var x$1$5 = $as_Lcom_vinctus_oql_OverlapsOQLExpression(expr);
     var this$32 = $n(x$1$5);
-    var x183 = this$32.Lcom_vinctus_oql_OverlapsOQLExpression__f_leftStart;
+    var x192 = this$32.Lcom_vinctus_oql_OverlapsOQLExpression__f_leftStart;
     var this$33 = $n(x$1$5);
-    var x184 = this$33.Lcom_vinctus_oql_OverlapsOQLExpression__f_leftEnd;
+    var x193 = this$33.Lcom_vinctus_oql_OverlapsOQLExpression__f_leftEnd;
     var this$34 = $n(x$1$5);
-    var x185 = this$34.Lcom_vinctus_oql_OverlapsOQLExpression__f_rightStart;
+    var x194 = this$34.Lcom_vinctus_oql_OverlapsOQLExpression__f_rightStart;
     var this$35 = $n(x$1$5);
-    var x186 = this$35.Lcom_vinctus_oql_OverlapsOQLExpression__f_rightEnd;
-    this.decorate__Lcom_vinctus_oql_Entity__Lcom_vinctus_oql_OQLExpression__Lcom_vinctus_oql_DataModel__Lcom_vinctus_oql_SQLDataSource__T__V(entity, x183, model, ds, oql);
-    this.decorate__Lcom_vinctus_oql_Entity__Lcom_vinctus_oql_OQLExpression__Lcom_vinctus_oql_DataModel__Lcom_vinctus_oql_SQLDataSource__T__V(entity, x184, model, ds, oql);
-    this.decorate__Lcom_vinctus_oql_Entity__Lcom_vinctus_oql_OQLExpression__Lcom_vinctus_oql_DataModel__Lcom_vinctus_oql_SQLDataSource__T__V(entity, x185, model, ds, oql);
-    this.decorate__Lcom_vinctus_oql_Entity__Lcom_vinctus_oql_OQLExpression__Lcom_vinctus_oql_DataModel__Lcom_vinctus_oql_SQLDataSource__T__V(entity, x186, model, ds, oql);
+    var x195 = this$35.Lcom_vinctus_oql_OverlapsOQLExpression__f_rightEnd;
+    this.decorate__Lcom_vinctus_oql_Entity__Lcom_vinctus_oql_OQLExpression__Lcom_vinctus_oql_DataModel__Lcom_vinctus_oql_SQLDataSource__T__V(entity, x192, model, ds, oql);
+    this.decorate__Lcom_vinctus_oql_Entity__Lcom_vinctus_oql_OQLExpression__Lcom_vinctus_oql_DataModel__Lcom_vinctus_oql_SQLDataSource__T__V(entity, x193, model, ds, oql);
+    this.decorate__Lcom_vinctus_oql_Entity__Lcom_vinctus_oql_OQLExpression__Lcom_vinctus_oql_DataModel__Lcom_vinctus_oql_SQLDataSource__T__V(entity, x194, model, ds, oql);
+    this.decorate__Lcom_vinctus_oql_Entity__Lcom_vinctus_oql_OQLExpression__Lcom_vinctus_oql_DataModel__Lcom_vinctus_oql_SQLDataSource__T__V(entity, x195, model, ds, oql);
     return (void 0);
   }
   if ((expr instanceof $c_Lcom_vinctus_oql_GroupedOQLExpression)) {
-    var x178 = $as_Lcom_vinctus_oql_GroupedOQLExpression(expr);
-    var this$37 = $n(x178);
-    var x180 = this$37.Lcom_vinctus_oql_GroupedOQLExpression__f_expr;
-    this.decorate__Lcom_vinctus_oql_Entity__Lcom_vinctus_oql_OQLExpression__Lcom_vinctus_oql_DataModel__Lcom_vinctus_oql_SQLDataSource__T__V(entity, x180, model, ds, oql);
-    $n(x178).Lcom_vinctus_oql_OQLExpression__f_typ = $n(x180).Lcom_vinctus_oql_OQLExpression__f_typ;
+    var x187 = $as_Lcom_vinctus_oql_GroupedOQLExpression(expr);
+    var this$37 = $n(x187);
+    var x189 = this$37.Lcom_vinctus_oql_GroupedOQLExpression__f_expr;
+    this.decorate__Lcom_vinctus_oql_Entity__Lcom_vinctus_oql_OQLExpression__Lcom_vinctus_oql_DataModel__Lcom_vinctus_oql_SQLDataSource__T__V(entity, x189, model, ds, oql);
+    $n(x187).Lcom_vinctus_oql_OQLExpression__f_typ = $n(x189).Lcom_vinctus_oql_OQLExpression__f_typ;
     return (void 0);
   }
   if ((expr instanceof $c_Lcom_vinctus_oql_CaseOQLExpression)) {
     var x$1$6 = $as_Lcom_vinctus_oql_CaseOQLExpression(expr);
     var this$39 = $n(x$1$6);
-    var x176 = this$39.Lcom_vinctus_oql_CaseOQLExpression__f_whens;
+    var x185 = this$39.Lcom_vinctus_oql_CaseOQLExpression__f_whens;
     var this$40 = $n(x$1$6);
-    var x177 = this$40.Lcom_vinctus_oql_CaseOQLExpression__f_els;
-    var this$41 = $n(x176);
+    var x186 = this$40.Lcom_vinctus_oql_CaseOQLExpression__f_els;
+    var this$41 = $n(x185);
     var these$3 = this$41;
     while ((!$n(these$3).isEmpty__Z())) {
       var x0$9 = $n(these$3).head__O();
@@ -1735,18 +1746,18 @@ $c_Lcom_vinctus_oql_AbstractOQL$.prototype.decorate__Lcom_vinctus_oql_Entity__Lc
       matchResult12: {
         if ((x$1$7 !== null)) {
           var this$43 = $n(x$1$7);
-          var x120 = this$43.Lcom_vinctus_oql_OQLWhen__f_cond;
+          var x129 = this$43.Lcom_vinctus_oql_OQLWhen__f_cond;
           var this$44 = $n(x$1$7);
-          var x121 = this$44.Lcom_vinctus_oql_OQLWhen__f_expr;
-          this.decorate__Lcom_vinctus_oql_Entity__Lcom_vinctus_oql_OQLExpression__Lcom_vinctus_oql_DataModel__Lcom_vinctus_oql_SQLDataSource__T__V(entity, x120, model, ds, oql);
-          this.decorate__Lcom_vinctus_oql_Entity__Lcom_vinctus_oql_OQLExpression__Lcom_vinctus_oql_DataModel__Lcom_vinctus_oql_SQLDataSource__T__V(entity, x121, model, ds, oql);
+          var x130 = this$44.Lcom_vinctus_oql_OQLWhen__f_expr;
+          this.decorate__Lcom_vinctus_oql_Entity__Lcom_vinctus_oql_OQLExpression__Lcom_vinctus_oql_DataModel__Lcom_vinctus_oql_SQLDataSource__T__V(entity, x129, model, ds, oql);
+          this.decorate__Lcom_vinctus_oql_Entity__Lcom_vinctus_oql_OQLExpression__Lcom_vinctus_oql_DataModel__Lcom_vinctus_oql_SQLDataSource__T__V(entity, x130, model, ds, oql);
           break matchResult12;
         }
         throw new $c_s_MatchError(x$1$7);
       }
       these$3 = $as_sci_List($n(these$3).tail__O());
     }
-    var this$45 = $n(x177);
+    var this$45 = $n(x186);
     if ((!this$45.isEmpty__Z())) {
       var x0$10 = this$45.get__O();
       var expr$2 = $as_Lcom_vinctus_oql_OQLExpression(x0$10);
@@ -1757,31 +1768,31 @@ $c_Lcom_vinctus_oql_AbstractOQL$.prototype.decorate__Lcom_vinctus_oql_Entity__Lc
     }
   }
   if ((expr instanceof $c_Lcom_vinctus_oql_PrefixOQLExpression)) {
-    var x170 = $as_Lcom_vinctus_oql_PrefixOQLExpression(expr);
-    $n(x170);
-    var this$48 = $n(x170);
-    var x173 = this$48.Lcom_vinctus_oql_PrefixOQLExpression__f_expr;
-    this.decorate__Lcom_vinctus_oql_Entity__Lcom_vinctus_oql_OQLExpression__Lcom_vinctus_oql_DataModel__Lcom_vinctus_oql_SQLDataSource__T__V(entity, x173, model, ds, oql);
-    $n(x170).Lcom_vinctus_oql_OQLExpression__f_typ = $n(x173).Lcom_vinctus_oql_OQLExpression__f_typ;
+    var x179 = $as_Lcom_vinctus_oql_PrefixOQLExpression(expr);
+    $n(x179);
+    var this$48 = $n(x179);
+    var x182 = this$48.Lcom_vinctus_oql_PrefixOQLExpression__f_expr;
+    this.decorate__Lcom_vinctus_oql_Entity__Lcom_vinctus_oql_OQLExpression__Lcom_vinctus_oql_DataModel__Lcom_vinctus_oql_SQLDataSource__T__V(entity, x182, model, ds, oql);
+    $n(x179).Lcom_vinctus_oql_OQLExpression__f_typ = $n(x182).Lcom_vinctus_oql_OQLExpression__f_typ;
     return (void 0);
   }
   if ((expr instanceof $c_Lcom_vinctus_oql_PostfixOQLExpression)) {
     var x$1$8 = $as_Lcom_vinctus_oql_PostfixOQLExpression(expr);
     var this$50 = $n(x$1$8);
-    var x168 = this$50.Lcom_vinctus_oql_PostfixOQLExpression__f_expr;
+    var x177 = this$50.Lcom_vinctus_oql_PostfixOQLExpression__f_expr;
     $n(x$1$8);
-    this.decorate__Lcom_vinctus_oql_Entity__Lcom_vinctus_oql_OQLExpression__Lcom_vinctus_oql_DataModel__Lcom_vinctus_oql_SQLDataSource__T__V(entity, x168, model, ds, oql);
+    this.decorate__Lcom_vinctus_oql_Entity__Lcom_vinctus_oql_OQLExpression__Lcom_vinctus_oql_DataModel__Lcom_vinctus_oql_SQLDataSource__T__V(entity, x177, model, ds, oql);
     return (void 0);
   }
   if ((expr instanceof $c_Lcom_vinctus_oql_InArrayOQLExpression)) {
     var x$1$9 = $as_Lcom_vinctus_oql_InArrayOQLExpression(expr);
     var this$53 = $n(x$1$9);
-    var x163 = this$53.Lcom_vinctus_oql_InArrayOQLExpression__f_left;
+    var x172 = this$53.Lcom_vinctus_oql_InArrayOQLExpression__f_left;
     $n(x$1$9);
     var this$55 = $n(x$1$9);
-    var x165 = this$55.Lcom_vinctus_oql_InArrayOQLExpression__f_right;
-    this.decorate__Lcom_vinctus_oql_Entity__Lcom_vinctus_oql_OQLExpression__Lcom_vinctus_oql_DataModel__Lcom_vinctus_oql_SQLDataSource__T__V(entity, x163, model, ds, oql);
-    var this$56 = $n(x165);
+    var x174 = this$55.Lcom_vinctus_oql_InArrayOQLExpression__f_right;
+    this.decorate__Lcom_vinctus_oql_Entity__Lcom_vinctus_oql_OQLExpression__Lcom_vinctus_oql_DataModel__Lcom_vinctus_oql_SQLDataSource__T__V(entity, x172, model, ds, oql);
+    var this$56 = $n(x174);
     var these$4 = this$56;
     while ((!$n(these$4).isEmpty__Z())) {
       var x0$11 = $n(these$4).head__O();
@@ -1792,54 +1803,54 @@ $c_Lcom_vinctus_oql_AbstractOQL$.prototype.decorate__Lcom_vinctus_oql_Entity__Lc
     return (void 0);
   }
   if ((expr instanceof $c_Lcom_vinctus_oql_InfixOQLExpression)) {
-    var x156 = $as_Lcom_vinctus_oql_InfixOQLExpression(expr);
-    var this$58 = $n(x156);
-    var x158 = this$58.Lcom_vinctus_oql_InfixOQLExpression__f_left;
-    $n(x156);
-    var this$60 = $n(x156);
-    var x160 = this$60.Lcom_vinctus_oql_InfixOQLExpression__f_right;
-    this.decorate__Lcom_vinctus_oql_Entity__Lcom_vinctus_oql_OQLExpression__Lcom_vinctus_oql_DataModel__Lcom_vinctus_oql_SQLDataSource__T__V(entity, x158, model, ds, oql);
-    this.decorate__Lcom_vinctus_oql_Entity__Lcom_vinctus_oql_OQLExpression__Lcom_vinctus_oql_DataModel__Lcom_vinctus_oql_SQLDataSource__T__V(entity, x160, model, ds, oql);
-    var x$3 = $n(x158).Lcom_vinctus_oql_OQLExpression__f_typ;
-    var x$4 = $n(x160).Lcom_vinctus_oql_OQLExpression__f_typ;
+    var x165 = $as_Lcom_vinctus_oql_InfixOQLExpression(expr);
+    var this$58 = $n(x165);
+    var x167 = this$58.Lcom_vinctus_oql_InfixOQLExpression__f_left;
+    $n(x165);
+    var this$60 = $n(x165);
+    var x169 = this$60.Lcom_vinctus_oql_InfixOQLExpression__f_right;
+    this.decorate__Lcom_vinctus_oql_Entity__Lcom_vinctus_oql_OQLExpression__Lcom_vinctus_oql_DataModel__Lcom_vinctus_oql_SQLDataSource__T__V(entity, x167, model, ds, oql);
+    this.decorate__Lcom_vinctus_oql_Entity__Lcom_vinctus_oql_OQLExpression__Lcom_vinctus_oql_DataModel__Lcom_vinctus_oql_SQLDataSource__T__V(entity, x169, model, ds, oql);
+    var x$3 = $n(x167).Lcom_vinctus_oql_OQLExpression__f_typ;
+    var x$4 = $n(x169).Lcom_vinctus_oql_OQLExpression__f_typ;
     if (((x$3 === null) ? (x$4 === null) : $n(x$3).equals__O__Z(x$4))) {
-      $n(x156).Lcom_vinctus_oql_OQLExpression__f_typ = $n(x158).Lcom_vinctus_oql_OQLExpression__f_typ;
+      $n(x165).Lcom_vinctus_oql_OQLExpression__f_typ = $n(x167).Lcom_vinctus_oql_OQLExpression__f_typ;
       return (void 0);
     } else {
       return (void 0);
     }
   }
   if ((expr instanceof $c_Lcom_vinctus_oql_ReferenceOQLExpression)) {
-    var x152 = $as_Lcom_vinctus_oql_ReferenceOQLExpression(expr);
-    var this$62 = $n(x152);
-    var x154 = this$62.Lcom_vinctus_oql_ReferenceOQLExpression__f_ids;
-    $n(x152);
-    $n(x152).Lcom_vinctus_oql_ReferenceOQLExpression__f_dmrefs = $n(model).lookup__Lcom_vinctus_oql_OQLExpression__sci_List__Z__Lcom_vinctus_oql_Entity__T__sci_List(x152, x154, true, entity, oql);
+    var x161 = $as_Lcom_vinctus_oql_ReferenceOQLExpression(expr);
+    var this$62 = $n(x161);
+    var x163 = this$62.Lcom_vinctus_oql_ReferenceOQLExpression__f_ids;
+    $n(x161);
+    $n(x161).Lcom_vinctus_oql_ReferenceOQLExpression__f_dmrefs = $n(model).lookup__Lcom_vinctus_oql_OQLExpression__sci_List__Z__Lcom_vinctus_oql_Entity__T__sci_List(x161, x163, true, entity, oql);
     return (void 0);
   }
   if ((expr instanceof $c_Lcom_vinctus_oql_AttributeOQLExpression)) {
-    var x146 = $as_Lcom_vinctus_oql_AttributeOQLExpression(expr);
-    var this$65 = $n(x146);
-    var x148 = this$65.Lcom_vinctus_oql_AttributeOQLExpression__f_ids;
-    $n(x146);
-    if ((x148 !== null)) {
-      if (($n(x148).lengthCompare__I__I(1) === 0)) {
-        var this$70 = $n(x148);
-        var x151 = $as_Lcom_vinctus_oql_Ident($f_sc_LinearSeqOps__apply__I__O(this$70, 0));
+    var x155 = $as_Lcom_vinctus_oql_AttributeOQLExpression(expr);
+    var this$65 = $n(x155);
+    var x157 = this$65.Lcom_vinctus_oql_AttributeOQLExpression__f_ids;
+    $n(x155);
+    if ((x157 !== null)) {
+      if (($n(x157).lengthCompare__I__I(1) === 0)) {
+        var this$70 = $n(x157);
+        var x160 = $as_Lcom_vinctus_oql_Ident($f_sc_LinearSeqOps__apply__I__O(this$70, 0));
         var $x_5 = $n(ds).builtinVariables__sci_Map();
         if ($n(ds).caseSensitive__Z()) {
-          var $x_4 = $n(x151).Lcom_vinctus_oql_Ident__f_s;
+          var $x_4 = $n(x160).Lcom_vinctus_oql_Ident__f_s;
         } else {
-          var this$71 = $n($n(x151).Lcom_vinctus_oql_Ident__f_s);
+          var this$71 = $n($n(x160).Lcom_vinctus_oql_Ident__f_s);
           var $x_4 = $as_T(this$71.toLowerCase());
         }
         if ($n($x_5).contains__O__Z($x_4)) {
           var $x_8 = $n(expr);
           var $x_7 = $n(ds).builtinVariables__sci_Map();
           if ($n(ds).caseSensitive__Z()) {
-            var $x_6 = $n(x151).Lcom_vinctus_oql_Ident__f_s;
+            var $x_6 = $n(x160).Lcom_vinctus_oql_Ident__f_s;
           } else {
-            var this$72 = $n($n(x151).Lcom_vinctus_oql_Ident__f_s);
+            var this$72 = $n($n(x160).Lcom_vinctus_oql_Ident__f_s);
             var $x_6 = $as_T(this$72.toLowerCase());
           }
           $x_8.Lcom_vinctus_oql_OQLExpression__f_typ = $as_Lcom_vinctus_oql_Datatype($n($x_7).apply__O__O($x_6));
@@ -1847,28 +1858,28 @@ $c_Lcom_vinctus_oql_AbstractOQL$.prototype.decorate__Lcom_vinctus_oql_Entity__Lc
         }
       }
     }
-    $n(x146).Lcom_vinctus_oql_AttributeOQLExpression__f_dmrefs = $n(model).lookup__Lcom_vinctus_oql_OQLExpression__sci_List__Z__Lcom_vinctus_oql_Entity__T__sci_List(x146, x148, false, entity, oql);
+    $n(x155).Lcom_vinctus_oql_AttributeOQLExpression__f_dmrefs = $n(model).lookup__Lcom_vinctus_oql_OQLExpression__sci_List__Z__Lcom_vinctus_oql_Entity__T__sci_List(x155, x157, false, entity, oql);
     return (void 0);
   }
   if ((expr instanceof $c_Lcom_vinctus_oql_InQueryOQLExpression)) {
     var x$1$10 = $as_Lcom_vinctus_oql_InQueryOQLExpression(expr);
     var this$74 = $n(x$1$10);
-    var x139 = this$74.Lcom_vinctus_oql_InQueryOQLExpression__f_left;
+    var x148 = this$74.Lcom_vinctus_oql_InQueryOQLExpression__f_left;
     $n(x$1$10);
     var this$76 = $n(x$1$10);
-    var x141 = this$76.Lcom_vinctus_oql_InQueryOQLExpression__f_query;
-    this.decorate__Lcom_vinctus_oql_Entity__Lcom_vinctus_oql_OQLExpression__Lcom_vinctus_oql_DataModel__Lcom_vinctus_oql_SQLDataSource__T__V(entity, x139, model, ds, oql);
-    this.preprocessQuery__s_Option__Lcom_vinctus_oql_OQLQuery__Lcom_vinctus_oql_DataModel__Lcom_vinctus_oql_SQLDataSource__T__Lcom_vinctus_oql_OQLQuery(new $c_s_Some(entity), x141, model, ds, oql);
-    if ((!$n($n($n(x141).Lcom_vinctus_oql_OQLQuery__f_attr).Lcom_vinctus_oql_Attribute__f_typ).isArrayType__Z())) {
-      $m_Lcom_vinctus_oql_package$().problem__s_util_parsing_input_Position__T__T__E($n($n(x141).Lcom_vinctus_oql_OQLQuery__f_source).Lcom_vinctus_oql_Ident__f_pos, (("attribute " + $n($n(x141).Lcom_vinctus_oql_OQLQuery__f_source).Lcom_vinctus_oql_Ident__f_s) + " does not have an array type"), oql);
+    var x150 = this$76.Lcom_vinctus_oql_InQueryOQLExpression__f_query;
+    this.decorate__Lcom_vinctus_oql_Entity__Lcom_vinctus_oql_OQLExpression__Lcom_vinctus_oql_DataModel__Lcom_vinctus_oql_SQLDataSource__T__V(entity, x148, model, ds, oql);
+    this.preprocessQuery__s_Option__Lcom_vinctus_oql_OQLQuery__Lcom_vinctus_oql_DataModel__Lcom_vinctus_oql_SQLDataSource__T__Lcom_vinctus_oql_OQLQuery(new $c_s_Some(entity), x150, model, ds, oql);
+    if ((!$n($n($n(x150).Lcom_vinctus_oql_OQLQuery__f_attr).Lcom_vinctus_oql_Attribute__f_typ).isArrayType__Z())) {
+      $m_Lcom_vinctus_oql_package$().problem__s_util_parsing_input_Position__T__T__E($n($n(x150).Lcom_vinctus_oql_OQLQuery__f_source).Lcom_vinctus_oql_Ident__f_pos, (("attribute " + $n($n(x150).Lcom_vinctus_oql_OQLQuery__f_source).Lcom_vinctus_oql_Ident__f_s) + " does not have an array type"), oql);
     }
-    var this$78 = $n($n(x141).Lcom_vinctus_oql_OQLQuery__f_select);
+    var this$78 = $n($n(x150).Lcom_vinctus_oql_OQLQuery__f_select);
     if ((!this$78.isEmpty__Z())) {
       var x0$12 = this$78.get__O();
       var _$16 = $as_Lcom_vinctus_oql_OQLExpression(x0$12);
-      $m_Lcom_vinctus_oql_AbstractOQL$().decorate__Lcom_vinctus_oql_Entity__Lcom_vinctus_oql_OQLExpression__Lcom_vinctus_oql_DataModel__Lcom_vinctus_oql_SQLDataSource__T__V($n(x141).Lcom_vinctus_oql_OQLQuery__f_entity, _$16, model, ds, oql);
+      $m_Lcom_vinctus_oql_AbstractOQL$().decorate__Lcom_vinctus_oql_Entity__Lcom_vinctus_oql_OQLExpression__Lcom_vinctus_oql_DataModel__Lcom_vinctus_oql_SQLDataSource__T__V($n(x150).Lcom_vinctus_oql_OQLQuery__f_entity, _$16, model, ds, oql);
     }
-    var this$79 = $n($n(x141).Lcom_vinctus_oql_OQLQuery__f_order);
+    var this$79 = $n($n(x150).Lcom_vinctus_oql_OQLQuery__f_order);
     if ((!this$79.isEmpty__Z())) {
       var x0$13 = this$79.get__O();
       var _$17 = $as_sci_List(x0$13);
@@ -1880,9 +1891,9 @@ $c_Lcom_vinctus_oql_AbstractOQL$.prototype.decorate__Lcom_vinctus_oql_Entity__Lc
         matchResult13: {
           if ((x$1$11 !== null)) {
             var this$82 = $n(x$1$11);
-            var x124 = this$82.Lcom_vinctus_oql_OQLOrdering__f_expr;
+            var x133 = this$82.Lcom_vinctus_oql_OQLOrdering__f_expr;
             $n(x$1$11);
-            $m_Lcom_vinctus_oql_AbstractOQL$().decorate__Lcom_vinctus_oql_Entity__Lcom_vinctus_oql_OQLExpression__Lcom_vinctus_oql_DataModel__Lcom_vinctus_oql_SQLDataSource__T__V($n(x141).Lcom_vinctus_oql_OQLQuery__f_entity, x124, model, ds, oql);
+            $m_Lcom_vinctus_oql_AbstractOQL$().decorate__Lcom_vinctus_oql_Entity__Lcom_vinctus_oql_OQLExpression__Lcom_vinctus_oql_DataModel__Lcom_vinctus_oql_SQLDataSource__T__V($n(x150).Lcom_vinctus_oql_OQLQuery__f_entity, x133, model, ds, oql);
             break matchResult13;
           }
           throw new $c_s_MatchError(x$1$11);
@@ -1920,13 +1931,13 @@ $c_Lcom_vinctus_oql_AbstractOQL$.prototype.decorate__Lcom_vinctus_oql_Entity__Lc
     return (void 0);
   }
   if ((expr instanceof $c_Lcom_vinctus_oql_TypedOQLExpression)) {
-    var x128 = $as_Lcom_vinctus_oql_TypedOQLExpression(expr);
-    var this$85 = $n(x128);
-    var x130 = this$85.Lcom_vinctus_oql_TypedOQLExpression__f_expr;
-    var this$86 = $n(x128);
-    var x131 = this$86.Lcom_vinctus_oql_TypedOQLExpression__f_t;
-    this.decorate__Lcom_vinctus_oql_Entity__Lcom_vinctus_oql_OQLExpression__Lcom_vinctus_oql_DataModel__Lcom_vinctus_oql_SQLDataSource__T__V(entity, x130, model, ds, oql);
-    $n(x128).Lcom_vinctus_oql_OQLExpression__f_typ = x131;
+    var x137 = $as_Lcom_vinctus_oql_TypedOQLExpression(expr);
+    var this$85 = $n(x137);
+    var x139 = this$85.Lcom_vinctus_oql_TypedOQLExpression__f_expr;
+    var this$86 = $n(x137);
+    var x140 = this$86.Lcom_vinctus_oql_TypedOQLExpression__f_t;
+    this.decorate__Lcom_vinctus_oql_Entity__Lcom_vinctus_oql_OQLExpression__Lcom_vinctus_oql_DataModel__Lcom_vinctus_oql_SQLDataSource__T__V(entity, x139, model, ds, oql);
+    $n(x137).Lcom_vinctus_oql_OQLExpression__f_typ = x140;
     return (void 0);
   }
   matchAlts1: {
@@ -1953,20 +1964,20 @@ $c_Lcom_vinctus_oql_AbstractOQL$.prototype.preprocessQuery__s_Option__Lcom_vinct
     } else {
       matchResult15: {
         var entity;
-        var x203 = $n($n($as_Lcom_vinctus_oql_Entity($n(outer).get__O())).attributes__sci_Map()).get__O__s_Option($n($n(query).Lcom_vinctus_oql_OQLQuery__f_source).Lcom_vinctus_oql_Ident__f_s);
-        if ((x203 instanceof $c_s_Some)) {
-          var x205 = $as_Lcom_vinctus_oql_Attribute($n($as_s_Some(x203)).s_Some__f_value);
-          if ((x205 !== null)) {
-            $n(x205);
-            $n(x205);
-            $n(x205);
-            $n(x205);
-            var this$7 = $n(x205);
-            var x211 = this$7.Lcom_vinctus_oql_Attribute__f_typ;
-            if ($is_Lcom_vinctus_oql_RelationalType(x211)) {
-              var typ = $as_Lcom_vinctus_oql_RelationalType(x211);
+        var x212 = $n($n($as_Lcom_vinctus_oql_Entity($n(outer).get__O())).attributes__sci_Map()).get__O__s_Option($n($n(query).Lcom_vinctus_oql_OQLQuery__f_source).Lcom_vinctus_oql_Ident__f_s);
+        if ((x212 instanceof $c_s_Some)) {
+          var x214 = $as_Lcom_vinctus_oql_Attribute($n($as_s_Some(x212)).s_Some__f_value);
+          if ((x214 !== null)) {
+            $n(x214);
+            $n(x214);
+            $n(x214);
+            $n(x214);
+            var this$7 = $n(x214);
+            var x220 = this$7.Lcom_vinctus_oql_Attribute__f_typ;
+            if ($is_Lcom_vinctus_oql_RelationalType(x220)) {
+              var typ = $as_Lcom_vinctus_oql_RelationalType(x220);
               $n(query).Lcom_vinctus_oql_OQLQuery__f_entity = $n(typ).entity__Lcom_vinctus_oql_Entity();
-              $n(query).Lcom_vinctus_oql_OQLQuery__f_attr = x205;
+              $n(query).Lcom_vinctus_oql_OQLQuery__f_attr = x214;
               var entity = $n(typ).entity__Lcom_vinctus_oql_Entity();
               break matchResult15;
             }
@@ -1978,18 +1989,18 @@ $c_Lcom_vinctus_oql_AbstractOQL$.prototype.preprocessQuery__s_Option__Lcom_vinct
   } else {
     matchResult16: {
       var entity;
-      var x213 = $n($n(model).Lcom_vinctus_oql_DataModel__f_entities).get__O__s_Option($n($n(query).Lcom_vinctus_oql_OQLQuery__f_source).Lcom_vinctus_oql_Ident__f_s);
-      if ((x213 instanceof $c_s_Some)) {
-        var e = $as_Lcom_vinctus_oql_Entity($n($as_s_Some(x213)).s_Some__f_value);
+      var x222 = $n($n(model).Lcom_vinctus_oql_DataModel__f_entities).get__O__s_Option($n($n(query).Lcom_vinctus_oql_OQLQuery__f_source).Lcom_vinctus_oql_Ident__f_s);
+      if ((x222 instanceof $c_s_Some)) {
+        var e = $as_Lcom_vinctus_oql_Entity($n($as_s_Some(x222)).s_Some__f_value);
         $n(query).Lcom_vinctus_oql_OQLQuery__f_entity = e;
         var entity = e;
         break matchResult16;
       }
       var x = $m_s_None$();
-      if ((x === x213)) {
+      if ((x === x222)) {
         $m_Lcom_vinctus_oql_package$().problem__s_util_parsing_input_Position__T__T__E($n($n(query).Lcom_vinctus_oql_OQLQuery__f_source).Lcom_vinctus_oql_Ident__f_pos, (("unknown entity '" + $n($n(query).Lcom_vinctus_oql_OQLQuery__f_source).Lcom_vinctus_oql_Ident__f_s) + "'"), oql);
       }
-      throw new $c_s_MatchError(x213);
+      throw new $c_s_MatchError(x222);
     }
   }
   var subtracts = $ct_scm_HashSet__(new $c_scm_HashSet());
@@ -2000,40 +2011,40 @@ $c_Lcom_vinctus_oql_AbstractOQL$.prototype.preprocessQuery__s_Option__Lcom_vinct
     var x$1 = $as_Lcom_vinctus_oql_OQLProject(x0);
     matchResult22: {
       if ((x$1 instanceof $c_Lcom_vinctus_oql_QueryOQLProject)) {
-        var x301 = $as_Lcom_vinctus_oql_QueryOQLProject(x$1);
-        var this$10 = $n(x301);
-        var x303 = this$10.Lcom_vinctus_oql_QueryOQLProject__f_label;
-        var this$11 = $n(x301);
-        var x304 = this$11.Lcom_vinctus_oql_QueryOQLProject__f_query;
-        var key = $n(x303).Lcom_vinctus_oql_Ident__f_s;
+        var x310 = $as_Lcom_vinctus_oql_QueryOQLProject(x$1);
+        var this$10 = $n(x310);
+        var x312 = this$10.Lcom_vinctus_oql_QueryOQLProject__f_label;
+        var this$11 = $n(x310);
+        var x313 = this$11.Lcom_vinctus_oql_QueryOQLProject__f_query;
+        var key = $n(x312).Lcom_vinctus_oql_Ident__f_s;
         matchResult18: {
           var value;
-          var x220 = $n($n(entity).attributes__sci_Map()).get__O__s_Option($n($n(x304).Lcom_vinctus_oql_OQLQuery__f_source).Lcom_vinctus_oql_Ident__f_s);
-          if ((x220 instanceof $c_s_Some)) {
-            var x224 = $as_Lcom_vinctus_oql_Attribute($n($as_s_Some(x220)).s_Some__f_value);
-            if ((x224 !== null)) {
-              $n(x224);
-              $n(x224);
-              $n(x224);
-              $n(x224);
-              var this$17 = $n(x224);
-              var x230 = this$17.Lcom_vinctus_oql_Attribute__f_typ;
-              if ($is_Lcom_vinctus_oql_Datatype(x230)) {
-                var ids = new $c_sci_$colon$colon($n(x304).Lcom_vinctus_oql_OQLQuery__f_source, $m_sci_Nil$());
+          var x229 = $n($n(entity).attributes__sci_Map()).get__O__s_Option($n($n(x313).Lcom_vinctus_oql_OQLQuery__f_source).Lcom_vinctus_oql_Ident__f_s);
+          if ((x229 instanceof $c_s_Some)) {
+            var x233 = $as_Lcom_vinctus_oql_Attribute($n($as_s_Some(x229)).s_Some__f_value);
+            if ((x233 !== null)) {
+              $n(x233);
+              $n(x233);
+              $n(x233);
+              $n(x233);
+              var this$17 = $n(x233);
+              var x239 = this$17.Lcom_vinctus_oql_Attribute__f_typ;
+              if ($is_Lcom_vinctus_oql_Datatype(x239)) {
+                var ids = new $c_sci_$colon$colon($n(x313).Lcom_vinctus_oql_OQLQuery__f_source, $m_sci_Nil$());
                 var attr = new $c_Lcom_vinctus_oql_AttributeOQLExpression(ids, null);
                 $m_Lcom_vinctus_oql_AbstractOQL$().decorate__Lcom_vinctus_oql_Entity__Lcom_vinctus_oql_OQLExpression__Lcom_vinctus_oql_DataModel__Lcom_vinctus_oql_SQLDataSource__T__V(entity, attr, model, ds, oql);
-                var value = new $c_Lcom_vinctus_oql_ExpressionOQLProject(x303, attr);
+                var value = new $c_Lcom_vinctus_oql_ExpressionOQLProject(x312, attr);
                 break matchResult18;
               }
             }
-            $m_Lcom_vinctus_oql_AbstractOQL$().preprocessQuery__s_Option__Lcom_vinctus_oql_OQLQuery__Lcom_vinctus_oql_DataModel__Lcom_vinctus_oql_SQLDataSource__T__Lcom_vinctus_oql_OQLQuery(new $c_s_Some(entity), x304, model, ds, oql);
-            var this$21 = $n($n(x304).Lcom_vinctus_oql_OQLQuery__f_select);
+            $m_Lcom_vinctus_oql_AbstractOQL$().preprocessQuery__s_Option__Lcom_vinctus_oql_OQLQuery__Lcom_vinctus_oql_DataModel__Lcom_vinctus_oql_SQLDataSource__T__Lcom_vinctus_oql_OQLQuery(new $c_s_Some(entity), x313, model, ds, oql);
+            var this$21 = $n($n(x313).Lcom_vinctus_oql_OQLQuery__f_select);
             if ((!this$21.isEmpty__Z())) {
               var x0$1 = this$21.get__O();
               var _$18 = $as_Lcom_vinctus_oql_OQLExpression(x0$1);
-              $m_Lcom_vinctus_oql_AbstractOQL$().decorate__Lcom_vinctus_oql_Entity__Lcom_vinctus_oql_OQLExpression__Lcom_vinctus_oql_DataModel__Lcom_vinctus_oql_SQLDataSource__T__V($n(x304).Lcom_vinctus_oql_OQLQuery__f_entity, _$18, model, ds, oql);
+              $m_Lcom_vinctus_oql_AbstractOQL$().decorate__Lcom_vinctus_oql_Entity__Lcom_vinctus_oql_OQLExpression__Lcom_vinctus_oql_DataModel__Lcom_vinctus_oql_SQLDataSource__T__V($n(x313).Lcom_vinctus_oql_OQLQuery__f_entity, _$18, model, ds, oql);
             }
-            var this$22 = $n($n(x304).Lcom_vinctus_oql_OQLQuery__f_order);
+            var this$22 = $n($n(x313).Lcom_vinctus_oql_OQLQuery__f_order);
             if ((!this$22.isEmpty__Z())) {
               var x0$2 = this$22.get__O();
               var _$19 = $as_sci_List(x0$2);
@@ -2045,9 +2056,9 @@ $c_Lcom_vinctus_oql_AbstractOQL$.prototype.preprocessQuery__s_Option__Lcom_vinct
                 matchResult17: {
                   if ((x$1$1 !== null)) {
                     var this$25 = $n(x$1$1);
-                    var x218 = this$25.Lcom_vinctus_oql_OQLOrdering__f_expr;
+                    var x227 = this$25.Lcom_vinctus_oql_OQLOrdering__f_expr;
                     $n(x$1$1);
-                    $m_Lcom_vinctus_oql_AbstractOQL$().decorate__Lcom_vinctus_oql_Entity__Lcom_vinctus_oql_OQLExpression__Lcom_vinctus_oql_DataModel__Lcom_vinctus_oql_SQLDataSource__T__V($n(x304).Lcom_vinctus_oql_OQLQuery__f_entity, x218, model, ds, oql);
+                    $m_Lcom_vinctus_oql_AbstractOQL$().decorate__Lcom_vinctus_oql_Entity__Lcom_vinctus_oql_OQLExpression__Lcom_vinctus_oql_DataModel__Lcom_vinctus_oql_SQLDataSource__T__V($n(x313).Lcom_vinctus_oql_OQLQuery__f_entity, x227, model, ds, oql);
                     break matchResult17;
                   }
                   throw new $c_s_MatchError(x$1$1);
@@ -2055,27 +2066,27 @@ $c_Lcom_vinctus_oql_AbstractOQL$.prototype.preprocessQuery__s_Option__Lcom_vinct
                 these$1 = $as_sci_List($n(these$1).tail__O());
               }
             }
-            var value = x301;
+            var value = x310;
             break matchResult18;
           }
           var x$2 = $m_s_None$();
-          if ((x$2 === x220)) {
+          if ((x$2 === x229)) {
             var $x_2 = $n(ds).builtinVariables__sci_Map();
             if ($n(ds).caseSensitive__Z()) {
-              var $x_1 = $n($n(x304).Lcom_vinctus_oql_OQLQuery__f_source).Lcom_vinctus_oql_Ident__f_s;
+              var $x_1 = $n($n(x313).Lcom_vinctus_oql_OQLQuery__f_source).Lcom_vinctus_oql_Ident__f_s;
             } else {
-              var this$27 = $n($n($n(x304).Lcom_vinctus_oql_OQLQuery__f_source).Lcom_vinctus_oql_Ident__f_s);
+              var this$27 = $n($n($n(x313).Lcom_vinctus_oql_OQLQuery__f_source).Lcom_vinctus_oql_Ident__f_s);
               var $x_1 = $as_T(this$27.toLowerCase());
             }
             if ($n($x_2).contains__O__Z($x_1)) {
-              var s = $n($n(x304).Lcom_vinctus_oql_OQLQuery__f_source).Lcom_vinctus_oql_Ident__f_s;
+              var s = $n($n(x313).Lcom_vinctus_oql_OQLQuery__f_source).Lcom_vinctus_oql_Ident__f_s;
               var expr = new $c_Lcom_vinctus_oql_RawOQLExpression(s);
-              var value = new $c_Lcom_vinctus_oql_ExpressionOQLProject(x303, expr);
+              var value = new $c_Lcom_vinctus_oql_ExpressionOQLProject(x312, expr);
               break matchResult18;
             }
-            $m_Lcom_vinctus_oql_package$().problem__s_util_parsing_input_Position__T__T__E($n($n(x304).Lcom_vinctus_oql_OQLQuery__f_source).Lcom_vinctus_oql_Ident__f_pos, (((("entity '" + $n(entity).Lcom_vinctus_oql_Entity__f_name) + "' does not have attribute '") + $n($n(x304).Lcom_vinctus_oql_OQLQuery__f_source).Lcom_vinctus_oql_Ident__f_s) + "'"), oql);
+            $m_Lcom_vinctus_oql_package$().problem__s_util_parsing_input_Position__T__T__E($n($n(x313).Lcom_vinctus_oql_OQLQuery__f_source).Lcom_vinctus_oql_Ident__f_pos, (((("entity '" + $n(entity).Lcom_vinctus_oql_Entity__f_name) + "' does not have attribute '") + $n($n(x313).Lcom_vinctus_oql_OQLQuery__f_source).Lcom_vinctus_oql_Ident__f_s) + "'"), oql);
           }
-          throw new $c_s_MatchError(x220);
+          throw new $c_s_MatchError(x229);
         }
         $p_scm_LinkedHashMap__put0__O__O__Z__s_Some(map, key, value, false);
         break matchResult22;
@@ -2087,21 +2098,21 @@ $c_Lcom_vinctus_oql_AbstractOQL$.prototype.preprocessQuery__s_Option__Lcom_vinct
           matchResult19: {
             if ((x$1$3 !== null)) {
               var this$31 = $n(x$1$3);
-              var x234 = this$31.Lcom_vinctus_oql_Attribute__f_name;
+              var x243 = this$31.Lcom_vinctus_oql_Attribute__f_name;
               $n(x$1$3);
               $n(x$1$3);
               $n(x$1$3);
               var this$35 = $n(x$1$3);
-              var x238 = this$35.Lcom_vinctus_oql_Attribute__f_typ;
-              if ($n(x238).isDataType__Z()) {
-                var ids$1 = new $c_sci_$colon$colon(new $c_Lcom_vinctus_oql_Ident(x234, null), $m_sci_Nil$());
+              var x247 = this$35.Lcom_vinctus_oql_Attribute__f_typ;
+              if ($n(x247).isDataType__Z()) {
+                var ids$1 = new $c_sci_$colon$colon(new $c_Lcom_vinctus_oql_Ident(x243, null), $m_sci_Nil$());
                 var dmrefs = new $c_sci_$colon$colon(new $c_T2(entity, x$1$3), $m_sci_Nil$());
                 var expr$1 = new $c_Lcom_vinctus_oql_AttributeOQLExpression(ids$1, dmrefs);
-                var this$39 = $n(x238);
+                var this$39 = $n(x247);
                 expr$1.Lcom_vinctus_oql_OQLExpression__f_typ = $as_Lcom_vinctus_oql_Datatype(this$39);
-                var label = new $c_Lcom_vinctus_oql_Ident(x234, null);
+                var label = new $c_Lcom_vinctus_oql_Ident(x243, null);
                 var value$1 = new $c_Lcom_vinctus_oql_ExpressionOQLProject(label, expr$1);
-                $p_scm_LinkedHashMap__put0__O__O__Z__s_Some(map, x234, value$1, false);
+                $p_scm_LinkedHashMap__put0__O__O__Z__s_Some(map, x243, value$1, false);
                 break matchResult19;
               }
             }
@@ -2112,62 +2123,62 @@ $c_Lcom_vinctus_oql_AbstractOQL$.prototype.preprocessQuery__s_Option__Lcom_vinct
       if ((x$1 instanceof $c_Lcom_vinctus_oql_SubtractOQLProject)) {
         var x$1$4 = $as_Lcom_vinctus_oql_SubtractOQLProject(x$1);
         var this$43 = $n(x$1$4);
-        var x300 = this$43.Lcom_vinctus_oql_SubtractOQLProject__f_id;
-        var elem = $n(x300).Lcom_vinctus_oql_Ident__f_s;
+        var x309 = this$43.Lcom_vinctus_oql_SubtractOQLProject__f_id;
+        var elem = $n(x309).Lcom_vinctus_oql_Ident__f_s;
         if (subtracts.contains__O__Z(elem)) {
-          $m_Lcom_vinctus_oql_package$().problem__s_util_parsing_input_Position__T__T__E($n(x300).Lcom_vinctus_oql_Ident__f_pos, (("attribute '" + $n(x300).Lcom_vinctus_oql_Ident__f_s) + "' already removed"), oql);
+          $m_Lcom_vinctus_oql_package$().problem__s_util_parsing_input_Position__T__T__E($n(x309).Lcom_vinctus_oql_Ident__f_pos, (("attribute '" + $n(x309).Lcom_vinctus_oql_Ident__f_s) + "' already removed"), oql);
         }
-        var elem$1 = $n(x300).Lcom_vinctus_oql_Ident__f_s;
+        var elem$1 = $n(x309).Lcom_vinctus_oql_Ident__f_s;
         subtracts.add__O__Z(elem$1);
-        if (map.contains__O__Z($n(x300).Lcom_vinctus_oql_Ident__f_s)) {
-          var elem$2 = $n(x300).Lcom_vinctus_oql_Ident__f_s;
+        if (map.contains__O__Z($n(x309).Lcom_vinctus_oql_Ident__f_s)) {
+          var elem$2 = $n(x309).Lcom_vinctus_oql_Ident__f_s;
           map.subtractOne__O__scm_LinkedHashMap(elem$2);
           break matchResult22;
         } else {
-          $m_Lcom_vinctus_oql_package$().problem__s_util_parsing_input_Position__T__T__E($n(x300).Lcom_vinctus_oql_Ident__f_pos, (("attribute '" + $n(x300).Lcom_vinctus_oql_Ident__f_s) + "' not added with '*'"), oql);
+          $m_Lcom_vinctus_oql_package$().problem__s_util_parsing_input_Position__T__T__E($n(x309).Lcom_vinctus_oql_Ident__f_pos, (("attribute '" + $n(x309).Lcom_vinctus_oql_Ident__f_s) + "' not added with '*'"), oql);
         }
       }
       if ((x$1 instanceof $c_Lcom_vinctus_oql_ExpressionOQLProject)) {
-        var x294 = $as_Lcom_vinctus_oql_ExpressionOQLProject(x$1);
-        var this$45 = $n(x294);
-        var x296 = this$45.Lcom_vinctus_oql_ExpressionOQLProject__f_label;
-        var this$46 = $n(x294);
-        var x297 = this$46.Lcom_vinctus_oql_ExpressionOQLProject__f_expr;
-        if (map.contains__O__Z($n(x296).Lcom_vinctus_oql_Ident__f_s)) {
-          $m_Lcom_vinctus_oql_package$().problem__s_util_parsing_input_Position__T__T__E($n(x296).Lcom_vinctus_oql_Ident__f_pos, (("duplicate attribute label '" + $n(x296).Lcom_vinctus_oql_Ident__f_s) + "'"), oql);
+        var x303 = $as_Lcom_vinctus_oql_ExpressionOQLProject(x$1);
+        var this$45 = $n(x303);
+        var x305 = this$45.Lcom_vinctus_oql_ExpressionOQLProject__f_label;
+        var this$46 = $n(x303);
+        var x306 = this$46.Lcom_vinctus_oql_ExpressionOQLProject__f_expr;
+        if (map.contains__O__Z($n(x305).Lcom_vinctus_oql_Ident__f_s)) {
+          $m_Lcom_vinctus_oql_package$().problem__s_util_parsing_input_Position__T__T__E($n(x305).Lcom_vinctus_oql_Ident__f_pos, (("duplicate attribute label '" + $n(x305).Lcom_vinctus_oql_Ident__f_s) + "'"), oql);
         }
-        var key$1 = $n(x296).Lcom_vinctus_oql_Ident__f_s;
+        var key$1 = $n(x305).Lcom_vinctus_oql_Ident__f_s;
         matchResult21: {
           var value$2;
-          if ((x297 instanceof $c_Lcom_vinctus_oql_AttributeOQLExpression)) {
-            var x287 = $as_Lcom_vinctus_oql_AttributeOQLExpression(x297);
-            var this$48 = $n(x287);
-            var x289 = this$48.Lcom_vinctus_oql_AttributeOQLExpression__f_ids;
-            $n(x287);
-            if ((x289 !== null)) {
-              if (($n(x289).lengthCompare__I__I(1) === 0)) {
-                var this$53 = $n(x289);
-                var x292 = $as_Lcom_vinctus_oql_Ident($f_sc_LinearSeqOps__apply__I__O(this$53, 0));
-                var x239 = $n($n(entity).attributes__sci_Map()).get__O__s_Option($n(x292).Lcom_vinctus_oql_Ident__f_s);
-                if ((x239 instanceof $c_s_Some)) {
-                  var x278 = $as_Lcom_vinctus_oql_Attribute($n($as_s_Some(x239)).s_Some__f_value);
-                  if ((x278 !== null)) {
-                    $n(x278);
-                    $n(x278);
-                    $n(x278);
-                    $n(x278);
-                    var this$59 = $n(x278);
-                    var x284 = this$59.Lcom_vinctus_oql_Attribute__f_typ;
-                    if ($is_Lcom_vinctus_oql_Datatype(x284)) {
-                      $n(x287).Lcom_vinctus_oql_AttributeOQLExpression__f_dmrefs = new $c_sci_$colon$colon(new $c_T2(entity, x278), $m_sci_Nil$());
-                      $m_Lcom_vinctus_oql_AbstractOQL$().decorate__Lcom_vinctus_oql_Entity__Lcom_vinctus_oql_OQLExpression__Lcom_vinctus_oql_DataModel__Lcom_vinctus_oql_SQLDataSource__T__V(entity, x287, model, ds, oql);
-                      var value$2 = x294;
+          if ((x306 instanceof $c_Lcom_vinctus_oql_AttributeOQLExpression)) {
+            var x296 = $as_Lcom_vinctus_oql_AttributeOQLExpression(x306);
+            var this$48 = $n(x296);
+            var x298 = this$48.Lcom_vinctus_oql_AttributeOQLExpression__f_ids;
+            $n(x296);
+            if ((x298 !== null)) {
+              if (($n(x298).lengthCompare__I__I(1) === 0)) {
+                var this$53 = $n(x298);
+                var x301 = $as_Lcom_vinctus_oql_Ident($f_sc_LinearSeqOps__apply__I__O(this$53, 0));
+                var x248 = $n($n(entity).attributes__sci_Map()).get__O__s_Option($n(x301).Lcom_vinctus_oql_Ident__f_s);
+                if ((x248 instanceof $c_s_Some)) {
+                  var x287 = $as_Lcom_vinctus_oql_Attribute($n($as_s_Some(x248)).s_Some__f_value);
+                  if ((x287 !== null)) {
+                    $n(x287);
+                    $n(x287);
+                    $n(x287);
+                    $n(x287);
+                    var this$59 = $n(x287);
+                    var x293 = this$59.Lcom_vinctus_oql_Attribute__f_typ;
+                    if ($is_Lcom_vinctus_oql_Datatype(x293)) {
+                      $n(x296).Lcom_vinctus_oql_AttributeOQLExpression__f_dmrefs = new $c_sci_$colon$colon(new $c_T2(entity, x287), $m_sci_Nil$());
+                      $m_Lcom_vinctus_oql_AbstractOQL$().decorate__Lcom_vinctus_oql_Entity__Lcom_vinctus_oql_OQLExpression__Lcom_vinctus_oql_DataModel__Lcom_vinctus_oql_SQLDataSource__T__V(entity, x296, model, ds, oql);
+                      var value$2 = x303;
                       break matchResult21;
                     }
-                    if ((x284 instanceof $c_Lcom_vinctus_oql_ManyToManyType)) {
-                      var x$1$5 = $as_Lcom_vinctus_oql_ManyToManyType(x284);
+                    if ((x293 instanceof $c_Lcom_vinctus_oql_ManyToManyType)) {
+                      var x$1$5 = $as_Lcom_vinctus_oql_ManyToManyType(x293);
                       var this$62 = $n(x$1$5);
-                      var x273 = this$62.Lcom_vinctus_oql_ManyToManyType__f_entity;
+                      var x282 = this$62.Lcom_vinctus_oql_ManyToManyType__f_entity;
                       $n(x$1$5);
                       $n(x$1$5);
                       $n(x$1$5);
@@ -2179,14 +2190,14 @@ $c_Lcom_vinctus_oql_AbstractOQL$.prototype.preprocessQuery__s_Option__Lcom_vinct
                       var order = $m_s_None$();
                       var limit = $m_s_None$();
                       var offset = $m_s_None$();
-                      var query$1 = $x_4.preprocessQuery__s_Option__Lcom_vinctus_oql_OQLQuery__Lcom_vinctus_oql_DataModel__Lcom_vinctus_oql_SQLDataSource__T__Lcom_vinctus_oql_OQLQuery($x_3, new $c_Lcom_vinctus_oql_OQLQuery(x292, x273, x278, project, select, group, order, limit, offset), model, ds, oql);
-                      var value$2 = new $c_Lcom_vinctus_oql_QueryOQLProject(x296, query$1);
+                      var query$1 = $x_4.preprocessQuery__s_Option__Lcom_vinctus_oql_OQLQuery__Lcom_vinctus_oql_DataModel__Lcom_vinctus_oql_SQLDataSource__T__Lcom_vinctus_oql_OQLQuery($x_3, new $c_Lcom_vinctus_oql_OQLQuery(x301, x282, x287, project, select, group, order, limit, offset), model, ds, oql);
+                      var value$2 = new $c_Lcom_vinctus_oql_QueryOQLProject(x305, query$1);
                       break matchResult21;
                     }
-                    if ((x284 instanceof $c_Lcom_vinctus_oql_ManyToOneType)) {
-                      var x$1$6 = $as_Lcom_vinctus_oql_ManyToOneType(x284);
+                    if ((x293 instanceof $c_Lcom_vinctus_oql_ManyToOneType)) {
+                      var x$1$6 = $as_Lcom_vinctus_oql_ManyToOneType(x293);
                       var this$70 = $n(x$1$6);
-                      var x262 = this$70.Lcom_vinctus_oql_ManyToOneType__f_entity;
+                      var x271 = this$70.Lcom_vinctus_oql_ManyToOneType__f_entity;
                       var $x_6 = $m_Lcom_vinctus_oql_AbstractOQL$();
                       var $x_5 = new $c_s_Some(entity);
                       var project$1 = new $c_sci_$colon$colon($m_Lcom_vinctus_oql_StarOQLProject$(), $m_sci_Nil$());
@@ -2195,14 +2206,14 @@ $c_Lcom_vinctus_oql_AbstractOQL$.prototype.preprocessQuery__s_Option__Lcom_vinct
                       var order$1 = $m_s_None$();
                       var limit$1 = $m_s_None$();
                       var offset$1 = $m_s_None$();
-                      var query$2 = $x_6.preprocessQuery__s_Option__Lcom_vinctus_oql_OQLQuery__Lcom_vinctus_oql_DataModel__Lcom_vinctus_oql_SQLDataSource__T__Lcom_vinctus_oql_OQLQuery($x_5, new $c_Lcom_vinctus_oql_OQLQuery(x292, x262, x278, project$1, select$1, group$1, order$1, limit$1, offset$1), model, ds, oql);
-                      var value$2 = new $c_Lcom_vinctus_oql_QueryOQLProject(x296, query$2);
+                      var query$2 = $x_6.preprocessQuery__s_Option__Lcom_vinctus_oql_OQLQuery__Lcom_vinctus_oql_DataModel__Lcom_vinctus_oql_SQLDataSource__T__Lcom_vinctus_oql_OQLQuery($x_5, new $c_Lcom_vinctus_oql_OQLQuery(x301, x271, x287, project$1, select$1, group$1, order$1, limit$1, offset$1), model, ds, oql);
+                      var value$2 = new $c_Lcom_vinctus_oql_QueryOQLProject(x305, query$2);
                       break matchResult21;
                     }
-                    if ((x284 instanceof $c_Lcom_vinctus_oql_OneToManyType)) {
-                      var x$1$7 = $as_Lcom_vinctus_oql_OneToManyType(x284);
+                    if ((x293 instanceof $c_Lcom_vinctus_oql_OneToManyType)) {
+                      var x$1$7 = $as_Lcom_vinctus_oql_OneToManyType(x293);
                       var this$75 = $n(x$1$7);
-                      var x250 = this$75.Lcom_vinctus_oql_OneToManyType__f_entity;
+                      var x259 = this$75.Lcom_vinctus_oql_OneToManyType__f_entity;
                       $n(x$1$7);
                       var $x_8 = $m_Lcom_vinctus_oql_AbstractOQL$();
                       var $x_7 = new $c_s_Some(entity);
@@ -2212,19 +2223,19 @@ $c_Lcom_vinctus_oql_AbstractOQL$.prototype.preprocessQuery__s_Option__Lcom_vinct
                       var order$2 = $m_s_None$();
                       var limit$2 = $m_s_None$();
                       var offset$2 = $m_s_None$();
-                      var query$3 = $x_8.preprocessQuery__s_Option__Lcom_vinctus_oql_OQLQuery__Lcom_vinctus_oql_DataModel__Lcom_vinctus_oql_SQLDataSource__T__Lcom_vinctus_oql_OQLQuery($x_7, new $c_Lcom_vinctus_oql_OQLQuery(x292, x250, x278, project$2, select$2, group$2, order$2, limit$2, offset$2), model, ds, oql);
-                      var value$2 = new $c_Lcom_vinctus_oql_QueryOQLProject(x296, query$3);
+                      var query$3 = $x_8.preprocessQuery__s_Option__Lcom_vinctus_oql_OQLQuery__Lcom_vinctus_oql_DataModel__Lcom_vinctus_oql_SQLDataSource__T__Lcom_vinctus_oql_OQLQuery($x_7, new $c_Lcom_vinctus_oql_OQLQuery(x301, x259, x287, project$2, select$2, group$2, order$2, limit$2, offset$2), model, ds, oql);
+                      var value$2 = new $c_Lcom_vinctus_oql_QueryOQLProject(x305, query$3);
                       break matchResult21;
                     }
                   }
                 }
                 var x$5 = $m_s_None$();
-                if ((x$5 === x239)) {
+                if ((x$5 === x248)) {
                   var $x_11 = $n($n(ds).builtinVariables__sci_Map());
                   if ($n(ds).caseSensitive__Z()) {
-                    var $x_10 = $n(x292).Lcom_vinctus_oql_Ident__f_s;
+                    var $x_10 = $n(x301).Lcom_vinctus_oql_Ident__f_s;
                   } else {
-                    var this$80 = $n($n(x292).Lcom_vinctus_oql_Ident__f_s);
+                    var this$80 = $n($n(x301).Lcom_vinctus_oql_Ident__f_s);
                     var $x_10 = $as_T(this$80.toLowerCase());
                   }
                   var $x_9 = $x_11.contains__O__Z($x_10);
@@ -2232,15 +2243,15 @@ $c_Lcom_vinctus_oql_AbstractOQL$.prototype.preprocessQuery__s_Option__Lcom_vinct
                   var $x_9 = false;
                 }
                 if ($x_9) {
-                  var value$2 = x294;
+                  var value$2 = x303;
                   break matchResult21;
                 }
-                $m_Lcom_vinctus_oql_package$().problem__s_util_parsing_input_Position__T__T__E($n(x292).Lcom_vinctus_oql_Ident__f_pos, (((("entity '" + $n(entity).Lcom_vinctus_oql_Entity__f_name) + "' does not have attribute '") + $n(x292).Lcom_vinctus_oql_Ident__f_s) + "'"), oql);
+                $m_Lcom_vinctus_oql_package$().problem__s_util_parsing_input_Position__T__T__E($n(x301).Lcom_vinctus_oql_Ident__f_pos, (((("entity '" + $n(entity).Lcom_vinctus_oql_Entity__f_name) + "' does not have attribute '") + $n(x301).Lcom_vinctus_oql_Ident__f_s) + "'"), oql);
               }
             }
           }
-          $m_Lcom_vinctus_oql_AbstractOQL$().decorate__Lcom_vinctus_oql_Entity__Lcom_vinctus_oql_OQLExpression__Lcom_vinctus_oql_DataModel__Lcom_vinctus_oql_SQLDataSource__T__V(entity, x297, model, ds, oql);
-          var value$2 = x294;
+          $m_Lcom_vinctus_oql_AbstractOQL$().decorate__Lcom_vinctus_oql_Entity__Lcom_vinctus_oql_OQLExpression__Lcom_vinctus_oql_DataModel__Lcom_vinctus_oql_SQLDataSource__T__V(entity, x306, model, ds, oql);
+          var value$2 = x303;
         }
         $p_scm_LinkedHashMap__put0__O__O__Z__s_Some(map, key$1, value$2, false);
         break matchResult22;
@@ -2266,15 +2277,15 @@ $c_Lcom_vinctus_oql_AbstractOQL$.prototype.orList__sci_List__Lcom_vinctus_oql_OQ
   if ((exprs !== null)) {
     if (($n(exprs).lengthCompare__I__I(1) === 0)) {
       var this$4 = $n(exprs);
-      var x310 = $as_Lcom_vinctus_oql_OQLExpression($f_sc_LinearSeqOps__apply__I__O(this$4, 0));
-      return x310;
+      var x319 = $as_Lcom_vinctus_oql_OQLExpression($f_sc_LinearSeqOps__apply__I__O(this$4, 0));
+      return x319;
     }
   }
   if ((exprs instanceof $c_sci_$colon$colon)) {
-    var x306 = $as_sci_$colon$colon(exprs);
-    var x308 = $n(x306).sci_$colon$colon__f_next;
-    var head = $as_Lcom_vinctus_oql_OQLExpression($n(x306).sci_$colon$colon__f_head);
-    var right = this.orList__sci_List__Lcom_vinctus_oql_OQLExpression(x308);
+    var x315 = $as_sci_$colon$colon(exprs);
+    var x317 = $n(x315).sci_$colon$colon__f_next;
+    var head = $as_Lcom_vinctus_oql_OQLExpression($n(x315).sci_$colon$colon__f_head);
+    var right = this.orList__sci_List__Lcom_vinctus_oql_OQLExpression(x317);
     return new $c_Lcom_vinctus_oql_InfixOQLExpression(head, "OR", right);
   }
   $m_s_sys_package$().error__T__E("orList: problem");
@@ -2283,20 +2294,20 @@ $c_Lcom_vinctus_oql_AbstractOQL$.prototype.writeQuery__Lcom_vinctus_oql_Abstract
   if ((node instanceof $c_Lcom_vinctus_oql_AbstractOQL$ResultNode)) {
     var x$1 = $as_Lcom_vinctus_oql_AbstractOQL$ResultNode(node);
     var this$2 = $n(x$1);
-    var x429 = this$2.Lcom_vinctus_oql_AbstractOQL$ResultNode__f_query;
+    var x438 = this$2.Lcom_vinctus_oql_AbstractOQL$ResultNode__f_query;
     var this$3 = $n(x$1);
-    var x430 = this$3.Lcom_vinctus_oql_AbstractOQL$ResultNode__f_element;
+    var x439 = this$3.Lcom_vinctus_oql_AbstractOQL$ResultNode__f_element;
     var this$4 = $n(builder);
-    $n($as_Lcom_vinctus_oql_SQLQueryBuilder($n(new $c_s_util_Either$LeftProjection(this$4).toOption__s_Option()).get__O())).table__T__s_Option__V($n($n(x429).Lcom_vinctus_oql_OQLQuery__f_entity).Lcom_vinctus_oql_Entity__f_table, $m_s_None$());
-    var this$5 = $n($n(x429).Lcom_vinctus_oql_OQLQuery__f_select);
+    $n($as_Lcom_vinctus_oql_SQLQueryBuilder($n(new $c_s_util_Either$LeftProjection(this$4).toOption__s_Option()).get__O())).table__T__s_Option__V($n($n(x438).Lcom_vinctus_oql_OQLQuery__f_entity).Lcom_vinctus_oql_Entity__f_table, $m_s_None$());
+    var this$5 = $n($n(x438).Lcom_vinctus_oql_OQLQuery__f_select);
     if ((!this$5.isEmpty__Z())) {
       var x0 = this$5.get__O();
       var _$20 = $as_Lcom_vinctus_oql_OQLExpression(x0);
       var this$6 = $n(builder);
-      $n($as_Lcom_vinctus_oql_SQLQueryBuilder($n(new $c_s_util_Either$LeftProjection(this$6).toOption__s_Option()).get__O())).select__Lcom_vinctus_oql_OQLExpression__T__V(_$20, $n($n(x429).Lcom_vinctus_oql_OQLQuery__f_entity).Lcom_vinctus_oql_Entity__f_table);
+      $n($as_Lcom_vinctus_oql_SQLQueryBuilder($n(new $c_s_util_Either$LeftProjection(this$6).toOption__s_Option()).get__O())).select__Lcom_vinctus_oql_OQLExpression__T__V(_$20, $n($n(x438).Lcom_vinctus_oql_OQLQuery__f_entity).Lcom_vinctus_oql_Entity__f_table);
     }
     if ($n(fixed).Lcom_vinctus_oql_Fixed__f_operative) {
-      var this$7 = $n($as_sci_List($n($n($n(x429).Lcom_vinctus_oql_OQLQuery__f_entity).fixing__sci_Map()).apply__O__O($n(fixed).Lcom_vinctus_oql_Fixed__f_entity)));
+      var this$7 = $n($as_sci_List($n($n($n(x438).Lcom_vinctus_oql_OQLQuery__f_entity).fixing__sci_Map()).apply__O__O($n(fixed).Lcom_vinctus_oql_Fixed__f_entity)));
       var these = this$7;
       while ((!$n(these).isEmpty__Z())) {
         var x0$1 = $n(these).head__O();
@@ -2329,18 +2340,18 @@ $c_Lcom_vinctus_oql_AbstractOQL$.prototype.writeQuery__Lcom_vinctus_oql_Abstract
             }
             matchResult24: {
               var $x_1;
-              var x311 = $n(fixed).Lcom_vinctus_oql_Fixed__f_at;
-              if ($isInt(x311)) {
-                var n$2 = $uI(x311);
+              var x320 = $n(fixed).Lcom_vinctus_oql_Fixed__f_at;
+              if ($isInt(x320)) {
+                var n$2 = $uI(x320);
                 var $x_1 = new $c_Lcom_vinctus_oql_IntegerOQLExpression(n$2);
                 break matchResult24;
               }
-              if (((typeof x311) === "string")) {
-                var s = $as_T(x311);
+              if (((typeof x320) === "string")) {
+                var s = $as_T(x320);
                 var $x_1 = new $c_Lcom_vinctus_oql_StringOQLExpression(s);
                 break matchResult24;
               }
-              $m_s_sys_package$().error__T__E((("no type match for creating TypedOQLExpression for fixed.at: '" + x311) + "'"));
+              $m_s_sys_package$().error__T__E((("no type match for creating TypedOQLExpression for fixed.at: '" + x320) + "'"));
             }
             var expr = $as_Lcom_vinctus_oql_OQLExpression($x_1);
             var this$12 = $n($n($as_Lcom_vinctus_oql_Attribute($n($n($n(fixed).Lcom_vinctus_oql_Fixed__f_entity).pk__s_Option()).get__O())).Lcom_vinctus_oql_Attribute__f_typ);
@@ -2349,7 +2360,7 @@ $c_Lcom_vinctus_oql_AbstractOQL$.prototype.writeQuery__Lcom_vinctus_oql_Abstract
             var elem = new $c_Lcom_vinctus_oql_InfixOQLExpression(attr, "=", right);
             var cond = $x_2.orList__sci_List__Lcom_vinctus_oql_OQLExpression($as_sci_List($f_sc_StrictOptimizedSeqOps__appended__O__O(this$15, elem)));
             var this$16 = $n(builder);
-            $n($as_Lcom_vinctus_oql_SQLQueryBuilder($n(new $c_s_util_Either$LeftProjection(this$16).toOption__s_Option()).get__O())).select__Lcom_vinctus_oql_OQLExpression__T__V(cond, $n($n(x429).Lcom_vinctus_oql_OQLQuery__f_entity).Lcom_vinctus_oql_Entity__f_table);
+            $n($as_Lcom_vinctus_oql_SQLQueryBuilder($n(new $c_s_util_Either$LeftProjection(this$16).toOption__s_Option()).get__O())).select__Lcom_vinctus_oql_OQLExpression__T__V(cond, $n($n(x438).Lcom_vinctus_oql_OQLQuery__f_entity).Lcom_vinctus_oql_Entity__f_table);
             break matchResult25;
           }
           throw new $c_s_MatchError(x$1$1);
@@ -2357,21 +2368,21 @@ $c_Lcom_vinctus_oql_AbstractOQL$.prototype.writeQuery__Lcom_vinctus_oql_Abstract
         these = $as_sci_List($n(these).tail__O());
       }
     }
-    var this$17 = $n($n(x429).Lcom_vinctus_oql_OQLQuery__f_group);
+    var this$17 = $n($n(x438).Lcom_vinctus_oql_OQLQuery__f_group);
     if ((!this$17.isEmpty__Z())) {
       var x0$4 = this$17.get__O();
       var _$21 = $as_sci_List(x0$4);
       var this$18 = $n(builder);
-      $n($as_Lcom_vinctus_oql_SQLQueryBuilder($n(new $c_s_util_Either$LeftProjection(this$18).toOption__s_Option()).get__O())).group__sci_List__T__V(_$21, $n($n(x429).Lcom_vinctus_oql_OQLQuery__f_entity).Lcom_vinctus_oql_Entity__f_table);
+      $n($as_Lcom_vinctus_oql_SQLQueryBuilder($n(new $c_s_util_Either$LeftProjection(this$18).toOption__s_Option()).get__O())).group__sci_List__T__V(_$21, $n($n(x438).Lcom_vinctus_oql_OQLQuery__f_entity).Lcom_vinctus_oql_Entity__f_table);
     }
-    var this$19 = $n($n(x429).Lcom_vinctus_oql_OQLQuery__f_order);
+    var this$19 = $n($n(x438).Lcom_vinctus_oql_OQLQuery__f_order);
     if ((!this$19.isEmpty__Z())) {
       var x0$5 = this$19.get__O();
       var _$22 = $as_sci_List(x0$5);
       var this$20 = $n(builder);
-      $n($as_Lcom_vinctus_oql_SQLQueryBuilder($n(new $c_s_util_Either$LeftProjection(this$20).toOption__s_Option()).get__O())).order__sci_List__T__V(_$22, $n($n(x429).Lcom_vinctus_oql_OQLQuery__f_entity).Lcom_vinctus_oql_Entity__f_table);
+      $n($as_Lcom_vinctus_oql_SQLQueryBuilder($n(new $c_s_util_Either$LeftProjection(this$20).toOption__s_Option()).get__O())).order__sci_List__T__V(_$22, $n($n(x438).Lcom_vinctus_oql_OQLQuery__f_entity).Lcom_vinctus_oql_Entity__f_table);
     }
-    var this$22 = $n($n(x429).Lcom_vinctus_oql_OQLQuery__f_limit);
+    var this$22 = $n($n(x438).Lcom_vinctus_oql_OQLQuery__f_limit);
     var this$21 = $n(builder);
     var \u03b41$ = $as_Lcom_vinctus_oql_SQLQueryBuilder($n(new $c_s_util_Either$LeftProjection(this$21).toOption__s_Option()).get__O());
     if ((!this$22.isEmpty__Z())) {
@@ -2379,7 +2390,7 @@ $c_Lcom_vinctus_oql_AbstractOQL$.prototype.writeQuery__Lcom_vinctus_oql_Abstract
       var n$3 = $uI(x0$6);
       $n(\u03b41$).limit__I__V(n$3);
     }
-    var this$24 = $n($n(x429).Lcom_vinctus_oql_OQLQuery__f_offset);
+    var this$24 = $n($n(x438).Lcom_vinctus_oql_OQLQuery__f_offset);
     var this$23 = $n(builder);
     var \u03b42$ = $as_Lcom_vinctus_oql_SQLQueryBuilder($n(new $c_s_util_Either$LeftProjection(this$23).toOption__s_Option()).get__O());
     if ((!this$24.isEmpty__Z())) {
@@ -2387,40 +2398,40 @@ $c_Lcom_vinctus_oql_AbstractOQL$.prototype.writeQuery__Lcom_vinctus_oql_Abstract
       var n$4 = $uI(x0$7);
       $n(\u03b42$).offset__I__V(n$4);
     }
-    this.writeQuery__Lcom_vinctus_oql_AbstractOQL$Node__T__s_util_Either__T__Lcom_vinctus_oql_SQLDataSource__Lcom_vinctus_oql_Fixed__Lcom_vinctus_oql_DataModel__Lcom_vinctus_oql_SQLQueryBuilder(x430, $n($n(x429).Lcom_vinctus_oql_OQLQuery__f_entity).Lcom_vinctus_oql_Entity__f_table, builder, oql, ds, fixed, model);
+    this.writeQuery__Lcom_vinctus_oql_AbstractOQL$Node__T__s_util_Either__T__Lcom_vinctus_oql_SQLDataSource__Lcom_vinctus_oql_Fixed__Lcom_vinctus_oql_DataModel__Lcom_vinctus_oql_SQLQueryBuilder(x439, $n($n(x438).Lcom_vinctus_oql_OQLQuery__f_entity).Lcom_vinctus_oql_Entity__f_table, builder, oql, ds, fixed, model);
     var this$25 = $n(builder);
     return $as_Lcom_vinctus_oql_SQLQueryBuilder($n(new $c_s_util_Either$LeftProjection(this$25).toOption__s_Option()).get__O());
   }
   if ((node instanceof $c_Lcom_vinctus_oql_AbstractOQL$ValueNode)) {
-    var x424 = $as_Lcom_vinctus_oql_AbstractOQL$ValueNode(node);
-    var this$27 = $n(x424);
-    var x426 = this$27.Lcom_vinctus_oql_AbstractOQL$ValueNode__f_value;
+    var x433 = $as_Lcom_vinctus_oql_AbstractOQL$ValueNode(node);
+    var this$27 = $n(x433);
+    var x435 = this$27.Lcom_vinctus_oql_AbstractOQL$ValueNode__f_value;
     matchResult26: {
       var \u03b43$___1;
       var \u03b43$___2;
       var this$28 = $n(builder);
-      var x317 = $n($as_Lcom_vinctus_oql_SQLQueryBuilder($n(new $c_s_util_Either$LeftProjection(this$28).toOption__s_Option()).get__O())).projectValue__Lcom_vinctus_oql_OQLExpression__T__T2(x426, table);
-      if ((x317 !== null)) {
-        var idx = $uI($n(x317)._1__O());
-        var typed = $uZ($n(x317)._2__O());
+      var x326 = $n($as_Lcom_vinctus_oql_SQLQueryBuilder($n(new $c_s_util_Either$LeftProjection(this$28).toOption__s_Option()).get__O())).projectValue__Lcom_vinctus_oql_OQLExpression__T__T2(x435, table);
+      if ((x326 !== null)) {
+        var idx = $uI($n(x326)._1__O());
+        var typed = $uZ($n(x326)._2__O());
         var \u03b43$___1 = idx;
         var \u03b43$___2 = typed;
         break matchResult26;
       }
-      throw new $c_s_MatchError(x317);
+      throw new $c_s_MatchError(x326);
     }
     var idx$2 = $uI(\u03b43$___1);
     var typed$2 = $uZ(\u03b43$___2);
-    $n(x424).Lcom_vinctus_oql_AbstractOQL$ValueNode__f_idx = idx$2;
-    $n(x424).Lcom_vinctus_oql_AbstractOQL$ValueNode__f_typed = typed$2;
+    $n(x433).Lcom_vinctus_oql_AbstractOQL$ValueNode__f_idx = idx$2;
+    $n(x433).Lcom_vinctus_oql_AbstractOQL$ValueNode__f_typed = typed$2;
     var this$30 = $n(builder);
     return $as_Lcom_vinctus_oql_SQLQueryBuilder($n(new $c_s_util_Either$LeftProjection(this$30).toOption__s_Option()).get__O());
   }
   if ((node instanceof $c_Lcom_vinctus_oql_AbstractOQL$ObjectNode)) {
     var x$1$2 = $as_Lcom_vinctus_oql_AbstractOQL$ObjectNode(node);
     var this$32 = $n(x$1$2);
-    var x423 = this$32.Lcom_vinctus_oql_AbstractOQL$ObjectNode__f_props;
-    $n(x423).foreach__F1__V(new $c_sr_AbstractFunction1_$$Lambda$70e1780b84463d18653aacefee3ab989ac625f28(((x$1$2$1) => {
+    var x432 = this$32.Lcom_vinctus_oql_AbstractOQL$ObjectNode__f_props;
+    $n(x432).foreach__F1__V(new $c_sr_AbstractFunction1_$$Lambda$70e1780b84463d18653aacefee3ab989ac625f28(((x$1$2$1) => {
       var x$1$3 = $as_T2(x$1$2$1);
       if ((x$1$3 !== null)) {
         var e = $as_Lcom_vinctus_oql_AbstractOQL$Node($n(x$1$3)._2__O());
@@ -2432,53 +2443,53 @@ $c_Lcom_vinctus_oql_AbstractOQL$.prototype.writeQuery__Lcom_vinctus_oql_Abstract
     return $as_Lcom_vinctus_oql_SQLQueryBuilder($n(new $c_s_util_Either$LeftProjection(this$33).toOption__s_Option()).get__O());
   }
   if ((node instanceof $c_Lcom_vinctus_oql_AbstractOQL$ManyToOneNode)) {
-    var x398 = $as_Lcom_vinctus_oql_AbstractOQL$ManyToOneNode(node);
-    var this$35 = $n(x398);
-    var x400 = this$35.Lcom_vinctus_oql_AbstractOQL$ManyToOneNode__f_query;
-    var this$36 = $n(x398);
-    var x401 = this$36.Lcom_vinctus_oql_AbstractOQL$ManyToOneNode__f_element;
-    if ((x400 !== null)) {
-      $n(x400);
-      var this$39 = $n(x400);
-      var x404 = this$39.Lcom_vinctus_oql_OQLQuery__f_entity;
-      var this$40 = $n(x400);
-      var x405 = this$40.Lcom_vinctus_oql_OQLQuery__f_attr;
-      $n(x400);
-      $n(x400);
-      $n(x400);
-      $n(x400);
-      $n(x400);
-      $n(x400);
-      if ((x405 !== null)) {
-        var this$48 = $n(x405);
-        var x413 = this$48.Lcom_vinctus_oql_Attribute__f_name;
-        var this$49 = $n(x405);
-        var x414 = this$49.Lcom_vinctus_oql_Attribute__f_column;
-        $n(x405);
-        $n(x405);
-        var this$52 = $n(x405);
-        var x417 = this$52.Lcom_vinctus_oql_Attribute__f_typ;
-        if ((x417 instanceof $c_Lcom_vinctus_oql_ManyToOneType)) {
-          var x$1$4 = $as_Lcom_vinctus_oql_ManyToOneType(x417);
+    var x407 = $as_Lcom_vinctus_oql_AbstractOQL$ManyToOneNode(node);
+    var this$35 = $n(x407);
+    var x409 = this$35.Lcom_vinctus_oql_AbstractOQL$ManyToOneNode__f_query;
+    var this$36 = $n(x407);
+    var x410 = this$36.Lcom_vinctus_oql_AbstractOQL$ManyToOneNode__f_element;
+    if ((x409 !== null)) {
+      $n(x409);
+      var this$39 = $n(x409);
+      var x413 = this$39.Lcom_vinctus_oql_OQLQuery__f_entity;
+      var this$40 = $n(x409);
+      var x414 = this$40.Lcom_vinctus_oql_OQLQuery__f_attr;
+      $n(x409);
+      $n(x409);
+      $n(x409);
+      $n(x409);
+      $n(x409);
+      $n(x409);
+      if ((x414 !== null)) {
+        var this$48 = $n(x414);
+        var x422 = this$48.Lcom_vinctus_oql_Attribute__f_name;
+        var this$49 = $n(x414);
+        var x423 = this$49.Lcom_vinctus_oql_Attribute__f_column;
+        $n(x414);
+        $n(x414);
+        var this$52 = $n(x414);
+        var x426 = this$52.Lcom_vinctus_oql_Attribute__f_typ;
+        if ((x426 instanceof $c_Lcom_vinctus_oql_ManyToOneType)) {
+          var x$1$4 = $as_Lcom_vinctus_oql_ManyToOneType(x426);
           var this$54 = $n(x$1$4);
-          var x420 = this$54.Lcom_vinctus_oql_ManyToOneType__f_entity;
-          var alias = ((table + "$") + x413);
-          if ($n(x405).Lcom_vinctus_oql_Attribute__f_required) {
-            $n(x398).Lcom_vinctus_oql_AbstractOQL$ManyToOneNode__f_idx = $m_s_None$();
+          var x429 = this$54.Lcom_vinctus_oql_ManyToOneType__f_entity;
+          var alias = ((table + "$") + x422);
+          if ($n(x414).Lcom_vinctus_oql_Attribute__f_required) {
+            $n(x407).Lcom_vinctus_oql_AbstractOQL$ManyToOneNode__f_idx = $m_s_None$();
           } else {
-            var ids = new $c_sci_$colon$colon(new $c_Lcom_vinctus_oql_Ident(x413, null), $m_sci_Nil$());
-            var dmrefs = new $c_sci_$colon$colon(new $c_T2(x404, x405), $m_sci_Nil$());
+            var ids = new $c_sci_$colon$colon(new $c_Lcom_vinctus_oql_Ident(x422, null), $m_sci_Nil$());
+            var dmrefs = new $c_sci_$colon$colon(new $c_T2(x413, x414), $m_sci_Nil$());
             var mtoAttr = new $c_Lcom_vinctus_oql_AttributeOQLExpression(ids, dmrefs);
-            var this$58 = $n($n($as_Lcom_vinctus_oql_Attribute($n($n(x420).pk__s_Option()).get__O())).Lcom_vinctus_oql_Attribute__f_typ);
+            var this$58 = $n($n($as_Lcom_vinctus_oql_Attribute($n($n(x429).pk__s_Option()).get__O())).Lcom_vinctus_oql_Attribute__f_typ);
             mtoAttr.Lcom_vinctus_oql_OQLExpression__f_typ = $as_Lcom_vinctus_oql_Datatype(this$58);
-            var $x_3 = $n(x398);
+            var $x_3 = $n(x407);
             var this$59 = $n(builder);
             var value = $n($n($as_Lcom_vinctus_oql_SQLQueryBuilder($n(new $c_s_util_Either$LeftProjection(this$59).toOption__s_Option()).get__O())).projectValue__Lcom_vinctus_oql_OQLExpression__T__T2(mtoAttr, table))._1__O();
             $x_3.Lcom_vinctus_oql_AbstractOQL$ManyToOneNode__f_idx = new $c_s_Some(value);
           }
           var this$61 = $n(builder);
-          $n($as_Lcom_vinctus_oql_SQLQueryBuilder($n(new $c_s_util_Either$LeftProjection(this$61).toOption__s_Option()).get__O())).leftJoin__T__T__T__T__T__Lcom_vinctus_oql_SQLQueryBuilder(table, x414, $n(x404).Lcom_vinctus_oql_Entity__f_table, alias, $n($as_Lcom_vinctus_oql_Attribute($n($n(x404).pk__s_Option()).get__O())).Lcom_vinctus_oql_Attribute__f_column);
-          this.writeQuery__Lcom_vinctus_oql_AbstractOQL$Node__T__s_util_Either__T__Lcom_vinctus_oql_SQLDataSource__Lcom_vinctus_oql_Fixed__Lcom_vinctus_oql_DataModel__Lcom_vinctus_oql_SQLQueryBuilder(x401, alias, builder, oql, ds, fixed, model);
+          $n($as_Lcom_vinctus_oql_SQLQueryBuilder($n(new $c_s_util_Either$LeftProjection(this$61).toOption__s_Option()).get__O())).leftJoin__T__T__T__T__T__Lcom_vinctus_oql_SQLQueryBuilder(table, x423, $n(x413).Lcom_vinctus_oql_Entity__f_table, alias, $n($as_Lcom_vinctus_oql_Attribute($n($n(x413).pk__s_Option()).get__O())).Lcom_vinctus_oql_Attribute__f_column);
+          this.writeQuery__Lcom_vinctus_oql_AbstractOQL$Node__T__s_util_Either__T__Lcom_vinctus_oql_SQLDataSource__Lcom_vinctus_oql_Fixed__Lcom_vinctus_oql_DataModel__Lcom_vinctus_oql_SQLQueryBuilder(x410, alias, builder, oql, ds, fixed, model);
           var this$62 = $n(builder);
           return $as_Lcom_vinctus_oql_SQLQueryBuilder($n(new $c_s_util_Either$LeftProjection(this$62).toOption__s_Option()).get__O());
         }
@@ -2486,132 +2497,132 @@ $c_Lcom_vinctus_oql_AbstractOQL$.prototype.writeQuery__Lcom_vinctus_oql_Abstract
     }
   }
   if ((node instanceof $c_Lcom_vinctus_oql_AbstractOQL$ManyToManyNode)) {
-    var x372 = $as_Lcom_vinctus_oql_AbstractOQL$ManyToManyNode(node);
-    var this$64 = $n(x372);
-    var x374 = this$64.Lcom_vinctus_oql_AbstractOQL$ManyToManyNode__f_query;
-    var this$65 = $n(x372);
-    var x375 = this$65.Lcom_vinctus_oql_AbstractOQL$ManyToManyNode__f_element;
-    if ((x374 !== null)) {
-      $n(x374);
-      var this$68 = $n(x374);
-      var x378 = this$68.Lcom_vinctus_oql_OQLQuery__f_entity;
-      var this$69 = $n(x374);
-      var x379 = this$69.Lcom_vinctus_oql_OQLQuery__f_attr;
-      $n(x374);
-      var this$71 = $n(x374);
-      var x381 = this$71.Lcom_vinctus_oql_OQLQuery__f_select;
-      var this$72 = $n(x374);
-      var x382 = this$72.Lcom_vinctus_oql_OQLQuery__f_group;
-      var this$73 = $n(x374);
-      var x383 = this$73.Lcom_vinctus_oql_OQLQuery__f_order;
-      var this$74 = $n(x374);
-      var x384 = this$74.Lcom_vinctus_oql_OQLQuery__f_limit;
-      var this$75 = $n(x374);
-      var x385 = this$75.Lcom_vinctus_oql_OQLQuery__f_offset;
-      if ((x379 !== null)) {
-        var this$77 = $n(x379);
-        var x387 = this$77.Lcom_vinctus_oql_Attribute__f_name;
-        $n(x379);
-        $n(x379);
-        $n(x379);
-        var this$81 = $n(x379);
-        var x391 = this$81.Lcom_vinctus_oql_Attribute__f_typ;
-        if ((x391 instanceof $c_Lcom_vinctus_oql_ManyToManyType)) {
-          var x$1$5 = $as_Lcom_vinctus_oql_ManyToManyType(x391);
+    var x381 = $as_Lcom_vinctus_oql_AbstractOQL$ManyToManyNode(node);
+    var this$64 = $n(x381);
+    var x383 = this$64.Lcom_vinctus_oql_AbstractOQL$ManyToManyNode__f_query;
+    var this$65 = $n(x381);
+    var x384 = this$65.Lcom_vinctus_oql_AbstractOQL$ManyToManyNode__f_element;
+    if ((x383 !== null)) {
+      $n(x383);
+      var this$68 = $n(x383);
+      var x387 = this$68.Lcom_vinctus_oql_OQLQuery__f_entity;
+      var this$69 = $n(x383);
+      var x388 = this$69.Lcom_vinctus_oql_OQLQuery__f_attr;
+      $n(x383);
+      var this$71 = $n(x383);
+      var x390 = this$71.Lcom_vinctus_oql_OQLQuery__f_select;
+      var this$72 = $n(x383);
+      var x391 = this$72.Lcom_vinctus_oql_OQLQuery__f_group;
+      var this$73 = $n(x383);
+      var x392 = this$73.Lcom_vinctus_oql_OQLQuery__f_order;
+      var this$74 = $n(x383);
+      var x393 = this$74.Lcom_vinctus_oql_OQLQuery__f_limit;
+      var this$75 = $n(x383);
+      var x394 = this$75.Lcom_vinctus_oql_OQLQuery__f_offset;
+      if ((x388 !== null)) {
+        var this$77 = $n(x388);
+        var x396 = this$77.Lcom_vinctus_oql_Attribute__f_name;
+        $n(x388);
+        $n(x388);
+        $n(x388);
+        var this$81 = $n(x388);
+        var x400 = this$81.Lcom_vinctus_oql_Attribute__f_typ;
+        if ((x400 instanceof $c_Lcom_vinctus_oql_ManyToManyType)) {
+          var x$1$5 = $as_Lcom_vinctus_oql_ManyToManyType(x400);
           var this$83 = $n(x$1$5);
-          var x394 = this$83.Lcom_vinctus_oql_ManyToManyType__f_entity;
+          var x403 = this$83.Lcom_vinctus_oql_ManyToManyType__f_entity;
           var this$84 = $n(x$1$5);
-          var x395 = this$84.Lcom_vinctus_oql_ManyToManyType__f_link;
+          var x404 = this$84.Lcom_vinctus_oql_ManyToManyType__f_link;
           var this$85 = $n(x$1$5);
-          var x396 = this$85.Lcom_vinctus_oql_ManyToManyType__f_self;
+          var x405 = this$85.Lcom_vinctus_oql_ManyToManyType__f_self;
           var this$86 = $n(x$1$5);
-          var x397 = this$86.Lcom_vinctus_oql_ManyToManyType__f_target;
-          var alias$2 = ((table + "$") + x387);
+          var x406 = this$86.Lcom_vinctus_oql_ManyToManyType__f_target;
+          var alias$2 = ((table + "$") + x396);
           if ($n(builder).isLeft__Z()) {
             var this$87 = $n(builder);
             var subquery = new $c_Lcom_vinctus_oql_SQLQueryBuilder(oql, ds, fixed, model, ((4 + $n($as_Lcom_vinctus_oql_SQLQueryBuilder($n(new $c_s_util_Either$LeftProjection(this$87).toOption__s_Option()).get__O())).Lcom_vinctus_oql_SQLQueryBuilder__f_margin) | 0), false);
           } else {
             var subquery = new $c_Lcom_vinctus_oql_SQLQueryBuilder(oql, ds, fixed, model, $uI($n($n(builder).toOption__s_Option()).get__O()), true);
           }
-          var joinAlias = ((alias$2 + "$") + $n(x397).Lcom_vinctus_oql_Attribute__f_name);
+          var joinAlias = ((alias$2 + "$") + $n(x406).Lcom_vinctus_oql_Attribute__f_name);
           if ($n(builder).isLeft__Z()) {
-            var $x_4 = $n(x372);
+            var $x_4 = $n(x381);
             var this$88 = $n(builder);
             $x_4.Lcom_vinctus_oql_AbstractOQL$ManyToManyNode__f_idx = $n($as_Lcom_vinctus_oql_SQLQueryBuilder($n(new $c_s_util_Either$LeftProjection(this$88).toOption__s_Option()).get__O())).projectQuery__Lcom_vinctus_oql_SQLQueryBuilder__I(subquery);
           }
-          subquery.table__T__s_Option__V($n(x395).Lcom_vinctus_oql_Entity__f_table, new $c_s_Some(alias$2));
-          this.writeQuery__Lcom_vinctus_oql_AbstractOQL$Node__T__s_util_Either__T__Lcom_vinctus_oql_SQLDataSource__Lcom_vinctus_oql_Fixed__Lcom_vinctus_oql_DataModel__Lcom_vinctus_oql_SQLQueryBuilder(x375, joinAlias, new $c_s_util_Left(subquery), oql, ds, fixed, model);
-          var s$1 = (((((((("\"" + alias$2) + "\".\"") + $n(x396).Lcom_vinctus_oql_Attribute__f_column) + "\" = \"") + table) + "\".\"") + $n($as_Lcom_vinctus_oql_Attribute($n($n(x378).pk__s_Option()).get__O())).Lcom_vinctus_oql_Attribute__f_column) + "\"");
+          subquery.table__T__s_Option__V($n(x404).Lcom_vinctus_oql_Entity__f_table, new $c_s_Some(alias$2));
+          this.writeQuery__Lcom_vinctus_oql_AbstractOQL$Node__T__s_util_Either__T__Lcom_vinctus_oql_SQLDataSource__Lcom_vinctus_oql_Fixed__Lcom_vinctus_oql_DataModel__Lcom_vinctus_oql_SQLQueryBuilder(x384, joinAlias, new $c_s_util_Left(subquery), oql, ds, fixed, model);
+          var s$1 = (((((((("\"" + alias$2) + "\".\"") + $n(x405).Lcom_vinctus_oql_Attribute__f_column) + "\" = \"") + table) + "\".\"") + $n($as_Lcom_vinctus_oql_Attribute($n($n(x387).pk__s_Option()).get__O())).Lcom_vinctus_oql_Attribute__f_column) + "\"");
           subquery.select__Lcom_vinctus_oql_OQLExpression__T__V(new $c_Lcom_vinctus_oql_RawOQLExpression(s$1), null);
-          var this$92 = $n(x381);
+          var this$92 = $n(x390);
           if ((!this$92.isEmpty__Z())) {
             var x0$8 = this$92.get__O();
             var _$23 = $as_Lcom_vinctus_oql_OQLExpression(x0$8);
             subquery.select__Lcom_vinctus_oql_OQLExpression__T__V(_$23, joinAlias);
           }
-          var this$93 = $n(x382);
+          var this$93 = $n(x391);
           if ((!this$93.isEmpty__Z())) {
             var x0$9 = this$93.get__O();
             var _$24 = $as_sci_List(x0$9);
             subquery.group__sci_List__T__V(_$24, joinAlias);
           }
-          var this$94 = $n(x383);
+          var this$94 = $n(x392);
           if ((!this$94.isEmpty__Z())) {
             var x0$10 = this$94.get__O();
             var _$25 = $as_sci_List(x0$10);
             subquery.order__sci_List__T__V(_$25, joinAlias);
           }
-          var this$95 = $n(x384);
+          var this$95 = $n(x393);
           if ((!this$95.isEmpty__Z())) {
             var x0$11 = this$95.get__O();
             var n$5 = $uI(x0$11);
             subquery.limit__I__V(n$5);
           }
-          var this$96 = $n(x385);
+          var this$96 = $n(x394);
           if ((!this$96.isEmpty__Z())) {
             var x0$12 = this$96.get__O();
             var n$6 = $uI(x0$12);
             subquery.offset__I__V(n$6);
           }
-          subquery.innerJoin__T__T__T__T__T__Lcom_vinctus_oql_SQLQueryBuilder(alias$2, $n(x397).Lcom_vinctus_oql_Attribute__f_column, $n(x394).Lcom_vinctus_oql_Entity__f_table, joinAlias, $n($as_Lcom_vinctus_oql_Attribute($n($n(x394).pk__s_Option()).get__O())).Lcom_vinctus_oql_Attribute__f_column);
+          subquery.innerJoin__T__T__T__T__T__Lcom_vinctus_oql_SQLQueryBuilder(alias$2, $n(x406).Lcom_vinctus_oql_Attribute__f_column, $n(x403).Lcom_vinctus_oql_Entity__f_table, joinAlias, $n($as_Lcom_vinctus_oql_Attribute($n($n(x403).pk__s_Option()).get__O())).Lcom_vinctus_oql_Attribute__f_column);
           return subquery;
         }
       }
     }
   }
   if ((node instanceof $c_Lcom_vinctus_oql_AbstractOQL$OneToOneNode)) {
-    var x348 = $as_Lcom_vinctus_oql_AbstractOQL$OneToOneNode(node);
-    var this$98 = $n(x348);
-    var x350 = this$98.Lcom_vinctus_oql_AbstractOQL$OneToOneNode__f_query;
-    var this$99 = $n(x348);
-    var x351 = this$99.Lcom_vinctus_oql_AbstractOQL$OneToOneNode__f_element;
-    if ((x350 !== null)) {
-      $n(x350);
-      var this$102 = $n(x350);
-      var x354 = this$102.Lcom_vinctus_oql_OQLQuery__f_entity;
-      var this$103 = $n(x350);
-      var x355 = this$103.Lcom_vinctus_oql_OQLQuery__f_attr;
-      $n(x350);
-      $n(x350);
-      $n(x350);
-      $n(x350);
-      $n(x350);
-      $n(x350);
-      if ((x355 !== null)) {
-        var this$111 = $n(x355);
-        var x363 = this$111.Lcom_vinctus_oql_Attribute__f_name;
-        $n(x355);
-        $n(x355);
-        $n(x355);
-        var this$115 = $n(x355);
-        var x367 = this$115.Lcom_vinctus_oql_Attribute__f_typ;
-        if ((x367 instanceof $c_Lcom_vinctus_oql_OneToOneType)) {
-          var x$1$6 = $as_Lcom_vinctus_oql_OneToOneType(x367);
+    var x357 = $as_Lcom_vinctus_oql_AbstractOQL$OneToOneNode(node);
+    var this$98 = $n(x357);
+    var x359 = this$98.Lcom_vinctus_oql_AbstractOQL$OneToOneNode__f_query;
+    var this$99 = $n(x357);
+    var x360 = this$99.Lcom_vinctus_oql_AbstractOQL$OneToOneNode__f_element;
+    if ((x359 !== null)) {
+      $n(x359);
+      var this$102 = $n(x359);
+      var x363 = this$102.Lcom_vinctus_oql_OQLQuery__f_entity;
+      var this$103 = $n(x359);
+      var x364 = this$103.Lcom_vinctus_oql_OQLQuery__f_attr;
+      $n(x359);
+      $n(x359);
+      $n(x359);
+      $n(x359);
+      $n(x359);
+      $n(x359);
+      if ((x364 !== null)) {
+        var this$111 = $n(x364);
+        var x372 = this$111.Lcom_vinctus_oql_Attribute__f_name;
+        $n(x364);
+        $n(x364);
+        $n(x364);
+        var this$115 = $n(x364);
+        var x376 = this$115.Lcom_vinctus_oql_Attribute__f_typ;
+        if ((x376 instanceof $c_Lcom_vinctus_oql_OneToOneType)) {
+          var x$1$6 = $as_Lcom_vinctus_oql_OneToOneType(x376);
           var this$117 = $n(x$1$6);
-          var x370 = this$117.Lcom_vinctus_oql_OneToOneType__f_entity;
+          var x379 = this$117.Lcom_vinctus_oql_OneToOneType__f_entity;
           var this$118 = $n(x$1$6);
-          var x371 = this$118.Lcom_vinctus_oql_OneToOneType__f_attribute;
-          var alias$3 = ((table + "$") + x363);
+          var x380 = this$118.Lcom_vinctus_oql_OneToOneType__f_attribute;
+          var alias$3 = ((table + "$") + x372);
           if ($n(builder).isLeft__Z()) {
             var this$119 = $n(builder);
             var subquery$7 = new $c_Lcom_vinctus_oql_SQLQueryBuilder(oql, ds, fixed, model, ((4 + $n($as_Lcom_vinctus_oql_SQLQueryBuilder($n(new $c_s_util_Either$LeftProjection(this$119).toOption__s_Option()).get__O())).Lcom_vinctus_oql_SQLQueryBuilder__f_margin) | 0), false);
@@ -2619,13 +2630,13 @@ $c_Lcom_vinctus_oql_AbstractOQL$.prototype.writeQuery__Lcom_vinctus_oql_Abstract
             var subquery$7 = new $c_Lcom_vinctus_oql_SQLQueryBuilder(oql, ds, fixed, model, $uI($n($n(builder).toOption__s_Option()).get__O()), true);
           }
           if ($n(builder).isLeft__Z()) {
-            var $x_5 = $n(x348);
+            var $x_5 = $n(x357);
             var this$120 = $n(builder);
             $x_5.Lcom_vinctus_oql_AbstractOQL$OneToOneNode__f_idx = $n($as_Lcom_vinctus_oql_SQLQueryBuilder($n(new $c_s_util_Either$LeftProjection(this$120).toOption__s_Option()).get__O())).projectQuery__Lcom_vinctus_oql_SQLQueryBuilder__I(subquery$7);
           }
-          subquery$7.table__T__s_Option__V($n(x370).Lcom_vinctus_oql_Entity__f_table, new $c_s_Some(alias$3));
-          this.writeQuery__Lcom_vinctus_oql_AbstractOQL$Node__T__s_util_Either__T__Lcom_vinctus_oql_SQLDataSource__Lcom_vinctus_oql_Fixed__Lcom_vinctus_oql_DataModel__Lcom_vinctus_oql_SQLQueryBuilder(x351, alias$3, new $c_s_util_Left(subquery$7), oql, ds, fixed, model);
-          var s$2 = (((((((("\"" + alias$3) + "\".\"") + $n(x371).Lcom_vinctus_oql_Attribute__f_column) + "\" = \"") + table) + "\".\"") + $n($as_Lcom_vinctus_oql_Attribute($n($n(x354).pk__s_Option()).get__O())).Lcom_vinctus_oql_Attribute__f_column) + "\"");
+          subquery$7.table__T__s_Option__V($n(x379).Lcom_vinctus_oql_Entity__f_table, new $c_s_Some(alias$3));
+          this.writeQuery__Lcom_vinctus_oql_AbstractOQL$Node__T__s_util_Either__T__Lcom_vinctus_oql_SQLDataSource__Lcom_vinctus_oql_Fixed__Lcom_vinctus_oql_DataModel__Lcom_vinctus_oql_SQLQueryBuilder(x360, alias$3, new $c_s_util_Left(subquery$7), oql, ds, fixed, model);
+          var s$2 = (((((((("\"" + alias$3) + "\".\"") + $n(x380).Lcom_vinctus_oql_Attribute__f_column) + "\" = \"") + table) + "\".\"") + $n($as_Lcom_vinctus_oql_Attribute($n($n(x363).pk__s_Option()).get__O())).Lcom_vinctus_oql_Attribute__f_column) + "\"");
           subquery$7.select__Lcom_vinctus_oql_OQLExpression__T__V(new $c_Lcom_vinctus_oql_RawOQLExpression(s$2), null);
           return subquery$7;
         }
@@ -2633,42 +2644,42 @@ $c_Lcom_vinctus_oql_AbstractOQL$.prototype.writeQuery__Lcom_vinctus_oql_Abstract
     }
   }
   if ((node instanceof $c_Lcom_vinctus_oql_AbstractOQL$OneToManyNode)) {
-    var x324 = $as_Lcom_vinctus_oql_AbstractOQL$OneToManyNode(node);
-    var this$125 = $n(x324);
-    var x326 = this$125.Lcom_vinctus_oql_AbstractOQL$OneToManyNode__f_query;
-    var this$126 = $n(x324);
-    var x327 = this$126.Lcom_vinctus_oql_AbstractOQL$OneToManyNode__f_element;
-    if ((x326 !== null)) {
-      $n(x326);
-      $n(x326);
-      var this$130 = $n(x326);
-      var x331 = this$130.Lcom_vinctus_oql_OQLQuery__f_attr;
-      $n(x326);
-      var this$132 = $n(x326);
-      var x333 = this$132.Lcom_vinctus_oql_OQLQuery__f_select;
-      var this$133 = $n(x326);
-      var x334 = this$133.Lcom_vinctus_oql_OQLQuery__f_group;
-      var this$134 = $n(x326);
-      var x335 = this$134.Lcom_vinctus_oql_OQLQuery__f_order;
-      var this$135 = $n(x326);
-      var x336 = this$135.Lcom_vinctus_oql_OQLQuery__f_limit;
-      var this$136 = $n(x326);
-      var x337 = this$136.Lcom_vinctus_oql_OQLQuery__f_offset;
-      if ((x331 !== null)) {
-        var this$138 = $n(x331);
-        var x339 = this$138.Lcom_vinctus_oql_Attribute__f_name;
-        $n(x331);
-        $n(x331);
-        $n(x331);
-        var this$142 = $n(x331);
-        var x343 = this$142.Lcom_vinctus_oql_Attribute__f_typ;
-        if ((x343 instanceof $c_Lcom_vinctus_oql_OneToManyType)) {
-          var x$1$7 = $as_Lcom_vinctus_oql_OneToManyType(x343);
+    var x333 = $as_Lcom_vinctus_oql_AbstractOQL$OneToManyNode(node);
+    var this$125 = $n(x333);
+    var x335 = this$125.Lcom_vinctus_oql_AbstractOQL$OneToManyNode__f_query;
+    var this$126 = $n(x333);
+    var x336 = this$126.Lcom_vinctus_oql_AbstractOQL$OneToManyNode__f_element;
+    if ((x335 !== null)) {
+      $n(x335);
+      $n(x335);
+      var this$130 = $n(x335);
+      var x340 = this$130.Lcom_vinctus_oql_OQLQuery__f_attr;
+      $n(x335);
+      var this$132 = $n(x335);
+      var x342 = this$132.Lcom_vinctus_oql_OQLQuery__f_select;
+      var this$133 = $n(x335);
+      var x343 = this$133.Lcom_vinctus_oql_OQLQuery__f_group;
+      var this$134 = $n(x335);
+      var x344 = this$134.Lcom_vinctus_oql_OQLQuery__f_order;
+      var this$135 = $n(x335);
+      var x345 = this$135.Lcom_vinctus_oql_OQLQuery__f_limit;
+      var this$136 = $n(x335);
+      var x346 = this$136.Lcom_vinctus_oql_OQLQuery__f_offset;
+      if ((x340 !== null)) {
+        var this$138 = $n(x340);
+        var x348 = this$138.Lcom_vinctus_oql_Attribute__f_name;
+        $n(x340);
+        $n(x340);
+        $n(x340);
+        var this$142 = $n(x340);
+        var x352 = this$142.Lcom_vinctus_oql_Attribute__f_typ;
+        if ((x352 instanceof $c_Lcom_vinctus_oql_OneToManyType)) {
+          var x$1$7 = $as_Lcom_vinctus_oql_OneToManyType(x352);
           var this$144 = $n(x$1$7);
-          var x346 = this$144.Lcom_vinctus_oql_OneToManyType__f_entity;
+          var x355 = this$144.Lcom_vinctus_oql_OneToManyType__f_entity;
           var this$145 = $n(x$1$7);
-          var x347 = this$145.Lcom_vinctus_oql_OneToManyType__f_attribute;
-          var alias$4 = ((table + "$") + x339);
+          var x356 = this$145.Lcom_vinctus_oql_OneToManyType__f_attribute;
+          var alias$4 = ((table + "$") + x348);
           if ($n(builder).isLeft__Z()) {
             var this$146 = $n(builder);
             var subquery$8 = new $c_Lcom_vinctus_oql_SQLQueryBuilder(oql, ds, fixed, model, ((4 + $n($as_Lcom_vinctus_oql_SQLQueryBuilder($n(new $c_s_util_Either$LeftProjection(this$146).toOption__s_Option()).get__O())).Lcom_vinctus_oql_SQLQueryBuilder__f_margin) | 0), false);
@@ -2676,39 +2687,39 @@ $c_Lcom_vinctus_oql_AbstractOQL$.prototype.writeQuery__Lcom_vinctus_oql_Abstract
             var subquery$8 = new $c_Lcom_vinctus_oql_SQLQueryBuilder(oql, ds, fixed, model, $uI($n($n(builder).toOption__s_Option()).get__O()), true);
           }
           if ($n(builder).isLeft__Z()) {
-            var $x_6 = $n(x324);
+            var $x_6 = $n(x333);
             var this$147 = $n(builder);
             $x_6.Lcom_vinctus_oql_AbstractOQL$OneToManyNode__f_idx = $n($as_Lcom_vinctus_oql_SQLQueryBuilder($n(new $c_s_util_Either$LeftProjection(this$147).toOption__s_Option()).get__O())).projectQuery__Lcom_vinctus_oql_SQLQueryBuilder__I(subquery$8);
           }
-          subquery$8.table__T__s_Option__V($n(x346).Lcom_vinctus_oql_Entity__f_table, new $c_s_Some(alias$4));
-          this.writeQuery__Lcom_vinctus_oql_AbstractOQL$Node__T__s_util_Either__T__Lcom_vinctus_oql_SQLDataSource__Lcom_vinctus_oql_Fixed__Lcom_vinctus_oql_DataModel__Lcom_vinctus_oql_SQLQueryBuilder(x327, alias$4, new $c_s_util_Left(subquery$8), oql, ds, fixed, model);
-          var s$3 = (((((((("\"" + alias$4) + "\".\"") + $n(x347).Lcom_vinctus_oql_Attribute__f_column) + "\" = \"") + table) + "\".\"") + $n($as_Lcom_vinctus_oql_Attribute($n($n($n($as_Lcom_vinctus_oql_ManyToOneType($n(x347).Lcom_vinctus_oql_Attribute__f_typ)).Lcom_vinctus_oql_ManyToOneType__f_entity).pk__s_Option()).get__O())).Lcom_vinctus_oql_Attribute__f_column) + "\"");
+          subquery$8.table__T__s_Option__V($n(x355).Lcom_vinctus_oql_Entity__f_table, new $c_s_Some(alias$4));
+          this.writeQuery__Lcom_vinctus_oql_AbstractOQL$Node__T__s_util_Either__T__Lcom_vinctus_oql_SQLDataSource__Lcom_vinctus_oql_Fixed__Lcom_vinctus_oql_DataModel__Lcom_vinctus_oql_SQLQueryBuilder(x336, alias$4, new $c_s_util_Left(subquery$8), oql, ds, fixed, model);
+          var s$3 = (((((((("\"" + alias$4) + "\".\"") + $n(x356).Lcom_vinctus_oql_Attribute__f_column) + "\" = \"") + table) + "\".\"") + $n($as_Lcom_vinctus_oql_Attribute($n($n($n($as_Lcom_vinctus_oql_ManyToOneType($n(x356).Lcom_vinctus_oql_Attribute__f_typ)).Lcom_vinctus_oql_ManyToOneType__f_entity).pk__s_Option()).get__O())).Lcom_vinctus_oql_Attribute__f_column) + "\"");
           subquery$8.select__Lcom_vinctus_oql_OQLExpression__T__V(new $c_Lcom_vinctus_oql_RawOQLExpression(s$3), null);
-          var this$151 = $n(x333);
+          var this$151 = $n(x342);
           if ((!this$151.isEmpty__Z())) {
             var x0$13 = this$151.get__O();
             var _$26 = $as_Lcom_vinctus_oql_OQLExpression(x0$13);
             subquery$8.select__Lcom_vinctus_oql_OQLExpression__T__V(_$26, alias$4);
           }
-          var this$152 = $n(x334);
+          var this$152 = $n(x343);
           if ((!this$152.isEmpty__Z())) {
             var x0$14 = this$152.get__O();
             var _$27 = $as_sci_List(x0$14);
             subquery$8.group__sci_List__T__V(_$27, alias$4);
           }
-          var this$153 = $n(x335);
+          var this$153 = $n(x344);
           if ((!this$153.isEmpty__Z())) {
             var x0$15 = this$153.get__O();
             var _$28 = $as_sci_List(x0$15);
             subquery$8.order__sci_List__T__V(_$28, alias$4);
           }
-          var this$154 = $n(x336);
+          var this$154 = $n(x345);
           if ((!this$154.isEmpty__Z())) {
             var x0$16 = this$154.get__O();
             var n$7 = $uI(x0$16);
             subquery$8.limit__I__V(n$7);
           }
-          var this$155 = $n(x337);
+          var this$155 = $n(x346);
           if ((!this$155.isEmpty__Z())) {
             var x0$17 = this$155.get__O();
             var n$8 = $uI(x0$17);

@@ -1,6 +1,6 @@
 package com.vinctus.oql
 
-import com.vinctus.sjs_utils.DynamicMap
+import com.vinctus.sjs_utils.{DynamicMap, toJS}
 
 import scala.collection.mutable
 import scala.compiletime.uninitialized
@@ -175,6 +175,7 @@ abstract class AbstractOQL(dm: String, val ds: SQLDataSource, conv: Conversions)
                 case (NodePGResultSetValue(v), _, JSONType)        => conv.jsonNodePG(v.asInstanceOf[String])
                 case (SequenceResultSetValue(v), _, JSONType)      => conv.jsonSequence(v)
                 case (NodePGResultSetValue(_), arr, ArrayType(elemType)) => conv.array(arr, elemType)
+                case (SequenceResultSetValue(v), _, ArrayType(elemType)) => conv.array(toJS(v), elemType)
                 case _                                             => v.value
               }
             case ObjectNode(properties) =>
