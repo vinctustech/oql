@@ -125,6 +125,8 @@ class SQLQueryBuilder(
         s"${expression(left, table)} $op (\n$sql${" " * (margin + 2 * SQLQueryBuilder.INDENT)})"
       case InArrayOQLExpression(left, op, right) =>
         s"${expression(left, table)} $op (${right map (expression(_, table)) mkString ", "})"
+      case ArrayComparisonOQLExpression(left, op, quantifier, array) =>
+        s"${expression(left, table)} $op $quantifier(${expression(array, table)})"
       case ApplyOQLExpression(f, args) => s"${f.s}(${args map (expression(_, table)) mkString ", "})"
       case StarOQLExpression           => "*"
       case RawOQLExpression(s)         => s

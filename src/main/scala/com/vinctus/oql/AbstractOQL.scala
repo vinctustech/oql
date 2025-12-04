@@ -323,6 +323,18 @@ object AbstractOQL {
       case InArrayOQLExpression(left, op, right) =>
         _decorate(left)
         right foreach _decorate
+      case ArrayComparisonOQLExpression(left, op, quantifier, array) =>
+        _decorate(left)
+        _decorate(array)
+        if (array.typ != null && !array.typ.isArrayType)
+          problem(
+            array match {
+              case AttributeOQLExpression(ids, _) => ids.last.pos
+              case _                              => null
+            },
+            s"argument to $quantifier must be an array type",
+            oql,
+          )
       case e @ InfixOQLExpression(left, _, right) =>
         _decorate(left)
         _decorate(right)

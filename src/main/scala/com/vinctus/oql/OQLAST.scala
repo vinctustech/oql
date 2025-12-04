@@ -42,6 +42,8 @@ case class QueryOQLExpression(query: OQLQuery)                                  
 case class InfixOQLExpression(left: OQLExpression, op: String, right: OQLExpression)         extends OQLExpression
 case class PrefixOQLExpression(op: String, expr: OQLExpression)                              extends OQLExpression
 case class PostfixOQLExpression(expr: OQLExpression, op: String)                             extends OQLExpression
+case class ArrayComparisonOQLExpression(left: OQLExpression, op: String, quantifier: String, array: OQLExpression)
+    extends OQLExpression
 case class BetweenOQLExpression(expr: OQLExpression, op: String, lower: OQLExpression, upper: OQLExpression)
     extends OQLExpression
 case class JSONOQLExpression(expr: OQLExpression)                                                 extends OQLExpression

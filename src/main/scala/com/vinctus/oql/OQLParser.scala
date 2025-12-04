@@ -134,9 +134,12 @@ object OQLParser extends RegexParsers with PackratParsers {
     kw("NOT") ~> booleanPrimary ^^ (e => PrefixOQLExpression("NOT", e)) | booleanPrimary
 
   lazy val booleanPrimary: PackratParser[OQLExpression] =
-    expression ~ comparison ~ expression ^^ { case l ~ c ~ r =>
-      InfixOQLExpression(l, c, r)
-    } | // TODO: should not use InfixOQLExpression because result type is boolean
+    expression ~ comparison ~ quantifier ~ ("(" ~> expression <~ ")") ^^ { case l ~ c ~ q ~ arr =>
+      ArrayComparisonOQLExpression(l, c, q.toUpperCase, arr)
+    } |
+      expression ~ comparison ~ expression ^^ { case l ~ c ~ r =>
+        InfixOQLExpression(l, c, r)
+      } | // TODO: should not use InfixOQLExpression because result type is boolean
       expression ~ ((kw("NOT") ~ kw("BETWEEN") ^^^ "NOT BETWEEN") | kw("BETWEEN")) ~ expression ~ kw(
         "AND",
       ) ~ expression ^^ { case e ~ b ~ l ~ _ ~ u =>
@@ -159,6 +162,8 @@ object OQLParser extends RegexParsers with PackratParsers {
     kw("IS") ~ kw("NULL") ^^^ "IS NULL" | kw("IS") ~ kw("NOT") ~ kw("NULL") ^^^ "IS NOT NULL"
 
   lazy val in: PackratParser[String] = kw("NOT") ~ kw("IN") ^^^ "NOT IN" | kw("IN")
+
+  lazy val quantifier: PackratParser[String] = kw("ANY") | kw("ALL")
 
   lazy val comparison: PackratParser[String] =
     "<=" | ">=" | "<" | ">" | "=" | "!=" | kw("LIKE") | kw("ILIKE") | (kw("NOT") ~ kw("LIKE") ^^^ "NOT LIKE") | (kw(
