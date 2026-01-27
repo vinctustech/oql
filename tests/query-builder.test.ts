@@ -1,0 +1,109 @@
+import { describe, it, before, after } from 'node:test'
+import assert from 'node:assert'
+import { OQL } from '@vinctus/oql'
+import { createOQL } from './setup.ts'
+
+describe('OQL QueryBuilder', () => {
+  let oql: OQL
+
+  before(() => {
+    oql = createOQL()
+  })
+
+  after(() => {
+    oql.close()
+  })
+
+  describe('query', () => {
+    it('should query from entity', async () => {
+      const users = await oql.queryBuilder()
+        .query('users { id name }')
+        .getMany()
+      assert.ok(Array.isArray(users))
+      assert.ok(users.length >= 3) // At least seed data
+    })
+
+    it('should chain query with filter', async () => {
+      const users = await oql.queryBuilder()
+        .query('users { id name } [active = true]')
+        .getMany()
+      assert.ok(Array.isArray(users))
+    })
+  })
+
+  describe('order', () => {
+    it('should order ascending', async () => {
+      const users = await oql.queryBuilder()
+        .query('users { id name } [name IN ("Alice", "Bob", "Charlie")]')
+        .order('name', 'ASC')
+        .getMany()
+      assert.strictEqual(users.length, 3)
+      // First alphabetically should be Alice (from seed data)
+      assert.strictEqual(users[0].name, 'Alice')
+    })
+
+    it('should order descending', async () => {
+      const users = await oql.queryBuilder()
+        .query('users { id name } [name IN ("Alice", "Bob", "Charlie")]')
+        .order('name', 'DESC')
+        .getMany()
+      assert.ok(users.length > 0)
+      assert.strictEqual(users[0].name, 'Charlie')
+    })
+  })
+
+  describe('limit and offset', () => {
+    it('should limit results', async () => {
+      const users = await oql.queryBuilder()
+        .query('users { id name }')
+        .order('id', 'ASC')
+        .limit(2)
+        .getMany()
+      assert.strictEqual(users.length, 2)
+    })
+
+    it('should offset results', async () => {
+      const users = await oql.queryBuilder()
+        .query('users { id name }')
+        .order('id', 'ASC')
+        .offset(1)
+        .limit(2)
+        .getMany()
+      assert.strictEqual(users.length, 2)
+      assert.strictEqual(users[0].id, 2) // Skipped id=1
+    })
+  })
+
+  describe('getOne', () => {
+    it('should return single result', async () => {
+      const user = await oql.queryBuilder()
+        .query('users { id name } [id = 1]')
+        .getOne()
+      assert.ok(user)
+      assert.strictEqual(user.id, 1)
+    })
+
+    it('should return undefined when no match', async () => {
+      const user = await oql.queryBuilder()
+        .query('users { id } [id = -999]')
+        .getOne()
+      assert.strictEqual(user, undefined)
+    })
+  })
+
+  describe('getCount', () => {
+    it('should return count', async () => {
+      const count = await oql.queryBuilder()
+        .query('users')
+        .getCount()
+      assert.ok(count >= 3) // At least seed data
+    })
+
+    it('should return filtered count', async () => {
+      const count = await oql.queryBuilder()
+        .query('users [active = true]')
+        .getCount()
+      assert.ok(count >= 2)
+    })
+  })
+})

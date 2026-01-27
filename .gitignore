@@ -24,3 +24,4 @@ project/plugins/project/
 java/
 
 .npmrc
+node_modules/
