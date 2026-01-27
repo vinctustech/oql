@@ -1,7 +1,7 @@
 package com.vinctus.oql
 
-import typings.pg.mod.types
-import typings.pgTypes.mod.TypeId
+import com.vinctus.oql.facades.pg.types
+import com.vinctus.oql.facades.TypeId
 
 import scala.scalajs.js
 import js.Dynamic.{global => g}

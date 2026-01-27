@@ -1,6 +1,6 @@
 package com.vinctus.oql
 
-import typings.node.tlsMod.ConnectionOptions
+import com.vinctus.oql.facades.ConnectionOptions
 
 import scala.scalajs.js
 import scala.scalajs.js.|
@@ -93,6 +93,9 @@ class OQL_NodePG_JS(
     ds.asInstanceOf[NodePGDataSource]
       .connect
       .raw(sql, if (values.isEmpty) js.Array() else values.get)
+
+  @JSExport
+  def close(): Unit = ds.asInstanceOf[NodePGDataSource].connect.close()
 
   private val varRegex = "(?<!:):([a-zA-Z_][a-zA-Z0-9_]*)" r
 

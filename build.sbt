@@ -37,11 +37,12 @@ enablePlugins(ScalaJSPlugin)
 
 jsEnv := new org.scalajs.jsenv.nodejs.NodeJSEnv()
 
-enablePlugins(ScalablyTypedConverterPlugin)
+// ScalablyTyped removed - using manual facades instead
+// enablePlugins(ScalablyTypedConverterPlugin)
+// stTypescriptVersion := "5.3.3"
+// stIgnore += "source-map-support"
 
-stTypescriptVersion := "5.3.3"
-
-stIgnore += "source-map-support"
+enablePlugins(ScalaJSBundlerPlugin)
 
 enablePlugins(ParadoxPlugin)
 enablePlugins(ParadoxMaterialThemePlugin)
@@ -79,10 +80,7 @@ Test / scalaJSUseTestModuleInitializer := false
 
 Compile / npmDependencies ++= Seq(
   "pg"                 -> "8.13.1",
-  "@types/pg"          -> "8.11.11",
   "source-map-support" -> "0.5.21",
-//  "big.js" -> "6.1.1",
-//  "@types/big.js" -> "6.1.3"
 )
 
 libraryDependencies ++= Seq(

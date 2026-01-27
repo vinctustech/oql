@@ -1,6 +1,6 @@
 package com.vinctus.oql
 
-import typings.pg.mod.QueryArrayResult
+import com.vinctus.oql.facades.pg.QueryArrayResult
 
 import scala.scalajs.js
 import scala.compiletime.uninitialized

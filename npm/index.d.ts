@@ -58,6 +58,8 @@ export class OQL {
 
   raw<T = any>(sql: string, values?: any[]): Promise<T[]>
 
+  close(): void
+
 }
 
 export class OQL_MEM {

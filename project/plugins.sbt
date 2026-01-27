@@ -3,7 +3,9 @@ addSbtPlugin("org.scala-js" % "sbt-scalajs" % "1.20.1")
 //addSbtPlugin("org.portable-scala" % "sbt-scala-native-crossproject" % "1.0.0")
 //addSbtPlugin("org.scala-native" % "sbt-scala-native" % "0.4.0")
 
-addSbtPlugin("org.scalablytyped.converter" % "sbt-converter" % "1.0.0-beta44")
+// ScalablyTyped removed - using manual facades instead
+// addSbtPlugin("org.scalablytyped.converter" % "sbt-converter" % "1.0.0-beta44")
+addSbtPlugin("ch.epfl.scala" % "sbt-scalajs-bundler" % "0.21.1")
 
 addSbtPlugin("com.codecommit" % "sbt-github-packages" % "0.5.3")
 

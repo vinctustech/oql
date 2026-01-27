@@ -1,6 +1,6 @@
 package com.vinctus.oql
 
-import typings.node.tlsMod.ConnectionOptions
+import com.vinctus.oql.facades.ConnectionOptions
 
 import scala.scalajs.js.|
 import scalajs.js

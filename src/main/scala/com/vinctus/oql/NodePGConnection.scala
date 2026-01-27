@@ -1,6 +1,6 @@
 package com.vinctus.oql
 
-import typings.pg.mod.{Pool, PoolClient, PoolConfig, QueryArrayConfig}
+import com.vinctus.oql.facades.pg.{Pool, PoolClient, PoolConfig, QueryArrayConfig}
 
 import scala.concurrent.Future
 

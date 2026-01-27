@@ -4,7 +4,7 @@ import com.vinctus.sjs_utils.{DynamicMap, toJS}
 
 import scala.scalajs.js.annotation.JSExportTopLevel
 //import com.vinctus.mappable.{Mappable, map2cc}
-import typings.node.tlsMod.ConnectionOptions
+import com.vinctus.oql.facades.ConnectionOptions
 
 import scala.concurrent.Future
 import scala.scalajs.js

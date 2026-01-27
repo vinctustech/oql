@@ -1,6 +1,6 @@
 package com.vinctus.oql
 
-import typings.node.tlsMod.ConnectionOptions
+import com.vinctus.oql.facades.ConnectionOptions
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
