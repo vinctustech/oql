@@ -43,6 +43,8 @@ abstract class AbstractOQL(dm: String, val ds: SQLDataSource, conv: Conversions)
     query.select foreach (decorate(query.entity, _, model, ds, oql))
     query.group foreach (_ foreach (decorate(query.entity, _, model, ds, oql)))
     query.order foreach (_ foreach { case OQLOrdering(expr, _) => decorate(query.entity, expr, model, ds, oql) })
+    query.distinctOn foreach (_ foreach (decorate(query.entity, _, model, ds, oql)))
+    query.having foreach (decorate(query.entity, _, model, ds, oql))
     query
 
   def parseCondition(cond: String, entity: Entity): OQLExpression = {
@@ -564,7 +566,10 @@ object AbstractOQL {
           }
         }
 
+        if (query.distinct) builder.left.toOption.get.distinct(true)
+        query.distinctOn foreach (builder.left.toOption.get.distinctOn(_, query.entity.table))
         query.group foreach (builder.left.toOption.get.group(_, query.entity.table))
+        query.having foreach (builder.left.toOption.get.having(_, query.entity.table))
         query.order foreach (builder.left.toOption.get.order(_, query.entity.table))
         query.limit foreach builder.left.toOption.get.limit
         query.offset foreach builder.left.toOption.get.offset
@@ -589,7 +594,10 @@ object AbstractOQL {
               _,
               _,
               _,
-              _
+              _,
+              _,
+              _,
+              _,
             ),
             element
           ) =>
@@ -618,7 +626,10 @@ object AbstractOQL {
               group,
               order,
               limit,
-              offset
+              offset,
+              _,
+              _,
+              having,
             ),
             element
           ) =>
@@ -640,6 +651,7 @@ object AbstractOQL {
         )
         select foreach (subquery.select(_, joinAlias))
         group foreach (subquery.group(_, joinAlias))
+        having foreach (subquery.having(_, joinAlias))
         order foreach (subquery.order(_, joinAlias))
         limit foreach subquery.limit
         offset foreach subquery.offset
@@ -655,7 +667,10 @@ object AbstractOQL {
               _,
               order,
               _,
-              _
+              _,
+              _,
+              _,
+              _,
             ),
             element
           ) =>
@@ -687,7 +702,10 @@ object AbstractOQL {
               group,
               order,
               limit,
-              offset
+              offset,
+              _,
+              _,
+              having,
             ),
             element
           ) =>
@@ -713,6 +731,7 @@ object AbstractOQL {
         )
         select foreach (subquery.select(_, alias))
         group foreach (subquery.group(_, alias))
+        having foreach (subquery.having(_, alias))
         order foreach (subquery.order(_, alias))
         limit foreach subquery.limit
         offset foreach subquery.offset

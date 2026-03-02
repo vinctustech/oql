@@ -17,6 +17,9 @@ case class OQLQuery(
     order: Option[List[OQLOrdering]],
     limit: Option[Int],
     offset: Option[Int],
+    distinct: Boolean = false,
+    distinctOn: Option[List[OQLExpression]] = None,
+    having: Option[OQLExpression] = None,
 ) extends OQLCommand
 
 trait OQLProject { val label: Ident }

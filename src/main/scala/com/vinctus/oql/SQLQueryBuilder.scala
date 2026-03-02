@@ -54,10 +54,19 @@ class SQLQueryBuilder(
   private var where: Option[(String, OQLExpression)]        = None
   private var _group: Option[(String, List[OQLExpression])] = None
   private var _order: Option[(String, List[OQLOrdering])]   = None
-  private var _limit: Option[Int]                           = None
-  private var _offset: Option[Int]                          = None
+  private var _limit: Option[Int]                                      = None
+  private var _offset: Option[Int]                                     = None
+  private var _distinct: Boolean                                       = false
+  private var _distinctOn: Option[(String, List[OQLExpression])]       = None
+  private var _having: Option[(String, OQLExpression)]                 = None
 
   def table(name: String, alias: Option[String]): Unit = if (from eq null) from = (name, alias)
+
+  def distinct(d: Boolean): Unit = _distinct = d
+
+  def distinctOn(exprs: List[OQLExpression], table: String): Unit = _distinctOn = Some((table, exprs))
+
+  def having(cond: OQLExpression, table: String): Unit = _having = Some((table, cond))
 
   def select(cond: OQLExpression, table: String): Unit =
     where = where match {
@@ -195,7 +204,13 @@ class SQLQueryBuilder(
 
     def pq(yes: String, no: String = "") = if (projectQuery) yes else no
 
-    line(s"${pq(s"(${ds.resultArrayFunctionStart}")}SELECT ${pq(ds.rowSequenceFunctionStart)}")
+    val distinctClause = _distinctOn match {
+      case Some((table, exprs)) =>
+        s"DISTINCT ON (${exprs.map(e => expression(e, table)).mkString(", ")}) "
+      case None =>
+        if (_distinct) "DISTINCT " else ""
+    }
+    line(s"${pq(s"(${ds.resultArrayFunctionStart}")}SELECT ${distinctClause}${pq(ds.rowSequenceFunctionStart)}")
     in()
     in()
 
@@ -214,6 +229,8 @@ class SQLQueryBuilder(
       _group map { case (table, groupings) =>
         s"GROUP BY ${groupings map (expr => s"${expression(expr, table)}") mkString ", "}"
       }
+    val havingClause =
+      _having map { case (table, expr) => s"HAVING ${expression(expr, table)}" }
     val orderByClause =
       _order map { case (table, orderings) =>
         s"ORDER BY ${orderings map { case OQLOrdering(expr, ordering) =>
@@ -230,6 +247,7 @@ class SQLQueryBuilder(
     out()
     whereClause foreach line
     groupByClause foreach line
+    havingClause foreach line
     orderByClause foreach line
     _limit foreach (n => line(s"LIMIT $n"))
     _offset foreach (n => line(s"OFFSET $n"))

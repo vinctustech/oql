@@ -16,9 +16,16 @@ object OQLParser extends RegexParsers with PackratParsers {
 //    OQLInsert(e, v)
 //  }
 
+  lazy val distinctSpec: PackratParser[(Boolean, Option[List[OQLExpression]])] =
+    "^" ~> "(" ~> rep1sep(expression, ",") <~ ")" ^^ (exprs => (false, Some(exprs))) |
+      "^" ^^^ (true, None) |
+      success((false, None))
+
   lazy val query: PackratParser[OQLQuery] =
-    entityName ~ not(".") ~ project ~ opt(select) ~ opt(group) ~ opt(order) ~ restrict ^^ {
-      case e ~ _ ~ p ~ s ~ g ~ o ~ Seq(lim, off) => OQLQuery(e, null, null, p, s, g, o, lim, off)
+    distinctSpec ~ entityName ~ not(".") ~ project ~ opt(select) ~ opt(group) ~ opt(order) ~ restrict ^^ {
+      case (d, don) ~ e ~ _ ~ p ~ s ~ gh ~ o ~ Seq(lim, off) =>
+        val (g, h) = gh match { case Some((gl, hl)) => (Some(gl), hl); case None => (None, None) }
+        OQLQuery(e, null, null, p, s, g, o, lim, off, d, don, h)
     }
 
   lazy val project: PackratParser[List[OQLProject]] =
@@ -96,7 +103,8 @@ object OQLParser extends RegexParsers with PackratParsers {
 
   lazy val select: PackratParser[OQLExpression] = "[" ~> expression <~ "]"
 
-  lazy val group: PackratParser[List[OQLExpression]] = "/" ~> expressions <~ "/"
+  lazy val group: PackratParser[(List[OQLExpression], Option[OQLExpression])] =
+    "/" ~> expressions ~ opt("[" ~> expression <~ "]") <~ "/" ^^ { case g ~ h => (g, h) }
 
   lazy val order: PackratParser[List[OQLOrdering]] = "<" ~> rep1sep(ordering, ",") <~ ">"
 

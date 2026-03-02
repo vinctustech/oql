@@ -381,7 +381,83 @@ describe('unified expression parser', () => {
     })
   })
 
-  // --- Group 14: Expressions in ordering context (regression) ---
+  // --- Group 14: DISTINCT ---
+
+  describe('DISTINCT', () => {
+    it('should deduplicate rows with DISTINCT', async () => {
+      // All 3 users have unique names, so DISTINCT returns 3 rows
+      const users = await oql.queryMany('^ users { name } [id IN (1,2,3)] <name>')
+      assert.strictEqual(users.length, 3)
+      const names = users.map(u => u.name)
+      assert.deepStrictEqual(names, ['Alice', 'Bob', 'Charlie'])
+    })
+
+    it('should deduplicate identical values with DISTINCT', async () => {
+      // Alice(true), Bob(true), Charlie(false) → DISTINCT active gives 2 rows
+      const rows = await oql.queryMany('^ users { active } [id IN (1,2,3)] <active DESC>')
+      assert.strictEqual(rows.length, 2)
+      const values = rows.map(r => r.active)
+      assert.deepStrictEqual(values, [true, false])
+    })
+  })
+
+  // --- Group 15: DISTINCT ON ---
+
+  describe('DISTINCT ON', () => {
+    it('should return one row per distinct key', async () => {
+      // posts: (1, 'First Post', author=1/Alice), (2, 'Second Post', author=1/Alice), (3, 'Bobs Post', author=2/Bob)
+      // DISTINCT ON (&author) with ORDER BY &author, id → one post per author, earliest id wins
+      const posts = await oql.queryMany('^(&author) posts { &author title } [id IN (1,2,3)] <&author, id>')
+      assert.strictEqual(posts.length, 2)
+      const titles = posts.map(p => p.title).sort()
+      assert.deepStrictEqual(titles, ['Bobs Post', 'First Post'])
+    })
+
+    it('should handle dotted reference in DISTINCT ON (induces join)', async () => {
+      // DISTINCT ON (author.name) — traverses FK to users table, inducing a LEFT JOIN
+      // Alice authored posts 1 and 2, Bob authored post 3
+      // DISTINCT ON author.name with ORDER BY author.name, id → one post per author name
+      const posts = await oql.queryMany('^(author.name) posts { name: author.name title } [id IN (1,2,3)] <author.name, id>')
+      assert.strictEqual(posts.length, 2)
+      const rows = posts.map(p => ({ name: p.name, title: p.title })).sort((a, b) => a.name.localeCompare(b.name))
+      assert.deepStrictEqual(rows, [
+        { name: 'Alice', title: 'First Post' },
+        { name: 'Bob', title: 'Bobs Post' },
+      ])
+    })
+  })
+
+  // --- Group 16: HAVING ---
+
+  describe('HAVING', () => {
+    it('should filter groups with HAVING', async () => {
+      // Alice has 2 posts, Bob has 1 → only Alice with count > 1
+      const rows = await oql.queryMany('posts { &author post_count: count(id) } /&author [count(id) > 1]/')
+      assert.strictEqual(rows.length, 1)
+      assert.strictEqual(rows[0].author, 1)
+      assert.strictEqual(rows[0].post_count, 2)
+    })
+
+    it('should filter groups with HAVING using >=', async () => {
+      // active=true: Alice(1), Bob(2) → 2 users; active=false: Charlie(3) → 1 user
+      // HAVING count(id) >= 2 → only active=true group
+      const rows = await oql.queryMany('users { active user_count: count(id) } /active [count(id) >= 2]/')
+      assert.strictEqual(rows.length, 1)
+      assert.strictEqual(rows[0].active, true)
+      assert.strictEqual(rows[0].user_count, 2)
+    })
+
+    it('should handle dotted reference in GROUP BY with HAVING (induces join)', async () => {
+      // GROUP BY author.name — traverses FK to users table, inducing a LEFT JOIN
+      // Alice has 2 posts, Bob has 1 → HAVING count(id) > 1 → only Alice
+      const rows = await oql.queryMany('posts { name: author.name post_count: count(id) } /author.name [count(id) > 1]/')
+      assert.strictEqual(rows.length, 1)
+      assert.strictEqual(rows[0].name, 'Alice')
+      assert.strictEqual(rows[0].post_count, 2)
+    })
+  })
+
+  // --- Group 17: Expressions in ordering context (regression) ---
 
   describe('expressions in ORDER BY', () => {
     it('should accept arithmetic in ORDER BY', async () => {
