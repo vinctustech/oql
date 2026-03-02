@@ -234,6 +234,75 @@ describe('Function return types', () => {
     })
   })
 
+  // Aggregate functions (additional)
+
+  describe('count(*)', () => {
+    it('should count all rows per group', async () => {
+      const rows = await oql.queryMany(
+        'posts { author_id: &author post_count: count(*) } /&author/'
+      )
+      const sorted = [...rows].sort((a: any, b: any) => a.author_id - b.author_id)
+      assert.strictEqual(sorted[0].post_count, 2) // Alice has 2 posts
+      assert.strictEqual(sorted[1].post_count, 1) // Bob has 1 post
+    })
+  })
+
+  describe('min()', () => {
+    it('should return minimum value', async () => {
+      const rows = await oql.queryMany(
+        'posts { author_id: &author first: min(id) } /&author/'
+      )
+      const alice = rows.find((r: any) => r.author_id === 1)
+      assert.strictEqual(alice.first, 1)
+    })
+  })
+
+  describe('max()', () => {
+    it('should return maximum value', async () => {
+      const rows = await oql.queryMany(
+        'posts { author_id: &author last: max(id) } /&author/'
+      )
+      const alice = rows.find((r: any) => r.author_id === 1)
+      assert.strictEqual(alice.last, 2)
+    })
+  })
+
+  describe('avg()', () => {
+    it('should return average as float', async () => {
+      const rows = await oql.queryMany(
+        'posts { author_id: &author average: avg(id) } /&author/'
+      )
+      const alice = rows.find((r: any) => r.author_id === 1)
+      assert.strictEqual(typeof alice.average, 'number')
+      assert.strictEqual(alice.average, 1.5) // avg(1,2) = 1.5
+    })
+  })
+
+  describe('bool_and()', () => {
+    it('should return AND of all boolean values', async () => {
+      // All 3 seed users: Alice(true), Bob(true), Charlie(false)
+      const row = await oql.queryOne('users { val: bool_and(active) } [id IN (1,2,3)]')
+      assert.strictEqual(row.val, false) // false because Charlie is inactive
+    })
+
+    it('should return true when all are true', async () => {
+      const row = await oql.queryOne('users { val: bool_and(active) } [id IN (1,2)]')
+      assert.strictEqual(row.val, true)
+    })
+  })
+
+  describe('bool_or()', () => {
+    it('should return OR of all boolean values', async () => {
+      const row = await oql.queryOne('users { val: bool_or(active) } [id IN (1,2,3)]')
+      assert.strictEqual(row.val, true)
+    })
+
+    it('should return false when all are false', async () => {
+      const row = await oql.queryOne('users { val: bool_or(active) } [id = 3]')
+      assert.strictEqual(row.val, false)
+    })
+  })
+
   // Functions in WHERE clauses
 
   describe('functions in WHERE', () => {

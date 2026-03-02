@@ -315,4 +315,46 @@ describe('OQL mutations', () => {
       assert.deepStrictEqual(remaining, [])
     })
   })
+
+  describe('bulkUpdate', () => {
+    it('should update multiple records', async () => {
+      const u1 = await oql.entity('users').insert({ name: 'Bulk1', email: 'b1@test.com', active: true })
+      const u2 = await oql.entity('users').insert({ name: 'Bulk2', email: 'b2@test.com', active: true })
+
+      await oql.entity('users').bulkUpdate([
+        [u1.id, { name: 'Bulk1Updated' }],
+        [u2.id, { name: 'Bulk2Updated' }],
+      ])
+
+      const fetched1 = await oql.queryOne('users { name } [id = :id]', { id: u1.id })
+      assert.strictEqual(fetched1.name, 'Bulk1Updated')
+
+      const fetched2 = await oql.queryOne('users { name } [id = :id]', { id: u2.id })
+      assert.strictEqual(fetched2.name, 'Bulk2Updated')
+
+      await oql.entity('users').bulkDelete([u1.id, u2.id])
+    })
+
+    it('should update same fields across all records', async () => {
+      const u1 = await oql.entity('users').insert({ name: 'BU1', email: 'bu1@test.com', active: true })
+      const u2 = await oql.entity('users').insert({ name: 'BU2', email: 'bu2@test.com', active: true })
+
+      await oql.entity('users').bulkUpdate([
+        [u1.id, { name: 'BU1Updated', active: false }],
+        [u2.id, { name: 'BU2Updated', active: false }],
+      ])
+
+      const fetched1 = await oql.queryOne('users { name email active } [id = :id]', { id: u1.id })
+      assert.strictEqual(fetched1.name, 'BU1Updated')
+      assert.strictEqual(fetched1.email, 'bu1@test.com') // unchanged
+      assert.strictEqual(fetched1.active, false)
+
+      const fetched2 = await oql.queryOne('users { name email active } [id = :id]', { id: u2.id })
+      assert.strictEqual(fetched2.name, 'BU2Updated')
+      assert.strictEqual(fetched2.email, 'bu2@test.com') // unchanged
+      assert.strictEqual(fetched2.active, false)
+
+      await oql.entity('users').bulkDelete([u1.id, u2.id])
+    })
+  })
 })

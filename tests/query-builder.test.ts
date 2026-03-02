@@ -106,4 +106,93 @@ describe('OQL QueryBuilder', () => {
       assert.ok(count >= 2)
     })
   })
+
+  describe('select', () => {
+    it('should add a WHERE condition', async () => {
+      const users = await oql.queryBuilder()
+        .query('users { id name }')
+        .select('id = 1')
+        .getMany()
+      assert.strictEqual(users.length, 1)
+      assert.strictEqual(users[0].name, 'Alice')
+    })
+
+    it('should chain multiple select calls with AND', async () => {
+      const users = await oql.queryBuilder()
+        .query('users { id name }')
+        .select('id IN (1,2,3)')
+        .select('active = true')
+        .getMany()
+      const ids = users.map((u: any) => u.id).sort((a: number, b: number) => a - b)
+      assert.deepStrictEqual(ids, [1, 2])
+    })
+
+    it('should combine with existing WHERE in query', async () => {
+      const users = await oql.queryBuilder()
+        .query('users { id name } [id IN (1,2,3)]')
+        .select('active = true')
+        .getMany()
+      const ids = users.map((u: any) => u.id).sort((a: number, b: number) => a - b)
+      assert.deepStrictEqual(ids, [1, 2])
+    })
+
+    it('should support parameters', async () => {
+      const users = await oql.queryBuilder()
+        .query('users { id name }')
+        .select('name = :name', { name: 'Alice' })
+        .getMany()
+      assert.strictEqual(users.length, 1)
+      assert.strictEqual(users[0].name, 'Alice')
+    })
+  })
+
+  describe('cond', () => {
+    it('should apply chained operations when condition is truthy', async () => {
+      const users = await oql.queryBuilder()
+        .query('users { id name } [id IN (1,2,3)]')
+        .cond(true)
+        .select('active = true')
+        .getMany()
+      const ids = users.map((u: any) => u.id).sort((a: number, b: number) => a - b)
+      assert.deepStrictEqual(ids, [1, 2])
+    })
+
+    it('should skip chained operations when condition is falsy', async () => {
+      const users = await oql.queryBuilder()
+        .query('users { id name } [id IN (1,2,3)]')
+        .cond(false)
+        .select('active = true')
+        .getMany()
+      // select was skipped, so all 3 users returned
+      const ids = users.map((u: any) => u.id).sort((a: number, b: number) => a - b)
+      assert.deepStrictEqual(ids, [1, 2, 3])
+    })
+
+    it('should skip on null', async () => {
+      const users = await oql.queryBuilder()
+        .query('users { id } [id IN (1,2,3)]')
+        .cond(null)
+        .select('id = 1')
+        .getMany()
+      assert.strictEqual(users.length, 3)
+    })
+
+    it('should skip on empty string', async () => {
+      const users = await oql.queryBuilder()
+        .query('users { id } [id IN (1,2,3)]')
+        .cond('')
+        .select('id = 1')
+        .getMany()
+      assert.strictEqual(users.length, 3)
+    })
+
+    it('should apply on non-empty string', async () => {
+      const users = await oql.queryBuilder()
+        .query('users { id } [id IN (1,2,3)]')
+        .cond('active')
+        .select('id = 1')
+        .getMany()
+      assert.strictEqual(users.length, 1)
+    })
+  })
 })

@@ -85,7 +85,7 @@ class SQLQueryBuilder(
 
   def projectValue(expr: OQLExpression, table: String): (Int, Boolean) = {
     val cur   = idx
-    val typed = projectQuery && ds.typeFunction.isDefined && expr.typ == null
+    val typed = !subquery && ds.typeFunction.isDefined && expr.typ == null
 
     projects += ValueProject(expr, table, typed)
     idx += (if (typed) 2 else 1)

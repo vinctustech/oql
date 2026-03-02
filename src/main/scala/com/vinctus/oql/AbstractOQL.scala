@@ -446,10 +446,9 @@ object AbstractOQL {
             proj
           case None
               if ds.builtinVariables contains (if (ds.caseSensitive) query.source.s else query.source.s.toLowerCase) =>
-            ExpressionOQLProject(
-              label,
-              RawOQLExpression(query.source.s)
-            ) // it's a built-in variable so sent it through raw
+            val raw = RawOQLExpression(query.source.s)
+            raw.typ = ds.builtinVariables(if (ds.caseSensitive) query.source.s else query.source.s.toLowerCase)
+            ExpressionOQLProject(label, raw) // it's a built-in variable so assign type and send through raw
           case None =>
             problem(query.source.pos, s"entity '${entity.name}' does not have attribute '${query.source.s}'", oql)
         }
@@ -523,7 +522,8 @@ object AbstractOQL {
                   )
                 )
               case None if ds.builtinVariables contains (if (ds.caseSensitive) id.s else id.s.toLowerCase) =>
-                expProj // it's a built-in variable so leave dmrefs null and let it go through
+                expr.typ = ds.builtinVariables(if (ds.caseSensitive) id.s else id.s.toLowerCase)
+                expProj // it's a built-in variable so assign type and leave dmrefs null
               case _ => problem(id.pos, s"entity '${entity.name}' does not have attribute '${id.s}'", oql)
             }
           case _ =>

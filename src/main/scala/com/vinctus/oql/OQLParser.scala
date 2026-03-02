@@ -75,7 +75,7 @@ object OQLParser extends RegexParsers with PackratParsers {
   lazy val applyExpression: PackratParser[OQLExpression] =
     identifier ~ ("(" ~> repsep(expression, ",") <~ ")") ^^ { case f ~ as => ApplyOQLExpression(f, as) }
 
-  lazy val simpleType: PackratParser[Datatype] =
+  lazy val scalarType: PackratParser[Datatype] =
     kw("json") ^^^ JSONType |
       kw("text") ^^^ TextType |
       kw("integer") ^^^ IntegerType |
@@ -86,7 +86,18 @@ object OQLParser extends RegexParsers with PackratParsers {
       kw("time") ^^^ TimeType |
       kw("interval") ^^^ IntervalType |
       kw("uuid") ^^^ UUIDType |
-      kw("timestamp") ^^^ TimestampType
+      kw("timestamp") ^^^ TimestampType |
+      kw("numeric") ~ "(" ~ integer ~ "," ~ integer ~ ")" ^^ { case _ ~ _ ~ p ~ _ ~ s ~ _ =>
+        DecimalType(p, s)
+      } |
+      kw("decimal") ~ "(" ~ integer ~ "," ~ integer ~ ")" ^^ { case _ ~ _ ~ p ~ _ ~ s ~ _ =>
+        DecimalType(p, s)
+      } |
+      (kw("numeric") | kw("decimal")) ^^^ FloatType
+
+  lazy val simpleType: PackratParser[Datatype] =
+    scalarType ~ "[]" ^^ { case t ~ _ => ArrayType(t) } |
+      scalarType
 
   lazy val castExpression: PackratParser[OQLExpression] =
     primary ~ "::" ~ simpleType ^^ { case p ~ _ ~ t => TypedOQLExpression(p, t) }

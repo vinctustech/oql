@@ -7,6 +7,7 @@ entity users {
   name: text
   email: text
   active: boolean
+  posts: [posts].author
 }
 
 entity posts {

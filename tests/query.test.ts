@@ -420,4 +420,91 @@ describe('OQL queries', () => {
       assert.strictEqual(parseInt(result[0].count), 3)
     })
   })
+
+  describe('star-minus projection', () => {
+    it('should exclude a single field with * -field', async () => {
+      const users = await oql.queryMany('users { * -email } [id = 1]')
+      assert.deepStrictEqual(users, [{
+        id: 1,
+        name: 'Alice',
+        active: true
+      }])
+    })
+
+    it('should exclude multiple fields with * -field1 -field2', async () => {
+      const users = await oql.queryMany('users { * -email -active } [id = 1]')
+      assert.deepStrictEqual(users, [{
+        id: 1,
+        name: 'Alice'
+      }])
+    })
+  })
+
+  describe('NULLS FIRST / NULLS LAST', () => {
+    it('should order with NULLS FIRST', async () => {
+      // Insert a user with null email
+      const inserted = await mutOql.entity('users').insert({ name: 'NullSort', email: null, active: true })
+
+      const users = await mutOql.queryMany(
+        'users { id email } [id IN :ids] <email ASC NULLS FIRST>',
+        { ids: [1, inserted.id] }
+      )
+      // null should come first
+      assert.strictEqual(users[0].email, null)
+      assert.strictEqual(users[1].email, 'alice@example.com')
+
+      await mutOql.entity('users').delete(inserted.id)
+    })
+
+    it('should order with NULLS LAST', async () => {
+      const inserted = await mutOql.entity('users').insert({ name: 'NullSort', email: null, active: true })
+
+      const users = await mutOql.queryMany(
+        'users { id email } [id IN :ids] <email ASC NULLS LAST>',
+        { ids: [1, inserted.id] }
+      )
+      // null should come last
+      assert.strictEqual(users[0].email, 'alice@example.com')
+      assert.strictEqual(users[1].email, null)
+
+      await mutOql.entity('users').delete(inserted.id)
+    })
+  })
+
+  describe('built-in variables', () => {
+    it('current_date should return a date', async () => {
+      const row = await oql.queryOne("users { val: current_date } [id = 1]")
+      assert.ok(row.val instanceof Date || typeof row.val === 'string')
+    })
+
+    it('current_timestamp should return a timestamp', async () => {
+      const row = await oql.queryOne("users { val: current_timestamp } [id = 1]")
+      assert.ok(row.val instanceof Date)
+    })
+  })
+
+  describe('unary minus', () => {
+    it('should negate a field value', async () => {
+      const row = await oql.queryOne("users { val: (-id) } [id = 1]")
+      assert.strictEqual(row.val, -1)
+    })
+
+    it('should negate an expression', async () => {
+      const row = await oql.queryOne("users { val: (-(id + 5)) } [id = 1]")
+      assert.strictEqual(row.val, -6)
+    })
+
+    it('should work in WHERE clause', async () => {
+      const rows = await oql.queryMany("users { id } [-id < -2 AND id IN (1,2,3)]")
+      assert.strictEqual(rows.length, 1)
+      assert.strictEqual(rows[0].id, 3)
+    })
+  })
+
+  describe('offset-only restrict', () => {
+    it('should support offset without limit using |,offset|', async () => {
+      const users = await oql.queryMany('users { id } [id IN (1,2,3)] <id> |,1|')
+      assert.deepStrictEqual(users.map((u: any) => u.id), [2, 3])
+    })
+  })
 })

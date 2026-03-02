@@ -33,19 +33,19 @@ trait PGDataSource extends SQLDataSource {
 
   def reverseMapType(typ: String): Datatype =
     typ match {
-      case "timestamp without time zone" => TimestampType
-      case "uuid"                        => UUIDType
-      case "integer"                     => IntegerType
-      case "bigint"                      => BigintType
-      case "time"                        => TimeType
-      case "date"                        => DateType
-      case "interval"                    => IntervalType
-      case "double precision" | "numeric" => FloatType
-      case "text"                        => TextType
-      case "boolean"                     => BooleanType
-      case "json" | "jsonb"              => JSONType
-      case s if s.endsWith("[]")         => ArrayType(reverseMapType(s.dropRight(2)))
-      case s if s.startsWith("_")        => ArrayType(reverseMapType(s.drop(1)))
+      case "timestamp without time zone" | "timestamp with time zone" => TimestampType
+      case "uuid"                           => UUIDType
+      case "integer" | "smallint"           => IntegerType
+      case "bigint"                         => BigintType
+      case "time" | "time without time zone" | "time with time zone" => TimeType
+      case "date"                           => DateType
+      case "interval"                       => IntervalType
+      case "double precision" | "numeric" | "real" => FloatType
+      case "text" | "character varying" | "character" => TextType
+      case "boolean"                        => BooleanType
+      case "json" | "jsonb"                 => JSONType
+      case s if s.endsWith("[]")            => ArrayType(reverseMapType(s.dropRight(2)))
+      case s if s.startsWith("_")           => ArrayType(reverseMapType(s.drop(1)))
     }
 
   val resultArrayFunctionStart: String = "to_json(ARRAY("
