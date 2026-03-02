@@ -352,6 +352,12 @@ object AbstractOQL {
 
         if (left.typ == right.typ)
           e.typ = left.typ
+        else
+          (left.typ, right.typ) match {
+            case (FloatType, IntegerType | BigintType) | (IntegerType | BigintType, FloatType) => e.typ = FloatType
+            case (BigintType, IntegerType) | (IntegerType, BigintType)                         => e.typ = BigintType
+            case _                                                                             =>
+          }
       case attrexp @ ReferenceOQLExpression(ids, _) =>
         attrexp.dmrefs = model.lookup(attrexp, ids, ref = true, entity, oql)
       case AttributeOQLExpression(List(id), _)
