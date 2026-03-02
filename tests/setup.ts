@@ -80,6 +80,21 @@ INSERT INTO posts (title, body, author) VALUES
   ('Second Post', 'Another post', 1),
   ('Bobs Post', 'From Bob', 2);
 
+-- JSONB operator test table
+DROP TABLE IF EXISTS jsonb_ops;
+
+CREATE TABLE jsonb_ops (
+  id SERIAL PRIMARY KEY,
+  label VARCHAR(255) NOT NULL,
+  data JSONB
+);
+
+INSERT INTO jsonb_ops (label, data) VALUES
+  ('object', '{"role": "admin", "prefs": {"theme": "dark"}}'),
+  ('array', '["tag1", "tag2", "tag3"]'),
+  ('nested', '{"a": {"b": {"c": 1}}}'),
+  ('mixed', '{"n": 42, "b": true, "s": "hello", "arr": [1, 2, 3]}');
+
 -- JSON test tables (read-only + mutation)
 DROP TABLE IF EXISTS json_write;
 DROP TABLE IF EXISTS json_read;

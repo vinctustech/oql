@@ -174,7 +174,7 @@ abstract class AbstractOQL(dm: String, val ds: SQLDataSource, conv: Conversions)
                 case (_, s: String, UUIDType)                      => conv.uuid(s)
                 case (_, t: String, TimestampType)                 => conv.timestamp(t)
                 case (_, d: String, DecimalType(precision, scale)) => conv.decimal(d, precision, scale)
-                case (NodePGResultSetValue(v), _, JSONType)        => conv.jsonNodePG(v.asInstanceOf[String])
+                case (NodePGResultSetValue(v), _, JSONType)        => conv.jsonNodePG(v)
                 case (SequenceResultSetValue(v), _, JSONType)      => conv.jsonSequence(v)
                 case (NodePGResultSetValue(_), arr, ArrayType(elemType)) => conv.array(arr, elemType)
                 case (SequenceResultSetValue(v), _, ArrayType(elemType)) => conv.array(toJS(v), elemType)
@@ -337,6 +337,15 @@ object AbstractOQL {
             s"argument to $quantifier must be an array type",
             oql,
           )
+      case e @ InfixOQLExpression(left, "->" | "#>", right) =>
+        _decorate(left); _decorate(right)
+        e.typ = JSONBType
+      case e @ InfixOQLExpression(left, "->>" | "#>>", right) =>
+        _decorate(left); _decorate(right)
+        e.typ = TextType
+      case e @ InfixOQLExpression(left, "@>" | "<@" | "?", right) =>
+        _decorate(left); _decorate(right)
+        e.typ = BooleanType
       case e @ InfixOQLExpression(left, _, right) =>
         _decorate(left)
         _decorate(right)

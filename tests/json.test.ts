@@ -19,6 +19,14 @@ entity json_write {
 }
 `
 
+const jsonbOpsSchema = `
+entity jsonb_ops {
+ *id: integer
+  label: text
+  data: json
+}
+`
+
 function createJsonOQL(schema: string): OQL {
   return new OQL(
     schema,
@@ -219,5 +227,109 @@ describe('JSON write to JSON columns + roundtrip', () => {
     const fetched = await oql.queryOne('json_write { data } [id = :id]', { id: row.id })
     assert.deepStrictEqual(fetched.data, ['now', 'array'])
     await oql.entity('json_write').delete(row.id)
+  })
+})
+
+describe('JSONB operators', () => {
+  let oql: OQL
+
+  before(() => {
+    oql = createJsonOQL(jsonbOpsSchema)
+  })
+
+  after(() => {
+    oql.close()
+  })
+
+  // Field access operators (-> and ->>)
+
+  it('-> should return JSON value for a key', async () => {
+    const row = await oql.queryOne('jsonb_ops { role: (data -> \'role\') } [label = \'object\']')
+    assert.strictEqual(row.role, 'admin')
+  })
+
+  it('->> should return text value for a key', async () => {
+    const row = await oql.queryOne('jsonb_ops { role: (data ->> \'role\') } [label = \'object\']')
+    assert.strictEqual(row.role, 'admin')
+  })
+
+  it('-> chained should access nested JSON', async () => {
+    const row = await oql.queryOne('jsonb_ops { theme: (data -> \'prefs\' -> \'theme\') } [label = \'object\']')
+    assert.strictEqual(row.theme, 'dark')
+  })
+
+  it('-> then ->> should return nested value as text', async () => {
+    const row = await oql.queryOne('jsonb_ops { theme: (data -> \'prefs\' ->> \'theme\') } [label = \'object\']')
+    assert.strictEqual(row.theme, 'dark')
+  })
+
+  it('-> with integer index on array', async () => {
+    const row = await oql.queryOne('jsonb_ops { first: (data -> 0) } [label = \'array\']')
+    assert.strictEqual(row.first, 'tag1')
+  })
+
+  it('->> with integer index on array', async () => {
+    const row = await oql.queryOne('jsonb_ops { first: (data ->> 0) } [label = \'array\']')
+    assert.strictEqual(row.first, 'tag1')
+  })
+
+  // Path access operators (#> and #>>)
+
+  it('#> should access nested path returning JSON', async () => {
+    const row = await oql.queryOne("jsonb_ops { val: (data #> '{a,b}') } [label = 'nested']")
+    assert.deepStrictEqual(row.val, { c: 1 })
+  })
+
+  it('#>> should access nested path returning text', async () => {
+    const row = await oql.queryOne("jsonb_ops { val: (data #>> '{a,b,c}') } [label = 'nested']")
+    assert.strictEqual(row.val, '1')
+  })
+
+  // Containment operators (@> and <@)
+
+  it('@> should filter rows containing given JSON', async () => {
+    const rows = await oql.queryMany("jsonb_ops { label } [data @> '{\"role\": \"admin\"}']")
+    assert.strictEqual(rows.length, 1)
+    assert.strictEqual(rows[0].label, 'object')
+  })
+
+  it('<@ should filter rows contained by given JSON', async () => {
+    const rows = await oql.queryMany("jsonb_ops { label } ['{\"role\": \"admin\", \"prefs\": {\"theme\": \"dark\"}}' <@ data]")
+    assert.strictEqual(rows.length, 1)
+    assert.strictEqual(rows[0].label, 'object')
+  })
+
+  // Key existence (?)
+
+  it('? should filter rows where key exists', async () => {
+    const rows = await oql.queryMany("jsonb_ops { label } [data ? 'role']")
+    const labels = rows.map((r: any) => r.label).sort()
+    assert.deepStrictEqual(labels, ['object'])
+  })
+
+  // Operators in WHERE with other conditions
+
+  it('->> in comparison should work in WHERE', async () => {
+    const rows = await oql.queryMany("jsonb_ops { label } [data ->> 'role' = 'admin']")
+    assert.strictEqual(rows.length, 1)
+    assert.strictEqual(rows[0].label, 'object')
+  })
+
+  it('combined ->> conditions with AND', async () => {
+    const rows = await oql.queryMany("jsonb_ops { label } [data ->> 'role' = 'admin' AND data -> 'prefs' ->> 'theme' = 'dark']")
+    assert.strictEqual(rows.length, 1)
+    assert.strictEqual(rows[0].label, 'object')
+  })
+
+  // Edge cases
+
+  it('-> on missing key should return null', async () => {
+    const row = await oql.queryOne("jsonb_ops { val: (data -> 'missing') } [label = 'object']")
+    assert.strictEqual(row.val, null)
+  })
+
+  it('->> on numeric value should return text', async () => {
+    const row = await oql.queryOne("jsonb_ops { val: (data ->> 'n') } [label = 'mixed']")
+    assert.strictEqual(row.val, '42')
   })
 })

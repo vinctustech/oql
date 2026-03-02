@@ -177,9 +177,10 @@ object OQLParser extends RegexParsers with PackratParsers {
   lazy val quantifier: PackratParser[String] = kw("ANY") | kw("ALL")
 
   lazy val comparisonOp: PackratParser[String] =
-    "<=" | ">=" | "<" | ">" | "=" | "!=" | kw("LIKE") | kw("ILIKE") | (kw("NOT") ~ kw("LIKE") ^^^ "NOT LIKE") | (kw(
-      "NOT",
-    ) ~ kw("ILIKE") ^^^ "NOT ILIKE")
+    "@>" | "<@" | "<=" | ">=" | "<" | ">" | "=" | "!=" | "?" |
+      kw("LIKE") | kw("ILIKE") | (kw("NOT") ~ kw("LIKE") ^^^ "NOT LIKE") | (kw(
+        "NOT",
+      ) ~ kw("ILIKE") ^^^ "NOT ILIKE")
 
   lazy val booleanLiteral: PackratParser[OQLExpression] =
     (kw("TRUE") | kw("FALSE") | kw("NULL")) ^^ BooleanOQLExpression.apply
@@ -191,7 +192,13 @@ object OQLParser extends RegexParsers with PackratParsers {
       multiplicative
 
   lazy val multiplicative: PackratParser[OQLExpression] =
-    multiplicative ~ ("*" | "/" | "%") ~ primary ^^ { case l ~ o ~ r =>
+    multiplicative ~ ("*" | "/" | "%") ~ jsonAccess ^^ { case l ~ o ~ r =>
+      InfixOQLExpression(l, o, r)
+    } |
+      jsonAccess
+
+  lazy val jsonAccess: PackratParser[OQLExpression] =
+    jsonAccess ~ ("->>" | "->" | "#>>" | "#>") ~ primary ^^ { case l ~ o ~ r =>
       InfixOQLExpression(l, o, r)
     } |
       primary

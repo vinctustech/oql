@@ -19,6 +19,7 @@ case object FloatType extends Datatype
 case object UUIDType extends Datatype
 case object TimestampType extends Datatype
 case object JSONType extends Datatype
+case object JSONBType extends Datatype
 case class ArrayType(elementType: Datatype) extends Datatype { override val isArrayType = true }
 
 trait RelationalType extends TypeSpecifier {

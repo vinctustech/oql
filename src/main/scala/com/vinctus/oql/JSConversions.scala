@@ -13,7 +13,10 @@ object JSConversions extends Conversions {
 
   def decimal(n: String, precision: Int, scale: Int): Any = n.toDouble
 
-  def jsonNodePG(v: String): Any = js.JSON.parse(v)
+  def jsonNodePG(v: Any): Any = v match {
+    case s: String => js.JSON.parse(s)
+    case other     => other
+  }
 
   def jsonSequence(v: Any): Any = toJS(v)
 
@@ -28,7 +31,7 @@ object JSConversions extends Conversions {
         case UUIDType                      => jsArr.map(v => if (v == null) null else uuid(v.toString))
         case TimestampType                 => jsArr.map(v => if (v == null) null else timestamp(v.toString))
         case DecimalType(precision, scale) => jsArr.map(v => if (v == null) null else decimal(v.toString, precision, scale))
-        case JSONType                      => jsArr.map(v => if (v == null) null else jsonNodePG(v.asInstanceOf[String]))
+        case JSONType                      => jsArr.map(v => if (v == null) null else jsonNodePG(v))
         case _                             => jsArr // text, boolean, date, time, interval pass through
       }
     }

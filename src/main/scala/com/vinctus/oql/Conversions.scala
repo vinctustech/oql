@@ -12,7 +12,7 @@ abstract class Conversions {
 
   def decimal(n: String, precision: Int, scale: Int): Any
 
-  def jsonNodePG(v: String): Any
+  def jsonNodePG(v: Any): Any
 
   def jsonSequence(v: Any): Any
 

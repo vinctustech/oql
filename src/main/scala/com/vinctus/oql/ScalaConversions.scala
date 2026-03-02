@@ -14,7 +14,10 @@ object ScalaConversions extends Conversions {
 
   def decimal(n: String, precision: Int, scale: Int): Any = BigDecimal(n).setScale(scale)
 
-  def jsonNodePG(v: String): Any = JSON.readValue(v)
+  def jsonNodePG(v: Any): Any = v match {
+    case s: String => JSON.readValue(s)
+    case other     => other
+  }
 
   def jsonSequence(v: Any): Any = v
 
@@ -29,7 +32,7 @@ object ScalaConversions extends Conversions {
         case UUIDType                      => jsArr.map(v => if (v == null) null else uuid(v.toString))
         case TimestampType                 => jsArr.map(v => if (v == null) null else timestamp(v.toString))
         case DecimalType(precision, scale) => jsArr.map(v => if (v == null) null else decimal(v.toString, precision, scale))
-        case JSONType                      => jsArr.map(v => if (v == null) null else jsonNodePG(v.asInstanceOf[String]))
+        case JSONType                      => jsArr.map(v => if (v == null) null else jsonNodePG(v))
         case _                             => jsArr
       }
       converted.toList
