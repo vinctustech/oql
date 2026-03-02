@@ -20,7 +20,8 @@ trait PGDataSource extends SQLDataSource {
       case UUIDType              => "UUID"
       case TimestampType         => "TIMESTAMP WITHOUT TIME ZONE"
       case ArrayType(elemType)   => mapType(elemType) + "[]"
-      case JSONType              => "JSONB"
+      case JSONType | JSONBType   => "JSONB"
+      case EnumType(name, _)     => s"\"$name\""
       case ManyToOneType(entity) => mapType(entity.pk.get.typ)
     }
 
@@ -40,12 +41,14 @@ trait PGDataSource extends SQLDataSource {
       case "time" | "time without time zone" | "time with time zone" => TimeType
       case "date"                           => DateType
       case "interval"                       => IntervalType
-      case "double precision" | "numeric" | "real" => FloatType
-      case "text" | "character varying" | "character" => TextType
+      case "double precision" | "numeric" | "real" | "money" => FloatType
+      case "text" | "character varying" | "character" | "name" | "unknown" => TextType
       case "boolean"                        => BooleanType
       case "json" | "jsonb"                 => JSONType
+      case "bytea"                          => TextType
       case s if s.endsWith("[]")            => ArrayType(reverseMapType(s.dropRight(2)))
       case s if s.startsWith("_")           => ArrayType(reverseMapType(s.drop(1)))
+      case _                                => TextType // fallback for unrecognized types (enums, domains, etc.)
     }
 
   val resultArrayFunctionStart: String = "to_json(ARRAY("
@@ -88,6 +91,9 @@ trait PGDataSource extends SQLDataSource {
       ("now", 0) -> (_ => TimestampType),
       ("date_trunc", 2) -> (_ => TimestampType),
       ("date_part", 2) -> (_ => FloatType),
+      ("make_timestamp", 6) -> (_ => TimestampType),
+      ("make_timestamptz", 6) -> (_ => TimestampType),
+      ("make_timestamptz", 7) -> (_ => TimestampType),
       ("age", 1) -> (_ => IntervalType),
       ("age", 2) -> (_ => IntervalType),
       // Math functions

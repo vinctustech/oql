@@ -35,6 +35,28 @@ entity posts (mut_posts) {
 }
 `
 
+// Enum schema — tests enum column handling
+export const enumSchema = `
+enum priority { low medium high critical }
+
+entity tickets {
+ *id: integer
+  title: text
+  priority: priority
+}
+`
+
+// Enum mutation schema — separate table for insert/update/delete tests
+export const enumMutationSchema = `
+enum priority { low medium high critical }
+
+entity tickets (mut_tickets) {
+ *id: integer
+  title: text
+  priority: priority
+}
+`
+
 // SQL to reset the database before tests
 const resetSQL = `
 DROP TABLE IF EXISTS posts;
@@ -119,6 +141,31 @@ CREATE TABLE json_write (
   label VARCHAR(255) NOT NULL,
   data JSON
 );
+
+-- Enum test tables
+DROP TABLE IF EXISTS tickets CASCADE;
+DROP TABLE IF EXISTS mut_tickets CASCADE;
+DROP TYPE IF EXISTS priority CASCADE;
+
+CREATE TYPE priority AS ENUM ('low', 'medium', 'high', 'critical');
+
+CREATE TABLE tickets (
+  id SERIAL PRIMARY KEY,
+  title VARCHAR(255) NOT NULL,
+  priority priority NOT NULL
+);
+
+CREATE TABLE mut_tickets (
+  id SERIAL PRIMARY KEY,
+  title VARCHAR(255) NOT NULL,
+  priority priority NOT NULL
+);
+
+INSERT INTO tickets (title, priority) VALUES
+  ('Bug fix', 'high'),
+  ('Feature request', 'medium'),
+  ('Crash report', 'critical'),
+  ('Documentation', 'low');
 
 -- Seed data for mutation tables
 INSERT INTO mut_users (name, email, active) VALUES
