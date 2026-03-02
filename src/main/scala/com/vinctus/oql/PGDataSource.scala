@@ -20,6 +20,7 @@ trait PGDataSource extends SQLDataSource {
       case UUIDType              => "UUID"
       case TimestampType         => "TIMESTAMP WITHOUT TIME ZONE"
       case ArrayType(elemType)   => mapType(elemType) + "[]"
+      case JSONType              => "JSONB"
       case ManyToOneType(entity) => mapType(entity.pk.get.typ)
     }
 

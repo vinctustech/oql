@@ -80,6 +80,30 @@ INSERT INTO posts (title, body, author) VALUES
   ('Second Post', 'Another post', 1),
   ('Bobs Post', 'From Bob', 2);
 
+-- JSON test tables (read-only + mutation)
+DROP TABLE IF EXISTS json_write;
+DROP TABLE IF EXISTS json_read;
+
+CREATE TABLE json_read (
+  id SERIAL PRIMARY KEY,
+  label VARCHAR(255) NOT NULL,
+  data JSON
+);
+
+INSERT INTO json_read (label, data) VALUES
+  ('object', '{"role": "admin", "prefs": {"theme": "dark"}}'),
+  ('array', '["tag1", "tag2", "tag3"]'),
+  ('null_val', NULL),
+  ('empty_obj', '{}'),
+  ('empty_arr', '[]'),
+  ('mixed_types', '{"n": 42, "b": true, "s": "hello"}');
+
+CREATE TABLE json_write (
+  id SERIAL PRIMARY KEY,
+  label VARCHAR(255) NOT NULL,
+  data JSON
+);
+
 -- Seed data for mutation tables
 INSERT INTO mut_users (name, email, active) VALUES
   ('Alice', 'alice@example.com', true),

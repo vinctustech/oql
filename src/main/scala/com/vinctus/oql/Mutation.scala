@@ -196,7 +196,7 @@ class Mutation private[oql] (oql: AbstractOQL, entity: Entity)(implicit ec: scal
     val pairs =
       updatesWithoutUndefined map { case (k, v) =>
         val v1 =
-          if (v.isInstanceOf[Map[?, ?]])
+          if (v.isInstanceOf[Map[?, ?]] && attrs(k).typ != JSONType)
             entity.attributes(k) match {
               case Attribute(_, _, _, _, ManyToOneType(mtoEntity)) =>
                 v.asInstanceOf[Map[String, Any]](mtoEntity.pk.get.name)
