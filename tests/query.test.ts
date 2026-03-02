@@ -1,26 +1,31 @@
 import { describe, it, before, after } from 'node:test'
 import assert from 'node:assert'
 import { OQL } from '@vinctus/oql'
-import { createOQL } from './setup.ts'
+import { createOQL, mutationSchema } from './setup.ts'
 
 describe('OQL queries', () => {
   let oql: OQL
+  let mutOql: OQL // Separate instance for tests that insert/modify data
 
   before(() => {
     oql = createOQL()
+    mutOql = createOQL(mutationSchema)
   })
 
   after(() => {
     oql.close()
+    mutOql.close()
   })
 
   describe('queryMany', () => {
     it('should return all rows with correct structure', async () => {
       const users = await oql.queryMany<{id: number, name: string}>('users { id name } [id IN (1,2,3)]')
-      assert.strictEqual(users.length, 3)
-
-      const alice = users.find(u => u.id === 1)
-      assert.deepStrictEqual(alice, { id: 1, name: 'Alice' })
+      const sorted = [...users].sort((a, b) => a.id - b.id)
+      assert.deepStrictEqual(sorted, [
+        { id: 1, name: 'Alice' },
+        { id: 2, name: 'Bob' },
+        { id: 3, name: 'Charlie' }
+      ])
     })
 
     it('should return empty array when no matches', async () => {
@@ -30,22 +35,21 @@ describe('OQL queries', () => {
 
     it('should filter with WHERE clause', async () => {
       const users = await oql.queryMany('users { id name } [active = true AND id IN (1,2,3)]')
-      assert.strictEqual(users.length, 2)
-
-      const names = users.map(u => u.name).sort()
-      assert.deepStrictEqual(names, ['Alice', 'Bob'])
+      const sorted = [...users].sort((a, b) => a.id - b.id)
+      assert.deepStrictEqual(sorted, [
+        { id: 1, name: 'Alice' },
+        { id: 2, name: 'Bob' }
+      ])
     })
 
     it('should return nested objects for relationships', async () => {
       const posts = await oql.queryMany('posts { id title author { id name } } [id IN (1,2,3)]')
-      assert.strictEqual(posts.length, 3)
-
-      const firstPost = posts.find(p => p.id === 1)
-      assert.deepStrictEqual(firstPost, {
-        id: 1,
-        title: 'First Post',
-        author: { id: 1, name: 'Alice' }
-      })
+      const sorted = [...posts].sort((a, b) => a.id - b.id)
+      assert.deepStrictEqual(sorted, [
+        { id: 1, title: 'First Post', author: { id: 1, name: 'Alice' } },
+        { id: 2, title: 'Second Post', author: { id: 1, name: 'Alice' } },
+        { id: 3, title: 'Bobs Post', author: { id: 2, name: 'Bob' } }
+      ])
     })
 
     it('should select all fields with *', async () => {
@@ -102,21 +106,18 @@ describe('OQL queries', () => {
   describe('comparison operators', () => {
     it('should support greater than', async () => {
       const users = await oql.queryMany('users { id } [id > 1 AND id <= 3]')
-      assert.strictEqual(users.length, 2)
       const ids = users.map(u => u.id).sort((a, b) => a - b)
       assert.deepStrictEqual(ids, [2, 3])
     })
 
     it('should support less than', async () => {
       const users = await oql.queryMany('users { id } [id < 3 AND id >= 1]')
-      assert.strictEqual(users.length, 2)
       const ids = users.map(u => u.id).sort((a, b) => a - b)
       assert.deepStrictEqual(ids, [1, 2])
     })
 
     it('should support not equal', async () => {
       const users = await oql.queryMany('users { id } [id != 2 AND id IN (1,2,3)]')
-      assert.strictEqual(users.length, 2)
       const ids = users.map(u => u.id).sort((a, b) => a - b)
       assert.deepStrictEqual(ids, [1, 3])
     })
@@ -125,9 +126,11 @@ describe('OQL queries', () => {
   describe('logical operators', () => {
     it('should support OR', async () => {
       const users = await oql.queryMany('users { id name } [id = 1 OR id = 3]')
-      assert.strictEqual(users.length, 2)
-      const names = users.map(u => u.name).sort()
-      assert.deepStrictEqual(names, ['Alice', 'Charlie'])
+      const sorted = [...users].sort((a, b) => a.id - b.id)
+      assert.deepStrictEqual(sorted, [
+        { id: 1, name: 'Alice' },
+        { id: 3, name: 'Charlie' }
+      ])
     })
 
     it('should support NOT', async () => {
@@ -138,7 +141,8 @@ describe('OQL queries', () => {
 
     it('should support complex boolean expressions', async () => {
       const users = await oql.queryMany('users { id } [(id = 1 OR id = 2) AND active = true]')
-      assert.strictEqual(users.length, 2)
+      const ids = users.map(u => u.id).sort((a, b) => a - b)
+      assert.deepStrictEqual(ids, [1, 2])
     })
   })
 
@@ -146,7 +150,7 @@ describe('OQL queries', () => {
     it('should support LIKE', async () => {
       const users = await oql.queryMany('users { id name } [name LIKE "A%"]')
       assert.strictEqual(users.length, 1)
-      assert.strictEqual(users[0].name, 'Alice')
+      assert.deepStrictEqual(users[0], { id: 1, name: 'Alice' })
     })
 
     it('should support LIKE with wildcard in middle', async () => {
@@ -158,46 +162,54 @@ describe('OQL queries', () => {
     it('should support case-insensitive ILIKE', async () => {
       const users = await oql.queryMany('users { id name } [name ILIKE "alice"]')
       assert.strictEqual(users.length, 1)
-      assert.strictEqual(users[0].name, 'Alice')
+      assert.deepStrictEqual(users[0], { id: 1, name: 'Alice' })
     })
   })
 
   describe('NULL handling', () => {
     it('should query for NULL values with IS NULL', async () => {
-      // Insert a user with null email
-      const inserted = await oql.entity('users').insert({ name: 'NullTest', email: null, active: true })
+      // Insert a user with null email into mutation table
+      const inserted = await mutOql.entity('users').insert({ name: 'NullTest', email: null, active: true })
 
-      const users = await oql.queryMany('users { id name } [email IS NULL]')
-      assert.ok(users.length >= 1)
-      assert.ok(users.some(u => u.name === 'NullTest'))
+      // Scope by id since other concurrent tests may also insert into mut_users
+      const user = await mutOql.queryOne('users { id name email } [id = :id AND email IS NULL]', { id: inserted.id })
+      assert.deepStrictEqual(user, { id: inserted.id, name: 'NullTest', email: null })
+
+      // Verify IS NULL does NOT match rows with non-null emails
+      const noMatch = await mutOql.queryOne('users { id } [id = 1 AND email IS NULL]')
+      assert.strictEqual(noMatch, undefined)
 
       // Cleanup
-      await oql.entity('users').delete(inserted.id)
+      await mutOql.entity('users').delete(inserted.id)
     })
 
     it('should query for non-NULL values with IS NOT NULL', async () => {
       const users = await oql.queryMany('users { id name } [email IS NOT NULL AND id IN (1,2,3)]')
-      assert.strictEqual(users.length, 3) // All seed users have emails
+      const sorted = [...users].sort((a, b) => a.id - b.id)
+      assert.deepStrictEqual(sorted, [
+        { id: 1, name: 'Alice' },
+        { id: 2, name: 'Bob' },
+        { id: 3, name: 'Charlie' }
+      ])
     })
   })
 
   describe('ordering', () => {
     it('should order ascending', async () => {
       const users = await oql.queryMany('users { id name } [id IN (1,2,3)] <name>')
-      assert.strictEqual(users[0].name, 'Alice')
-      assert.strictEqual(users[2].name, 'Charlie')
+      assert.deepStrictEqual(users.map(u => u.name), ['Alice', 'Bob', 'Charlie'])
     })
 
     it('should order descending', async () => {
       const users = await oql.queryMany('users { id name } [id IN (1,2,3)] <name DESC>')
-      assert.strictEqual(users[0].name, 'Charlie')
-      assert.strictEqual(users[2].name, 'Alice')
+      assert.deepStrictEqual(users.map(u => u.name), ['Charlie', 'Bob', 'Alice'])
     })
 
     it('should order by multiple fields', async () => {
       const posts = await oql.queryMany('posts { id title author { id } } [id IN (1,2,3)] <author.id DESC, title ASC>')
-      // Author 2 (Bob) has 1 post, Author 1 (Alice) has 2 posts
-      assert.strictEqual(posts[0].author.id, 2) // Bob's post first (DESC by author.id)
+      // Author 2 (Bob) first, then Author 1 (Alice) sorted by title ASC
+      assert.strictEqual(posts.length, 3)
+      assert.deepStrictEqual(posts.map(p => p.title), ['Bobs Post', 'First Post', 'Second Post'])
     })
   })
 
@@ -209,16 +221,14 @@ describe('OQL queries', () => {
 
     it('should offset results', async () => {
       const users = await oql.queryMany('users { id } [id IN (1,2,3)] <id> |2, 1|')
-      assert.strictEqual(users.length, 2)
-      assert.strictEqual(users[0].id, 2) // Skipped id=1
+      assert.deepStrictEqual(users.map(u => u.id), [2, 3])
     })
   })
 
   describe('parameters', () => {
     it('should substitute string parameters', async () => {
       const users = await oql.queryMany('users { id name } [name = :name]', { name: 'Alice' })
-      assert.strictEqual(users.length, 1)
-      assert.deepStrictEqual(users[0], { id: 1, name: 'Alice' })
+      assert.deepStrictEqual(users, [{ id: 1, name: 'Alice' }])
     })
 
     it('should substitute number parameters', async () => {
@@ -228,59 +238,64 @@ describe('OQL queries', () => {
 
     it('should substitute boolean parameters', async () => {
       const users = await oql.queryMany('users { id } [active = :active AND id = 3]', { active: false })
-      assert.strictEqual(users.length, 1)
-      assert.deepStrictEqual(users[0], { id: 3 })
+      assert.deepStrictEqual(users, [{ id: 3 }])
     })
 
     it('should substitute array parameters with IN', async () => {
       const users = await oql.queryMany('users { id name } [id IN :ids]', { ids: [1, 3] })
-      assert.strictEqual(users.length, 2)
-      const names = users.map(u => u.name).sort()
-      assert.deepStrictEqual(names, ['Alice', 'Charlie'])
+      const sorted = [...users].sort((a, b) => a.id - b.id)
+      assert.deepStrictEqual(sorted, [
+        { id: 1, name: 'Alice' },
+        { id: 3, name: 'Charlie' }
+      ])
     })
 
     it('should handle strings with special characters', async () => {
-      const inserted = await oql.entity('users').insert({
+      const inserted = await mutOql.entity('users').insert({
         name: "O'Brien",
         email: 'obrien@example.com',
         active: true
       })
 
-      const users = await oql.queryMany('users { id name } [name = :name]', { name: "O'Brien" })
+      const users = await mutOql.queryMany('users { id name } [name = :name]', { name: "O'Brien" })
       assert.strictEqual(users.length, 1)
       assert.strictEqual(users[0].name, "O'Brien")
 
       // Cleanup
-      await oql.entity('users').delete(inserted.id)
+      await mutOql.entity('users').delete(inserted.id)
     })
 
     it('should handle strings with backslashes', async () => {
-      const inserted = await oql.entity('users').insert({
+      const inserted = await mutOql.entity('users').insert({
         name: 'path\\to\\file',
         email: 'path@example.com',
         active: true
       })
 
-      const users = await oql.queryMany('users { id name } [name = :name]', { name: 'path\\to\\file' })
+      const users = await mutOql.queryMany('users { id name } [name = :name]', { name: 'path\\to\\file' })
       assert.strictEqual(users.length, 1)
       assert.strictEqual(users[0].name, 'path\\to\\file')
 
       // Cleanup
-      await oql.entity('users').delete(inserted.id)
+      await mutOql.entity('users').delete(inserted.id)
     })
   })
 
   describe('relationship queries', () => {
     it('should filter by relationship field', async () => {
       const posts = await oql.queryMany('posts { id title } [author.name = "Alice"]')
-      assert.strictEqual(posts.length, 2) // Alice has 2 posts
+      const sorted = [...posts].sort((a, b) => a.id - b.id)
+      assert.deepStrictEqual(sorted, [
+        { id: 1, title: 'First Post' },
+        { id: 2, title: 'Second Post' }
+      ])
     })
 
     it('should return null for missing relationships', async () => {
-      // Insert a post with no author
-      await oql.raw('INSERT INTO posts (id, title, body, author) VALUES (999, \'Orphan Post\', \'No author\', NULL)')
+      // Insert a post with no author into mutation table
+      await mutOql.raw('INSERT INTO mut_posts (id, title, body, author) VALUES (999, \'Orphan Post\', \'No author\', NULL)')
 
-      const post = await oql.queryOne('posts { id title author { name } } [id = 999]')
+      const post = await mutOql.queryOne('posts { id title author { name } } [id = 999]')
       assert.deepStrictEqual(post, {
         id: 999,
         title: 'Orphan Post',
@@ -288,115 +303,111 @@ describe('OQL queries', () => {
       })
 
       // Cleanup
-      await oql.raw('DELETE FROM posts WHERE id = 999')
+      await mutOql.raw('DELETE FROM mut_posts WHERE id = 999')
     })
   })
 
   describe('edge cases', () => {
     it('should handle unicode characters', async () => {
-      const inserted = await oql.entity('users').insert({
+      const inserted = await mutOql.entity('users').insert({
         name: '日本語テスト',
         email: 'unicode@example.com',
         active: true
       })
 
-      const user = await oql.queryOne('users { name } [id = :id]', { id: inserted.id })
+      const user = await mutOql.queryOne('users { name } [id = :id]', { id: inserted.id })
       assert.deepStrictEqual(user, { name: '日本語テスト' })
 
       // Cleanup
-      await oql.entity('users').delete(inserted.id)
+      await mutOql.entity('users').delete(inserted.id)
     })
 
     it('should handle emoji characters', async () => {
-      const inserted = await oql.entity('users').insert({
+      const inserted = await mutOql.entity('users').insert({
         name: '👨‍💻 Developer',
         email: 'emoji@example.com',
         active: true
       })
 
-      const user = await oql.queryOne('users { name } [id = :id]', { id: inserted.id })
+      const user = await mutOql.queryOne('users { name } [id = :id]', { id: inserted.id })
       assert.deepStrictEqual(user, { name: '👨‍💻 Developer' })
 
       // Cleanup
-      await oql.entity('users').delete(inserted.id)
+      await mutOql.entity('users').delete(inserted.id)
     })
 
     it('should handle very long strings', async () => {
       const longName = 'A'.repeat(200)
-      const inserted = await oql.entity('users').insert({
+      const inserted = await mutOql.entity('users').insert({
         name: longName,
         email: 'long@example.com',
         active: true
       })
 
-      const user = await oql.queryOne('users { name } [id = :id]', { id: inserted.id })
+      const user = await mutOql.queryOne('users { name } [id = :id]', { id: inserted.id })
       assert.deepStrictEqual(user, { name: longName })
 
       // Cleanup
-      await oql.entity('users').delete(inserted.id)
+      await mutOql.entity('users').delete(inserted.id)
     })
 
     it('should handle newlines in strings', async () => {
-      const inserted = await oql.entity('users').insert({
+      const inserted = await mutOql.entity('users').insert({
         name: 'Line1\nLine2',
         email: 'newline@example.com',
         active: true
       })
 
-      const user = await oql.queryOne('users { name } [id = :id]', { id: inserted.id })
+      const user = await mutOql.queryOne('users { name } [id = :id]', { id: inserted.id })
       assert.deepStrictEqual(user, { name: 'Line1\nLine2' })
 
       // Cleanup
-      await oql.entity('users').delete(inserted.id)
+      await mutOql.entity('users').delete(inserted.id)
     })
 
     it('should handle tabs in strings', async () => {
-      const inserted = await oql.entity('users').insert({
+      const inserted = await mutOql.entity('users').insert({
         name: 'Col1\tCol2',
         email: 'tab@example.com',
         active: true
       })
 
-      const user = await oql.queryOne('users { name } [id = :id]', { id: inserted.id })
+      const user = await mutOql.queryOne('users { name } [id = :id]', { id: inserted.id })
       assert.deepStrictEqual(user, { name: 'Col1\tCol2' })
 
       // Cleanup
-      await oql.entity('users').delete(inserted.id)
+      await mutOql.entity('users').delete(inserted.id)
     })
 
     it('should handle empty IN array with manual SQL', async () => {
-      // Empty IN clause should return no results
-      // This tests the edge case - OQL might not support this directly
       const users = await oql.raw('SELECT id FROM users WHERE id = ANY($1)', [[]])
       assert.deepStrictEqual(users, [])
     })
 
     it('should handle multiple parameters in complex query', async () => {
       const users = await oql.queryMany(
-        'users { id name } [name LIKE :pattern AND active = :active AND id > :minId]',
+        'users { id name } [name LIKE :pattern AND active = :active AND id > :minId AND id IN (1,2,3)]',
         { pattern: '%li%', active: true, minId: 0 }
       )
-
-      // Should find Alice (contains 'li', active, id > 0)
-      const names = users.map(u => u.name).sort()
-      assert.ok(names.includes('Alice'))
+      // Alice contains 'li' and is active; Charlie contains 'li' but is inactive
+      assert.deepStrictEqual(users, [{ id: 1, name: 'Alice' }])
     })
 
     it('should handle single quotes in LIKE parameter', async () => {
-      const inserted = await oql.entity('users').insert({
+      const inserted = await mutOql.entity('users').insert({
         name: "It's a test",
         email: 'quote@example.com',
         active: true
       })
 
-      const users = await oql.queryMany(
+      const users = await mutOql.queryMany(
         "users { name } [name LIKE :pattern]",
         { pattern: "%It's%" }
       )
-      assert.ok(users.some(u => u.name === "It's a test"))
+      assert.deepStrictEqual(users, [{ name: "It's a test" }])
 
       // Cleanup
-      await oql.entity('users').delete(inserted.id)
+      await mutOql.entity('users').delete(inserted.id)
     })
   })
 
@@ -405,6 +416,7 @@ describe('OQL queries', () => {
       const result = await oql.raw<{count: string}>(
         'SELECT COUNT(*) as count FROM users WHERE id IN (1,2,3)'
       )
+      assert.strictEqual(result.length, 1)
       assert.strictEqual(parseInt(result[0].count), 3)
     })
   })

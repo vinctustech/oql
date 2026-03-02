@@ -6,9 +6,8 @@ import { createOQL, dbConfig, testSchema } from './setup.ts'
 describe('OQL connection', () => {
   it('should connect with valid credentials', async () => {
     const oql = createOQL()
-    // Simple query to verify connection works
     const result = await oql.raw('SELECT 1 as test')
-    assert.strictEqual(result[0].test, 1)
+    assert.deepStrictEqual(result, [{ test: 1 }])
     oql.close()
   })
 
@@ -51,11 +50,19 @@ describe('OQL connection', () => {
   })
 
   describe('close', () => {
-    it('should close without error', () => {
+    it('should close the connection pool', async () => {
       const oql = createOQL()
-      assert.doesNotThrow(() => {
-        oql.close()
-      })
+      // Verify connection works before close
+      const before = await oql.raw('SELECT 1 as test')
+      assert.deepStrictEqual(before, [{ test: 1 }])
+
+      oql.close()
+
+      // After close, queries should fail
+      await assert.rejects(
+        () => oql.raw('SELECT 1'),
+        /Cannot use a pool after calling end|terminated/
+      )
     })
   })
 })

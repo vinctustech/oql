@@ -14,68 +14,66 @@ describe('boolean expression parser - standalone non-comparison expressions', ()
     oql.close()
   })
 
-  // All of these tests demonstrate valid boolean expressions that the parser
-  // rejects because booleanPrimary only falls back to qualifiedAttributeExpression
-  // and booleanLiteral — it does not include applyExpression, caseExpression,
+  // All of these tests demonstrate valid boolean expressions that the old parser
+  // rejected because booleanPrimary only fell back to qualifiedAttributeExpression
+  // and booleanLiteral — it did not include applyExpression, caseExpression,
   // or castExpression as standalone boolean values.
 
   describe('function call as standalone boolean', () => {
     it('should accept a function call as a boolean condition', async () => {
-      // coalesce(active, true) returns boolean, valid in SQL WHERE clause
-      // Fails: applyExpression is not reachable from booleanPrimary
-      await assert.doesNotReject(
-        () => oql.queryMany('users { id name } [coalesce(active, true)]')
-      )
+      // coalesce(active, true) returns the first non-null: active for all 3 users
+      // Alice(true), Bob(true), Charlie(false) → 2 rows where result is truthy
+      const users = await oql.queryMany('users { id name } [coalesce(active, true) AND id IN (1,2,3)]')
+      const ids = users.map(u => u.id).sort((a, b) => a - b)
+      assert.deepStrictEqual(ids, [1, 2])
     })
 
     it('should accept NOT function_call()', async () => {
-      // NOT coalesce(active, false) — NOT goes to booleanPrimary, same gap
-      await assert.doesNotReject(
-        () => oql.queryMany('users { id name } [NOT coalesce(active, false)]')
-      )
+      // NOT coalesce(active, false): Charlie has active=false, coalesce(false,false)=false, NOT false=true
+      const users = await oql.queryMany('users { id name } [NOT coalesce(active, false) AND id IN (1,2,3)]')
+      assert.strictEqual(users.length, 1)
+      assert.strictEqual(users[0].name, 'Charlie')
     })
 
     it('should accept function call on one side of OR', async () => {
-      // The right-hand side of OR must be a booleanPrimary
-      await assert.doesNotReject(
-        () => oql.queryMany('users { id name } [id = 1 OR coalesce(active, true)]')
-      )
+      // id = 999 matches nobody; coalesce(active, true) is truthy for Alice and Bob
+      const users = await oql.queryMany('users { id name } [id = 999 OR coalesce(active, true) AND id IN (1,2,3)]')
+      const ids = users.map(u => u.id).sort((a, b) => a - b)
+      assert.deepStrictEqual(ids, [1, 2])
     })
 
     it('should accept function call on one side of AND', async () => {
-      await assert.doesNotReject(
-        () => oql.queryMany('users { id name } [id > 0 AND coalesce(active, true)]')
-      )
+      // id > 0 AND coalesce(active, true) AND id IN (1,2,3): active is truthy for Alice and Bob
+      const users = await oql.queryMany('users { id name } [id > 0 AND coalesce(active, true) AND id IN (1,2,3)]')
+      const ids = users.map(u => u.id).sort((a, b) => a - b)
+      assert.deepStrictEqual(ids, [1, 2])
     })
   })
 
   describe('CASE expression as standalone boolean', () => {
     it('should accept CASE returning boolean as a condition', async () => {
-      // CASE WHEN ... THEN true ELSE false END is a valid boolean expression
-      // Fails: caseExpression is not reachable from booleanPrimary
-      await assert.doesNotReject(
-        () => oql.queryMany('users { id name } [CASE WHEN id = 1 THEN true ELSE false END]')
-      )
+      // CASE WHEN id = 1 THEN true ELSE false END → only Alice
+      const users = await oql.queryMany('users { id name } [CASE WHEN id = 1 THEN true ELSE false END]')
+      assert.strictEqual(users.length, 1)
+      assert.deepStrictEqual(users[0], { id: 1, name: 'Alice' })
     })
   })
 
   describe('cast expression as standalone boolean', () => {
     it('should accept a cast to boolean as a condition', async () => {
-      // active::boolean is valid (redundant but legal)
-      // Fails: castExpression is not reachable from booleanPrimary
-      await assert.doesNotReject(
-        () => oql.queryMany('users { id name } [active::boolean]')
-      )
+      // active::boolean — Alice and Bob are active
+      const users = await oql.queryMany('users { id name } [active::boolean AND id IN (1,2,3)]')
+      const ids = users.map(u => u.id).sort((a, b) => a - b)
+      assert.deepStrictEqual(ids, [1, 2])
     })
   })
 
   describe('parenthesized expression in boolean context', () => {
     it('should accept a parenthesized function call as boolean', async () => {
-      // booleanPrimary's grouped form uses booleanExpression, not expression,
-      // so (coalesce(active, true)) can't be parsed either
-      await assert.doesNotReject(
-        () => oql.queryMany('users { id name } [(coalesce(active, true))]')
-      )
+      // (coalesce(active, true)) — Alice and Bob are active
+      const users = await oql.queryMany('users { id name } [(coalesce(active, true)) AND id IN (1,2,3)]')
+      const ids = users.map(u => u.id).sort((a, b) => a - b)
+      assert.deepStrictEqual(ids, [1, 2])
     })
   })
 })

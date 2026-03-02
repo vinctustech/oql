@@ -1,13 +1,13 @@
 import { describe, it, before, after } from 'node:test'
 import assert from 'node:assert'
 import { OQL } from '@vinctus/oql'
-import { createOQL } from './setup.ts'
+import { createOQL, mutationSchema } from './setup.ts'
 
 describe('OQL mutations', () => {
   let oql: OQL
 
   before(() => {
-    oql = createOQL()
+    oql = createOQL(mutationSchema)
   })
 
   after(() => {
@@ -22,7 +22,7 @@ describe('OQL mutations', () => {
         active: true
       })
 
-      assert.ok(user.id, 'Should have an id')
+      assert.strictEqual(typeof user.id, 'number')
       assert.deepStrictEqual(
         { name: user.name, email: user.email, active: user.active },
         { name: 'TestInsert', email: 'test@example.com', active: true }
@@ -39,8 +39,11 @@ describe('OQL mutations', () => {
         active: true
       })
 
-      assert.ok(user.id)
-      assert.strictEqual(user.email, null)
+      assert.strictEqual(typeof user.id, 'number')
+      assert.deepStrictEqual(
+        { name: user.name, email: user.email, active: user.active },
+        { name: 'NullEmail', email: null, active: true }
+      )
 
       // Cleanup
       await oql.entity('users').delete(user.id)
@@ -53,12 +56,15 @@ describe('OQL mutations', () => {
         active: false
       })
 
-      assert.ok(user.id)
-      assert.strictEqual(user.active, false)
+      assert.strictEqual(typeof user.id, 'number')
+      assert.deepStrictEqual(
+        { name: user.name, email: user.email, active: user.active },
+        { name: 'InactiveUser', email: 'inactive@example.com', active: false }
+      )
 
       // Verify persistence
-      const fetched = await oql.queryOne('users { active } [id = :id]', { id: user.id })
-      assert.deepStrictEqual(fetched, { active: false })
+      const fetched = await oql.queryOne('users { name email active } [id = :id]', { id: user.id })
+      assert.deepStrictEqual(fetched, { name: 'InactiveUser', email: 'inactive@example.com', active: false })
 
       // Cleanup
       await oql.entity('users').delete(user.id)
@@ -71,8 +77,11 @@ describe('OQL mutations', () => {
         active: true
       })
 
-      assert.ok(user.id)
-      assert.strictEqual(user.name, '')
+      assert.strictEqual(typeof user.id, 'number')
+      assert.deepStrictEqual(
+        { name: user.name, email: user.email, active: user.active },
+        { name: '', email: 'empty@example.com', active: true }
+      )
 
       // Cleanup
       await oql.entity('users').delete(user.id)
@@ -86,13 +95,15 @@ describe('OQL mutations', () => {
         author: 1
       })
 
-      assert.ok(post.id)
+      assert.strictEqual(typeof post.id, 'number')
       assert.strictEqual(post.title, 'Test Post')
+      assert.strictEqual(post.body, 'Test content')
 
       // Verify relationship
-      const fetched = await oql.queryOne('posts { title author { name } } [id = :id]', { id: post.id })
+      const fetched = await oql.queryOne('posts { title body author { name } } [id = :id]', { id: post.id })
       assert.deepStrictEqual(fetched, {
         title: 'Test Post',
+        body: 'Test content',
         author: { name: 'Alice' }
       })
 
@@ -107,12 +118,15 @@ describe('OQL mutations', () => {
         author: null
       })
 
-      assert.ok(post.id)
+      assert.strictEqual(typeof post.id, 'number')
+      assert.strictEqual(post.title, 'Orphan Post')
+      assert.strictEqual(post.body, 'No author')
 
       // Verify null relationship
-      const fetched = await oql.queryOne('posts { title author { name } } [id = :id]', { id: post.id })
+      const fetched = await oql.queryOne('posts { title body author { name } } [id = :id]', { id: post.id })
       assert.deepStrictEqual(fetched, {
         title: 'Orphan Post',
+        body: 'No author',
         author: null
       })
 
@@ -122,24 +136,28 @@ describe('OQL mutations', () => {
   })
 
   describe('update', () => {
+    // Note: update() returns { pk, ...updatedFields } — only the fields passed to update,
+    // not the full row. This is by design (see Mutation.scala). Use a follow-up query
+    // to verify both updated and unchanged fields.
+
     it('should update a record and return it', async () => {
-      // Insert a test record
       const inserted = await oql.entity('users').insert({
         name: 'BeforeUpdate',
         email: 'before@example.com',
         active: true
       })
 
-      // Update it
       const updated = await oql.entity('users').update(inserted.id, {
         name: 'AfterUpdate'
       })
 
+      // update() returns PK + updated fields only
+      assert.strictEqual(updated.id, inserted.id)
       assert.strictEqual(updated.name, 'AfterUpdate')
 
-      // Verify persistence by querying
-      const fetched = await oql.queryOne('users { name email } [id = :id]', { id: inserted.id })
-      assert.deepStrictEqual(fetched, { name: 'AfterUpdate', email: 'before@example.com' })
+      // Verify full persistence: updated field changed, others unchanged
+      const fetched = await oql.queryOne('users { name email active } [id = :id]', { id: inserted.id })
+      assert.deepStrictEqual(fetched, { name: 'AfterUpdate', email: 'before@example.com', active: true })
 
       // Cleanup
       await oql.entity('users').delete(inserted.id)
@@ -157,8 +175,14 @@ describe('OQL mutations', () => {
         active: false
       })
 
+      // update() returns PK + updated fields only
+      assert.strictEqual(updated.id, inserted.id)
       assert.strictEqual(updated.name, 'MultiUpdated')
       assert.strictEqual(updated.active, false)
+
+      // Verify full persistence: both fields updated, email unchanged
+      const fetched = await oql.queryOne('users { name email active } [id = :id]', { id: inserted.id })
+      assert.deepStrictEqual(fetched, { name: 'MultiUpdated', email: 'multi@example.com', active: false })
 
       // Cleanup
       await oql.entity('users').delete(inserted.id)
@@ -171,16 +195,17 @@ describe('OQL mutations', () => {
         active: true
       })
 
-      // Update email to null
       const updated = await oql.entity('users').update(inserted.id, {
         email: null
       })
 
+      // update() returns PK + updated fields only
+      assert.strictEqual(updated.id, inserted.id)
       assert.strictEqual(updated.email, null)
 
-      // Verify persistence
-      const fetched = await oql.queryOne('users { email } [id = :id]', { id: inserted.id })
-      assert.deepStrictEqual(fetched, { email: null })
+      // Verify full persistence: email nulled, others unchanged
+      const fetched = await oql.queryOne('users { name email active } [id = :id]', { id: inserted.id })
+      assert.deepStrictEqual(fetched, { name: 'HasEmail', email: null, active: true })
 
       // Cleanup
       await oql.entity('users').delete(inserted.id)
@@ -197,18 +222,19 @@ describe('OQL mutations', () => {
         active: false
       })
 
+      // update() returns PK + updated fields only
+      assert.strictEqual(updated.id, inserted.id)
       assert.strictEqual(updated.active, false)
 
-      // Verify persistence
-      const fetched = await oql.queryOne('users { active } [id = :id]', { id: inserted.id })
-      assert.deepStrictEqual(fetched, { active: false })
+      // Verify full persistence: active changed, others unchanged
+      const fetched = await oql.queryOne('users { name email active } [id = :id]', { id: inserted.id })
+      assert.deepStrictEqual(fetched, { name: 'ActiveUser', email: 'active@example.com', active: false })
 
       // Cleanup
       await oql.entity('users').delete(inserted.id)
     })
 
     it('should update foreign key relationship', async () => {
-      // Insert a post by Alice
       const post = await oql.entity('posts').insert({
         title: 'Alices Post',
         body: 'Content',
@@ -220,10 +246,11 @@ describe('OQL mutations', () => {
         author: 2
       })
 
-      // Verify new relationship
-      const fetched = await oql.queryOne('posts { title author { name } } [id = :id]', { id: post.id })
+      // Verify new relationship and that other fields unchanged
+      const fetched = await oql.queryOne('posts { title body author { name } } [id = :id]', { id: post.id })
       assert.deepStrictEqual(fetched, {
         title: 'Alices Post',
+        body: 'Content',
         author: { name: 'Bob' }
       })
 
@@ -232,7 +259,6 @@ describe('OQL mutations', () => {
     })
 
     it('should update foreign key to null', async () => {
-      // Insert a post by Alice
       const post = await oql.entity('posts').insert({
         title: 'Orphaning Post',
         body: 'Content',
@@ -244,10 +270,11 @@ describe('OQL mutations', () => {
         author: null
       })
 
-      // Verify null relationship
-      const fetched = await oql.queryOne('posts { title author { name } } [id = :id]', { id: post.id })
+      // Verify null relationship and that other fields unchanged
+      const fetched = await oql.queryOne('posts { title body author { name } } [id = :id]', { id: post.id })
       assert.deepStrictEqual(fetched, {
         title: 'Orphaning Post',
+        body: 'Content',
         author: null
       })
 
@@ -258,14 +285,12 @@ describe('OQL mutations', () => {
 
   describe('delete', () => {
     it('should delete a record', async () => {
-      // Insert a record to delete
       const user = await oql.entity('users').insert({
         name: 'ToDelete',
         email: 'delete@example.com',
         active: true
       })
 
-      // Delete it
       await oql.entity('users').delete(user.id)
 
       // Verify it's gone
@@ -276,14 +301,16 @@ describe('OQL mutations', () => {
 
   describe('bulkDelete', () => {
     it('should delete multiple records', async () => {
-      // Insert records to delete
       const u1 = await oql.entity('users').insert({ name: 'BulkDel1', email: null, active: true })
       const u2 = await oql.entity('users').insert({ name: 'BulkDel2', email: null, active: true })
 
-      // Bulk delete
+      // Verify they exist before deleting
+      const before = await oql.queryMany('users { id } [id IN :ids]', { ids: [u1.id, u2.id] })
+      assert.strictEqual(before.length, 2)
+
       await oql.entity('users').bulkDelete([u1.id, u2.id])
 
-      // Verify they're gone - use IN :ids (not IN (:ids)) since array renders with parens
+      // Verify they're gone
       const remaining = await oql.queryMany('users { id } [id IN :ids]', { ids: [u1.id, u2.id] })
       assert.deepStrictEqual(remaining, [])
     })

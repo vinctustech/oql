@@ -1,6 +1,6 @@
 import { OQL } from '@vinctus/oql'
 
-// Test schema with multiple entities
+// Read-only schema — points at seed tables that are never modified
 export const testSchema = `
 entity users {
  *id: integer
@@ -17,10 +17,29 @@ entity posts {
 }
 `
 
+// Mutation schema — same entities, mapped to separate tables for insert/update/delete tests
+export const mutationSchema = `
+entity users (mut_users) {
+ *id: integer
+  name: text
+  email: text
+  active: boolean
+}
+
+entity posts (mut_posts) {
+ *id: integer
+  title: text
+  body: text
+  author: users
+}
+`
+
 // SQL to reset the database before tests
 const resetSQL = `
 DROP TABLE IF EXISTS posts;
 DROP TABLE IF EXISTS users;
+DROP TABLE IF EXISTS mut_posts;
+DROP TABLE IF EXISTS mut_users;
 
 CREATE TABLE users (
   id SERIAL PRIMARY KEY,
@@ -36,13 +55,38 @@ CREATE TABLE posts (
   author INTEGER REFERENCES users(id)
 );
 
--- Seed data
+CREATE TABLE mut_users (
+  id SERIAL PRIMARY KEY,
+  name VARCHAR(255) NOT NULL,
+  email VARCHAR(255),
+  active BOOLEAN DEFAULT true
+);
+
+CREATE TABLE mut_posts (
+  id SERIAL PRIMARY KEY,
+  title VARCHAR(255) NOT NULL,
+  body TEXT,
+  author INTEGER REFERENCES mut_users(id)
+);
+
+-- Seed data for read-only tables
 INSERT INTO users (name, email, active) VALUES
   ('Alice', 'alice@example.com', true),
   ('Bob', 'bob@example.com', true),
   ('Charlie', 'charlie@example.com', false);
 
 INSERT INTO posts (title, body, author) VALUES
+  ('First Post', 'Hello world', 1),
+  ('Second Post', 'Another post', 1),
+  ('Bobs Post', 'From Bob', 2);
+
+-- Seed data for mutation tables
+INSERT INTO mut_users (name, email, active) VALUES
+  ('Alice', 'alice@example.com', true),
+  ('Bob', 'bob@example.com', true),
+  ('Charlie', 'charlie@example.com', false);
+
+INSERT INTO mut_posts (title, body, author) VALUES
   ('First Post', 'Hello world', 1),
   ('Second Post', 'Another post', 1),
   ('Bobs Post', 'From Bob', 2);
