@@ -120,7 +120,7 @@ object OQLParser extends RegexParsers with PackratParsers {
   lazy val order: PackratParser[List[OQLOrdering]] = "<" ~> rep1sep(ordering, ",") <~ ">"
 
   lazy val ordering: PackratParser[OQLOrdering] =
-    expression ~ opt(kw("ASC") | kw("DESC")) ~ opt(kw("NULLS") ~> (kw("FIRST") | kw("LAST"))) ^^ { case e ~ d ~ n =>
+    additive ~ opt(kw("ASC") | kw("DESC")) ~ opt(kw("NULLS") ~> (kw("FIRST") | kw("LAST"))) ^^ { case e ~ d ~ n =>
       OQLOrdering(
         e,
         (d, n) match {

@@ -211,6 +211,21 @@ describe('OQL queries', () => {
       assert.strictEqual(posts.length, 3)
       assert.deepStrictEqual(posts.map(p => p.title), ['Bobs Post', 'First Post', 'Second Post'])
     })
+
+    it('should not conflict with > in ordering closure when followed by more projections', async () => {
+      const users = await oql.queryMany('users { id posts { id title } <title> name } [id IN (1,2)] <id>')
+      assert.deepStrictEqual(users, [
+        { id: 1, posts: [{ id: 1, title: 'First Post' }, { id: 2, title: 'Second Post' }], name: 'Alice' },
+        { id: 2, posts: [{ id: 3, title: 'Bobs Post' }], name: 'Bob' },
+      ])
+    })
+
+    it('should handle subquery ordering followed by sibling projections', async () => {
+      const users = await oql.queryMany('users { id posts { title } <title DESC> active } [id = 1]')
+      assert.deepStrictEqual(users, [
+        { id: 1, posts: [{ title: 'Second Post' }, { title: 'First Post' }], active: true },
+      ])
+    })
   })
 
   describe('limit and offset', () => {
