@@ -1,0 +1,12 @@
+{
+  "name": "@vinctus/oql-petradb-engine",
+  "version": "1.0.0",
+  "description": "Object Query Language - PetraDB Engine Backend",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Vinctus Technologies Inc.",
+  "license": "ISC",
+  "dependencies": {}
+}

@@ -1,0 +1,126 @@
+package com.vinctus.oql
+
+import com.vinctus.sjs_utils.{DynamicMap, toJS}
+
+import scala.scalajs.js.annotation.JSExportTopLevel
+import com.vinctus.oql.facades.ConnectionOptions
+
+import scala.concurrent.Future
+import scala.scalajs.js
+import scala.scalajs.js.|
+import scala.util.matching.Regex
+
+class OQL_PetraDB_ScalaJS(
+    dm: String,
+    storage: String = "memory",
+    path: String = ""
+)(implicit ec: scala.concurrent.ExecutionContext)
+    extends AbstractOQL(
+      dm,
+      new PetraDBDataSource(storage, path),
+      ScalaConversions
+    )
+    with Dynamic {
+
+  def execute[R](action: OQLConnection => Future[R]): Future[R] = action(connect)
+
+  def entity(name: String): Mutation = new Mutation(this, model.entities(name))
+
+  def selectDynamic(resource: String): Mutation = entity(resource)
+
+  def jsQueryOne[T <: js.Object](oql: String, fixed: String = null, at: Any = null): Future[Option[T]] =
+    jsQueryOne(parseQuery(oql), fixedEntity(fixed, at)) map (_.map(toJS(_).asInstanceOf[T]))
+
+  def jsQueryOne[T <: js.Object](q: OQLQuery, fixed: Fixed): Future[Option[T]] =
+    queryOne(q, "", fixed) map (_.map(toJS(_).asInstanceOf[T]))
+
+  def queryOne(oql: String, fixed: String = null, at: Any = null): Future[Option[DynamicMap]] =
+    queryOne(parseQuery(oql), oql, fixedEntity(fixed, at))
+
+  def jsQueryMany[T <: js.Object](oql: String, fixed: String = null, at: Any = null): Future[T] =
+    (queryMany(oql, fixed, at) map (toJS(_))).asInstanceOf[Future[T]]
+
+  def jsQueryMany[T <: js.Object](q: OQLQuery): Future[T] =
+    (queryMany(q, "", () => new ScalaPlainResultBuilder, Fixed(operative = false)) map (toJS(_)))
+      .asInstanceOf[Future[T]]
+
+  def queryMany(
+      oql: String,
+      fixed: String = null,
+      at: Any = null,
+      parameters: Map[String, Any] = Map()
+  ): Future[List[DynamicMap]] = {
+    val subst = substitute(oql, parameters)
+
+    queryMany(subst, () => new ScalaJSResultBuilder, fixedEntity(fixed, at)) map (_.arrayResult
+      .asInstanceOf[List[DynamicMap]])
+  }
+
+  def queryBuilder(fixed: String = null, at: js.Any = null) =
+    new ScalaJSPetraDBQueryBuilder(
+      this,
+      OQLQuery(null, null, null, List(StarOQLProject), None, None, None, None, None),
+      fixedEntity(fixed, at)
+    )
+
+  def json(oql: String, fixed: String = null, at: Any = null, parameters: Map[String, Any] = Map()): Future[String] = {
+    val subst = substitute(oql, parameters)
+
+    queryMany(subst, () => new ScalaPlainResultBuilder, fixedEntity(fixed, at)) map (r =>
+      JSON(r.arrayResult, ds.platformSpecific, 2, format = true)
+    )
+  }
+
+  private val varRegex = ":([a-zA-Z_][a-zA-Z0-9_]*)" r
+
+  def substitute(s: String, parameters: Map[String, Any]): String = {
+    if (parameters.isEmpty) s
+    else
+      varRegex.replaceAllIn(
+        s,
+        m =>
+          parameters get m.group(1) match {
+            case None        => sys.error(s"template: parameter '${m.group(1)}' not found")
+            case Some(value) => Regex.quoteReplacement(subsrender(value))
+          }
+      )
+  }
+
+  def subsrender(a: Any): String =
+    a match {
+      case s: String =>
+        s"'${s
+            .replace("\\", """\\""")
+            .replace("'", """\'""")
+            .replace("\r", """\r""")
+            .replace("\n", """\n""")}'"
+      case d: js.Date           => s"'${d.toISOString()}'"
+      case a: collection.Seq[?] => s"(${a map subsrender mkString ","})"
+      case _                    => String.valueOf(a)
+    }
+
+  def render(a: Any, typ: Option[Datatype] = None): String =
+    if (typ.isDefined)
+      typ.get match {
+        case JSONType => s"'${JSON(a, ds.platformSpecific)}'"
+        case ArrayType(elemType) =>
+          if (a == null) s"NULL::${ds.mapType(typ.get)}"
+          else {
+            val seq: Seq[Any] = a match {
+              case arr: js.Array[?] => arr.toSeq
+              case seq: Seq[?]      => seq
+              case other            => sys.error(s"Expected array but got ${other.getClass}")
+            }
+            s"ARRAY[${seq.map(e => render(e)).mkString(",")}]::${ds.mapType(typ.get)}"
+          }
+        case _ => ds.typed(a, typ.get)
+      }
+    else
+      a match {
+        case s: String            => ds.string(s)
+        case d: js.Date           => s"'${d.toISOString()}'"
+        case s: collection.Seq[?] => s"(${s map (e => render(e, typ)) mkString ","})"
+        case _                    => String.valueOf(a)
+      }
+
+}

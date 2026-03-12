@@ -1,0 +1,155 @@
+package com.vinctus.oql
+
+import com.vinctus.oql.facades.ConnectionOptions
+
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
+import scala.scalajs.js
+import scala.scalajs.js.JSConverters.*
+import scala.scalajs.js.annotation.{JSExport, JSExportTopLevel}
+import scala.scalajs.js.{Promise, |}
+import scala.util.matching.Regex
+
+@JSExportTopLevel("OQL_PETRADB")
+class OQL_PetraDB_JS(
+    dm: String,
+    storage: String = "memory",
+    path: String = ""
+) extends AbstractOQL(
+      dm,
+      new PetraDBDataSource(storage, path),
+      JSConversions
+    ) {
+
+  def execute[R](action: OQLConnection => Future[R]): Future[R] = action(connect)
+
+  @JSExport("create")
+  def jsCreate(): Promise[Unit] = create.toJSPromise
+
+  @JSExport
+  def entity(name: String): Mutation_JS_PetraDB = new Mutation_JS_PetraDB(this, model.entities(name))
+
+  @JSExport("showQuery")
+  def jsShowQuery(): Unit = showQuery()
+
+  @JSExport("count")
+  def jsCount(
+      oql: String,
+      parameters: js.UndefOr[js.Any] = js.undefined,
+      fixed: js.UndefOr[String] = null,
+      at: js.Any = null
+  ): js.Promise[Int] =
+    count(substitute(oql, parameters), fixed.orNull, at).toJSPromise
+
+  @JSExport("queryOne")
+  def jsQueryOne(
+      oql: String,
+      parameters: js.UndefOr[js.Any] = js.undefined,
+      fixed: js.UndefOr[String] = null,
+      at: js.Any = null
+  ): js.Promise[js.UndefOr[Any]] = {
+    val subst = substitute(oql, parameters)
+
+    jsQueryOne(parseQuery(subst), subst, fixedEntity(fixed.orNull, at))
+  }
+
+  def jsQueryOne(query: OQLQuery, oql: String, fixed: Fixed): js.Promise[js.UndefOr[Any]] =
+    jsQueryMany(query, oql, fixed).toFuture map {
+      case a if a.length == 0 => js.undefined
+      case a if a.length == 1 => a.head
+      case _                  => sys.error(s"queryOne: more than one row was found")
+    } toJSPromise
+
+  @JSExport("queryMany")
+  def jsQueryMany(
+      oql: String,
+      parameters: js.UndefOr[js.Any] = js.undefined,
+      fixed: js.UndefOr[String] = null,
+      at: js.Any = null
+  ): js.Promise[js.Array[js.Any]] = {
+    val subst = substitute(oql, parameters)
+
+    jsQueryMany(parseQuery(subst), subst, fixedEntity(fixed.orNull, at))
+  }
+
+  def jsQueryMany(query: OQLQuery, oql: String, fixed: Fixed): js.Promise[js.Array[js.Any]] =
+    queryMany(query, oql, () => new JSResultBuilder, fixed)
+      .map(_.arrayResult.asInstanceOf[js.Array[js.Any]])
+      .toJSPromise
+
+  @JSExport("queryBuilder")
+  def jsQueryBuilder(fixed: js.UndefOr[String], at: js.Any) =
+    new QueryBuilder_JS_PetraDB(
+      this,
+      OQLQuery(null, null, null, List(StarOQLProject), None, None, None, None, None),
+      fixedEntity(fixed.orNull, at)
+    )
+
+  @JSExport
+  def raw(sql: String, values: js.UndefOr[js.Array[js.Any]]): js.Promise[js.Array[js.Any]] =
+    ds.asInstanceOf[PetraDBDataSource]
+      .connect
+      .raw(sql, if (values.isEmpty) Vector() else values.get.toIndexedSeq.asInstanceOf[IndexedSeq[Any]])
+      .map(t => t map (_.toJSArray) toJSArray)
+      .asInstanceOf[Future[js.Array[js.Any]]]
+      .toJSPromise
+
+  @JSExport
+  def rawMulti(sql: String) =
+    ds.asInstanceOf[PetraDBDataSource]
+      .connect
+      .rawMulti(sql)
+      .toJSPromise
+
+  private val varRegex = ":([a-zA-Z_][a-zA-Z0-9_]*)" r
+
+  def substitute(s: String, parameters: js.UndefOr[js.Any]): String =
+    if (parameters.isEmpty) s
+    else
+      varRegex.replaceAllIn(
+        s,
+        m =>
+          parameters.asInstanceOf[js.Dictionary[Any]] get m.group(1) match {
+            case None        => sys.error(s"template: parameter '${m.group(1)}' not found")
+            case Some(value) => Regex.quoteReplacement(subsrender(value))
+          }
+      )
+
+  def subsrender(a: Any): String =
+    a match {
+      case s: String =>
+        s"'${s
+            .replace("\\", """\\""")
+            .replace("'", """\'""")
+            .replace("\r", """\r""")
+            .replace("\n", """\n""")}'"
+      case d: js.Date     => s"'${d.toISOString()}'"
+      case a: js.Array[?] => s"(${a map subsrender mkString ","})"
+      case _              => String.valueOf(a)
+    }
+
+  def render(a: Any, typ: Option[Datatype] = None): String =
+    if (typ.isDefined)
+      typ.get match {
+        case JSONType => s"'${JSON(a, ds.platformSpecific)}'"
+        case ArrayType(elemType) =>
+          if (a == null) s"NULL::${ds.mapType(typ.get)}"
+          else {
+            val seq: Seq[Any] = a match {
+              case arr: js.Array[?] => arr.toSeq
+              case seq: Seq[?]      => seq
+              case other            => sys.error(s"Expected array but got ${other.getClass}")
+            }
+            s"ARRAY[${seq.map(e => render(e)).mkString(",")}]::${ds.mapType(typ.get)}"
+          }
+        case _ => ds.typed(a, typ.get)
+      }
+    else
+      a match {
+        case s: String      => ds.string(s)
+        case d: js.Date     => s"'${d.toISOString()}'"
+        case a: js.Array[?] => s"(${a map (e => render(e, typ)) mkString ","})"
+        case _              => String.valueOf(a)
+      }
+
+}
