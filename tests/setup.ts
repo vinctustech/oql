@@ -1,4 +1,4 @@
-import { OQL } from '@vinctus/oql'
+import { OQL_PG as OQL } from '@vinctus/oql-pg'
 
 // Read-only schema — points at seed tables that are never modified
 export const testSchema = `

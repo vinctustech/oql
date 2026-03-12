@@ -10,7 +10,7 @@ import scala.concurrent.Future
 import scala.scalajs.js.annotation.{JSExport, JSExportTopLevel}
 import scala.util.matching.Regex
 
-@JSExportTopLevel("OQL")
+@JSExportTopLevel("OQL_PG")
 class OQL_NodePG_JS(
     dm: String,
     host: String,

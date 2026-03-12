@@ -1,6 +1,6 @@
 import { describe, it, before, after } from 'node:test'
 import assert from 'node:assert'
-import { OQL } from '@vinctus/oql'
+import { OQL_PG as OQL } from '@vinctus/oql-pg'
 import { createOQL } from './setup.ts'
 
 describe('OQL QueryBuilder', () => {

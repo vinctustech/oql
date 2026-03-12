@@ -38,7 +38,7 @@ export class Mutation {
 
 }
 
-export class OQL {
+export class OQL_PG {
 
   constructor(dm: string, host: string, port: number, database: string, user: string, password: string, ssl: any, idleTimeoutMillis: number, max: number)
 
