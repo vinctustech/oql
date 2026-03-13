@@ -58,9 +58,8 @@ class PetraDBConnection(val dataSource: PetraDBDataSource, storageType: String =
       case _              => String.valueOf(a)
 
   def raw(sql: String, parameters: IndexedSeq[Any]): Future[(IndexedSeq[String], Seq[Seq[Any]])] =
-    val sql1 = substitute(sql, parameters)
     val res =
-      executeSQL(sql1).head match
+      executeSQL(sql, parameters).head match
         case QueryResult(table) =>
           val columns = table.meta.columns.map(_.name)
           val rows = table.data map (_.data map unpack)
