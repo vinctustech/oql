@@ -1,18 +1,18 @@
 import { describe, it } from 'node:test'
 import assert from 'node:assert'
-import { OQL_PG as OQL } from '@vinctus/oql-pg'
-import { createOQL, dbConfig, testSchema } from './setup.ts'
+import { backend, createOQL, dbConfig, testSchema } from './setup.ts'
 
-describe('OQL connection', () => {
+describe('OQL connection', { skip: backend !== 'pg' && 'pg-only: tests network connection semantics' }, () => {
   it('should connect with valid credentials', async () => {
-    const oql = createOQL()
+    const oql = await createOQL()
     const result = await oql.raw('SELECT 1 as test')
     assert.deepStrictEqual(result, [{ test: 1 }])
-    oql.close()
+    oql.close!()
   })
 
   it('should fail with invalid credentials', async () => {
-    const oql = new OQL(
+    const { OQL_PG } = await import('@vinctus/oql-pg')
+    const oql = new OQL_PG(
       testSchema,
       dbConfig.host,
       dbConfig.port,
@@ -31,7 +31,8 @@ describe('OQL connection', () => {
   })
 
   it('should fail with invalid host', async () => {
-    const oql = new OQL(
+    const { OQL_PG } = await import('@vinctus/oql-pg')
+    const oql = new OQL_PG(
       testSchema,
       'invalid.host.example',
       dbConfig.port,
@@ -51,12 +52,12 @@ describe('OQL connection', () => {
 
   describe('close', () => {
     it('should close the connection pool', async () => {
-      const oql = createOQL()
+      const oql = await createOQL()
       // Verify connection works before close
       const before = await oql.raw('SELECT 1 as test')
       assert.deepStrictEqual(before, [{ test: 1 }])
 
-      oql.close()
+      oql.close!()
 
       // After close, queries should fail
       await assert.rejects(

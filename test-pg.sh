@@ -1,5 +1,5 @@
 #!/bin/bash
 set -e
 
-echo "Running pg test suite..."
-(cd tests && npm test)
+echo "Running test suite against pg backend..."
+(cd tests && OQL_BACKEND=pg npm test)

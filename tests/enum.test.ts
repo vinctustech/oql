@@ -1,20 +1,19 @@
 import { describe, it, before, after } from 'node:test'
 import assert from 'node:assert'
-import { OQL_PG as OQL } from '@vinctus/oql-pg'
-import { createOQL, enumSchema, enumMutationSchema } from './setup.ts'
+import { createOQL, enumSchema, enumMutationSchema, type OQL } from './setup.ts'
 
 describe('OQL enum support', () => {
   let oql: OQL
   let mutOql: OQL
 
-  before(() => {
-    oql = createOQL(enumSchema)
-    mutOql = createOQL(enumMutationSchema)
+  before(async () => {
+    oql = await createOQL(enumSchema)
+    mutOql = await createOQL(enumMutationSchema)
   })
 
   after(() => {
-    oql.close()
-    mutOql.close()
+    oql.close?.()
+    mutOql.close?.()
   })
 
   describe('projection', () => {

@@ -4,6 +4,7 @@
   "private": true,
   "dependencies": {
     "@vinctus/oql-pg": "file:../pg/npm",
+    "@vinctus/oql-petradb-engine": "file:../petradb-engine/npm",
     "pg": "^8.13.1"
   },
   "devDependencies": {
@@ -12,6 +13,8 @@
   },
   "scripts": {
     "test": "tsx global-setup.ts && node --test --import tsx *.test.ts",
+    "test:pg": "OQL_BACKEND=pg npm test",
+    "test:petradb": "OQL_BACKEND=petradb npm test",
     "db:start": "docker compose up -d",
     "db:stop": "docker compose down"
   }

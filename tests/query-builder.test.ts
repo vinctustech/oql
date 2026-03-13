@@ -1,17 +1,16 @@
 import { describe, it, before, after } from 'node:test'
 import assert from 'node:assert'
-import { OQL_PG as OQL } from '@vinctus/oql-pg'
-import { createOQL } from './setup.ts'
+import { createOQL, type OQL } from './setup.ts'
 
 describe('OQL QueryBuilder', () => {
   let oql: OQL
 
-  before(() => {
-    oql = createOQL()
+  before(async () => {
+    oql = await createOQL()
   })
 
   after(() => {
-    oql.close()
+    oql.close?.()
   })
 
   describe('query', () => {

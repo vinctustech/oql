@@ -1,4 +1,35 @@
-import { OQL_PG as OQL } from '@vinctus/oql-pg'
+export const backend = (process.env.OQL_BACKEND ?? 'pg') as 'pg' | 'petradb'
+
+// Common OQL interface — both backends share these methods
+export interface OQL {
+  create(): Promise<void>
+  showQuery(): void
+  entity(name: string): any
+  queryBuilder<T = any>(fixed?: string, at?: any): any
+  queryOne<T = any>(oql: string, parameters?: any, fixed?: string, at?: any): Promise<T | undefined>
+  queryMany<T = any>(oql: string, parameters?: any, fixed?: string, at?: any): Promise<T[]>
+  count(oql: string, parameters?: any, fixed?: string, at?: any): Promise<number>
+  raw<T = any>(sql: string, values?: any[]): Promise<T[]>
+  close?: () => void
+}
+
+// Lazy-loaded backend constructors — only the selected backend is imported
+let _OQL_PG: any
+let _OQL_PETRADB: any
+
+async function loadBackend() {
+  if (backend === 'petradb') {
+    if (!_OQL_PETRADB) {
+      const mod = await import('@vinctus/oql-petradb-engine')
+      _OQL_PETRADB = mod.OQL_PETRADB
+    }
+  } else {
+    if (!_OQL_PG) {
+      const mod = await import('@vinctus/oql-pg')
+      _OQL_PG = mod.OQL_PG
+    }
+  }
+}
 
 // Read-only schema — points at seed tables that are never modified
 export const testSchema = `
@@ -179,7 +210,7 @@ INSERT INTO mut_posts (title, body, author) VALUES
   ('Bobs Post', 'From Bob', 2);
 `
 
-// Default test database config - matches tests/docker-compose.yml
+// Default test database config - matches tests/docker-compose.yml (pg backend only)
 export const dbConfig = {
   host: process.env.DB_HOST ?? 'localhost',
   port: parseInt(process.env.DB_PORT ?? '5434'),
@@ -188,8 +219,15 @@ export const dbConfig = {
   password: process.env.DB_PASSWORD ?? 'docker',
 }
 
-export function createOQL(schema: string = testSchema): OQL {
-  return new OQL(
+export async function createOQL(schema: string = testSchema): Promise<OQL> {
+  await loadBackend()
+  if (backend === 'petradb') {
+    const oql = new _OQL_PETRADB(schema)
+    // PetraDB is in-memory — each instance starts empty, so seed it with the test data
+    await oql.rawMulti(resetSQL)
+    return oql as OQL
+  }
+  return new _OQL_PG(
     schema,
     dbConfig.host,
     dbConfig.port,
@@ -199,11 +237,17 @@ export function createOQL(schema: string = testSchema): OQL {
     false,
     10000,
     10
-  )
+  ) as OQL
 }
 
 export async function resetDatabase(): Promise<void> {
-  const oql = createOQL()
+  await loadBackend()
+  if (backend === 'petradb') {
+    const oql = new _OQL_PETRADB(testSchema)
+    await oql.rawMulti(resetSQL)
+    return
+  }
+  const oql = await createOQL()
   await oql.raw(resetSQL)
-  oql.close()
+  oql.close!()
 }

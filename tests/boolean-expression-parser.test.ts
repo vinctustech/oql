@@ -1,17 +1,16 @@
 import { describe, it, before, after } from 'node:test'
 import assert from 'node:assert'
-import { OQL_PG as OQL } from '@vinctus/oql-pg'
-import { createOQL } from './setup.ts'
+import { createOQL, type OQL } from './setup.ts'
 
 describe('boolean expression parser - standalone non-comparison expressions', () => {
   let oql: OQL
 
-  before(() => {
-    oql = createOQL()
+  before(async () => {
+    oql = await createOQL()
   })
 
   after(() => {
-    oql.close()
+    oql.close?.()
   })
 
   // All of these tests demonstrate valid boolean expressions that the old parser

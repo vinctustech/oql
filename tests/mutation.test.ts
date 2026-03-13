@@ -1,17 +1,16 @@
 import { describe, it, before, after } from 'node:test'
 import assert from 'node:assert'
-import { OQL_PG as OQL } from '@vinctus/oql-pg'
-import { createOQL, mutationSchema } from './setup.ts'
+import { createOQL, mutationSchema, type OQL } from './setup.ts'
 
 describe('OQL mutations', () => {
   let oql: OQL
 
-  before(() => {
-    oql = createOQL(mutationSchema)
+  before(async () => {
+    oql = await createOQL(mutationSchema)
   })
 
   after(() => {
-    oql.close()
+    oql.close?.()
   })
 
   describe('insert', () => {

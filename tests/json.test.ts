@@ -1,7 +1,6 @@
 import { describe, it, before, after } from 'node:test'
 import assert from 'node:assert'
-import { OQL_PG as OQL } from '@vinctus/oql-pg'
-import { dbConfig } from './setup.ts'
+import { createOQL, type OQL } from './setup.ts'
 
 const jsonReadSchema = `
 entity json_read {
@@ -27,29 +26,15 @@ entity jsonb_ops {
 }
 `
 
-function createJsonOQL(schema: string): OQL {
-  return new OQL(
-    schema,
-    dbConfig.host,
-    dbConfig.port,
-    dbConfig.database,
-    dbConfig.user,
-    dbConfig.password,
-    false,
-    10000,
-    10
-  )
-}
-
 describe('JSON read from JSON columns', () => {
   let oql: OQL
 
-  before(() => {
-    oql = createJsonOQL(jsonReadSchema)
+  before(async () => {
+    oql = await createOQL(jsonReadSchema)
   })
 
   after(() => {
-    oql.close()
+    oql.close?.()
   })
 
   it('should read a JSON object with nested fields', async () => {
@@ -96,12 +81,12 @@ describe('JSON read from JSON columns', () => {
 describe('JSON write to JSON columns + roundtrip', () => {
   let oql: OQL
 
-  before(() => {
-    oql = createJsonOQL(jsonWriteSchema)
+  before(async () => {
+    oql = await createOQL(jsonWriteSchema)
   })
 
   after(() => {
-    oql.close()
+    oql.close?.()
   })
 
   it('should insert a JSON object and read it back', async () => {
@@ -233,12 +218,12 @@ describe('JSON write to JSON columns + roundtrip', () => {
 describe('JSONB operators', () => {
   let oql: OQL
 
-  before(() => {
-    oql = createJsonOQL(jsonbOpsSchema)
+  before(async () => {
+    oql = await createOQL(jsonbOpsSchema)
   })
 
   after(() => {
-    oql.close()
+    oql.close?.()
   })
 
   // Field access operators (-> and ->>)

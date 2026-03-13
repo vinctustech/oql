@@ -27,6 +27,7 @@ class PetraDBConnection(val dataSource: PetraDBDataSource, storageType: String =
           case QueryResult(table)     => table.data.iterator
           case InsertResult(_, table) => table.data.iterator
           case UpdateResult(_)        => Iterator()
+          case _                      => Iterator()
       )
     )
 
@@ -67,7 +68,7 @@ class PetraDBConnection(val dataSource: PetraDBDataSource, storageType: String =
 
   def rawMulti(sql: String): Future[Seq[IndexedSeq[IndexedSeq[Any]]]] =
     val res =
-      executeSQL(sql) map {
+      executeSQL(sql) collect {
         case QueryResult(table)     => table.data map (_.data map unpack)
         case InsertResult(_, table) => table.data map (_.data map unpack)
       }
