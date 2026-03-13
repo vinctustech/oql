@@ -90,8 +90,15 @@ class OQL_PetraDB_JS(
     ds.asInstanceOf[PetraDBDataSource]
       .connect
       .raw(sql, if (values.isEmpty) Vector() else values.get.toIndexedSeq.asInstanceOf[IndexedSeq[Any]])
-      .map(t => t map (_.toJSArray) toJSArray)
-      .asInstanceOf[Future[js.Array[js.Any]]]
+      .map { case (columns, rows) =>
+        rows.map { row =>
+          val obj = js.Dynamic.literal()
+          columns.zip(row).foreach { case (name, value) =>
+            obj.updateDynamic(name)(value.asInstanceOf[js.Any])
+          }
+          obj.asInstanceOf[js.Any]
+        }.toJSArray
+      }
       .toJSPromise
 
   @JSExport
@@ -101,7 +108,7 @@ class OQL_PetraDB_JS(
       .rawMulti(sql)
       .toJSPromise
 
-  private val varRegex = ":([a-zA-Z_][a-zA-Z0-9_]*)" r
+  private val varRegex = "(?<!:):([a-zA-Z_][a-zA-Z0-9_]*)" r
 
   def substitute(s: String, parameters: js.UndefOr[js.Any]): String =
     if (parameters.isEmpty) s

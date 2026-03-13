@@ -108,6 +108,5 @@ class PetraDBDataSource(storageType: String = "memory", path: String = "")(impli
   val builtinVariables =
     Map("current_date" -> DateType, "current_timestamp" -> TimestampType, "current_time" -> TimeType)
 
-  override def string(s: String): String = s"'${quote(s)}'"
 
 }

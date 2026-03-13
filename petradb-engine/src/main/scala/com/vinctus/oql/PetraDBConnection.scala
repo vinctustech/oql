@@ -1,6 +1,6 @@
 package com.vinctus.oql
 
-import io.github.edadma.petradb.{QueryResult, InsertResult, UpdateResult}
+import io.github.edadma.petradb.{QueryResult, InsertResult, UpdateResult, DeleteResult}
 import io.github.edadma.petradb.engine.{MemoryDB, PersistentDB, TextDB, Session, executeSQL}
 
 import scala.concurrent.Future
@@ -39,9 +39,9 @@ class PetraDBConnection(val dataSource: PetraDBDataSource, storageType: String =
       varRegex.replaceAllIn(
         s,
         m =>
-          val idx = m.group(1).toInt
+          val idx = m.group(1).toInt - 1 // PostgreSQL $1-based indexing to 0-based
 
-          if idx >= parameters.length then sys.error(s"substitute: parameter '$idx' not found")
+          if idx < 0 || idx >= parameters.length then sys.error(s"substitute: parameter '${m.group(1)}' not found")
           else Regex.quoteReplacement(subsrender(parameters(idx)))
       )
 
@@ -57,12 +57,24 @@ class PetraDBConnection(val dataSource: PetraDBDataSource, storageType: String =
       case a: js.Array[?] => s"(${a map subsrender mkString ","})"
       case _              => String.valueOf(a)
 
-  def raw(sql: String, parameters: IndexedSeq[Any]): Future[Seq[Seq[Any]]] =
+  def raw(sql: String, parameters: IndexedSeq[Any]): Future[(IndexedSeq[String], Seq[Seq[Any]])] =
     val sql1 = substitute(sql, parameters)
     val res =
       executeSQL(sql1).head match
         case QueryResult(table) =>
-          table.data map (_.data map unpack)
+          val columns = table.meta.columns.map(_.name)
+          val rows = table.data map (_.data map unpack)
+          (columns, rows)
+        case InsertResult(_, table) =>
+          val columns = table.meta.columns.map(_.name)
+          val rows = table.data map (_.data map unpack)
+          (columns, rows)
+        case UpdateResult(_) =>
+          (IndexedSeq.empty, Seq.empty)
+        case DeleteResult(_) =>
+          (IndexedSeq.empty, Seq.empty)
+        case _ =>
+          (IndexedSeq.empty, Seq.empty)
 
     Future(res)
 

@@ -71,7 +71,7 @@ class OQL_PetraDB_ScalaJS(
     )
   }
 
-  private val varRegex = ":([a-zA-Z_][a-zA-Z0-9_]*)" r
+  private val varRegex = "(?<!:):([a-zA-Z_][a-zA-Z0-9_]*)" r
 
   def substitute(s: String, parameters: Map[String, Any]): String = {
     if (parameters.isEmpty) s
