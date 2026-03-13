@@ -311,13 +311,17 @@ object AbstractOQL {
       case e @ GroupedOQLExpression(expr) =>
         _decorate(expr)
         e.typ = expr.typ
-      case CaseOQLExpression(whens, els) =>
+      case e @ CaseOQLExpression(whens, els) =>
         whens foreach { case OQLWhen(cond, expr) =>
           _decorate(cond)
           _decorate(expr)
         }
 
         els foreach _decorate
+
+        // Infer CASE type from the first THEN expression, or ELSE if present
+        val resultType = whens.headOption.map(_.expr.typ).orElse(els.map(_.typ))
+        resultType.foreach(e.typ = _)
       case e @ PrefixOQLExpression(op, expr) =>
         _decorate(expr)
         e.typ = expr.typ

@@ -264,6 +264,19 @@ describe('OQL queries', () => {
       ])
     })
 
+    it('should not treat :: typecast as parameter', async () => {
+      // :ids is a parameter, but ::integer[] is a typecast — the :: should not be parsed as a parameter
+      const users = await oql.queryMany(
+        "users { id name } [id = ANY(:ids::integer[])]",
+        { ids: '{1,3}' }
+      )
+      const sorted = [...users].sort((a, b) => a.id - b.id)
+      assert.deepStrictEqual(sorted, [
+        { id: 1, name: 'Alice' },
+        { id: 3, name: 'Charlie' }
+      ])
+    })
+
     it('should handle strings with special characters', async () => {
       const inserted = await mutOql.entity('users').insert({
         name: "O'Brien",

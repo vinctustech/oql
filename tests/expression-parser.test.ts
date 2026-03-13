@@ -328,6 +328,34 @@ describe('unified expression parser', () => {
       )
       assert.deepStrictEqual(users, [{ id: 1, status: 'active' }])
     })
+
+    it('should parse CASE with numeric result type', async () => {
+      const users = await oql.queryMany(
+        'users { id score: (CASE WHEN id = 1 THEN 100 WHEN id = 2 THEN 200 ELSE 0 END) } [id IN (1,2,3)] <id>'
+      )
+      assert.deepStrictEqual(users, [
+        { id: 1, score: 100 },
+        { id: 2, score: 200 },
+        { id: 3, score: 0 }
+      ])
+    })
+
+    it('should parse CASE with ELSE branch only determining type', async () => {
+      const users = await oql.queryMany(
+        'users { id label: (CASE WHEN id = 999 THEN \'found\' ELSE \'not found\' END) } [id = 1]'
+      )
+      assert.deepStrictEqual(users, [{ id: 1, label: 'not found' }])
+    })
+
+    it('should parse CASE without ELSE (implicit NULL)', async () => {
+      const users = await oql.queryMany(
+        'users { id flag: (CASE WHEN id = 1 THEN \'yes\' END) } [id IN (1,2)] <id>'
+      )
+      assert.deepStrictEqual(users, [
+        { id: 1, flag: 'yes' },
+        { id: 2, flag: null }
+      ])
+    })
   })
 
   // --- Group 13: Missing operators and syntax ---

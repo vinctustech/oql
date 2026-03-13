@@ -82,7 +82,7 @@ class OQL_NodePG_ScalaJS(
     )
   }
 
-  private val varRegex = ":([a-zA-Z_][a-zA-Z0-9_]*)" r
+  private val varRegex = "(?<!:):([a-zA-Z_][a-zA-Z0-9_]*)" r
 
   def substitute(s: String, parameters: Map[String, Any]): String = // todo: unit tests for parameters
     if (parameters.isEmpty) s
