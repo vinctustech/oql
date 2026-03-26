@@ -7,7 +7,8 @@ addSbtPlugin("org.scala-js" % "sbt-scalajs" % "1.20.2")
 // addSbtPlugin("org.scalablytyped.converter" % "sbt-converter" % "1.0.0-beta44")
 addSbtPlugin("ch.epfl.scala" % "sbt-scalajs-bundler" % "0.21.1")
 
-addSbtPlugin("com.codecommit" % "sbt-github-packages" % "0.5.3")
+// GitHub Packages plugin removed — all deps now on Maven Central
+// addSbtPlugin("com.codecommit" % "sbt-github-packages" % "0.5.3")
 
 //resolvers += "edadma" at "https://maven.pkg.github.com/edadma/npm-plugin/io/github/edadma"
 //resolvers += Resolver.githubPackages("edadma")
