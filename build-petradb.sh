@@ -1,10 +1,10 @@
 #!/bin/bash
 set -e
 
-echo "Building petradb-engine backend..."
-sbt '; project petradb-engine; fullOptJS'
+echo "Building petradb backend..."
+sbt '; project petradb; fullOptJS'
 
-cp petradb-engine/target/scala-3.8.2/scalajs-bundler/main/-vinctus-oql-petradb-engine-opt.js petradb-engine/npm/main.js
-cp petradb-engine/target/scala-3.8.2/scalajs-bundler/main/-vinctus-oql-petradb-engine-opt.js.map petradb-engine/npm/main.js.map
+cp petradb/target/scala-3.8.2/scalajs-bundler/main/-vinctus-oql-petradb-opt.js petradb/npm/main.js
+cp petradb/target/scala-3.8.2/scalajs-bundler/main/-vinctus-oql-petradb-opt.js.map petradb/npm/main.js.map
 
-echo "petradb-engine build complete → petradb-engine/npm/"
+echo "petradb build complete → petradb/npm/"

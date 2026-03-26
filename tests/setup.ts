@@ -20,7 +20,7 @@ let _OQL_PETRADB: any
 async function loadBackend() {
   if (backend === 'petradb') {
     if (!_OQL_PETRADB) {
-      const mod = await import('@vinctus/oql-petradb-engine')
+      const mod = await import('@vinctus/oql-petradb')
       _OQL_PETRADB = mod.OQL_PETRADB
     }
   } else {

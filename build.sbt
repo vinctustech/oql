@@ -38,7 +38,7 @@ lazy val commonSettings = Seq(
 )
 
 lazy val root = project.in(file("."))
-  .aggregate(core, pg, `petradb-engine`)
+  .aggregate(core, pg, petradb)
   .enablePlugins(ParadoxPlugin)
   .enablePlugins(ParadoxMaterialThemePlugin)
   .settings(
@@ -80,7 +80,7 @@ lazy val pg = project.in(file("pg"))
   .settings(commonSettings)
   .settings(
     name := "@vinctus/oql-pg",
-    version := "1.4.0",
+    version := "1.4.1-alpha.1",
     scalaJSUseMainModuleInitializer := true,
     jsEnv := new org.scalajs.jsenv.nodejs.NodeJSEnv(),
     Compile / npmDependencies ++= Seq(
@@ -94,13 +94,13 @@ lazy val pg = project.in(file("pg"))
 //    ),
   )
 
-lazy val `petradb-engine` = project.in(file("petradb-engine"))
+lazy val petradb = project.in(file("petradb"))
   .enablePlugins(ScalaJSPlugin, ScalaJSBundlerPlugin)
   .dependsOn(core)
   .settings(commonSettings)
   .settings(
-    name := "@vinctus/oql-petradb-engine",
-    version := "1.0.0",
+    name := "@vinctus/oql-petradb",
+    version := "1.4.1-alpha.1",
     scalaJSUseMainModuleInitializer := false,
     jsEnv := new org.scalajs.jsenv.nodejs.NodeJSEnv(),
     libraryDependencies ++= Seq(

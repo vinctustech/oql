@@ -4,7 +4,7 @@
   "private": true,
   "dependencies": {
     "@vinctus/oql-pg": "file:../pg/npm",
-    "@vinctus/oql-petradb-engine": "file:../petradb-engine/npm",
+    "@vinctus/oql-petradb": "file:../petradb/npm",
     "pg": "^8.13.1"
   },
   "devDependencies": {
