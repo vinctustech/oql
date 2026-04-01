@@ -31,11 +31,29 @@ class PetraDBDataSource(storageType: String = "memory", path: String = "")(impli
 
   def mapPKType(typ: TypeSpecifier): String =
     typ match {
-      case IntegerType => "INT AUTO"
+      case IntegerType => "SERIAL"
       case BigintType  => "BIGINT AUTO"
-      case UUIDType    => "UUID AUTO"
+      case UUIDType    => "UUID"
       case _: Datatype => mapType(typ)
     }
+
+  override def schema(model: DataModel): String = {
+    val tables =
+      for (entity <- model.entities.values.toList.sortBy(_.table))
+        yield {
+          val columns =
+            for (attribute <- entity.attributes.values if attribute.typ.isColumnType)
+              yield
+                if (attribute.pk)
+                  s"  ${attribute.column} ${mapPKType(attribute.typ)} PRIMARY KEY"
+                else
+                  s"  ${attribute.column} ${mapType(attribute.typ)}${if (attribute.required) " NOT NULL" else ""}"
+
+          s"CREATE TABLE ${entity.table} (\n${columns mkString ",\n"}\n);"
+        }
+
+    tables.mkString("\n")
+  }
 
   def reverseMapType(typ: String): Datatype =
     typ match {
