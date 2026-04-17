@@ -99,6 +99,6 @@ lazy val petradb = project.in(file("petradb"))
     scalaJSUseMainModuleInitializer := false,
     jsEnv := new org.scalajs.jsenv.nodejs.NodeJSEnv(),
     libraryDependencies ++= Seq(
-      "io.github.edadma" %%% "petradb-engine" % "1.5.1",
+      "io.github.edadma" %%% "petradb-engine" % "1.5.2",
     ),
   )

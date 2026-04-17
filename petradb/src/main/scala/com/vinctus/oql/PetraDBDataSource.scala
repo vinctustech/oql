@@ -18,14 +18,14 @@ class PetraDBDataSource(storageType: String = "memory", path: String = "")(impli
       case IntegerType           => "INTEGER"
       case BooleanType           => "BOOLEAN"
       case BigintType            => "BIGINT"
-      case DecimalType(p, s)     => s"DECIMAL($p, $s)"
+      case DecimalType(p, s)     => s"NUMERIC($p, $s)"
       case DateType              => "DATE"
-      case FloatType             => "DOUBLE"
+      case FloatType             => "DOUBLE PRECISION"
       case UUIDType              => "UUID"
-      case TimestampType         => "TIMESTAMP"
-      case JSONType              => "JSON"
-      case EnumType(name, _)     => name
-      case ArrayType(elemType)   => mapType(elemType) + " ARRAY"
+      case TimestampType         => "TIMESTAMP WITHOUT TIME ZONE"
+      case JSONType | JSONBType  => "JSONB"
+      case EnumType(name, _)     => s"\"$name\""
+      case ArrayType(elemType)   => mapType(elemType) + "[]"
       case ManyToOneType(entity) => mapType(entity.pk.get.typ)
     }
 
