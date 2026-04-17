@@ -95,7 +95,7 @@ lazy val petradb = project.in(file("petradb"))
   .settings(commonSettings)
   .settings(
     name := "@vinctus/oql-petradb",
-    version := "1.4.1-alpha.1",
+    version := "1.4.1-alpha.2",
     scalaJSUseMainModuleInitializer := false,
     jsEnv := new org.scalajs.jsenv.nodejs.NodeJSEnv(),
     libraryDependencies ++= Seq(
