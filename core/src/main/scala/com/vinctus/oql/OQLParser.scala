@@ -248,8 +248,8 @@ object OQLParser extends RegexParsers with PackratParsers {
       qualifiedAttributeExpression |
       "&" ~> identifiers ^^ (ReferenceOQLExpression(_)) |
       "-" ~> primary ^^ (e => PrefixOQLExpression("-", e)) |
-      "(" ~> query <~ ")" ^^ QueryOQLExpression.apply |
-      "(" ~> expression <~ ")" ^^ GroupedOQLExpression.apply
+      "(" ~> expression <~ ")" ^^ GroupedOQLExpression.apply |
+      "(" ~> query <~ ")" ^^ QueryOQLExpression.apply
 
   lazy val caseExpression: PackratParser[CaseOQLExpression] =
     kw("CASE") ~> rep1(when) ~ opt(kw("ELSE") ~> expression) <~ kw("END") ^^ { case ws ~ e => CaseOQLExpression(ws, e) }

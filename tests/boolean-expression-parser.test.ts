@@ -74,5 +74,21 @@ describe('boolean expression parser - standalone non-comparison expressions', ()
       const ids = users.map(u => u.id).sort((a, b) => a - b)
       assert.deepStrictEqual(ids, [1, 2])
     })
+
+    it('should accept a parenthesized bare boolean attribute', async () => {
+      // (active) must parse as a grouped attribute expression, NOT as an implicit
+      // sub-query `active{*}` — Alice and Bob are active
+      const users = await oql.queryMany('users { id name } [(active) AND id IN (1,2,3)]')
+      const ids = users.map(u => u.id).sort((a, b) => a - b)
+      assert.deepStrictEqual(ids, [1, 2])
+    })
+
+    it('should accept NOT (bare_boolean_attribute)', async () => {
+      // NOT (active) must parse as NOT of grouped attribute, NOT as NOT of an
+      // implicit sub-query — Charlie is inactive
+      const users = await oql.queryMany('users { id name } [NOT (active) AND id IN (1,2,3)]')
+      assert.strictEqual(users.length, 1)
+      assert.strictEqual(users[0].name, 'Charlie')
+    })
   })
 })
