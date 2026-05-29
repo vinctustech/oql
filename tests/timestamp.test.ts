@@ -43,4 +43,19 @@ describe('petradb timestamps', { skip: backend !== 'petradb' }, () => {
     assert.strictEqual(rows.length, 1)
     assert.strictEqual(new Date(rows[0].at).toISOString(), '2024-01-01T00:00:00.000Z')
   })
+
+  it('compares a timestamp column to CURRENT_TIMESTAMP (timestamp vs timestamptz)', async () => {
+    // Postgres allows `timestamp <= timestamptz` via implicit cast; petradb
+    // must too. CURRENT_TIMESTAMP is timestamptz, the column is timestamp.
+    const ev = await createOQL('entity event { *id: integer at: timestamp }')
+    await ev.raw('DROP TABLE IF EXISTS event')
+    await ev.raw('CREATE TABLE event (id INTEGER PRIMARY KEY, at TIMESTAMP NOT NULL)')
+    await ev.raw("INSERT INTO event VALUES (1, '2024-01-01T00:00:00Z'), (2, '2999-01-01T00:00:00')")
+
+    const past = await ev.queryMany('event {id} [at <= CURRENT_TIMESTAMP]')
+    const future = await ev.queryMany('event {id} [at > CURRENT_TIMESTAMP]')
+    assert.strictEqual(past.length, 1)
+    assert.strictEqual(future.length, 1)
+    ev.close?.()
+  })
 })

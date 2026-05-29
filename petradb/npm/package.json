@@ -1,6 +1,6 @@
 {
   "name": "@vinctus/oql-petradb",
-  "version": "1.4.1-alpha.4",
+  "version": "1.4.1-alpha.5",
   "description": "Object Query Language - PetraDB Engine Backend",
   "main": "main.js",
   "scripts": {
