@@ -95,10 +95,10 @@ lazy val petradb = project.in(file("petradb"))
   .settings(commonSettings)
   .settings(
     name := "@vinctus/oql-petradb",
-    version := "1.4.1-alpha.2",
+    version := "1.4.1-alpha.4",
     scalaJSUseMainModuleInitializer := false,
     jsEnv := new org.scalajs.jsenv.nodejs.NodeJSEnv(),
     libraryDependencies ++= Seq(
-      "io.github.edadma" %%% "petradb-engine" % "1.5.2",
+      "io.github.edadma" %%% "petradb-engine" % "1.5.3",
     ),
   )
