@@ -9,6 +9,10 @@ export interface OQL {
   queryOne<T = any>(oql: string, parameters?: any, fixed?: string, at?: any): Promise<T | undefined>
   queryMany<T = any>(oql: string, parameters?: any, fixed?: string, at?: any): Promise<T[]>
   count(oql: string, parameters?: any, fixed?: string, at?: any): Promise<number>
+  // AST entry points — accept a pre-built plain-object AST, bypassing the string parser
+  queryOneAST<T = any>(ast: any, fixed?: string, at?: any): Promise<T | undefined>
+  queryManyAST<T = any>(ast: any, fixed?: string, at?: any): Promise<T[]>
+  countAST(ast: any, fixed?: string, at?: any): Promise<number>
   raw<T = any>(sql: string, values?: any[]): Promise<T[]>
   close?: () => void
 }

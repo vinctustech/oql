@@ -6,6 +6,8 @@ import scala.collection.mutable
 import scala.compiletime.uninitialized
 import scala.concurrent.Future
 import scala.scalajs.js
+import scala.scalajs.js.JSConverters._
+import scala.scalajs.js.annotation.JSExport
 
 abstract class AbstractOQL(dm: String, val ds: SQLDataSource, conv: Conversions)(implicit
     ec: scala.concurrent.ExecutionContext
@@ -38,7 +40,7 @@ abstract class AbstractOQL(dm: String, val ds: SQLDataSource, conv: Conversions)
 
   def parseQuery(oql: String): OQLQuery = processQuery(OQLParser.parseQuery(oql), oql)
 
-  private def processQuery(query: OQLQuery, oql: String): OQLQuery =
+  private[oql] def processQuery(query: OQLQuery, oql: String): OQLQuery =
     preprocessQuery(None, query, model, ds, oql) // todo: should be called "preprocessQuery" and do all decorating
     query.select foreach (decorate(query.entity, _, model, ds, oql))
     query.group foreach (_ foreach (decorate(query.entity, _, model, ds, oql)))
@@ -95,6 +97,48 @@ abstract class AbstractOQL(dm: String, val ds: SQLDataSource, conv: Conversions)
         case _         => sys.error(s"queryOne: more than one row was found")
       }
     }
+
+  // ── AST entry points: build the OQLQuery directly from a plain JS object,
+  //    bypassing the string parser (oql-typed's default path). Defined once here
+  //    and inherited by every backend. Same processQuery -> queryMany pipeline as
+  //    the string forms; `count` preprocesses internally so it takes the raw AST.
+  @JSExport("queryManyAST")
+  def jsQueryManyAST(
+      ast: js.Any,
+      fixed: js.UndefOr[String] = null,
+      at: js.Any = null
+  ): js.Promise[js.Array[js.Any]] =
+    queryMany(
+      processQuery(FromJS.fromJS(ast.asInstanceOf[js.Dynamic]), "<ast>"),
+      "<ast>",
+      () => new JSResultBuilder,
+      fixedEntity(fixed.orNull, at),
+    ).map(_.arrayResult.asInstanceOf[js.Array[js.Any]]).toJSPromise
+
+  @JSExport("queryOneAST")
+  def jsQueryOneAST(
+      ast: js.Any,
+      fixed: js.UndefOr[String] = null,
+      at: js.Any = null
+  ): js.Promise[js.UndefOr[Any]] =
+    queryMany(
+      processQuery(FromJS.fromJS(ast.asInstanceOf[js.Dynamic]), "<ast>"),
+      "<ast>",
+      () => new JSResultBuilder,
+      fixedEntity(fixed.orNull, at),
+    ).map(_.arrayResult.asInstanceOf[js.Array[js.Any]]).map {
+      case a if a.length == 0 => js.undefined
+      case a if a.length == 1 => a.head
+      case _                  => sys.error("queryOne: more than one row was found")
+    }.toJSPromise
+
+  @JSExport("countAST")
+  def jsCountAST(
+      ast: js.Any,
+      fixed: js.UndefOr[String] = null,
+      at: js.Any = null
+  ): js.Promise[Int] =
+    count(FromJS.fromJS(ast.asInstanceOf[js.Dynamic]), "<ast>", fixedEntity(fixed.orNull, at)).toJSPromise
 
   protected def fixedEntity(entity: String, value: Any): Fixed =
     if (entity ne null) Fixed(operative = true, model.entities(entity), value)
