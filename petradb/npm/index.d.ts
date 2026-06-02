@@ -58,6 +58,12 @@ export class OQL_PETRADB {
 
   count(oql: string, parameters?: any, fixed?: string, at?: any): Promise<number>
 
+  queryOneAST<T = any>(ast: any, fixed?: string, at?: any): Promise<T | undefined>
+
+  queryManyAST<T = any>(ast: any, fixed?: string, at?: any): Promise<T[]>
+
+  countAST(ast: any, fixed?: string, at?: any): Promise<number>
+
   raw<T = any>(sql: string, values?: any[]): Promise<T[]>
 
   rawMulti(sql: string): Promise<void>
