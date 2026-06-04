@@ -151,6 +151,48 @@ describe('AST entry points', () => {
         select: infix('=', attr('id'), int(1)),
       })
     })
+
+    it('CASE WHEN ... ELSE ... END in an aliased projection', async () => {
+      const rows = await parity('users { id flag: (CASE WHEN active = TRUE THEN 1 ELSE 0 END) } [id IN (1,2,3)]', {
+        kind: 'query',
+        source: 'users',
+        project: [
+          field('id'),
+          {
+            kind: 'expr',
+            label: 'flag',
+            expr: {
+              kind: 'case',
+              whens: [{ cond: infix('=', attr('active'), bool('TRUE')), expr: int(1) }],
+              els: int(0),
+            },
+          },
+        ],
+        select: { kind: 'in', op: 'IN', left: attr('id'), values: [int(1), int(2), int(3)] },
+      })
+      const byId = Object.fromEntries(rows.map((r) => [r.id, r.flag]))
+      assert.deepStrictEqual(byId, { 1: 1, 2: 1, 3: 0 }) // Charlie is inactive -> 0
+    })
+
+    it('CASE WHEN without ELSE (NULL on no match)', async () => {
+      const rows = await parity('users { id flag: (CASE WHEN active = TRUE THEN 1 END) } [id = 3]', {
+        kind: 'query',
+        source: 'users',
+        project: [
+          field('id'),
+          {
+            kind: 'expr',
+            label: 'flag',
+            expr: {
+              kind: 'case',
+              whens: [{ cond: infix('=', attr('active'), bool('TRUE')), expr: int(1) }],
+            },
+          },
+        ],
+        select: infix('=', attr('id'), int(3)),
+      })
+      assert.equal(rows[0].flag, null) // Charlie inactive, no ELSE -> NULL
+    })
   })
 
   describe('queryOneAST', () => {

@@ -111,6 +111,11 @@ object FromJS {
       case "apply"    => ApplyOQLExpression(Ident(o.f.asInstanceOf[String]), arr(o.args) map toExpr)
       case "star"     => StarOQLExpression
       case "subquery" => QueryOQLExpression(toQuery(o.query))
+      case "case" =>
+        CaseOQLExpression(
+          arr(o.whens) map (w => OQLWhen(toExpr(w.cond), toExpr(w.expr))),
+          opt(o.els) map toExpr,
+        )
       case "str"      => StringOQLExpression(o.v.asInstanceOf[String])
       case "int"      => IntegerOQLExpression(o.v.asInstanceOf[Int])
       case "float"    => FloatOQLExpression(o.v.asInstanceOf[Double])
