@@ -63,8 +63,8 @@ object FromJS {
             opt(o.select) map toExpr,
             None,
             opt(o.order) map (os => arr(os) map toOrdering),
-            None,
-            None,
+            opt(o.limit) map (_.asInstanceOf[Int]),
+            opt(o.offset) map (_.asInstanceOf[Int]),
           ),
         )
       case other => sys.error(s"fromJS: unknown projection kind '$other'")

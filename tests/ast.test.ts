@@ -85,6 +85,47 @@ describe('AST entry points', () => {
       })
     })
 
+    it('nested oneToMany relation with pagination (limit/offset)', async () => {
+      // Alice (id 1) has two posts (ids 1, 2). Order DESC, limit 1 -> [{id:2}].
+      const rowsLimit = await parity('users { id posts { id } <id DESC> |1| } [id = 1]', {
+        kind: 'query',
+        source: 'users',
+        project: [
+          field('id'),
+          {
+            kind: 'rel',
+            label: 'posts',
+            source: 'posts',
+            project: [field('id')],
+            order: [{ expr: attr('id'), dir: 'DESC' }],
+            limit: 1,
+          },
+        ],
+        select: infix('=', attr('id'), int(1)),
+      })
+      assert.deepStrictEqual(rowsLimit[0].posts, [{ id: 2 }])
+
+      // Offset 1 past the DESC-ordered list -> the second post [{id:1}].
+      const rowsOffset = await parity('users { id posts { id } <id DESC> |1, 1| } [id = 1]', {
+        kind: 'query',
+        source: 'users',
+        project: [
+          field('id'),
+          {
+            kind: 'rel',
+            label: 'posts',
+            source: 'posts',
+            project: [field('id')],
+            order: [{ expr: attr('id'), dir: 'DESC' }],
+            limit: 1,
+            offset: 1,
+          },
+        ],
+        select: infix('=', attr('id'), int(1)),
+      })
+      assert.deepStrictEqual(rowsOffset[0].posts, [{ id: 1 }])
+    })
+
     it('OR (grouped)', async () => {
       const rows = await parity('users { id } [(id = 1 OR id = 3)]', {
         kind: 'query',
