@@ -51,6 +51,12 @@ entity posts {
   body: text
   author: users
 }
+
+entity tagged {
+ *id: integer
+  label: text
+  tags: text[]
+}
 `
 
 // Mutation schema — same entities, mapped to separate tables for insert/update/delete tests
@@ -132,6 +138,20 @@ INSERT INTO users (name, email, active) VALUES
   ('Alice', 'alice@example.com', true),
   ('Bob', 'bob@example.com', true),
   ('Charlie', 'charlie@example.com', false);
+
+-- Array-column test table (scalar = ANY(arrayColumn) membership)
+DROP TABLE IF EXISTS tagged;
+
+CREATE TABLE tagged (
+  id SERIAL PRIMARY KEY,
+  label VARCHAR(255) NOT NULL,
+  tags TEXT[]
+);
+
+INSERT INTO tagged (label, tags) VALUES
+  ('alice', ARRAY['admin', 'vip']),
+  ('bob', ARRAY['vip']),
+  ('charlie', ARRAY['standard']);
 
 INSERT INTO posts (title, body, author) VALUES
   ('First Post', 'Hello world', 1),

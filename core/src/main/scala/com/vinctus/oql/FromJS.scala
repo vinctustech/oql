@@ -93,6 +93,13 @@ object FromJS {
         BetweenOQLExpression(toExpr(o.expr), "BETWEEN", toExpr(o.lower), toExpr(o.upper))
       case "in" =>
         InArrayOQLExpression(toExpr(o.left), o.op.asInstanceOf[String], arr(o.values) map toExpr)
+      case "arraycomp" =>
+        ArrayComparisonOQLExpression(
+          toExpr(o.left),
+          o.op.asInstanceOf[String],
+          o.quantifier.asInstanceOf[String],
+          toExpr(o.array),
+        )
       case "exists" =>
         ExistsOQLExpression(
           OQLQuery(

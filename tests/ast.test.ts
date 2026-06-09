@@ -193,6 +193,19 @@ describe('AST entry points', () => {
       })
       assert.equal(rows[0].flag, null) // Charlie inactive, no ELSE -> NULL
     })
+
+    it('scalar = ANY(arrayColumn) membership', async () => {
+      const rows = await parity('tagged { id } [\'vip\' = ANY(tags)]', {
+        kind: 'query',
+        source: 'tagged',
+        project: [field('id')],
+        select: { kind: 'arraycomp', left: str('vip'), op: '=', quantifier: 'ANY', array: attr('tags') },
+      })
+      assert.deepStrictEqual(
+        rows.map((r) => r.id).sort(),
+        [1, 2], // 'alice' ['admin','vip'] and 'bob' ['vip']; 'charlie' tags NULL -> excluded
+      )
+    })
   })
 
   describe('queryOneAST', () => {
