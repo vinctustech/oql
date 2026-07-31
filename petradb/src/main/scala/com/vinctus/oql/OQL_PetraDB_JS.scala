@@ -138,7 +138,7 @@ class OQL_PetraDB_JS(
   def render(a: Any, typ: Option[Datatype] = None): String =
     if (typ.isDefined)
       typ.get match {
-        case JSONType => s"'${JSON(a, ds.platformSpecific)}'"
+        case JSONType => ds.string(JSON(a, ds.platformSpecific))
         case ArrayType(elemType) =>
           if (a == null) s"NULL::${ds.mapType(typ.get)}"
           else {

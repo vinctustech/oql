@@ -75,7 +75,7 @@ lazy val pg = project.in(file("pg"))
   .settings(commonSettings)
   .settings(
     name := "@vinctus/oql-pg",
-    version := "1.4.2-alpha.5",
+    version := "1.4.2-alpha.6",
     scalaJSUseMainModuleInitializer := true,
     jsEnv := new org.scalajs.jsenv.nodejs.NodeJSEnv(),
     Compile / npmDependencies ++= Seq(
@@ -95,7 +95,7 @@ lazy val petradb = project.in(file("petradb"))
   .settings(commonSettings)
   .settings(
     name := "@vinctus/oql-petradb",
-    version := "1.4.2-alpha.5",
+    version := "1.4.2-alpha.6",
     scalaJSUseMainModuleInitializer := false,
     jsEnv := new org.scalajs.jsenv.nodejs.NodeJSEnv(),
     libraryDependencies ++= Seq(

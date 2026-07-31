@@ -150,6 +150,54 @@ describe('JSON write to JSON columns + roundtrip', () => {
     await oql.entity('json_write').delete(row.id)
   })
 
+  it('should insert JSON with apostrophes and read it back', async () => {
+    const data = { lastName: "O'Brien-Smith", note: "it's a driver's name" }
+    const row = await oql.entity('json_write').insert({
+      label: 'apostrophe_test',
+      data
+    })
+    const fetched = await oql.queryOne('json_write { data } [id = :id]', { id: row.id })
+    assert.deepStrictEqual(fetched.data, data)
+    await oql.entity('json_write').delete(row.id)
+  })
+
+  it('should insert JSON with backslashes and read it back', async () => {
+    const data = { path: 'C:\\temp\\file', mixed: "quote ' and backslash \\" }
+    const row = await oql.entity('json_write').insert({
+      label: 'backslash_test',
+      data
+    })
+    const fetched = await oql.queryOne('json_write { data } [id = :id]', { id: row.id })
+    assert.deepStrictEqual(fetched.data, data)
+    await oql.entity('json_write').delete(row.id)
+  })
+
+  it('should treat SQL injection attempts in JSON values as data', async () => {
+    const data = { note: "'); DROP TABLE json_write; --" }
+    const row = await oql.entity('json_write').insert({
+      label: 'injection_test',
+      data
+    })
+    const fetched = await oql.queryOne('json_write { data } [id = :id]', { id: row.id })
+    assert.deepStrictEqual(fetched.data, data)
+    await oql.entity('json_write').delete(row.id)
+    const stillThere = await oql.queryMany('json_write { id }')
+    assert.strictEqual(stillThere.length, 0)
+  })
+
+  it('should update a JSON field with apostrophes', async () => {
+    const row = await oql.entity('json_write').insert({
+      label: 'apostrophe_update_test',
+      data: { name: 'plain' }
+    })
+    await oql.entity('json_write').update(row.id, {
+      data: { name: "O'Brien-Smith" }
+    })
+    const fetched = await oql.queryOne('json_write { data } [id = :id]', { id: row.id })
+    assert.deepStrictEqual(fetched.data, { name: "O'Brien-Smith" })
+    await oql.entity('json_write').delete(row.id)
+  })
+
   it('should insert JSON with unicode characters', async () => {
     const data = { emoji: '☺', cjk: '日本語' }
     const row = await oql.entity('json_write').insert({
