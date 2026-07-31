@@ -1,16 +1,19 @@
 import { describe, it, before, after } from 'node:test'
 import assert from 'node:assert'
-import { createOQL, type OQL } from './setup.ts'
+import { createOQL, mutationSchema, type OQL } from './setup.ts'
 
 describe('Function return types', () => {
   let oql: OQL
+  let mutOql: OQL
 
   before(async () => {
     oql = await createOQL()
+    mutOql = await createOQL(mutationSchema)
   })
 
   after(() => {
     oql.close?.()
+    mutOql.close?.()
   })
 
   // String functions
@@ -92,11 +95,11 @@ describe('Function return types', () => {
     })
 
     it('should return fallback when first arg is null', async () => {
-      // Use raw SQL to insert a user with null email, test coalesce, then clean up
-      await oql.raw("INSERT INTO users (id, name, email, active) VALUES (9999, 'NullEmail', NULL, true)")
-      const row = await oql.queryOne("users { val: coalesce(email, 'none') } [id = 9999]")
+      // Insert into the mutation table so parallel test files reading `users` don't see a transient row
+      const inserted = await mutOql.entity('users').insert({ name: 'NullEmail', email: null, active: true })
+      const row = await mutOql.queryOne("users { val: coalesce(email, 'none') } [id = :id]", { id: inserted.id })
       assert.strictEqual(row.val, 'none')
-      await oql.raw("DELETE FROM users WHERE id = 9999")
+      await mutOql.entity('users').delete(inserted.id)
     })
   })
 

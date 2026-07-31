@@ -386,6 +386,7 @@ describe('bulk mutations with non-integer primary keys', () => {
     await oql.entity('tokens').bulkUpdate([
       ['aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa', { label: 'FIRST' }],
       ['bbbbbbbb-bbbb-4bbb-9bbb-bbbbbbbbbbbb', { label: 'SECOND' }],
+      ['11111111-1111-1111-1111-111111111111', { label: 'THIRD' }],
     ])
 
     const first = await oql.queryOne('tokens { label } [token = :token]', { token: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa' })
@@ -393,5 +394,8 @@ describe('bulk mutations with non-integer primary keys', () => {
 
     const second = await oql.queryOne('tokens { label } [token = :token]', { token: 'bbbbbbbb-bbbb-4bbb-9bbb-bbbbbbbbbbbb' })
     assert.strictEqual(second.label, 'SECOND')
+
+    const third = await oql.queryOne('tokens { label } [token = :token]', { token: '11111111-1111-1111-1111-111111111111' })
+    assert.strictEqual(third.label, 'THIRD')
   })
 })

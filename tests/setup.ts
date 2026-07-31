@@ -230,7 +230,8 @@ INSERT INTO mut_codes (code, label) VALUES
 
 INSERT INTO mut_tokens (token, label) VALUES
   ('aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa', 'first'),
-  ('bbbbbbbb-bbbb-4bbb-9bbb-bbbbbbbbbbbb', 'second');
+  ('bbbbbbbb-bbbb-4bbb-9bbb-bbbbbbbbbbbb', 'second'),
+  ('11111111-1111-1111-1111-111111111111', 'third');
 
 -- Enum test tables
 DROP TABLE IF EXISTS tickets CASCADE;
