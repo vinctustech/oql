@@ -113,7 +113,7 @@ class OQL_PetraDB_ScalaJS(
             }
             s"ARRAY[${seq.map(e => render(e)).mkString(",")}]::${ds.mapType(typ.get)}"
           }
-        case _ => ds.typed(a, typ.get)
+        case _ => ds.typed(render(a), typ.get)
       }
     else
       a match {

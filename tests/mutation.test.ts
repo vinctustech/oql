@@ -1,6 +1,6 @@
 import { describe, it, before, after } from 'node:test'
 import assert from 'node:assert'
-import { createOQL, mutationSchema, type OQL } from './setup.ts'
+import { createOQL, mutationSchema, nonIntegerPKSchema, type OQL } from './setup.ts'
 
 describe('OQL mutations', () => {
   let oql: OQL
@@ -355,5 +355,43 @@ describe('OQL mutations', () => {
 
       await oql.entity('users').bulkDelete([u1.id, u2.id])
     })
+  })
+})
+
+describe('bulk mutations with non-integer primary keys', () => {
+  let oql: OQL
+
+  before(async () => {
+    oql = await createOQL(nonIntegerPKSchema)
+  })
+
+  after(() => {
+    oql.close?.()
+  })
+
+  it('bulkUpdate should update rows keyed by a text primary key', async () => {
+    await oql.entity('codes').bulkUpdate([
+      ['alpha', { label: 'FIRST' }],
+      ['beta', { label: 'SECOND' }],
+    ])
+
+    const alpha = await oql.queryOne('codes { label } [code = :code]', { code: 'alpha' })
+    assert.strictEqual(alpha.label, 'FIRST')
+
+    const beta = await oql.queryOne('codes { label } [code = :code]', { code: 'beta' })
+    assert.strictEqual(beta.label, 'SECOND')
+  })
+
+  it('bulkUpdate should update rows keyed by a uuid primary key', async () => {
+    await oql.entity('tokens').bulkUpdate([
+      ['aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa', { label: 'FIRST' }],
+      ['bbbbbbbb-bbbb-4bbb-9bbb-bbbbbbbbbbbb', { label: 'SECOND' }],
+    ])
+
+    const first = await oql.queryOne('tokens { label } [token = :token]', { token: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa' })
+    assert.strictEqual(first.label, 'FIRST')
+
+    const second = await oql.queryOne('tokens { label } [token = :token]', { token: 'bbbbbbbb-bbbb-4bbb-9bbb-bbbbbbbbbbbb' })
+    assert.strictEqual(second.label, 'SECOND')
   })
 })

@@ -68,7 +68,7 @@ trait SQLDataSource extends OQLDataSource {
 
   def typed(a: Any, typ: Datatype): String =
     (a, typ) match {
-      case (s: String, TextType)        => string(s)
+      case (s: String, TextType)        => s"$s::TEXT"
       case (s: String, UUIDType)        => s"$s::UUID"
       case (s: String, IntegerType)     => s"$s::INTEGER"
       case (s: String, BooleanType)     => s"$s::BOOLEAN"

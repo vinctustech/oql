@@ -76,6 +76,19 @@ entity posts (mut_posts) {
 }
 `
 
+// Non-integer primary key schema — exercises primary key rendering in bulk mutations
+export const nonIntegerPKSchema = `
+entity codes (mut_codes) {
+ *code: text
+  label: text
+}
+
+entity tokens (mut_tokens) {
+ *token: uuid
+  label: text
+}
+`
+
 // Enum schema — tests enum column handling
 export const enumSchema = `
 enum priority { low medium high critical }
@@ -196,6 +209,28 @@ CREATE TABLE json_write (
   label VARCHAR(255) NOT NULL,
   data JSON
 );
+
+-- Non-integer primary key tables (bulk mutation tests)
+DROP TABLE IF EXISTS mut_codes;
+DROP TABLE IF EXISTS mut_tokens;
+
+CREATE TABLE mut_codes (
+  code TEXT PRIMARY KEY,
+  label VARCHAR(255)
+);
+
+CREATE TABLE mut_tokens (
+  token UUID PRIMARY KEY,
+  label VARCHAR(255)
+);
+
+INSERT INTO mut_codes (code, label) VALUES
+  ('alpha', 'first'),
+  ('beta', 'second');
+
+INSERT INTO mut_tokens (token, label) VALUES
+  ('aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa', 'first'),
+  ('bbbbbbbb-bbbb-4bbb-9bbb-bbbbbbbbbbbb', 'second');
 
 -- Enum test tables
 DROP TABLE IF EXISTS tickets CASCADE;

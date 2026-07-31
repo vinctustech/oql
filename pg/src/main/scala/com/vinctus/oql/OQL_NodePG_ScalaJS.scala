@@ -112,7 +112,7 @@ class OQL_NodePG_ScalaJS(
   def render(a: Any, typ: Option[Datatype] = None): String =
     if (typ.isDefined)
       typ.get match {
-        case JSONType => s"'${JSON(a, ds.platformSpecific)}'"
+        case JSONType => ds.string(JSON(a, ds.platformSpecific))
         case ArrayType(elemType) =>
           if (a == null) s"NULL::${ds.mapType(typ.get)}"
           else {
@@ -123,7 +123,7 @@ class OQL_NodePG_ScalaJS(
             }
             s"ARRAY[${seq.map(e => render(e)).mkString(",")}]::${ds.mapType(typ.get)}"
           }
-        case _ => ds.typed(a, typ.get)
+        case _ => ds.typed(render(a), typ.get)
       }
     else
       a match {
