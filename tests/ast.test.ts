@@ -247,6 +247,29 @@ describe('AST entry points', () => {
         [1, 2], // 'alice' ['admin','vip'] and 'bob' ['vip']; 'charlie' tags NULL -> excluded
       )
     })
+
+    // Empty IN/NOT IN lists have no string-parser equivalent (the grammar
+    // requires at least one element), so these assert behavior directly:
+    // `x IN ()` is FALSE (matches nothing), `x NOT IN ()` is TRUE (matches all).
+    it('empty IN () matches no rows', async () => {
+      const rows = await oql.queryManyAST({
+        kind: 'query',
+        source: 'users',
+        project: [field('id')],
+        select: { kind: 'in', op: 'IN', left: attr('id'), values: [] },
+      })
+      assert.equal(rows.length, 0)
+    })
+
+    it('empty NOT IN () matches all rows', async () => {
+      const rows = await oql.queryManyAST({
+        kind: 'query',
+        source: 'users',
+        project: [field('id')],
+        select: { kind: 'in', op: 'NOT IN', left: attr('id'), values: [] },
+      })
+      assert.equal(rows.length, 3)
+    })
   })
 
   describe('queryOneAST', () => {
@@ -294,6 +317,22 @@ describe('AST entry points', () => {
         offset: 0,
       })
       assert.equal(fromAst, 3)
+    })
+
+    it('empty IN () counts zero; empty NOT IN () counts all', async () => {
+      const none = await oql.countAST({
+        kind: 'query',
+        source: 'users',
+        select: { kind: 'in', op: 'IN', left: attr('id'), values: [] },
+      })
+      assert.equal(none, 0)
+
+      const all = await oql.countAST({
+        kind: 'query',
+        source: 'users',
+        select: { kind: 'in', op: 'NOT IN', left: attr('id'), values: [] },
+      })
+      assert.equal(all, 3)
     })
   })
 })

@@ -132,6 +132,7 @@ class SQLQueryBuilder(
         val sql = subquery.toString
 
         s"${expression(left, table)} $op (\n$sql${" " * (margin + 2 * SQLQueryBuilder.INDENT)})"
+      case InArrayOQLExpression(_, op, Nil) => if (op == "NOT IN") "TRUE" else "FALSE"
       case InArrayOQLExpression(left, op, right) =>
         s"${expression(left, table)} $op (${right map (expression(_, table)) mkString ", "})"
       case ArrayComparisonOQLExpression(left, op, quantifier, array) =>

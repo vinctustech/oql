@@ -1,6 +1,6 @@
 {
   "name": "@vinctus/oql-pg",
-  "version": "1.4.2-alpha.6",
+  "version": "1.4.2-beta.1",
   "description": "Object Query Language",
   "main": "main.js",
   "scripts": {
