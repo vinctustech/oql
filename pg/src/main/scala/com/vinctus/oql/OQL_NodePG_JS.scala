@@ -11,23 +11,42 @@ import scala.scalajs.js.annotation.{JSExport, JSExportTopLevel}
 import scala.util.matching.Regex
 
 @JSExportTopLevel("OQL_PG")
-class OQL_NodePG_JS(
+class OQL_NodePG_JS protected (
     dm: String,
-    host: String,
-    port: Int,
-    database: String,
-    user: String,
-    password: String,
-    ssl: Boolean | ConnectionOptions,
-    idleTimeoutMillis: Int,
-    max: Int
-) extends AbstractOQL(
-      dm,
-      new NodePGDataSource(host, port, database, user, password, ssl, idleTimeoutMillis, max),
-      JSConversions
-    ) {
+    dataSource: NodePGDataSource,
+    sharedModel: DataModel,
+    txConnection: NodePGConnection
+) extends AbstractOQL(dm, dataSource, JSConversions, sharedModel) {
+
+  def this(
+      dm: String,
+      host: String,
+      port: Int,
+      database: String,
+      user: String,
+      password: String,
+      ssl: Boolean | ConnectionOptions,
+      idleTimeoutMillis: Int,
+      max: Int
+  ) =
+    this(dm, new NodePGDataSource(host, port, database, user, password, ssl, idleTimeoutMillis, max), null, null)
+
+  // Inside a transaction every statement has to go to the client that ran BEGIN,
+  // rather than to a fresh one out of the pool.
+  private def pgConnection: NodePGConnection = if (txConnection ne null) txConnection else dataSource.connect
+
+  override def connect: OQLConnection = pgConnection
 
   def execute[R](action: OQLConnection => Future[R]): Future[R] = action(connect)
+
+  // Runs `body` with an OQL instance whose queries and mutations all share one
+  // connection wrapped in BEGIN/COMMIT. The transaction commits when the promise
+  // `body` returns resolves, and rolls back if it rejects.
+  @JSExport("transaction")
+  def jsTransaction(body: js.Function1[OQL_NodePG_JS, js.Promise[js.Any]]): js.Promise[js.Any] =
+    pgConnection
+      .transaction(connection => body(new OQL_NodePG_JS(dm, dataSource, model, connection)).toFuture)
+      .toJSPromise
 
   @JSExport
   def entity(name: String): Mutation_JS_NodePG = new Mutation_JS_NodePG(this, model.entities(name))
@@ -90,12 +109,10 @@ class OQL_NodePG_JS(
 
   @JSExport
   def raw(sql: String, values: js.UndefOr[js.Array[js.Any]]): js.Promise[js.Array[js.Any]] =
-    ds.asInstanceOf[NodePGDataSource]
-      .connect
-      .raw(sql, if (values.isEmpty) js.Array() else values.get)
+    pgConnection.raw(sql, if (values.isEmpty) js.Array() else values.get)
 
   @JSExport
-  def close(): Unit = ds.asInstanceOf[NodePGDataSource].connect.close()
+  def close(): Unit = pgConnection.close()
 
   private val varRegex = "(?<!:):([a-zA-Z_][a-zA-Z0-9_]*)" r
 

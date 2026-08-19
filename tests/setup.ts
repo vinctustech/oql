@@ -14,6 +14,8 @@ export interface OQL {
   queryManyAST<T = any>(ast: any, fixed?: string, at?: any): Promise<T[]>
   countAST(ast: any, fixed?: string, at?: any): Promise<number>
   raw<T = any>(sql: string, values?: any[]): Promise<T[]>
+  // Only backends that support transactions define this
+  transaction?<T>(body: (tx: OQL) => Promise<T>): Promise<T>
   close?: () => void
 }
 

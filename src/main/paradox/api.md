@@ -56,6 +56,23 @@ gets the *id*, *name*, *price* and `supplier.name` for products that are less th
 
 Perform the raw SQL query and return a promise for the results where *sql* is the query string and *values* are query parameter values.
 
+### `transaction(body)`
+
+Runs *body* inside a database transaction and returns a promise for its result. *body* is called with an OQL instance whose queries and mutations all run on one connection: the transaction commits when the promise *body* returns resolves, and rolls back if it rejects.
+
+For example
+
+```typescript
+await oql.transaction(async (tx) => {
+  await tx.entity('availability').update(id, {endDatetime: cutoff})
+  await tx.entity('availability').insert(remainder)
+})
+```
+
+either applies both writes or neither.
+
+Only the PostgreSQL backend supports transactions. Calling `transaction` on an instance that is already inside one joins the transaction in progress rather than nesting a new one, so a failure anywhere rolls back everything.
+
 The `QueryBuilder` Class
 ------------------------
 

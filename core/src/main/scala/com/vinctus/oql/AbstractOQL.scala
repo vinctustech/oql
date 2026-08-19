@@ -9,8 +9,8 @@ import scala.scalajs.js
 import scala.scalajs.js.JSConverters._
 import scala.scalajs.js.annotation.JSExport
 
-abstract class AbstractOQL(dm: String, val ds: SQLDataSource, conv: Conversions)(implicit
-    ec: scala.concurrent.ExecutionContext
+abstract class AbstractOQL(dm: String, val ds: SQLDataSource, conv: Conversions, sharedModel: DataModel = null)(
+    implicit ec: scala.concurrent.ExecutionContext
 ) {
 
   import AbstractOQL._
@@ -18,7 +18,8 @@ abstract class AbstractOQL(dm: String, val ds: SQLDataSource, conv: Conversions)
   private var _transpileOnly = false
   private var _showQuery = false
 
-  val model: DataModel = new DataModel(new DMLParser().parseModel(dm), dm)
+  // A transaction-scoped instance reuses the model its parent already parsed
+  val model: DataModel = if (sharedModel ne null) sharedModel else new DataModel(new DMLParser().parseModel(dm), dm)
 //    DMLParse(dm) match {
 //      case None              => sys.error("error building data model")
 //      case Some(m: DMLModel) => new DataModel(m, dm)

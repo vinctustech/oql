@@ -64,6 +64,8 @@ export class OQL_PG {
 
   raw<T = any>(sql: string, values?: any[]): Promise<T[]>
 
+  transaction<T = any>(body: (tx: OQL_PG) => Promise<T>): Promise<T>
+
   close(): void
 
 }
