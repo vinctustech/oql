@@ -2,7 +2,7 @@ import { describe, it, before, after } from 'node:test'
 import assert from 'node:assert'
 import { backend, createOQL, mutationSchema, type OQL } from './setup.ts'
 
-describe('OQL transactions', { skip: backend !== 'pg' && 'transactions are a pg-backend feature' }, () => {
+describe('OQL transactions', () => {
   let oql: OQL
 
   before(async () => {
@@ -85,7 +85,9 @@ describe('OQL transactions', { skip: backend !== 'pg' && 'transactions are a pg-
       })
     })
 
-    it('should hide uncommitted writes from other connections', async () => {
+    // petradb runs on a single session, so there is no second connection to
+    // read from — the isolation this checks is a pg-backend property.
+    it('should hide uncommitted writes from other connections', { skip: backend !== 'pg' }, async () => {
       await oql.transaction!(async (tx) => {
         await tx.entity('users').insert({ name: 'TxUncommitted', email: null, active: true })
 

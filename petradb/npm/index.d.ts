@@ -66,6 +66,8 @@ export class OQL_PETRADB {
 
   raw<T = any>(sql: string, values?: any[]): Promise<T[]>
 
+  transaction<T = any>(body: (tx: OQL_PETRADB) => Promise<T>): Promise<T>
+
   rawMulti(sql: string): Promise<void>
 
 }

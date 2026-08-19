@@ -101,6 +101,13 @@ class OQL_PetraDB_JS(
       }
       .toJSPromise
 
+  // Runs `body` with this instance wrapped in BEGIN/COMMIT, rolling back if the
+  // promise it returns rejects. petradb has a single session, so the instance
+  // handed to `body` is this one.
+  @JSExport("transaction")
+  def jsTransaction(body: js.Function1[OQL_PetraDB_JS, js.Promise[js.Any]]): js.Promise[js.Any] =
+    ds.asInstanceOf[PetraDBDataSource].connect.transaction(_ => body(this).toFuture).toJSPromise
+
   @JSExport
   def rawMulti(sql: String) =
     ds.asInstanceOf[PetraDBDataSource]

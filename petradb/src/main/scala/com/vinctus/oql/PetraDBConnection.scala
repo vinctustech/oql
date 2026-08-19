@@ -5,6 +5,7 @@ import io.github.edadma.petradb.engine.{MemoryDB, PersistentDB, TextDB, Session,
 
 import scala.concurrent.Future
 import scala.scalajs.js
+import scala.util.{Failure, Success}
 import scala.util.matching.Regex
 
 class PetraDBConnection(val dataSource: PetraDBDataSource, storageType: String = "memory", path: String = "")(implicit
@@ -30,6 +31,21 @@ class PetraDBConnection(val dataSource: PetraDBDataSource, storageType: String =
           case _                      => Iterator()
       )
     )
+
+  // petradb runs everything on one session, so there is no connection to pin:
+  // BEGIN/COMMIT already cover every statement this connection issues. A call
+  // made while a transaction is open joins it rather than nesting. That also
+  // means two transactions cannot run concurrently against one PetraDB
+  // instance — fine for the test backend this is, but not a general guarantee.
+  def transaction[R](body: PetraDBConnection => Future[R]): Future[R] =
+    if session.inTransaction then body(this)
+    else
+      Future(executeSQL("BEGIN"))
+        .flatMap(_ => body(this))
+        .transformWith {
+          case Success(value)     => Future(executeSQL("COMMIT")).map(_ => value)
+          case Failure(exception) => Future(executeSQL("ROLLBACK")).transformWith(_ => Future.failed(exception))
+        }
 
   private val varRegex = """\$([0-9_]+)""".r
 

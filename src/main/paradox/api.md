@@ -71,7 +71,7 @@ await oql.transaction(async (tx) => {
 
 either applies both writes or neither.
 
-Only the PostgreSQL backend supports transactions. Calling `transaction` on an instance that is already inside one joins the transaction in progress rather than nesting a new one, so a failure anywhere rolls back everything.
+Calling `transaction` on an instance that is already inside one joins the transaction in progress rather than nesting a new one, so a failure anywhere rolls back everything. The PostgreSQL backend pins one pooled connection for the duration; the in-memory backend has a single session, so two of its transactions cannot run concurrently.
 
 The `QueryBuilder` Class
 ------------------------
