@@ -20,6 +20,9 @@ class SQLQueryBuilder(
     model: DataModel,
     val margin: Int = 0,
     subquery: Boolean = false,
+    // The (alias, builder) of each query enclosing this one, innermost first; outer references render
+    // against these aliases and add their joins to these builders.
+    val outer: List[(String, SQLQueryBuilder)] = Nil,
 ) {
 
   import SQLQueryBuilder._
@@ -29,15 +32,20 @@ class SQLQueryBuilder(
   def call(f: String, args: String): String = f.replace("?", args)
 
   private trait Project
-  private case class ValueProject(expr: OQLExpression, table: String, typed: Boolean) extends Project {
+  private case class ValueProject(
+      expr: OQLExpression,
+      table: String,
+      typed: Boolean,
+      scopes: List[(String, SQLQueryBuilder)],
+  ) extends Project {
     override def toString: String = {
       val exp =
         if (projectQuery && ds.convertFunction.isDefined && (expr.typ == UUIDType || expr.typ == TimestampType))
-          call(ds.convertFunction.get, expression(expr, table))
+          call(ds.convertFunction.get, expression(expr, table, scopes))
         else
-          expression(expr, table)
+          expression(expr, table, scopes)
 
-      val typing = if (typed) s", ${call(ds.typeFunction.get, expression(expr, table))}" else ""
+      val typing = if (typed) s", ${call(ds.typeFunction.get, expression(expr, table, scopes))}" else ""
 
       s"$exp$typing"
     }
@@ -83,11 +91,15 @@ class SQLQueryBuilder(
 
   def offset(n: Int): Unit = _offset = Some(n)
 
-  def projectValue(expr: OQLExpression, table: String): (Int, Boolean) = {
+  def projectValue(
+      expr: OQLExpression,
+      table: String,
+      scopes: List[(String, SQLQueryBuilder)] = outer,
+  ): (Int, Boolean) = {
     val cur   = idx
     val typed = !subquery && ds.typeFunction.isDefined && expr.typ == null
 
-    projects += ValueProject(expr, table, typed)
+    projects += ValueProject(expr, table, typed, scopes)
     idx += (if (typed) 2 else 1)
     (cur, typed)
   }
@@ -99,75 +111,82 @@ class SQLQueryBuilder(
     idx - 1
   }
 
-  def expression(expr: OQLExpression, table: String): String = {
-    def attribute(dmrefs: List[(Entity, Attribute)]): String = {
-      var alias = table
+  def expression(expr: OQLExpression, table: String, scopes: List[(String, SQLQueryBuilder)] = outer): String = {
+    def attribute(from: String, dmrefs: List[(Entity, Attribute)], builder: SQLQueryBuilder): String = {
+      var alias = from
 
       dmrefs dropRight 1 foreach { case (e: Entity, Attribute(name, column, _, _, _)) =>
         val old_alias = alias
 
         alias = s"$alias$$$name"
-        leftJoin(old_alias, column, e.table, alias, e.pk.get.column)
+        builder.leftJoin(old_alias, column, e.table, alias, e.pk.get.column)
       }
 
       s"\"$alias\".\"${dmrefs.last._2.column}\""
     }
 
-    expr match {
-      case ExistsOQLExpression(query) =>
-        val subquery =
-          writeQuery(innerQuery(query), table, Right(margin + 2 * SQLQueryBuilder.INDENT), oql, ds, fixed, model)
-        val sql = subquery.toString
+    def subquery(query: OQLQuery): String =
+      writeQuery(
+        innerQuery(query),
+        table,
+        Right(margin + 2 * SQLQueryBuilder.INDENT),
+        oql,
+        ds,
+        fixed,
+        model,
+        scopes,
+        this,
+      ).toString
 
-        s"EXISTS (\n$sql${" " * (margin + 2 * SQLQueryBuilder.INDENT)})"
-      case QueryOQLExpression(query) =>
-        val subquery =
-          writeQuery(innerQuery(query), table, Right(margin + 2 * SQLQueryBuilder.INDENT), oql, ds, fixed, model)
-        val sql = subquery.toString
+    def render(expr: OQLExpression): String =
+      expr match {
+        case ExistsOQLExpression(query) =>
+          s"EXISTS (\n${subquery(query)}${" " * (margin + 2 * SQLQueryBuilder.INDENT)})"
+        case QueryOQLExpression(query) =>
+          s"(\n${subquery(query)}${" " * (margin + 2 * SQLQueryBuilder.INDENT)})"
+        case InQueryOQLExpression(left, op, query) =>
+          s"${render(left)} $op (\n${subquery(query)}${" " * (margin + 2 * SQLQueryBuilder.INDENT)})"
+        case InArrayOQLExpression(_, op, Nil) => if (op == "NOT IN") "TRUE" else "FALSE"
+        case InArrayOQLExpression(left, op, right) =>
+          s"${render(left)} $op (${right map render mkString ", "})"
+        case ArrayComparisonOQLExpression(left, op, quantifier, array) =>
+          s"${render(left)} $op $quantifier(${render(array)})"
+        case ApplyOQLExpression(f, args)                       => s"${f.s}(${args map render mkString ", "})"
+        case StarOQLExpression                                 => "*"
+        case RawOQLExpression(s)                               => s
+        case InfixOQLExpression(left, op @ ("*" | "/"), right) => s"${render(left)}$op${render(right)}"
+        case InfixOQLExpression(left, op, right)               => s"${render(left)} $op ${render(right)}"
+        case PrefixOQLExpression("-", expr)                    => s"-${render(expr)}"
+        case PrefixOQLExpression(op, expr)                     => s"$op ${render(expr)}"
+        case PostfixOQLExpression(expr, op)                    => s"${render(expr)} $op"
+        case BetweenOQLExpression(expr, op, lower, upper) =>
+          s"${render(expr)} $op ${render(lower)} AND ${render(upper)}"
+        case OverlapsOQLExpression(leftStart, leftEnd, rightStart, rightEnd) =>
+          s"(${render(leftStart)}, ${render(leftEnd)}) OVERLAPS (${render(rightStart)}, ${render(rightEnd)})"
+        case GroupedOQLExpression(expr)    => s"(${render(expr)})"
+        case TypedOQLExpression(expr, typ) => ds.typed(render(expr), typ)
+        case FloatOQLExpression(n)         => n.toString
+        case IntegerOQLExpression(n)       => n.toString
+        case JSONOQLExpression(e)          => s"'${render(e)}'"
+        case ArrayOQLExpression(elems)     => s"[${elems.map(render).mkString(", ")}]"
+        case ObjectOQLExpression(pairs)    =>
+          s"{${pairs.map({ case (k, v) => s"\"$k\": ${render(v)}" }).mkString(", ")}}"
+        case StringOQLExpression(s)            => ds.string(s)
+        case ReferenceOQLExpression(_, dmrefs) => attribute(table, dmrefs, this)
+        case OuterOQLExpression(_, level, dmrefs) =>
+          val (alias, builder) = scopes(level)
 
-        s"(\n$sql${" " * (margin + 2 * SQLQueryBuilder.INDENT)})"
-      case InQueryOQLExpression(left, op, query) =>
-        val subquery =
-          writeQuery(innerQuery(query), table, Right(margin + 2 * SQLQueryBuilder.INDENT), oql, ds, fixed, model)
-        val sql = subquery.toString
+          attribute(alias, dmrefs, builder)
+        case AttributeOQLExpression(List(id), null) => id.s // it's a built-in variable if dmrefs is null
+        case AttributeOQLExpression(_, dmrefs)      => attribute(table, dmrefs, this)
+        case BooleanOQLExpression(b)                => b
+        case CaseOQLExpression(whens, els)          =>
+          s"CASE ${whens map { case OQLWhen(cond, expr) =>
+              s"WHEN ${render(cond)} THEN ${render(expr)}"
+            } mkString " "}${if (els.isDefined) s" ELSE ${render(els.get)}" else ""} END"
+      }
 
-        s"${expression(left, table)} $op (\n$sql${" " * (margin + 2 * SQLQueryBuilder.INDENT)})"
-      case InArrayOQLExpression(_, op, Nil) => if (op == "NOT IN") "TRUE" else "FALSE"
-      case InArrayOQLExpression(left, op, right) =>
-        s"${expression(left, table)} $op (${right map (expression(_, table)) mkString ", "})"
-      case ArrayComparisonOQLExpression(left, op, quantifier, array) =>
-        s"${expression(left, table)} $op $quantifier(${expression(array, table)})"
-      case ApplyOQLExpression(f, args) => s"${f.s}(${args map (expression(_, table)) mkString ", "})"
-      case StarOQLExpression           => "*"
-      case RawOQLExpression(s)         => s
-      case InfixOQLExpression(left, op @ ("*" | "/"), right) =>
-        s"${expression(left, table)}$op${expression(right, table)}"
-      case InfixOQLExpression(left, op, right)          => s"${expression(left, table)} $op ${expression(right, table)}"
-      case PrefixOQLExpression("-", expr)               => s"-${expression(expr, table)}"
-      case PrefixOQLExpression(op, expr)                => s"$op ${expression(expr, table)}"
-      case PostfixOQLExpression(expr, op)               => s"${expression(expr, table)} $op"
-      case BetweenOQLExpression(expr, op, lower, upper) =>
-        s"${expression(expr, table)} $op ${expression(lower, table)} AND ${expression(upper, table)}"
-      case OverlapsOQLExpression(leftStart, leftEnd, rightStart, rightEnd) =>
-        s"(${expression(leftStart, table)}, ${expression(leftEnd, table)}) OVERLAPS (${expression(rightStart, table)}, ${expression(rightEnd, table)})"
-      case GroupedOQLExpression(expr)    => s"(${expression(expr, table)})"
-      case TypedOQLExpression(expr, typ) => ds.typed(expression(expr, table), typ)
-      case FloatOQLExpression(n)         => n.toString
-      case IntegerOQLExpression(n)       => n.toString
-      case JSONOQLExpression(e)          => s"'${expression(e, table)}'"
-      case ArrayOQLExpression(elems)     => s"[${elems.map(e => expression(e, table)).mkString(", ")}]"
-      case ObjectOQLExpression(pairs)    =>
-        s"{${pairs.map({ case (k, v) => s"\"$k\": ${expression(v, table)}" }).mkString(", ")}}"
-      case StringOQLExpression(s)                 => ds.string(s)
-      case ReferenceOQLExpression(_, dmrefs)      => attribute(dmrefs)
-      case AttributeOQLExpression(List(id), null) => id.s // it's a built-in variable if dmrefs is null
-      case AttributeOQLExpression(_, dmrefs)      => attribute(dmrefs)
-      case BooleanOQLExpression(b)                => b
-      case CaseOQLExpression(whens, els)          =>
-        s"CASE ${whens map { case OQLWhen(cond, expr) =>
-            s"WHEN ${expression(cond, table)} THEN ${expression(expr, table)}"
-          } mkString " "}${if (els.isDefined) s" ELSE ${expression(els.get, table)}" else ""} END"
-    }
+    render(expr)
   }
 
   def leftJoin(t1: String, c1: String, t2: String, alias: String, c2: String): SQLQueryBuilder = {

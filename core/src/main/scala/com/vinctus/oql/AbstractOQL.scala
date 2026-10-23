@@ -272,9 +272,18 @@ object AbstractOQL {
       expr: OQLExpression,
       model: DataModel,
       ds: SQLDataSource,
-      oql: String
+      oql: String,
+      scopes: List[Entity] = Nil
   ): Unit = {
-    def _decorate(expr: OQLExpression): Unit = decorate(entity, expr, model, ds, oql)
+    // `scopes` lists the entities of the queries enclosing the one over `entity`, innermost first
+    def _decorate(expr: OQLExpression): Unit = decorate(entity, expr, model, ds, oql, scopes)
+
+    def decorateSubquery(query: OQLQuery): Unit = {
+      val inner = entity :: scopes
+
+      query.select foreach (decorate(query.entity, _, model, ds, oql, inner))
+      query.order foreach (_ foreach { case OQLOrdering(expr, _) => decorate(query.entity, expr, model, ds, oql, inner) })
+    }
 
 //    def lookup(expr: OQLExpression, ids: List[Ident], ref: Boolean): List[(Entity, Attribute)] = {
 //      val dmrefs = new ListBuffer[(Entity, Attribute)]
@@ -317,21 +326,19 @@ object AbstractOQL {
     expr match {
       case ExistsOQLExpression(query) =>
         query.project = List(SQLStarOQLProject)
-        preprocessQuery(Some(entity), query, model, ds, oql)
+        preprocessQuery(Some(entity), query, model, ds, oql, entity :: scopes)
 
         if (!query.attr.typ.isArrayType)
           problem(query.source.pos, s"attribute ${query.source.s} does not have an array type", oql)
 
-        query.select foreach (decorate(query.entity, _, model, ds, oql))
-        query.order foreach (_ foreach { case OQLOrdering(expr, _) => decorate(query.entity, expr, model, ds, oql) })
+        decorateSubquery(query)
       case QueryOQLExpression(query) =>
-        preprocessQuery(Some(entity), query, model, ds, oql)
+        preprocessQuery(Some(entity), query, model, ds, oql, entity :: scopes)
 
         if (!query.attr.typ.isArrayType)
           problem(query.source.pos, s"attribute ${query.source.s} does not have an array type", oql)
 
-        query.select foreach (decorate(query.entity, _, model, ds, oql))
-        query.order foreach (_ foreach { case OQLOrdering(expr, _) => decorate(query.entity, expr, model, ds, oql) })
+        decorateSubquery(query)
       case e @ ApplyOQLExpression(f, args) =>
         args foreach _decorate
 
@@ -416,15 +423,24 @@ object AbstractOQL {
         ) // it's a built-in variable so assign type from `builtinVariables` map but leave dmrefs null
       case attrexp @ AttributeOQLExpression(ids, _) =>
         attrexp.dmrefs = model.lookup(attrexp, ids, ref = false, entity, oql)
+      case e @ OuterOQLExpression(ids, _, _) =>
+        scopes indexWhere (_.name == ids.head.s) match {
+          case -1 => problem(ids.head.pos, s"no enclosing query over entity '${ids.head.s}'", oql)
+          case level =>
+            if (ids.tail.isEmpty)
+              problem(ids.head.pos, s"outer reference '^${ids.head.s}' must name an attribute", oql)
+
+            e.level = level
+            e.dmrefs = model.lookup(e, ids.tail, ref = false, scopes(level), oql)
+        }
       case InQueryOQLExpression(left, op, query) =>
         _decorate(left)
-        preprocessQuery(Some(entity), query, model, ds, oql)
+        preprocessQuery(Some(entity), query, model, ds, oql, entity :: scopes)
 
         if (!query.attr.typ.isArrayType)
           problem(query.source.pos, s"attribute ${query.source.s} does not have an array type", oql)
 
-        query.select foreach (decorate(query.entity, _, model, ds, oql))
-        query.order foreach (_ foreach { case OQLOrdering(expr, _) => decorate(query.entity, expr, model, ds, oql) })
+        decorateSubquery(query)
       case e: StringOQLExpression  => e.typ = TextType
       case e: FloatOQLExpression   => e.typ = FloatType
       case e: IntegerOQLExpression => e.typ = IntegerType
@@ -442,7 +458,8 @@ object AbstractOQL {
       query: OQLQuery,
       model: DataModel,
       ds: SQLDataSource,
-      oql: String
+      oql: String,
+      scopes: List[Entity] = Nil
   ): OQLQuery = {
     val map = new mutable.LinkedHashMap[String, OQLProject]
     val entity =
@@ -483,14 +500,15 @@ object AbstractOQL {
               attr,
               model,
               ds,
-              oql
+              oql,
+              scopes
             ) // todo: should be done without call to 'decorate' because we have the attribute instance
             ExpressionOQLProject(label, attr)
           case Some(_) =>
-            preprocessQuery(Some(entity), query, model, ds, oql)
-            query.select foreach (decorate(query.entity, _, model, ds, oql))
+            preprocessQuery(Some(entity), query, model, ds, oql, entity :: scopes)
+            query.select foreach (decorate(query.entity, _, model, ds, oql, entity :: scopes))
             query.order foreach (_ foreach { case OQLOrdering(expr, _) =>
-              decorate(query.entity, expr, model, ds, oql)
+              decorate(query.entity, expr, model, ds, oql, entity :: scopes)
             })
             proj
           case None
@@ -534,7 +552,8 @@ object AbstractOQL {
                   a,
                   model,
                   ds,
-                  oql
+                  oql,
+                  scopes
                 ) // todo: shouldn't have to call `decorate` because we have the Attribute object
                 expProj
               case Some(attr @ Attribute(_, _, _, _, ManyToManyType(mtmEntity, link, self, target))) =>
@@ -545,7 +564,8 @@ object AbstractOQL {
                     OQLQuery(id, mtmEntity, attr, List(StarOQLProject), None, None, None, None, None),
                     model,
                     ds,
-                    oql
+                    oql,
+                    entity :: scopes
                   )
                 )
               case Some(attr @ Attribute(_, _, _, _, ManyToOneType(mtoEntity))) =>
@@ -556,7 +576,8 @@ object AbstractOQL {
                     OQLQuery(id, mtoEntity, attr, List(StarOQLProject), None, None, None, None, None),
                     model,
                     ds,
-                    oql
+                    oql,
+                    entity :: scopes
                   )
                 )
               case Some(attr @ Attribute(_, _, _, _, OneToManyType(otmEntity, otmAttr))) =>
@@ -567,7 +588,8 @@ object AbstractOQL {
                     OQLQuery(id, otmEntity, attr, List(StarOQLProject), None, None, None, None, None),
                     model,
                     ds,
-                    oql
+                    oql,
+                    entity :: scopes
                   )
                 )
               case None if ds.builtinVariables contains (if (ds.caseSensitive) id.s else id.s.toLowerCase) =>
@@ -576,7 +598,7 @@ object AbstractOQL {
               case _ => problem(id.pos, s"entity '${entity.name}' does not have attribute '${id.s}'", oql)
             }
           case _ =>
-            decorate(entity, expr, model, ds, oql)
+            decorate(entity, expr, model, ds, oql, scopes)
             expProj
         }
       case SQLStarOQLProject => map(null) = ExpressionOQLProject(Ident(null), StarOQLExpression)
@@ -600,8 +622,21 @@ object AbstractOQL {
       oql: String,
       ds: SQLDataSource,
       fixed: Fixed,
-      model: DataModel
-  ): SQLQueryBuilder =
+      model: DataModel,
+      // the (alias, builder) of each query enclosing the one `table` belongs to, innermost first
+      scopes: List[(String, SQLQueryBuilder)] = Nil,
+      // the builder whose expression is being written, when `builder` is `Right`
+      parent: SQLQueryBuilder = null,
+  ): SQLQueryBuilder = {
+    def enclosing: List[(String, SQLQueryBuilder)] = (table, builder.left.toOption.getOrElse(parent)) :: scopes
+
+    def newSubquery: SQLQueryBuilder =
+      builder match {
+        case Left(b) =>
+          new SQLQueryBuilder(oql, ds, fixed, model, b.margin + 2 * SQLQueryBuilder.INDENT, outer = enclosing)
+        case Right(margin) => new SQLQueryBuilder(oql, ds, fixed, model, margin, subquery = true, outer = enclosing)
+      }
+
     node match {
       case ResultNode(query, element) =>
         builder.left.toOption.get.table(query.entity.table, None)
@@ -637,16 +672,16 @@ object AbstractOQL {
         query.order foreach (builder.left.toOption.get.order(_, query.entity.table))
         query.limit foreach builder.left.toOption.get.limit
         query.offset foreach builder.left.toOption.get.offset
-        writeQuery(element, query.entity.table, builder, oql, ds, fixed, model)
+        writeQuery(element, query.entity.table, builder, oql, ds, fixed, model, scopes)
         builder.left.toOption.get
       case e @ ValueNode(expr) =>
-        val (idx, typed) = builder.left.toOption.get.projectValue(expr, table)
+        val (idx, typed) = builder.left.toOption.get.projectValue(expr, table, scopes)
 
         e.idx = idx
         e.typed = typed
         builder.left.toOption.get
       case ObjectNode(properties) =>
-        properties foreach { case (_, e) => writeQuery(e, table, builder, oql, ds, fixed, model) }
+        properties foreach { case (_, e) => writeQuery(e, table, builder, oql, ds, fixed, model, scopes) }
         builder.left.toOption.get
       case n @ ManyToOneNode(
             OQLQuery(
@@ -677,7 +712,7 @@ object AbstractOQL {
         }
 
         builder.left.toOption.get.leftJoin(table, column, entity.table, alias, entity.pk.get.column)
-        writeQuery(element, alias, builder, oql, ds, fixed, model)
+        writeQuery(element, alias, builder, oql, ds, fixed, model, enclosing)
         // todo: check query sections (i.e. order) that don't apply to many-to-one
         builder.left.toOption.get
       case n @ ManyToManyNode(
@@ -697,18 +732,15 @@ object AbstractOQL {
             ),
             element
           ) =>
-        val alias = s"$table$$$name"
-        val subquery =
-          if (builder.isLeft)
-            new SQLQueryBuilder(oql, ds, fixed, model, builder.left.toOption.get.margin + 2 * SQLQueryBuilder.INDENT)
-          else new SQLQueryBuilder(oql, ds, fixed, model, builder.toOption.get, true)
+        val alias     = s"$table$$$name"
+        val subquery  = newSubquery
         val joinAlias = s"$alias$$${targetAttr.name}"
 
         if (builder.isLeft)
           n.idx = builder.left.toOption.get.projectQuery(subquery)
 
         subquery.table(linkEntity.table, Some(alias))
-        writeQuery(element, joinAlias, Left(subquery), oql, ds, fixed, model)
+        writeQuery(element, joinAlias, Left(subquery), oql, ds, fixed, model, enclosing)
         subquery.select(
           RawOQLExpression(s""""$alias"."${selfAttr.column}" = "$table"."${entity.pk.get.column}""""),
           null
@@ -738,17 +770,14 @@ object AbstractOQL {
             ),
             element
           ) =>
-        val alias = s"$table$$$name"
-        val subquery =
-          if (builder.isLeft)
-            new SQLQueryBuilder(oql, ds, fixed, model, builder.left.toOption.get.margin + 2 * SQLQueryBuilder.INDENT)
-          else new SQLQueryBuilder(oql, ds, fixed, model, builder.toOption.get, true)
+        val alias    = s"$table$$$name"
+        val subquery = newSubquery
 
         if (builder.isLeft)
           n.idx = builder.left.toOption.get.projectQuery(subquery)
 
         subquery.table(mtoEntity.table, Some(alias))
-        writeQuery(element, alias, Left(subquery), oql, ds, fixed, model)
+        writeQuery(element, alias, Left(subquery), oql, ds, fixed, model, enclosing)
         subquery.select(
           RawOQLExpression(s""""$alias"."${otmAttr.column}" = "$table"."${entity.pk.get.column}""""),
           null
@@ -773,17 +802,14 @@ object AbstractOQL {
             ),
             element
           ) =>
-        val alias = s"$table$$$name"
-        val subquery =
-          if (builder.isLeft)
-            new SQLQueryBuilder(oql, ds, fixed, model, builder.left.toOption.get.margin + 2 * SQLQueryBuilder.INDENT)
-          else new SQLQueryBuilder(oql, ds, fixed, model, builder.toOption.get, true)
+        val alias    = s"$table$$$name"
+        val subquery = newSubquery
 
         if (builder.isLeft)
           n.idx = builder.left.toOption.get.projectQuery(subquery)
 
         subquery.table(otmEntity.table, Some(alias))
-        writeQuery(element, alias, Left(subquery), oql, ds, fixed, model)
+        writeQuery(element, alias, Left(subquery), oql, ds, fixed, model, enclosing)
         subquery.select(
           RawOQLExpression(s""""$alias"."${otmAttr.column}" = "$table"."${otmAttr.typ
               .asInstanceOf[ManyToOneType]
@@ -801,6 +827,7 @@ object AbstractOQL {
         offset foreach subquery.offset
         subquery
     }
+  }
 
   private[oql] trait Node
   private case class ResultNode(query: OQLQuery, element: Node) extends Node

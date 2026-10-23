@@ -85,6 +85,7 @@ object FromJS {
     kind(o) match {
       case "attr" => AttributeOQLExpression(idents(o))
       case "ref"  => ReferenceOQLExpression(idents(o))
+      case "outer" => OuterOQLExpression(idents(o))
       case "infix" =>
         InfixOQLExpression(toExpr(o.left), o.op.asInstanceOf[String], toExpr(o.right))
       case "prefix"  => PrefixOQLExpression(o.op.asInstanceOf[String], toExpr(o.expr))

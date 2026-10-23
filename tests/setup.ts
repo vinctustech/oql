@@ -91,6 +91,34 @@ entity tokens (mut_tokens) {
 }
 `
 
+// Correlated schema — a step's own `trip` attribute shadows the enclosing trips query, so outer
+// references must resolve against the enclosing scope rather than through that attribute
+export const correlatedSchema = `
+entity places (corr_places) {
+ *id: integer
+  name: text
+}
+
+entity stores (corr_stores) {
+ *id: integer
+  name: text
+  place: places
+}
+
+entity trips (corr_trips) {
+ *id: integer
+  ref: text
+  store: stores
+  steps: [steps].trip
+}
+
+entity steps (corr_steps) {
+ *id: integer
+  trip: trips
+  place: places
+}
+`
+
 // Enum schema — tests enum column handling
 export const enumSchema = `
 enum priority { low medium high critical }
@@ -172,6 +200,43 @@ INSERT INTO posts (title, body, author) VALUES
   ('First Post', 'Hello world', 1),
   ('Second Post', 'Another post', 1),
   ('Bobs Post', 'From Bob', 2);
+
+-- Correlated subquery test tables (outer references)
+DROP TABLE IF EXISTS corr_steps;
+DROP TABLE IF EXISTS corr_trips;
+DROP TABLE IF EXISTS corr_stores;
+DROP TABLE IF EXISTS corr_places;
+
+CREATE TABLE corr_places (
+  id SERIAL PRIMARY KEY,
+  name VARCHAR(255) NOT NULL
+);
+
+CREATE TABLE corr_stores (
+  id SERIAL PRIMARY KEY,
+  name VARCHAR(255) NOT NULL,
+  place INTEGER REFERENCES corr_places(id)
+);
+
+CREATE TABLE corr_trips (
+  id SERIAL PRIMARY KEY,
+  ref VARCHAR(255) NOT NULL,
+  store INTEGER REFERENCES corr_stores(id)
+);
+
+CREATE TABLE corr_steps (
+  id SERIAL PRIMARY KEY,
+  trip INTEGER REFERENCES corr_trips(id),
+  place INTEGER REFERENCES corr_places(id)
+);
+
+INSERT INTO corr_places (name) VALUES ('Depot'), ('Airport'), ('Hotel');
+
+INSERT INTO corr_stores (name, place) VALUES ('North', 1), ('South', 2);
+
+INSERT INTO corr_trips (ref, store) VALUES ('A', 1), ('B', 1), ('C', 2);
+
+INSERT INTO corr_steps (trip, place) VALUES (1, 1), (1, 3), (2, 1), (3, 2), (3, 1);
 
 -- JSONB operator test table
 DROP TABLE IF EXISTS jsonb_ops;

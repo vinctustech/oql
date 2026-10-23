@@ -247,6 +247,7 @@ object OQLParser extends RegexParsers with PackratParsers {
       applyExpression |
       qualifiedAttributeExpression |
       "&" ~> identifiers ^^ (ReferenceOQLExpression(_)) |
+      "^" ~> identifiers ^^ (OuterOQLExpression(_)) |
       "-" ~> primary ^^ (e => PrefixOQLExpression("-", e)) |
       "(" ~> expression <~ ")" ^^ GroupedOQLExpression.apply |
       "(" ~> query <~ ")" ^^ QueryOQLExpression.apply

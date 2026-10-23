@@ -59,6 +59,10 @@ case class BooleanOQLExpression(b: String)                                      
 case class TypedOQLExpression(expr: OQLExpression, t: Datatype)                                   extends OQLExpression
 case class AttributeOQLExpression(ids: List[Ident], var dmrefs: List[(Entity, Attribute)] = null) extends OQLExpression
 case class ReferenceOQLExpression(ids: List[Ident], var dmrefs: List[(Entity, Attribute)] = null) extends OQLExpression
+// `^entity.path`: the head names the nearest enclosing query over that entity; `level` counts enclosing
+// queries outward from the innermost (0), and `dmrefs` resolve the rest of the path from that entity.
+case class OuterOQLExpression(ids: List[Ident], var level: Int = -1, var dmrefs: List[(Entity, Attribute)] = null)
+    extends OQLExpression
 case class ApplyOQLExpression(f: Ident, args: List[OQLExpression])                                extends OQLExpression
 case object StarOQLExpression                                                                     extends OQLExpression
 case class CaseOQLExpression(whens: List[OQLWhen], els: Option[OQLExpression])                    extends OQLExpression
