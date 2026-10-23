@@ -103,19 +103,35 @@ entity stores (corr_stores) {
  *id: integer
   name: text
   place: places
+  trips: [trips].store
 }
 
 entity trips (corr_trips) {
  *id: integer
   ref: text
   store: stores
+  returnFor: trips
+  returns: [trips].returnFor
   steps: [steps].trip
+  drivers: [drivers] (assignments)
 }
 
 entity steps (corr_steps) {
  *id: integer
   trip: trips
   place: places
+}
+
+entity drivers (corr_drivers) {
+ *id: integer
+  name: text
+  home: places
+  trips: [trips] (assignments)
+}
+
+entity assignments (corr_assignments) {
+  trip: trips
+  driver: drivers
 }
 `
 
@@ -202,6 +218,8 @@ INSERT INTO posts (title, body, author) VALUES
   ('Bobs Post', 'From Bob', 2);
 
 -- Correlated subquery test tables (outer references)
+DROP TABLE IF EXISTS corr_assignments;
+DROP TABLE IF EXISTS corr_drivers;
 DROP TABLE IF EXISTS corr_steps;
 DROP TABLE IF EXISTS corr_trips;
 DROP TABLE IF EXISTS corr_stores;
@@ -221,7 +239,8 @@ CREATE TABLE corr_stores (
 CREATE TABLE corr_trips (
   id SERIAL PRIMARY KEY,
   ref VARCHAR(255) NOT NULL,
-  store INTEGER REFERENCES corr_stores(id)
+  store INTEGER REFERENCES corr_stores(id),
+  "returnFor" INTEGER REFERENCES corr_trips(id)
 );
 
 CREATE TABLE corr_steps (
@@ -230,13 +249,28 @@ CREATE TABLE corr_steps (
   place INTEGER REFERENCES corr_places(id)
 );
 
+CREATE TABLE corr_drivers (
+  id SERIAL PRIMARY KEY,
+  name VARCHAR(255) NOT NULL,
+  home INTEGER REFERENCES corr_places(id)
+);
+
+CREATE TABLE corr_assignments (
+  trip INTEGER REFERENCES corr_trips(id),
+  driver INTEGER REFERENCES corr_drivers(id)
+);
+
 INSERT INTO corr_places (name) VALUES ('Depot'), ('Airport'), ('Hotel');
 
 INSERT INTO corr_stores (name, place) VALUES ('North', 1), ('South', 2);
 
-INSERT INTO corr_trips (ref, store) VALUES ('A', 1), ('B', 1), ('C', 2);
+INSERT INTO corr_trips (ref, store, "returnFor") VALUES ('A', 1, NULL), ('B', 1, NULL), ('C', 2, NULL), ('D', 2, 1);
 
-INSERT INTO corr_steps (trip, place) VALUES (1, 1), (1, 3), (2, 1), (3, 2), (3, 1);
+INSERT INTO corr_steps (trip, place) VALUES (1, 1), (1, 3), (2, 1), (3, 2), (3, 1), (4, 2);
+
+INSERT INTO corr_drivers (name, home) VALUES ('Dee', 1), ('Eve', 3);
+
+INSERT INTO corr_assignments (trip, driver) VALUES (1, 1), (2, 2), (3, 2);
 
 -- JSONB operator test table
 DROP TABLE IF EXISTS jsonb_ops;
